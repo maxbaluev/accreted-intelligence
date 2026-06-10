@@ -1,19 +1,23 @@
 # Accreted Intelligence
 
-The public architecture writeup and whitepaper for **acc4** — a Recursive Language
-Model over a late-interaction scored-token memory. The engine source is private; this
-repository is the design, the thesis, and an honest account of how the system works.
+> *Most AI forgets. This is the architecture for AI that remembers what worked — and gets wiser.*
 
-- **[Whitepaper →](whitepaper.md)** — *Accreted Intelligence*: an architecture where
-  judgment compounds from real outcomes, the model is a replaceable processor, and
-  intelligence lives in scored state rather than weights.
-- **[Architecture overview →](architecture-overview.md)** — a skimmable tour of the two
-  verbs, the late-interaction scored-token memory, the six hooks, and the trust-kernel.
+A model that scores 90% on a benchmark today scores 90% tomorrow. It doesn't learn from deployment, doesn't track which of its outputs led to good outcomes, doesn't remember last week's mistake. It generates intelligence and throws it away.
 
-**acc4 in one paragraph.** Retrieval is MaxSim over per-token multivectors; real
-outcomes credit the exact tokens that aligned during retrieval; recursion (`solve`) is
-the only control primitive; the reasoning model is swappable while the scored substrate
-persists. Credit defaults to a weak prior unless reality validated it.
+**Accreted intelligence** is the bet that this is temporary: move learning out of model weights and into *scored external state* — where judgment compounds from contact with reality, and the model is a **replaceable processor** rather than the locus of intelligence.
+
+**acc4** is a working kernel for that thesis: a Recursive Language Model over a late-interaction scored-token memory. Two verbs over one memory; credit defaults to a weak prior, and only reality earns full weight.
+
+### Read
+- **[Whitepaper →](whitepaper.md)** — the problem (credit assignment + retrieval-to-action binding), the thesis, the architecture *with the math*, and an honest account of what's proven vs. open.
+- **[Architecture overview →](architecture-overview.md)** — the skimmable tour: two verbs, late-interaction memory, reality-gated credit, the trust-kernel.
+
+### The primitives, in the open
+The engine is private; the building blocks are public — each shippable on its own:
+- **[maxsim-rs](https://github.com/maxbaluev/maxsim-rs)** — late-interaction MaxSim, in clean Rust.
+- **[colpali-retrieve](https://github.com/maxbaluev/colpali-retrieve)** — multimodal late interaction (text → document images).
+- **[scored-rerank](https://github.com/maxbaluev/scored-rerank)** — ranking that learns from outcomes (Beta posteriors + Thompson sampling).
+- **[mcp-retrieve](https://github.com/maxbaluev/mcp-retrieve)** — late-interaction retrieval as an MCP tool.
 
 ---
 Max Baluev · maxbaluev@outlook.com · [Telegram](https://t.me/maxbaluev)
