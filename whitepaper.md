@@ -40,7 +40,7 @@ acc4 reduces the entire reasoner interface to **two verbs**, and binds every non
 ```mermaid
 flowchart LR
     INTENT["Owner intent"] --> RETRIEVE["retrieve<br/>(MaxSim over scored tokens)"]
-    RETRIEVE -->|"cite [ids] = credit edge"| ACT["act<br/>(solve · exec · register · &lt;name&gt;)"]
+    RETRIEVE -->|"cite [ids] = credit edge"| ACT["act<br/>(solve · exec · register · name)"]
     ACT --> OUTCOME["outcome<br/>(real-world verdict)"]
     OUTCOME -->|"credit moves aligned units"| RETRIEVE
 
@@ -87,7 +87,7 @@ A score is only as good as the evidence behind it. The honesty discipline at acc
 
 When a commitment closes, credit does not smear across a whole document. It flows to the specific tokens that aligned during retrieval; their Beta posteriors update Bayesian-style — a good outcome adds to a token's α, a bad one to its β, which moves both its mean $\pi_j = \alpha/(\alpha+\beta)$ and its confidence $\alpha+\beta$. The update is **surprise-gated** — an outcome that confirms what a token already predicted moves it little; a surprising one moves it more (free-energy minimization, Friston 2010, applied to practical judgment rather than sensory prediction) — and **reality-gated**, scaled by provenance: an outcome validated by reality (a real reply, a passing test, a world result) carries full weight, while a self-graded outcome contributes only a deliberately weak prior. In general form, the update for an aligned token scales as
 
-$$\Delta \;\propto\; \text{surprise} \cdot \text{provenance\_weight}$$
+$$\Delta \;\propto\; \text{surprise} \cdot \text{provenance weight}$$
 
 bounded so a heavily-credited token stays *correctable* by future opposite evidence rather than pinning at certainty. *(The exact surprise function, the provenance weights, the bound, and the calibration constants are proprietary.)*
 
@@ -136,10 +136,24 @@ maxbaluev@outlook.com | [Telegram](https://t.me/maxbaluev)
 
 ## References
 
+**Late interaction & multi-vector retrieval**
 - Khattab, O. & Zaharia, M. (2020). "ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT." *SIGIR*. [arXiv:2004.12832](https://arxiv.org/abs/2004.12832)
+- Santhanam, K. et al. (2022). "ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction." *NAACL*. [arXiv:2112.01488](https://arxiv.org/abs/2112.01488)
 - Faysse, M. et al. (2024). "ColPali: Efficient Document Retrieval with Vision Language Models." [arXiv:2407.01449](https://arxiv.org/abs/2407.01449)
+- Dhulipala, L. et al. (2024). "MUVERA: Multi-Vector Retrieval via Fixed Dimensional Encodings." [arXiv:2405.19504](https://arxiv.org/abs/2405.19504)
+
+**Recursion, retrieval-augmentation & long context**
 - Xu, P. et al. (2025). "Recursive Language Models / Retrieval in Long-context Language Models: An Empirical Study." [arXiv:2512.24601](https://arxiv.org/abs/2512.24601)
+- Lewis, P. et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *NeurIPS*. [arXiv:2005.11401](https://arxiv.org/abs/2005.11401)
+
+**Credit assignment, Bayesian scoring & active inference**
 - Sutton, R.S. & Barto, A.G. (2018). *Reinforcement Learning: An Introduction* (2nd ed.). [book](http://incompleteideas.net/book/the-book-2nd.html)
-- Friston, K. (2010). "The free-energy principle: a unified brain theory?" *Nature Reviews Neuroscience*, 11. [Nature](https://www.nature.com/articles/nrn2787)
 - Thompson, W.R. (1933). "On the likelihood that one unknown probability exceeds another in view of the evidence of two samples." *Biometrika*. [JSTOR](https://www.jstor.org/stable/2332286)
+- Russo, D. et al. (2018). "A Tutorial on Thompson Sampling." *Foundations and Trends in Machine Learning*, 11(1). [arXiv:1707.02038](https://arxiv.org/abs/1707.02038)
+- Friston, K. (2010). "The free-energy principle: a unified brain theory?" *Nature Reviews Neuroscience*, 11. [Nature](https://www.nature.com/articles/nrn2787)
+- Parr, T., Pezzulo, G. & Friston, K. (2022). *Active Inference: The Free Energy Principle in Mind, Brain, and Behavior*. MIT Press. [MIT Press](https://mitpress.mit.edu/9780262045353/active-inference/)
+
+**Externalized intelligence & compound systems**
+- Clark, A. & Chalmers, D. (1998). "The Extended Mind." *Analysis*, 58(1). [Oxford Academic](https://academic.oup.com/analysis/article-lookup/doi/10.1093/analys/58.1.7)
+- Zaharia, M. et al. (2024). "The Shift from Models to Compound AI Systems." [BAIR Blog](https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/)
 - Kim, S. et al. (2025). "When More is Less: Understanding Multi-Agent LLM Scaling." [arXiv:2512.08296](https://arxiv.org/abs/2512.08296)
