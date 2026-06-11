@@ -270,6 +270,21 @@
   .doc::after{content:"→";color:var(--green);margin-top:6px;transition:transform .2s;}
   .doc:hover::after{transform:translateX(4px);}
 
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;position:relative;}
+  .road::before{content:"";position:absolute;top:13px;left:6%;right:6%;height:1px;
+    background:linear-gradient(90deg,var(--green) 0%,var(--green) 33%,var(--line2) 60%,transparent 100%);}
+  @media(max-width:840px){.road{grid-template-columns:1fr;}.road::before{display:none;}}
+  .stage{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:rgba(15,22,17,.5);position:relative;}
+  .stage .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;border-radius:5px;padding:4px 10px;display:inline-block;margin-bottom:14px;}
+  .stage.now{border-color:rgba(67,217,126,.45);}
+  .stage.now .st{background:var(--green);color:#06130b;font-weight:600;}
+  .stage.next .st{color:var(--green);border:1px solid rgba(67,217,126,.45);background:var(--green-soft);}
+  .stage.later .st{color:var(--faint);border:1px dashed var(--line2);}
+  .stage h3{font-size:16.5px;font-weight:600;margin-bottom:7px;}
+  .stage p{font-size:14px;color:var(--dim);line-height:1.62;}
+  .stage p b{color:var(--ink);font-weight:500;}
+
   /* final CTA */
   .final{text-align:center;border-bottom:none;padding:130px 0 120px;position:relative;overflow:hidden;}
   .final .glow{position:absolute;inset:0;pointer-events:none;
@@ -488,6 +503,29 @@
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper.md<span>the thesis, the math, what's proven vs. open</span></a>
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">architecture-overview.md<span>the skimmable tour</span></a>
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence">github repo<span>+ open-source building blocks</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="wrap">
+    <div class="tag">where this goes</div>
+    <h2>One operator today.<br>One <em>shared brain</em> next.</h2>
+    <p class="body">The memory at AccInt's core isn't tied to one user — judgment lives in scored,
+    portable state. That sets the road:</p>
+    <div class="road">
+      <div class="stage now reveal" style="--rd:0s"><span class="st">NOW · LIVE</span>
+        <h3>Your operator</h3>
+        <p>One operator, working in <b>your</b> accounts, compounding <b>your</b> judgment.
+        This is what early access opens.</p></div>
+      <div class="stage next reveal" style="--rd:.12s"><span class="st">NEXT</span>
+        <h3>The team brain</h3>
+        <p><b>One memory, many operators.</b> Parallel agents already compound into one substrate
+        today — per-person authority and consent turn it into a company's shared judgment.</p></div>
+      <div class="stage later reveal" style="--rd:.24s"><span class="st">RESEARCH</span>
+        <h3>Judgment that travels</h3>
+        <p>Scored knowledge is portable: peers exchange it, and each side <b>re-verifies against its
+        own reality</b>. Organizations that learn from each other — without sharing a model.</p></div>
     </div>
   </div>
 </section>
