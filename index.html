@@ -53,6 +53,24 @@
   .btn:hover{text-decoration:none;transform:translateY(-1px);border-color:#39435a;}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1304;}
   .btn.primary:hover{filter:brightness(1.06);}
+  .byline{margin-top:34px;padding:14px 18px;border:1px solid var(--rule);border-radius:12px;background:var(--bg2);
+    font-size:14.5px;color:var(--muted);max-width:46em;line-height:1.6;}
+  .byline b{color:var(--ink);}
+  .byline a{color:var(--owner);}
+
+  /* Subscribe */
+  .subscribe{margin-top:34px;padding:24px;border:1px solid rgba(52,211,153,.35);border-radius:12px;background:var(--bg2);max-width:46em;}
+  .subscribe h3{font-size:17px;margin-bottom:6px;}
+  .subscribe p{font-size:14.5px;color:var(--muted);line-height:1.55;}
+  .subscribe form{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
+  .subscribe input[type=email]{flex:1 1 220px;padding:11px 14px;border-radius:10px;border:1px solid var(--rule);
+    background:var(--bg);color:var(--ink);font-size:15px;outline:none;}
+  .subscribe input[type=email]:focus{border-color:rgba(52,211,153,.55);}
+  .subscribe button{padding:11px 20px;border-radius:10px;border:1px solid var(--score);background:var(--score);
+    color:#04190f;font-weight:700;font-size:15px;cursor:pointer;}
+  .subscribe button:hover{filter:brightness(1.06);}
+  .subscribe .ok{margin-top:12px;color:var(--score);font-size:15px;display:none;}
+  .subscribe .hp{display:none;}
 
   /* Sections */
   section{padding:72px 0;border-bottom:1px solid var(--rule);}
@@ -139,6 +157,11 @@
       <a class="btn primary" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">Read the whitepaper</a>
       <a class="btn" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">Architecture overview</a>
       <a class="btn" href="https://github.com/maxbaluev/accreted-intelligence">GitHub</a>
+    </div>
+    <div class="byline">
+      Built end-to-end, solo, by <b>Max Baluev</b> — ex-CTO/founder; deep in agents, LLM systems, and
+      retrieval/memory. Open to <b>Staff / Principal / Founding AI engineer</b> roles — remote, GMT−3,
+      full US/EU overlap. <a href="mailto:maxbaluev@outlook.com">maxbaluev@outlook.com</a>
     </div>
   </div>
 </header>
@@ -284,6 +307,21 @@
       A system that compounds judgment must invest as heavily in governance, credit honesty, and boundary
       enforcement as in scoring and accumulation.
     </blockquote>
+
+    <div class="subscribe">
+      <h3>Want the result?</h3>
+      <p>The substrate-on/off experiment is the one measurement that settles the thesis. Leave your email
+         and you'll get the numbers when they land — that's all, no newsletter.</p>
+      <form id="subform" action="https://formsubmit.co/maxbaluev@outlook.com" method="POST">
+        <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
+        <input type="hidden" name="_subject" value="New experiment-results subscriber">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
+        <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
+        <button type="submit">Send me the results</button>
+      </form>
+      <div class="ok" id="subok">✓ You're on the list — you'll get the results when they land.</div>
+    </div>
   </div>
 </section>
 
@@ -300,5 +338,21 @@
   </div>
 </footer>
 
+<script>
+(function(){
+  var f=document.getElementById('subform'),ok=document.getElementById('subok');
+  if(new URLSearchParams(location.search).get('subscribed')==='1'){f.style.display='none';ok.style.display='block';}
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=f.querySelector('button');btn.disabled=true;btn.textContent='Sending…';
+    fetch('https://formsubmit.co/ajax/maxbaluev@outlook.com',{
+      method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify({email:f.email.value,_subject:'New experiment-results subscriber',_honey:f._honey.value})
+    }).then(function(r){return r.json();}).then(function(){
+      f.style.display='none';ok.style.display='block';
+    }).catch(function(){f.submit();});
+  });
+})();
+</script>
 </body>
 </html>
