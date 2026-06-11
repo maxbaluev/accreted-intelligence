@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AccInt — an operator, not a copilot</title>
-<meta name="description" content="AccInt is an operator for the work that repeats: it runs your pipeline week after week, proves every action with a receipt, and gets smarter about your business every cycle. When anyone asks what happened, the answer is already written. Early access.">
-<meta property="og:title" content="AccInt — an operator, not a copilot">
-<meta property="og:description" content="An operator for the work that repeats: every action a receipt, every approval named and timestamped, every lesson credited to memory — and it gets smarter about your business every cycle. Early access.">
+<title>Accreted Intelligence — it does your work, and every action makes it smarter</title>
+<meta name="description" content="Accreted Intelligence — AccInt — is the operator you hand work to: it runs it inside your own accounts, shows a receipt for every action, asks before anything leaves — and it learns from the very first action, so every next one is sharper, faster, cheaper. Early access.">
+<meta property="og:title" content="Accreted Intelligence — it does your work, and every action makes it smarter">
+<meta property="og:description" content="The operator you hand work to: it runs inside your own accounts, proves every action with a receipt, asks before anything leaves — and it learns from the very first action, so every next one is sharper, faster, cheaper. Early access.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://maxbaluev.github.io/accreted-intelligence/">
 <meta property="og:image" content="https://maxbaluev.github.io/accreted-intelligence/og.png">
@@ -88,10 +88,11 @@ radial-gradient(1100px 700px at 50% 120%, rgba(67,217,126,.04), transparent 60%)
 .hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:60px;align-items:center;}
 .hero-grid>*{min-width:0;}
 @media(max-width:920px){.hero-grid{grid-template-columns:1fr;gap:46px;}.hero{padding-top:120px;}}
-.kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;color:var(--green);text-transform:uppercase;}
-.kicker .sep{color:var(--faint);margin:0 9px;}
-h1{font-family:var(--serif);font-weight:400;font-size:clamp(50px,6.8vw,82px);line-height:.98;
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;color:var(--green);text-transform:uppercase;}
+.kicker .sep{color:var(--faint);margin:0 8px;}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,4.2vw,48px);line-height:1.04;
 letter-spacing:-.012em;margin-top:24px;}
+h1>span{display:block;text-wrap:balance;}
 h1 em{font-style:italic;color:var(--green);text-shadow:0 0 38px rgba(67,217,126,.35);}
 .lede{margin-top:26px;font-size:clamp(17px,2vw,19.5px);color:var(--dim);max-width:33em;}
 .lede b{color:var(--ink);font-weight:600;}
@@ -151,6 +152,9 @@ border-radius:9px;background:var(--green-soft);color:var(--green);font-size:15px
 @keyframes pillnudge{0%,100%{border-color:var(--line);}45%{border-color:var(--amber);color:var(--ink);box-shadow:0 0 0 3px rgba(255,210,125,.12);}}
 
 /* ---------- ledger card ---------- */
+.led-cap{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--faint);margin:0 2px 10px;}
+@media(max-width:640px),(min-width:921px) and (max-width:1120px){.kicker .k-op{display:none;}}
+@media(max-width:520px){.led-cap{font-size:10px;letter-spacing:.02em;}}
 .ledger{position:relative;border:1px solid var(--line2);border-radius:16px;
 background:linear-gradient(170deg,#111a14,#0d1410 55%);
 padding:22px 0 12px;box-shadow:0 40px 100px rgba(0,0,0,.55), 0 0 0 1px rgba(67,217,126,.05);
@@ -430,21 +434,22 @@ html{scroll-behavior:auto;}
   <div class="glow"></div>
   <div class="wrap hero-grid">
     <div>
-      <div class="kicker h-anim d1">AccInt<span class="sep">·</span>autonomous operator<span class="sep">·</span>early access</div>
-      <h1 class="h-anim d2">An <em>operator</em>,<br>not a copilot.</h1>
+      <div class="kicker h-anim d1">Accreted Intelligence<span class="k-op"><span class="sep">·</span>autonomous operator</span><span class="sep">·</span>early access</div>
+      <h1 class="h-anim d2"><span>It does your work.</span> <span>Every action makes it <em>smarter</em>.</span></h1>
       <p class="lede h-anim d3">
-        AccInt does <b>real work</b> inside <b>your own accounts</b> — one-off or every week —
-        end to end, with a receipt for every action. And the part no tool has: <b>it compounds</b>.
-        What it does for you once, it does better forever.
+        Accreted Intelligence — AccInt — is the operator you hand work to: it runs it
+        <b>inside your own accounts</b>, shows a <b>receipt for every action</b>, asks before
+        anything leaves — and it learns from the very first action, so every next one is
+        <b>sharper, faster, cheaper</b>.
       </p>
-      <div class="flow h-anim d4" aria-label="How a run works: you say it, it runs, it holds for your OK, it learns">
+      <div class="flow h-anim d4" aria-label="How a run works: you say it, it runs, it holds for your OK, it learns — every repeat sharper and cheaper">
         <div class="fstep"><b>you say it</b><small>in your words</small></div>
         <span class="farr" aria-hidden="true">→</span>
         <div class="fstep"><b>it runs</b><small>every step receipted</small><span class="stamp ok">VERIFIED</span></div>
         <span class="farr" aria-hidden="true">→</span>
         <div class="fstep"><b>it holds</b><small>sends wait for your OK, decision recorded</small><span class="stamp hold">HELD → OK</span></div>
         <span class="farr" aria-hidden="true">→</span>
-        <div class="fstep"><b>it learns</b><small>what worked</small><span class="stamp ok">CREDITED</span></div>
+        <div class="fstep"><b>it learns</b><small>every repeat sharper and cheaper</small><span class="stamp ok">CREDITED</span></div>
       </div>
       <div class="signup h-anim d5">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
@@ -455,8 +460,8 @@ html{scroll-behavior:auto;}
           <input type="hidden" name="first_job" value="">
           <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get early access</button>
-          <div class="pills" role="group" aria-label="What would you hire it for first?">
-            <span class="pl">first job · pick one</span>
+          <div class="pills" role="group" aria-label="What would you hand it first?">
+            <span class="pl">what would you hand it first? · pick one</span>
             <button type="button" class="pill" aria-pressed="false">agency recruiting &amp; search</button>
             <button type="button" class="pill" aria-pressed="false">fractional / agency client ops</button>
             <button type="button" class="pill" aria-pressed="false">founder-led B2B sales</button>
@@ -472,7 +477,9 @@ html{scroll-behavior:auto;}
       </div>
     </div>
 
-    <div class="ledger h-anim d5" aria-label="Example operating session">
+    <div class="h-anim d5">
+    <p class="led-cap">Tuesday, 9:14 — a real morning, running itself:</p>
+    <div class="ledger" aria-label="Example operating session — Tuesday, 9:14, a real morning, running itself">
       <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER</span><span>operator: accint</span></div>
       <div class="ledger-tabs" id="ledtabs">
         <button class="ltab" aria-pressed="true" data-s="recruiting">agency recruiting</button>
@@ -491,6 +498,7 @@ html{scroll-behavior:auto;}
       </div>
       <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
       <div class="ledger-foot">sessions are illustrative, shaped by real runs · drafts never leave without your word</div>
+    </div>
     </div>
   </div>
 </header>
