@@ -197,20 +197,43 @@
   p.body+p.body{margin-top:14px;}
   p.body b{color:var(--ink);font-weight:600;}
 
-  /* steps with connecting line */
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px;position:relative;}
-  .steps::before{content:"";position:absolute;top:46px;left:8%;right:8%;height:1px;
-    background:linear-gradient(90deg,transparent,var(--line2) 18%,var(--line2) 82%,transparent);}
-  @media(max-width:840px){.steps{grid-template-columns:1fr;}.steps::before{display:none;}}
-  .step{border:1px solid var(--line);border-radius:16px;padding:30px 26px;position:relative;
-    background:linear-gradient(180deg,var(--paper2),rgba(15,22,17,.4));
-    transition:transform .25s,border-color .25s,box-shadow .25s;}
-  .step:hover{transform:translateY(-4px);border-color:var(--line2);box-shadow:0 24px 60px rgba(0,0,0,.35);}
-  .step .num{font-family:var(--serif);font-style:italic;font-size:58px;color:var(--green);line-height:1;
-    text-shadow:0 0 30px rgba(67,217,126,.3);}
-  .step h3{font-size:17.5px;margin:16px 0 9px;font-weight:600;}
-  .step p{font-size:14.5px;color:var(--dim);line-height:1.62;}
-  .step p b{color:var(--ink);font-weight:500;}
+  /* two-column section layout */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;margin-top:14px;}
+  @media(max-width:840px){.duo{grid-template-columns:1fr;gap:40px;}}
+  .duo>*{min-width:0;}
+  .caps{display:flex;flex-direction:column;gap:18px;margin-top:30px;}
+  .cap{display:flex;gap:14px;align-items:baseline;}
+  .cap .n{font-family:var(--serif);font-style:italic;font-size:26px;color:var(--green);min-width:22px;}
+  .cap p{font-size:15px;color:var(--dim);line-height:1.6;}
+  .cap p b{color:var(--ink);font-weight:600;}
+
+  /* loop ring */
+  .ring{position:relative;width:min(430px,92%);aspect-ratio:1;margin:18px auto;}
+  .ring::before{content:"";position:absolute;inset:44px;border:1.5px dashed var(--line2);border-radius:50%;}
+  .rnode{position:absolute;transform:translate(-50%,-50%);background:var(--paper2);border:1px solid var(--line2);
+    border-radius:10px;padding:10px 14px;text-align:center;min-width:130px;box-shadow:0 14px 40px rgba(0,0,0,.4);}
+  .rnode h5{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--ink);font-weight:500;white-space:nowrap;}
+  .rnode span{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px;}
+  .rnode.g{border-color:rgba(67,217,126,.45);} .rnode.g h5{color:var(--green);}
+  .rnode.a{border-color:rgba(255,210,125,.4);} .rnode.a h5{color:var(--amber);}
+  .rn1{left:50%;top:7%;} .rn2{left:93%;top:50%;} .rn3{left:50%;top:93%;} .rn4{left:7%;top:50%;}
+  @media(max-width:520px){.rnode{min-width:104px;padding:8px 10px;} .rnode h5{font-size:10px;white-space:normal;} .rn2{left:88%;} .rn4{left:12%;}}
+  .rcore{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;
+    font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.06em;line-height:1.7;}
+  .rcore .cyc{font-size:22px;display:block;animation:spin 9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* compounding curve */
+  .curve{display:flex;align-items:flex-end;gap:16px;height:230px;margin-top:16px;}
+  .cbar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;text-align:center;min-width:0;}
+  .cbar .fill{border:1px solid rgba(67,217,126,.35);border-radius:8px 8px 0 0;
+    background:linear-gradient(180deg,rgba(67,217,126,.4),rgba(67,217,126,.06));}
+  .cbar.last .fill{background:linear-gradient(180deg,#54e98e,#36c46d);border-color:var(--green);
+    box-shadow:0 0 30px rgba(67,217,126,.35);}
+  .cbar h6{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink);margin-top:10px;font-weight:500;}
+  .cbar span{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:4px;line-height:1.5;}
+  .cbar.last h6{color:var(--green);}
+  .curve-cap{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:18px;letter-spacing:.04em;}
 
   /* kernel laws */
   .law{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;}
@@ -288,6 +311,7 @@
   <div class="nav-in">
     <span class="word">acc<span class="dot">●</span>int</span>
     <div class="nav-links">
+      <a href="#compounds">Why it compounds</a>
       <a href="#how">How it works</a>
       <a href="#jobs">What it does</a>
       <a href="#science">The science</a>
@@ -370,25 +394,48 @@
   </div>
 </div>
 
+<section id="compounds">
+  <div class="wrap">
+    <div class="duo">
+      <div>
+        <div class="tag">the difference</div>
+        <h2>Tools forget.<br>This one <em>compounds</em>.</h2>
+        <p class="body">Every tool you've tried forgets you the moment you close the tab — the context,
+        the corrections, what actually worked. <b>AccInt keeps it, scored by outcome.</b> And brand-new
+        tasks start smarter too — <b>judgment about your world carries over.</b></p>
+      </div>
+      <div class="reveal">
+        <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort collapses to a verified replay">
+          <div class="cbar"><div class="fill" style="height:100%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
+          <div class="cbar"><div class="fill" style="height:54%"></div><h6>RUN 2</h6><span>starts from<br>what worked</span></div>
+          <div class="cbar"><div class="fill" style="height:27%"></div><h6>RUN 3</h6><span>mostly<br>routine</span></div>
+          <div class="cbar last"><div class="fill" style="height:11%"></div><h6>RUN N</h6><span>verified replay<br>near-instant</span></div>
+        </div>
+        <div class="curve-cap">the same task, run after run · illustrative, shaped by real replay behavior — every run still verified</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="how">
   <div class="wrap">
-    <div class="tag">how it works</div>
-    <h2>You set the goal.<br>It does the <em>work</em>.</h2>
-    <div class="steps">
-      <div class="step reveal" style="--rd:0s"><div class="num">1</div>
-        <h3>Say it in plain words</h3>
-        <p>"Find me 20 leads like our last three customers and start conversations." No prompts to
-        engineer, no workflows to build — <b>the goal is the interface</b>.</p></div>
-      <div class="step reveal" style="--rd:.12s"><div class="num">2</div>
-        <h3>It uses every tool a person would</h3>
-        <p>A real browser in <b>your</b> LinkedIn, email, CRM when the work lives there — no integrations
-        to wait on. <b>Code and scripts</b> when that's faster. Documents, spreadsheets, APIs when they
-        fit. The browser is one of its hands, <b>not the whole product</b>. Anything that leaves your
-        machine <b>waits for your OK first</b>.</p></div>
-      <div class="step reveal" style="--rd:.24s"><div class="num">3</div>
-        <h3>It checks reality, then remembers</h3>
-        <p>A send isn't done until it's <b>confirmed on the live page</b>. Replies, results, and
-        failures flow back into one memory — so next week's work starts <b>smarter than this week's</b>.</p></div>
+    <div class="duo">
+      <div>
+        <div class="tag">how it works</div>
+        <h2>You set the goal.<br>It does the <em>work</em>.</h2>
+        <div class="caps">
+          <div class="cap"><span class="n">1</span><p>Say it in plain words — <b>the goal is the interface</b>. No prompts to engineer, no workflows to build.</p></div>
+          <div class="cap"><span class="n">2</span><p>It uses <b>every tool a person would</b> — a real browser in your accounts, code when faster, documents and APIs when they fit. Anything that leaves your machine <b>waits for your OK</b>.</p></div>
+          <div class="cap"><span class="n">3</span><p>It <b>checks reality, then remembers</b> — done isn't done until it's confirmed; results and failures become memory.</p></div>
+        </div>
+      </div>
+      <div class="ring reveal" role="img" aria-label="The loop: you set the goal, it does the work in your accounts, proves it with receipts, remembers what worked — next time starts smarter">
+        <div class="rnode rn1"><h5>you set the goal</h5><span>plain words</span></div>
+        <div class="rnode g rn2"><h5>it does the work</h5><span>in your accounts</span></div>
+        <div class="rnode a rn3"><h5>it proves it</h5><span>receipts</span></div>
+        <div class="rnode g rn4"><h5>it remembers</h5><span>what worked</span></div>
+        <div class="rcore"><span class="cyc">↻</span>next time<br>starts smarter</div>
+      </div>
     </div>
 
     <div class="law">
@@ -402,25 +449,6 @@
         <p>One local memory on your machine. No training on your accounts, no data leaving
         for someone else's model.</p></div>
     </div>
-  </div>
-</section>
-
-<section id="compounds">
-  <div class="wrap">
-    <div class="tag">the difference</div>
-    <h2>Tools forget.<br>This one <em>compounds</em>.</h2>
-    <p class="body">Every tool you've tried forgets you the moment you close the tab — the context,
-    the corrections, what actually worked. <b>AccInt keeps it, scored by outcome.</b></p>
-    <div class="law" style="margin-top:40px">
-      <div class="rule reveal" style="--rd:0s"><h4><span class="pil">⟶</span>THE FIRST TIME</h4>
-        <p>It reasons through every step — and shows its work.</p></div>
-      <div class="rule reveal" style="--rd:.12s"><h4><span class="pil">⟶</span>AFTER A FEW RUNS</h4>
-        <p>Your patterns are memory. It starts from what last succeeded — not from zero.</p></div>
-      <div class="rule reveal" style="--rd:.24s"><h4><span class="pil">⟶</span>WHAT REPEATS</h4>
-        <p>Collapses to a verified replay — near-instant, still receipted.</p></div>
-    </div>
-    <p class="body" style="margin-top:30px">And brand-new tasks start smarter too — <b>judgment about
-    your world carries over.</b></p>
   </div>
 </section>
 
