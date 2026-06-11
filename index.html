@@ -145,6 +145,10 @@ transition:filter .15s,transform .12s,box-shadow .15s;}
 border-radius:9px;background:var(--green-soft);color:var(--green);font-size:15px;}
 .signup .err{display:none;margin-top:10px;color:var(--amber);font-size:13.5px;}
 .hp{display:none;}
+.pill-hint{display:none;flex:1 1 100%;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--amber);margin-top:2px;}
+.pill-hint.on{display:block;}
+.pills.nudge .pill{animation:pillnudge .8s cubic-bezier(.2,.7,.2,1) 2;}
+@keyframes pillnudge{0%,100%{border-color:var(--line);}45%{border-color:var(--amber);color:var(--ink);box-shadow:0 0 0 3px rgba(255,210,125,.12);}}
 
 /* ---------- ledger card ---------- */
 .ledger{position:relative;border:1px solid var(--line2);border-radius:16px;
@@ -385,6 +389,7 @@ footer a:hover{color:var(--green);}
 }
 @media (prefers-reduced-motion: reduce){
 .row,.h-anim{animation:none;opacity:1;transform:none;}
+.pills.nudge .pill{animation:none;border-color:rgba(255,210,125,.5);}
 .reveal{opacity:1;transform:none;transition:none;}
 .ledger::after{animation:none;display:none;}
 html{scroll-behavior:auto;}
@@ -435,15 +440,16 @@ html{scroll-behavior:auto;}
           <input type="hidden" name="first_job" value="">
           <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get early access</button>
-          <div class="pills" role="group" aria-label="What would you hire it for first? Optional.">
-            <span class="pl">first job · optional</span>
-            <button type="button" class="pill" aria-pressed="false">founder sales</button>
-            <button type="button" class="pill" aria-pressed="false">recruiting</button>
-            <button type="button" class="pill" aria-pressed="false">client ops</button>
-            <button type="button" class="pill" aria-pressed="false">research</button>
-            <button type="button" class="pill" aria-pressed="false">back-office</button>
+          <div class="pills" role="group" aria-label="What would you hire it for first?">
+            <span class="pl">first job · pick one</span>
+            <button type="button" class="pill" aria-pressed="false">agency recruiting &amp; search</button>
+            <button type="button" class="pill" aria-pressed="false">fractional / agency client ops</button>
+            <button type="button" class="pill" aria-pressed="false">founder-led B2B sales</button>
+            <button type="button" class="pill" aria-pressed="false">research &amp; monitoring briefs</button>
+            <button type="button" class="pill" aria-pressed="false">back-office portal ops (no-API)</button>
             <button type="button" class="pill" aria-pressed="false">something else</button>
           </div>
+          <span class="pill-hint" aria-live="polite">pick one — invites go in order + fit</span>
         </form>
         <div class="note">no spam · no calls · first invites go in order</div>
         <div class="ok" id="subok">✓ You're on the list. You'll hear from me when your invite is ready.</div>
@@ -454,21 +460,21 @@ html{scroll-behavior:auto;}
     <div class="ledger h-anim d5" aria-label="Example operating session">
       <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER</span><span>operator: accint</span></div>
       <div class="ledger-tabs" id="ledtabs">
-        <button class="ltab" aria-pressed="true" data-s="sales">founder sales</button>
-        <button class="ltab" aria-pressed="false" data-s="recruiting">recruiting</button>
-        <button class="ltab" aria-pressed="false" data-s="clientops">client ops</button>
+        <button class="ltab" aria-pressed="true" data-s="recruiting">agency recruiting</button>
+        <button class="ltab" aria-pressed="false" data-s="clientops">client retainers</button>
+        <button class="ltab" aria-pressed="false" data-s="sales">founder sales</button>
         <button class="ltab" aria-pressed="false" data-s="research">research briefs</button>
       </div>
       <div id="ledrows">
-      <div class="row" style="--d:.45s"><span class="t">09:14</span><span class="verb">find</span><span class="what"><b>27 prospects</b> matched your target — pulled from your network first</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:.85s"><span class="t">09:21</span><span class="verb">rank</span><span class="what">top 8 by fit + warm-intro paths</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:1.25s"><span class="t">09:26</span><span class="verb">draft</span><span class="what">8 first lines — one per person, none templated</span><span class="stamp hold">HELD → your OK</span></div>
-      <div class="row" style="--d:1.65s"><span class="t">09:31</span><span class="verb">send</span><span class="what"><b>8/8 delivered</b> — each confirmed on the live page, not assumed</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:2.05s"><span class="t">09:42</span><span class="verb">run</span><span class="what">wrote a small script — all 8 enriched into <b>your tracker</b></span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:2.45s"><span class="t">+1d 06:02</span><span class="verb">learn</span><span class="what">2 replies → what worked just became memory</span><span class="stamp ok">CREDITED</span></div>
-      <div class="row refused" style="--d:2.85s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 strangers" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
+      <div class="row" style="--d:.45s"><span class="t">08:50</span><span class="verb">find</span><span class="what"><b>41 candidates</b> matched the brief — your ATS first, then LinkedIn</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:.85s"><span class="t">08:58</span><span class="verb">rank</span><span class="what">shortlist of 9 — each with a why + a warm path</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:1.25s"><span class="t">09:07</span><span class="verb">draft</span><span class="what">9 personal first-touches — none templated</span><span class="stamp hold">HELD → your OK</span></div>
+      <div class="row" style="--d:1.65s"><span class="t">09:15</span><span class="verb">send</span><span class="what"><b>9/9 sent</b> — each confirmed on the live page</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:2.05s"><span class="t">09:20</span><span class="verb">keep</span><span class="what">ATS updated: stage, notes, next step per candidate</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:2.45s"><span class="t">+1d 06:30</span><span class="verb">learn</span><span class="what">3 replies → the sourcing angle that worked is memory now</span><span class="stamp ok">CREDITED</span></div>
+      <div class="row refused" style="--d:2.85s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
       </div>
-      <div class="ledger-type"><span id="ledtype">next: 3 follow-ups due this morning</span><span class="car"></span></div>
+      <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
       <div class="ledger-foot">sessions are illustrative, shaped by real runs · drafts never leave without your word</div>
     </div>
   </div>
@@ -553,17 +559,18 @@ html{scroll-behavior:auto;}
   <div class="wrap">
     <div class="tag">the same week, twice</div>
     <h2>Hand it the work once. <em>Watch week nine.</em></h2>
-    <p class="body">The same ask, run one and run nine — every step a receipt, never a feature claim.
-    Felt first by <b>recruiters and talent partners, fractional executives and consultants, boutique
-    agencies, founders who carry their own sales</b> — and the memory makes it yours, week by week:</p>
+    <p class="body">Felt first where the pipeline <b>is</b> the revenue — <b>agency recruiters billing
+    placements, fractional operators billing retainers, founders closing their own deals</b>. The same
+    ask, run one and run nine — every step a receipt, never a feature claim — and the memory makes it
+    yours, week by week:</p>
     <div class="stabs" role="tablist" aria-label="Pick the work you know" id="storytabs">
-      <button class="ltab" role="tab" id="stab-sales" aria-selected="true" aria-controls="spanel-sales">founder sales</button>
-      <button class="ltab" role="tab" id="stab-rec" aria-selected="false" aria-controls="spanel-rec" tabindex="-1">recruiting</button>
-      <button class="ltab" role="tab" id="stab-ops" aria-selected="false" aria-controls="spanel-ops" tabindex="-1">client ops</button>
+      <button class="ltab" role="tab" id="stab-rec" aria-selected="true" aria-controls="spanel-rec">agency recruiting</button>
+      <button class="ltab" role="tab" id="stab-ops" aria-selected="false" aria-controls="spanel-ops" tabindex="-1">client retainers</button>
+      <button class="ltab" role="tab" id="stab-sales" aria-selected="false" aria-controls="spanel-sales" tabindex="-1">founder sales</button>
     </div>
     <div class="stories">
 
-<article class="story" role="tabpanel" id="spanel-sales" aria-labelledby="stab-sales" tabindex="0">
+<article class="story" role="tabpanel" id="spanel-sales" aria-labelledby="stab-sales" tabindex="0" hidden>
 <div class="story-ask"><span class="who">you · founder sales · monday 08:58</span>“Keep my pipeline warm this week — ten good ones, in my voice, nothing spammy.”</div>
 <div class="runs">
 <div class="runcol">
@@ -583,14 +590,15 @@ html{scroll-behavior:auto;}
 <div class="row memo"><span class="t">08:31</span><span class="verb">skip</span><span class="what"><b>Meridian Corp</b>: their CFO said “not till Q3” in run 4 — memory holds it</span><span class="stamp ok">MEMORY</span></div>
 <div class="row"><span class="t">08:33</span><span class="verb">draft</span><span class="what">9 first lines in your voice — 2 flagged for your read</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:37</span><span class="verb">send</span><span class="what">9/9 + tracker true — everything else was verified replay</span><span class="stamp ok">VERIFIED</span></div>
-<div class="run-f">6 min · 3 decisions surfaced, rest verified replay</div>
+<div class="row"><span class="t">+2d</span><span class="verb">learn</span><span class="what"><b>3 qualified replies</b> → 2 calls on Friday’s calendar</span><span class="stamp ok">CREDITED</span></div>
+<div class="run-f">6 min at the desk · the week ends in calls, not drafts</div>
 </div>
 </div>
 <div class="knows"><span class="kl">what the memory now knows</span><span class="kc">replies 2.3× when you cite their thesis</span><span class="kc">never pitch in their earnings week</span><span class="kc">your voice: short, one ask, zero exclamation marks</span></div>
 </article>
 
-<article class="story" role="tabpanel" id="spanel-rec" aria-labelledby="stab-rec" tabindex="0" hidden>
-<div class="story-ask"><span class="who">you · recruiting · monday 08:35</span>“Run the staff-platform-engineer search — my name is on every message, so quality only.”</div>
+<article class="story" role="tabpanel" id="spanel-rec" aria-labelledby="stab-rec" tabindex="0">
+<div class="story-ask"><span class="who">you · agency recruiting · monday 08:35</span>“Run the staff-platform-engineer search — my name is on every message, so quality only.”</div>
 <div class="runs">
 <div class="runcol">
 <div class="run-h"><b>RUN 1</b><span>week one</span></div>
@@ -609,14 +617,15 @@ html{scroll-behavior:auto;}
 <div class="row memo"><span class="t">08:12</span><span class="verb">skip</span><span class="what"><b>Arclight</b>’s staff eng: “happy till my March vest” in run 5 — re-engage then</span><span class="stamp ok">MEMORY</span></div>
 <div class="row"><span class="t">08:14</span><span class="verb">draft</span><span class="what">6 touches — both re-engages cite what changed since you last spoke</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:17</span><span class="verb">send</span><span class="what">6/6 + ATS true — the sourcing pass was verified replay</span><span class="stamp ok">VERIFIED</span></div>
-<div class="run-f">6 min · 3 decisions surfaced, rest verified replay</div>
+<div class="row"><span class="t">10:07</span><span class="verb">file</span><span class="what"><b>two submittals</b> out to the client — a fee rides on each</span><span class="stamp ok">VERIFIED</span></div>
+<div class="run-f">6 min of decisions · the rest verified replay</div>
 </div>
 </div>
 <div class="knows"><span class="kl">what the memory now knows</span><span class="kc">seniors reply to postmortems, not perks</span><span class="kc">“blast it” stays refused — named people only</span><span class="kc">thu 08–10 sends = 2.1× response</span></div>
 </article>
 
 <article class="story" role="tabpanel" id="spanel-ops" aria-labelledby="stab-ops" tabindex="0" hidden>
-<div class="story-ask"><span class="who">you · client ops · sunday 21:40</span>“Monday briefs for all five clients — what moved, what’s stuck, what I should say.”</div>
+<div class="story-ask"><span class="who">you · client retainers · sunday 21:40</span>“Monday briefs for every client — what moved, what’s stuck, what I should say.”</div>
 <div class="runs">
 <div class="runcol">
 <div class="run-h"><b>RUN 1</b><span>week one</span></div>
@@ -631,11 +640,11 @@ html{scroll-behavior:auto;}
 <div class="nine" aria-hidden="true">9 weeks later</div>
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
-<div class="row replay"><span class="t">06:05</span><span class="verb">replay</span><span class="what">the 5-workspace pull — 9 verified steps from runs 1–8, every row re-checked</span><span class="stamp re">REPLAYED</span></div>
+<div class="row replay"><span class="t">06:05</span><span class="verb">replay</span><span class="what">the full workspace pull — boards, portals, inboxes re-checked, none re-reasoned</span><span class="stamp re">REPLAYED</span></div>
 <div class="row memo"><span class="t">06:09</span><span class="verb">judge</span><span class="what"><b>Halvern</b> leads with the renewal risk — you rewrote it that way in run 3</span><span class="stamp ok">MEMORY</span></div>
-<div class="row"><span class="t">06:11</span><span class="verb">draft</span><span class="what">5 briefs in your structure — 1 flagged “client tone shifted, read this one”</span><span class="stamp hold">HELD → your OK</span></div>
-<div class="row"><span class="t">06:15</span><span class="verb">file</span><span class="what">briefs + trackers true — the pulls were verified replay</span><span class="stamp ok">VERIFIED</span></div>
-<div class="run-f">6 min · 3 decisions surfaced, rest verified replay</div>
+<div class="row"><span class="t">06:11</span><span class="verb">draft</span><span class="what"><b>7 briefs</b> in your structure — 1 flagged “client tone shifted, read this one”</span><span class="stamp hold">HELD → your OK</span></div>
+<div class="row"><span class="t">06:15</span><span class="verb">file</span><span class="what">briefs + trackers true — the two newest clients ride the same memory</span><span class="stamp ok">VERIFIED</span></div>
+<div class="run-f">seven clients on the same Monday — two retainers added, zero new hires</div>
 </div>
 </div>
 <div class="knows"><span class="kl">what the memory now knows</span><span class="kc">Halvern reads risks first, wins last</span><span class="kc">invoice nudges land tuesdays, never fridays</span><span class="kc">your brief = 5 lines, then receipts</span></div>
@@ -732,15 +741,16 @@ html{scroll-behavior:auto;}
         <input type="hidden" name="first_job" value="">
         <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get early access</button>
-        <div class="pills" role="group" aria-label="What would you hire it for first? Optional.">
-          <span class="pl">first job · optional</span>
-          <button type="button" class="pill" aria-pressed="false">founder sales</button>
-          <button type="button" class="pill" aria-pressed="false">recruiting</button>
-          <button type="button" class="pill" aria-pressed="false">client ops</button>
-          <button type="button" class="pill" aria-pressed="false">research</button>
-          <button type="button" class="pill" aria-pressed="false">back-office</button>
+        <div class="pills" role="group" aria-label="What would you hire it for first?">
+          <span class="pl">first job · pick one</span>
+          <button type="button" class="pill" aria-pressed="false">agency recruiting &amp; search</button>
+          <button type="button" class="pill" aria-pressed="false">fractional / agency client ops</button>
+          <button type="button" class="pill" aria-pressed="false">founder-led B2B sales</button>
+          <button type="button" class="pill" aria-pressed="false">research &amp; monitoring briefs</button>
+          <button type="button" class="pill" aria-pressed="false">back-office portal ops (no-API)</button>
           <button type="button" class="pill" aria-pressed="false">something else</button>
         </div>
+        <span class="pill-hint" aria-live="polite">pick one — invites go in order + fit</span>
       </form>
       <div class="note">no spam · no calls · first invites go in order</div>
       <div class="ok" id="subok2">✓ You're on the list. You'll hear from me when your invite is ready.</div>
@@ -770,15 +780,23 @@ html{scroll-behavior:auto;}
   function wire(formId, okId, errId){
     var f=document.getElementById(formId),ok=document.getElementById(okId),err=document.getElementById(errId);
     if(!f) return;
-    var hid=f.querySelector('input[name=first_job]'),pills=f.querySelectorAll('.pill');
+    var hid=f.querySelector('input[name=first_job]'),pills=f.querySelectorAll('.pill'),
+        prow=f.querySelector('.pills'),hint=f.querySelector('.pill-hint'),nudged=false;
     pills.forEach(function(p){p.addEventListener('click',function(){
       var on=p.getAttribute('aria-pressed')==='true';
       pills.forEach(function(x){x.setAttribute('aria-pressed','false');});
       if(!on){p.setAttribute('aria-pressed','true');}
       if(hid){hid.value=on?'':p.textContent;}
+      if(hid&&hid.value){if(hint){hint.classList.remove('on');}if(prow){prow.classList.remove('nudge');}}
     });});
     f.addEventListener('submit',function(e){
       e.preventDefault();
+      if(hid&&!hid.value&&!nudged){ /* soft-required: block once, nudge the pills */
+        nudged=true;
+        if(prow){prow.classList.remove('nudge');void prow.offsetWidth;prow.classList.add('nudge');}
+        if(hint){hint.classList.add('on');}
+        return;
+      }
       var btn=f.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Sending…';
       fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
         method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
