@@ -338,6 +338,21 @@ display:flex;flex-direction:column;gap:5px;}
 .doc::after{content:"→";color:var(--green);margin-top:6px;transition:transform .2s;}
 .doc:hover::after{transform:translateX(4px);}
 
+/* stack — runs where you already work */
+#stack{padding:70px 0;}
+#stack h2{font-size:clamp(28px,3.6vw,40px);}
+.stackrows{margin-top:30px;max-width:780px;border-top:1px solid var(--line);}
+.srow{display:grid;grid-template-columns:104px 1fr;gap:7px 20px;align-items:baseline;padding:15px 0;border-bottom:1px solid var(--line);}
+.srl{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--faint);}
+.schips{grid-column:2;list-style:none;display:flex;flex-wrap:wrap;gap:8px;}
+.schips li{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--dim);
+border:1px solid var(--line);border-radius:6px;padding:5px 12px;white-space:nowrap;}
+.schips li.mcp{color:var(--faint);border-style:dashed;border-color:var(--line2);}
+.schips li.live{color:var(--green);border-color:rgba(67,217,126,.45);background:var(--green-soft);}
+.schips li.live i{font-style:normal;opacity:.75;}
+.ssub{grid-column:2;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.04em;}
+@media(max-width:560px){.srow{grid-template-columns:1fr;gap:8px;}.schips,.ssub{grid-column:1;}}
+
 /* roadmap */
 .road{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;align-items:stretch;}
 @media(max-width:840px){.road{grid-template-columns:1fr;}}
@@ -488,8 +503,6 @@ html{scroll-behavior:auto;}
       operation — the sourcing, the follow-through, the records, the receipts. <b>Early access opens
       in small batches, in waitlist order.</b></p>
       <div class="specs">
-        <span>native: Windows · macOS · Linux</span>
-        <span>runs on Claude Code today · agent-agnostic by design</span>
         <span>memory: local, on your machine</span>
         <span>runs several at once: parallel terminals on different tasks · one memory · no collisions</span>
       </div>
@@ -506,15 +519,17 @@ html{scroll-behavior:auto;}
         <p class="body">Every tool you've tried forgets you the moment you close the tab — the context,
         the corrections, what actually worked. <b>AccInt keeps it, scored by outcome.</b> And brand-new
         tasks start smarter too — <b>judgment about your world carries over.</b></p>
+        <p class="body">Because verified steps replay instead of being re-reasoned, <b>the same job costs
+        less every time it repeats</b> — week nine runs on a fraction of the model-time week one needed.</p>
       </div>
       <div class="reveal">
-        <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort collapses to a verified replay">
+        <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
           <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
           <div class="cbar"><div class="fill" style="height:40%"></div><h6>RUN 2</h6><span>starts from<br>what worked</span></div>
           <div class="cbar"><div class="fill" style="height:19%"></div><h6>RUN 3</h6><span>mostly<br>routine</span></div>
-          <div class="cbar last"><div class="fill" style="height:8%"></div><h6>RUN N</h6><span>verified replay<br>near-instant</span></div>
+          <div class="cbar last"><div class="fill" style="height:8%"></div><h6>RUN N</h6><span>verified replay —<br>near-instant, near-free</span></div>
         </div>
-        <div class="curve-cap">the same task, run after run · illustrative, shaped by real replay behavior — every run still verified</div>
+        <div class="curve-cap">the same task, run after run · effort and cost collapse together · illustrative, shaped by real replay behavior — every run still verified</div>
       </div>
     </div>
   </div>
@@ -699,6 +714,44 @@ html{scroll-behavior:auto;}
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper.md<span>the thesis, the math, what's proven vs. open</span></a>
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">architecture-overview.md<span>the skimmable tour</span></a>
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence">github repo<span>+ open-source building blocks</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="tag">no new tab to live in</div>
+    <h2>Runs where you <em>already work</em>.</h2>
+    <p class="body">AccInt is not another app — it plugs into <b>the coding agent you already run</b>,
+    and the memory stays on your machine.</p>
+    <div class="stackrows">
+      <div class="srow reveal" style="--rd:0s">
+        <span class="srl">AGENTS</span>
+        <ul class="schips" aria-label="Agents AccInt runs on">
+          <li class="live">Claude Code <i>· live today</i></li>
+          <li class="mcp">Cursor</li>
+          <li class="mcp">Codex</li>
+          <li class="mcp">OpenCode</li>
+        </ul>
+        <span class="ssub">any MCP agent connects the same two verbs</span>
+      </div>
+      <div class="srow reveal" style="--rd:.1s">
+        <span class="srl">PLATFORMS</span>
+        <ul class="schips" aria-label="Platforms AccInt runs on">
+          <li>Windows</li>
+          <li>macOS</li>
+          <li>Linux / Unix</li>
+        </ul>
+        <span class="ssub">native on all three</span>
+      </div>
+      <div class="srow reveal" style="--rd:.2s">
+        <span class="srl">BUILD</span>
+        <ul class="schips" aria-label="How AccInt is built">
+          <li>one pure-Rust binary</li>
+          <li>memory local — never uploaded</li>
+          <li>no cloud dependency</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
