@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AccInt — an operator, not a copilot</title>
-<meta name="description" content="AccInt is an autonomous AI operator that works inside your own accounts — outreach, research, follow-ups — end to end. Every action verified against reality. Every outcome remembered. Early access.">
+<meta name="description" content="AccInt is an operator for the work that repeats: it runs your pipeline week after week, proves every action with receipts, and gets smarter about your business every cycle. Early access.">
 <meta property="og:title" content="AccInt — an operator, not a copilot">
-<meta property="og:description" content="An autonomous AI operator that works in your own accounts, verifies every action, and gets better every week it works for you. Pre-product, real system. Early access.">
+<meta property="og:description" content="An operator for the work that repeats: it runs your pipeline week after week, proves every action with receipts, and gets smarter about your business every cycle. Pre-product, real system. Early access.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://maxbaluev.github.io/accreted-intelligence/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,6 +68,13 @@
   .signup input[type=email]{flex:1 1 230px;padding:14px 16px;border-radius:8px;border:1px solid var(--line);
     background:var(--paper2);color:var(--ink);font-size:15.5px;font-family:var(--sans);outline:none;transition:border-color .15s;}
   .signup input[type=email]:focus{border-color:var(--green);}
+  .signup select{flex:1 1 100%;padding:13px 14px;border-radius:8px;border:1px solid var(--line);
+    background:var(--paper2);color:var(--dim);font-size:14.5px;font-family:var(--sans);outline:none;
+    appearance:none;-webkit-appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2397a59b' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;}
+  .signup select:focus{border-color:var(--green);}
+  .signup select.chosen{color:var(--ink);}
   .signup button{padding:14px 24px;border-radius:8px;border:none;background:var(--green);color:#06130b;
     font-weight:600;font-size:15.5px;font-family:var(--sans);cursor:pointer;transition:filter .15s,transform .12s;}
   .signup button:hover{filter:brightness(1.1);transform:translateY(-1px);}
@@ -176,9 +183,10 @@
       <div class="kicker">AccInt<span class="sep">·</span>autonomous operator<span class="sep">·</span>pre-product, real</div>
       <h1>An <em>operator</em>,<br>not a copilot.</h1>
       <p class="lede">
-        AccInt works inside <b>your own accounts</b> — outreach, research, follow-ups, the
-        recurring ops you never get to — <b>end to end</b>. Every action is verified against
-        reality. Every outcome is remembered. <b>It gets better every week it works for you.</b>
+        AccInt runs <b>the work that repeats</b> — your pipeline, your follow-through, your research,
+        your system of record — inside <b>your own accounts</b>, end to end. Every action is proven
+        with a receipt. Every outcome becomes memory. <b>It gets smarter about your business every
+        cycle.</b>
       </p>
       <div class="signup">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
@@ -186,6 +194,15 @@
           <input type="hidden" name="_subject" value="AccInt early access">
           <input type="hidden" name="_captcha" value="false">
           <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
+          <select name="first_job" required aria-label="What would you hire it for first?">
+            <option value="" disabled selected>What would you hire it for first?</option>
+            <option>Run my recruiting / talent pipeline</option>
+            <option>Run client operations (fractional · agency · consulting)</option>
+            <option>My founder sales pipeline</option>
+            <option>Research &amp; monitoring briefs</option>
+            <option>Back-office / portal operations</option>
+            <option>Something else</option>
+          </select>
           <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get early access</button>
         </form>
@@ -212,8 +229,8 @@
   <div class="wrap">
     <div class="mark">”</div>
     <p><b>Honest status:</b> AccInt is pre-product. But it is not a mockup — the system runs its
-    builder's own operation today: it finds the right people, writes the first lines, sends from
-    his real accounts, verifies every send on the live page, and compounds what worked into memory.
+    builder's entire pipeline today: sourcing the right people, ranking them, the follow-through,
+    the tracker — every action verified on the live page, every outcome compounding into memory.
     <b>Its first customer is the person who built it.</b> Early access opens in small batches.</p>
   </div>
 </div>
@@ -256,16 +273,17 @@
 <section>
   <div class="wrap">
     <div class="tag">what it takes off your plate</div>
-    <h2>The work that eats your <em>weeks</em>.</h2>
-    <p class="body">Built first for founders and operators whose growth depends on conversations
-    they don't have time to start:</p>
+    <h2>The work that <em>repeats</em>.</h2>
+    <p class="body">Built first for people whose business runs on a pipeline — <b>recruiters and
+    talent partners, fractional executives and consultants, boutique agencies, founders who carry
+    their own sales</b>:</p>
     <div class="jobs">
-      <div class="job reveal"><span class="arrow">→</span><p><b>Outreach that compounds</b> — find, rank, personalize, send, follow up; learn from every reply.</p></div>
-      <div class="job reveal"><span class="arrow">→</span><p><b>Lead research</b> — who's worth your time, with the warm path to reach them.</p></div>
-      <div class="job reveal"><span class="arrow">→</span><p><b>Follow-ups that never slip</b> — the second and third touches where deals actually live.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Run the pipeline</b> — who matters this week, what's next with each, done and logged.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Follow-through that never slips</b> — the second and third touches where outcomes actually live.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Keep the system of record true</b> — CRM, ATS, tracker updated from what actually happened, not from memory.</p></div>
       <div class="job reveal"><span class="arrow">→</span><p><b>Research &amp; briefs</b> — a sourced, verified answer on your desk, not a chat transcript.</p></div>
-      <div class="job reveal"><span class="arrow">→</span><p><b>The glue work</b> — spreadsheets, scrapes, scripts, and reports a person shouldn't burn hours on.</p></div>
-      <div class="job reveal"><span class="arrow">→</span><p><b>Recurring ops</b> — weekly triage and upkeep that runs on schedule, not on memory.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>The glue work</b> — spreadsheets, portals, scripts, and reports a person shouldn't burn hours on.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Quality over volume, structurally</b> — when contact is the right next step, it's personal and consented. It refuses spam. <b>Quality compounds; volume doesn't.</b></p></div>
     </div>
     <p class="body" style="margin-top:34px">Early access shapes what it learns to do for <b>your</b>
     business — the memory makes it yours, week by week.</p>
@@ -297,6 +315,15 @@
         <input type="hidden" name="_subject" value="AccInt early access">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
+        <select name="first_job" required aria-label="What would you hire it for first?">
+          <option value="" disabled selected>What would you hire it for first?</option>
+          <option>Run my recruiting / talent pipeline</option>
+          <option>Run client operations (fractional · agency · consulting)</option>
+          <option>My founder sales pipeline</option>
+          <option>Research &amp; monitoring briefs</option>
+          <option>Back-office / portal operations</option>
+          <option>Something else</option>
+        </select>
         <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get early access</button>
       </form>
@@ -323,12 +350,14 @@
   function wire(formId, okId){
     var f=document.getElementById(formId),ok=document.getElementById(okId);
     if(!f) return;
+    var sel=f.querySelector('select');
+    if(sel){sel.addEventListener('change',function(){sel.classList.add('chosen');});}
     f.addEventListener('submit',function(e){
       e.preventDefault();
       var btn=f.querySelector('button');btn.disabled=true;btn.textContent='Sending…';
       fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
         method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-        body:JSON.stringify({email:f.email.value,_subject:'AccInt early access',_honey:f._honey.value})
+        body:JSON.stringify({email:f.email.value,first_job:sel?sel.value:'',_subject:'AccInt early access',_honey:f._honey.value})
       }).then(function(r){return r.json();}).then(function(){
         f.style.display='none';ok.style.display='block';
       }).catch(function(){f.submit();});
