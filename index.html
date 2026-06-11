@@ -216,6 +216,31 @@ border-radius:5px;padding:5px 10px;white-space:nowrap;margin-top:3px;font-weight
 .specs span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);
 border:1px solid var(--line);border-radius:5px;padding:4px 11px;}
 
+/* three terminals, one tuesday */
+.vt{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--dim);margin-bottom:10px;}
+.tritue{margin-top:18px;max-width:680px;}
+.tt-panes{display:flex;gap:12px;}
+.tt-pane{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;background:rgba(15,22,17,.6);padding:9px 0 3px;position:relative;}
+.tt-ph{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;padding:0 11px 7px;border-bottom:1px solid var(--line);white-space:nowrap;}
+.tt-ph i{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(67,217,126,.7);flex:0 0 auto;}
+.tt-row{display:grid;grid-template-columns:32px 32px 1fr;gap:7px;align-items:baseline;padding:6.5px 11px;font-family:var(--mono);font-size:10.5px;line-height:1.45;}
+.tt-row+.tt-row{border-top:1px dashed var(--line);}
+.tt-row .t{color:var(--faint);}
+.tt-row .verb{color:var(--green);}
+.tt-row .what{color:var(--dim);min-width:0;overflow-wrap:break-word;}
+.tt-row .what em{font-style:normal;color:var(--amber);}
+.tt-join{display:block;width:100%;height:26px;}
+.tt-join line{stroke:rgba(67,217,126,.38);stroke-width:1;}
+.tt-base{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--green);text-align:center;border:1px solid rgba(67,217,126,.35);background:var(--green-soft);border-radius:7px;padding:8px 16px;line-height:1.65;}
+.tt-cap{margin-top:10px;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.04em;}
+@media(max-width:700px){
+.tt-panes{flex-direction:column;gap:10px;position:relative;padding-left:16px;}
+.tt-panes::before{content:"";position:absolute;left:4px;top:14px;bottom:-12px;width:1px;background:rgba(67,217,126,.35);}
+.tt-pane::before{content:"";position:absolute;left:-12px;top:50%;width:12px;height:1px;background:rgba(67,217,126,.35);}
+.tt-join{display:none;}
+.tt-base{margin-top:12px;}
+}
+
 /* ---------- sections ---------- */
 section{padding:104px 0;border-bottom:1px solid var(--line);scroll-margin-top:74px;position:relative;z-index:1;}
 .tag{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:18px;display:flex;align-items:center;gap:12px;}
@@ -355,7 +380,28 @@ border:1px solid var(--line);border-radius:6px;padding:5px 12px;white-space:nowr
 .schips li.live{color:var(--green);border-color:rgba(67,217,126,.45);background:var(--green-soft);}
 .schips li.live i{font-style:normal;opacity:.75;}
 .ssub{grid-column:2;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.04em;}
-@media(max-width:560px){.srow{grid-template-columns:1fr;gap:8px;}.schips,.ssub{grid-column:1;}}
+
+/* what stays / what leaves — the consent gate */
+.gatewrap{grid-column:2;max-width:660px;}
+.gate{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;}
+.g-col{border:1px solid var(--line);border-radius:10px;background:rgba(15,22,17,.6);padding:12px 16px 13px;min-width:0;}
+.g-col.stay{border-color:rgba(67,217,126,.32);background:rgba(67,217,126,.04);}
+.g-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;margin-bottom:4px;}
+.g-col.stay .g-h{color:var(--green);}
+.g-col.leave .g-h{color:var(--faint);}
+.g-it{font-family:var(--mono);font-size:11.5px;color:var(--dim);padding:6px 0;line-height:1.5;}
+.g-it+.g-it{border-top:1px dashed var(--line);}
+.g-it.none{color:var(--faint);}
+.g-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 12px;}
+.g-wire{flex:1 1 0;width:1px;min-height:12px;background:linear-gradient(180deg,transparent,rgba(255,210,125,.55));}
+.g-wire.b{background:linear-gradient(0deg,transparent,rgba(255,210,125,.55));}
+.g-lab{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--amber);border:1px solid rgba(255,210,125,.4);background:rgba(255,210,125,.08);border-radius:4px;padding:4px 10px;white-space:nowrap;}
+@media(max-width:560px){.srow{grid-template-columns:1fr;gap:8px;}.schips,.ssub,.gatewrap{grid-column:1;}
+.gate{grid-template-columns:1fr;}
+.g-mid{flex-direction:row;padding:12px 4px;}
+.g-wire{width:auto;height:1px;flex:1;min-height:0;background:linear-gradient(90deg,transparent,rgba(255,210,125,.55));}
+.g-wire.b{background:linear-gradient(270deg,transparent,rgba(255,210,125,.55));}
+}
 
 /* roadmap */
 .road{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;align-items:stretch;}
@@ -493,7 +539,7 @@ html{scroll-behavior:auto;}
       <div class="row" style="--d:1.25s"><span class="t">09:07</span><span class="verb">draft</span><span class="what">9 personal first-touches — none templated</span><span class="stamp hold">HELD → your OK</span></div>
       <div class="row" style="--d:1.65s"><span class="t">09:15</span><span class="verb">send</span><span class="what"><b>9/9 sent</b> — each confirmed on the live page</span><span class="stamp ok">VERIFIED</span></div>
       <div class="row" style="--d:2.05s"><span class="t">09:20</span><span class="verb">keep</span><span class="what">ATS updated: stage, notes, next step per candidate</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:2.45s"><span class="t">+1d 06:30</span><span class="verb">learn</span><span class="what">3 replies → the sourcing angle that worked is memory now</span><span class="stamp ok">CREDITED</span></div>
+      <div class="row" style="--d:2.45s"><span class="t">+1d 06:30</span><span class="verb">learn</span><span class="what">3 replies → the sourcing angle that worked shapes every run after</span><span class="stamp ok">CREDITED</span></div>
       <div class="row refused" style="--d:2.85s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
       </div>
       <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
@@ -510,10 +556,30 @@ html{scroll-behavior:auto;}
       <p><b>Not a concept.</b> The sessions above are how AccInt already works, every day, on a real
       operation — the sourcing, the follow-through, the records, the receipts. <b>Early access opens
       in small batches, in waitlist order.</b></p>
-      <div class="specs">
-        <span>memory: local, on your machine</span>
-        <span>runs several at once: parallel terminals on different tasks · one memory · no collisions</span>
+      <div class="tritue reveal" role="img" aria-label="Three terminals. One Tuesday. Three sessions run at the same minute — talent search finds 41 candidates at 09:14, client briefs runs 5 workspaces at 09:14, founder pipeline sends 8 approved messages at 09:15 — and all three converge into one base: three operators, one owner — every lesson lands in one place, no collisions, by construction.">
+        <div class="vt" aria-hidden="true">Three terminals. One Tuesday.</div>
+        <div class="tt-panes" aria-hidden="true">
+          <div class="tt-pane"><div class="tt-ph"><i></i>talent search</div>
+            <div class="tt-row"><span class="t">09:14</span><span class="verb">find</span><span class="what">41 candidates</span></div>
+            <div class="tt-row"><span class="t">09:16</span><span class="verb">hold</span><span class="what">9 drafts <em>→ OK</em></span></div>
+          </div>
+          <div class="tt-pane"><div class="tt-ph"><i></i>client briefs</div>
+            <div class="tt-row"><span class="t">09:14</span><span class="verb">run</span><span class="what">5 workspaces</span></div>
+            <div class="tt-row"><span class="t">09:15</span><span class="verb">draft</span><span class="what">5 briefs <em>→ OK</em></span></div>
+          </div>
+          <div class="tt-pane"><div class="tt-ph"><i></i>founder pipeline</div>
+            <div class="tt-row"><span class="t">09:15</span><span class="verb">send</span><span class="what">8/8 approved</span></div>
+            <div class="tt-row"><span class="t">09:16</span><span class="verb">learn</span><span class="what">2 replies in</span></div>
+          </div>
+        </div>
+        <svg class="tt-join" viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <line x1="100" y1="2" x2="297" y2="26" vector-effect="non-scaling-stroke"/>
+          <line x1="300" y1="2" x2="300" y2="26" vector-effect="non-scaling-stroke"/>
+          <line x1="500" y1="2" x2="303" y2="26" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="tt-base" aria-hidden="true">three operators, one owner — every lesson lands in one place · no collisions, by construction</div>
       </div>
+      <p class="tt-cap">one owner, several terminals — how AccInt already runs today</p>
     </div>
   </div>
 </div>
@@ -552,14 +618,14 @@ html{scroll-behavior:auto;}
         <div class="caps">
           <div class="cap"><span class="n">1</span><p>Say it in plain words — <b>the goal is the interface</b>. No prompts to engineer, no workflows to build.</p></div>
           <div class="cap"><span class="n">2</span><p>It uses <b>every tool a person would</b> — a real browser in your accounts, code when faster, documents and APIs when they fit. Anything that leaves your machine <b>waits for your OK</b>.</p></div>
-          <div class="cap"><span class="n">3</span><p>It <b>checks reality, then remembers</b> — done isn't done until it's confirmed; results and failures become memory.</p></div>
+          <div class="cap"><span class="n">3</span><p>It <b>checks reality, then keeps the lesson</b> — done isn't done until it's confirmed; what worked and what didn't sharpens every run after.</p></div>
         </div>
       </div>
-      <div class="ring reveal" role="img" aria-label="The loop: you set the goal, it does the work in your accounts, proves it with receipts, remembers what worked — next time starts smarter">
+      <div class="ring reveal" role="img" aria-label="The loop: you set the goal, it does the work in your accounts, proves it with receipts, keeps what worked — next time starts smarter">
         <div class="rnode rn1"><h5>you set the goal</h5><span>plain words</span></div>
         <div class="rnode g rn2"><h5>it does the work</h5><span>in your accounts</span></div>
         <div class="rnode a rn3"><h5>it proves it</h5><span>receipts</span></div>
-        <div class="rnode g rn4"><h5>it remembers</h5><span>what worked</span></div>
+        <div class="rnode g rn4"><h5>it learns</h5><span>what worked stays</span></div>
         <div class="rcore"><span class="cyc">↻</span>next time<br>starts smarter</div>
       </div>
     </div>
@@ -572,8 +638,8 @@ html{scroll-behavior:auto;}
         <p>Sending, posting, paying, deleting — hard-gated behind your word. Not a setting.
         A law in the kernel.</p></div>
       <div class="rule reveal" style="--rd:.24s"><h4><span class="pil">§3</span>YOUR DATA STAYS YOURS</h4>
-        <p>One local memory on your machine. No training on your accounts, no data leaving
-        for someone else's model.</p></div>
+        <p>Everything it learns lives on your machine and stays yours. No training on your
+        accounts, no data leaving for someone else's model.</p></div>
     </div>
   </div>
 </section>
@@ -584,8 +650,8 @@ html{scroll-behavior:auto;}
     <h2>Hand it the work once. <em>Watch week nine.</em></h2>
     <p class="body">Felt first where the pipeline <b>is</b> the revenue — <b>agency recruiters billing
     placements, fractional operators billing retainers, founders closing their own deals</b>. The same
-    ask, run one and run nine — every step a receipt, never a feature claim — and the memory makes it
-    yours, week by week:</p>
+    ask, run one and run nine — every step a receipt, never a feature claim — and what it learns makes
+    it yours, week by week:</p>
     <div class="stabs" role="tablist" aria-label="Pick the work you know" id="storytabs">
       <button class="ltab" role="tab" id="stab-rec" aria-selected="true" aria-controls="spanel-rec">agency recruiting</button>
       <button class="ltab" role="tab" id="stab-ops" aria-selected="false" aria-controls="spanel-ops" tabindex="-1">client retainers</button>
@@ -610,14 +676,14 @@ html{scroll-behavior:auto;}
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
 <div class="row replay"><span class="t">08:28</span><span class="verb">replay</span><span class="what">find → read → rank — 6 verified steps from runs 1–8, re-checked not re-reasoned</span><span class="stamp re">REPLAYED</span></div>
-<div class="row memo"><span class="t">08:31</span><span class="verb">skip</span><span class="what"><b>Meridian Corp</b>: their CFO said “not till Q3” in run 4 — memory holds it</span><span class="stamp ok">MEMORY</span></div>
+<div class="row memo"><span class="t">08:31</span><span class="verb">skip</span><span class="what"><b>Meridian Corp</b>: their CFO said “not till Q3” in run 4 — never needed re-telling</span><span class="stamp ok">KNOWN</span></div>
 <div class="row"><span class="t">08:33</span><span class="verb">draft</span><span class="what">9 first lines in your voice — 2 flagged for your read</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:37</span><span class="verb">send</span><span class="what">9/9 + tracker true — everything else was verified replay</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">+2d</span><span class="verb">learn</span><span class="what"><b>3 qualified replies</b> → 2 calls on Friday’s calendar</span><span class="stamp ok">CREDITED</span></div>
 <div class="run-f">6 min at the desk · the week ends in calls, not drafts</div>
 </div>
 </div>
-<div class="knows"><span class="kl">what the memory now knows</span><span class="kc">replies 2.3× when you cite their thesis</span><span class="kc">never pitch in their earnings week</span><span class="kc">your voice: short, one ask, zero exclamation marks</span></div>
+<div class="knows"><span class="kl">what it now knows about your world</span><span class="kc">replies 2.3× when you cite their thesis</span><span class="kc">never pitch in their earnings week</span><span class="kc">your voice: short, one ask, zero exclamation marks</span></div>
 </article>
 
 <article class="story" role="tabpanel" id="spanel-rec" aria-labelledby="stab-rec" tabindex="0">
@@ -637,14 +703,14 @@ html{scroll-behavior:auto;}
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
 <div class="row replay"><span class="t">08:09</span><span class="verb">replay</span><span class="what">the sourcing pass — 5 verified steps from runs 1–8, ATS + GitHub re-checked</span><span class="stamp re">REPLAYED</span></div>
-<div class="row memo"><span class="t">08:12</span><span class="verb">skip</span><span class="what"><b>Arclight</b>’s staff eng: “happy till my March vest” in run 5 — re-engage then</span><span class="stamp ok">MEMORY</span></div>
+<div class="row memo"><span class="t">08:12</span><span class="verb">skip</span><span class="what"><b>Arclight</b>’s staff eng: “happy till my March vest” in run 5 — re-engage then</span><span class="stamp ok">KNOWN</span></div>
 <div class="row"><span class="t">08:14</span><span class="verb">draft</span><span class="what">6 touches — both re-engages cite what changed since you last spoke</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:17</span><span class="verb">send</span><span class="what">6/6 + ATS true — the sourcing pass was verified replay</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">10:07</span><span class="verb">file</span><span class="what"><b>two submittals</b> out to the client — a fee rides on each</span><span class="stamp ok">VERIFIED</span></div>
 <div class="run-f">6 min of decisions · the rest verified replay</div>
 </div>
 </div>
-<div class="knows"><span class="kl">what the memory now knows</span><span class="kc">seniors reply to postmortems, not perks</span><span class="kc">“blast it” stays refused — named people only</span><span class="kc">thu 08–10 sends = 2.1× response</span></div>
+<div class="knows"><span class="kl">what it now knows about your world</span><span class="kc">seniors reply to postmortems, not perks</span><span class="kc">“blast it” stays refused — named people only</span><span class="kc">thu 08–10 sends = 2.1× response</span></div>
 </article>
 
 <article class="story" role="tabpanel" id="spanel-ops" aria-labelledby="stab-ops" tabindex="0" hidden>
@@ -655,22 +721,22 @@ html{scroll-behavior:auto;}
 <div class="row"><span class="t">06:05</span><span class="verb">run</span><span class="what">into <b>5 client workspaces</b> — boards, CRM, two portals, one inbox</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">06:31</span><span class="verb">find</span><span class="what">14 changes worth a partner’s eye — 3 risks, 1 stalled invoice thread</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">06:52</span><span class="verb">draft</span><span class="what">5 Monday briefs — Halvern’s leads with the renewal risk, thread linked</span><span class="stamp hold">HELD → your OK</span></div>
-<div class="row"><span class="t">07:14</span><span class="verb">keep</span><span class="what">trackers updated from <b>what actually happened</b> — 22 rows, zero from memory</span><span class="stamp ok">VERIFIED</span></div>
+<div class="row"><span class="t">07:14</span><span class="verb">keep</span><span class="what">trackers updated from <b>what actually happened</b> — 22 rows, zero from recollection</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">07:25</span><span class="verb">file</span><span class="what">briefs on your desk before coffee — every claim carries its receipt</span><span class="stamp ok">VERIFIED</span></div>
-<div class="row"><span class="t">07:31</span><span class="verb">learn</span><span class="what">your edit — “risks first, wins last” — became memory</span><span class="stamp ok">CREDITED</span></div>
+<div class="row"><span class="t">07:31</span><span class="verb">learn</span><span class="what">your edit — “risks first, wins last” — is how every brief reads now</span><span class="stamp ok">CREDITED</span></div>
 <div class="run-f">41 min · every step reasoned</div>
 </div>
 <div class="nine" aria-hidden="true">9 weeks later</div>
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
 <div class="row replay"><span class="t">06:05</span><span class="verb">replay</span><span class="what">the full workspace pull — boards, portals, inboxes re-checked, none re-reasoned</span><span class="stamp re">REPLAYED</span></div>
-<div class="row memo"><span class="t">06:09</span><span class="verb">judge</span><span class="what"><b>Halvern</b> leads with the renewal risk — you rewrote it that way in run 3</span><span class="stamp ok">MEMORY</span></div>
+<div class="row memo"><span class="t">06:09</span><span class="verb">judge</span><span class="what"><b>Halvern</b> leads with the renewal risk — you rewrote it that way in run 3</span><span class="stamp ok">KNOWN</span></div>
 <div class="row"><span class="t">06:11</span><span class="verb">draft</span><span class="what"><b>7 briefs</b> in your structure — 1 flagged “client tone shifted, read this one”</span><span class="stamp hold">HELD → your OK</span></div>
-<div class="row"><span class="t">06:15</span><span class="verb">file</span><span class="what">briefs + trackers true — the two newest clients ride the same memory</span><span class="stamp ok">VERIFIED</span></div>
+<div class="row"><span class="t">06:15</span><span class="verb">file</span><span class="what">briefs + trackers true — the two newest clients ride what it already knows</span><span class="stamp ok">VERIFIED</span></div>
 <div class="run-f">seven clients on the same Monday — two retainers added, zero new hires</div>
 </div>
 </div>
-<div class="knows"><span class="kl">what the memory now knows</span><span class="kc">Halvern reads risks first, wins last</span><span class="kc">invoice nudges land tuesdays, never fridays</span><span class="kc">your brief = 5 lines, then receipts</span></div>
+<div class="knows"><span class="kl">what it now knows about your world</span><span class="kc">Halvern reads risks first, wins last</span><span class="kc">invoice nudges land tuesdays, never fridays</span><span class="kc">your brief = 5 lines, then receipts</span></div>
 </article>
 
 </div>
@@ -685,24 +751,24 @@ html{scroll-behavior:auto;}
     someone's DM history, and the lessons evaporate with the session — so pilots stall in review, or
     agents run as shadow ops nobody can audit. <b>AccInt is built the other way around:</b> every
     action a receipt, every approval a held decision with a name and a timestamp, every lesson
-    credited to memory.</p>
+    credited and kept.</p>
     <div class="qchips reveal">
       <span class="qchip">WHAT DID IT DO <i>→ receipts</i></span>
       <span class="qchip">WHO SAID YES <i>→ held decisions, named + timestamped</i></span>
-      <span class="qchip">WHAT DID WE LEARN <i>→ credited memory</i></span>
+      <span class="qchip">WHAT DID WE LEARN <i>→ lessons credited, kept</i></span>
     </div>
-    <div class="audit reveal" role="img" aria-label="An answer assembled from the audit ledger. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited to memory. Every row was written when it happened; nothing reconstructed from recollection.">
+    <div class="audit reveal" role="img" aria-label="An answer assembled from the audit ledger. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="row"><span class="t">Mar 9</span><span class="verb">find</span><span class="what"><b>Meridian back in play</b> — their CFO wrote first: “budget opened early”</span><span class="stamp ok">VERIFIED</span></div>
       <div class="row"><span class="t">Mar 11</span><span class="verb">draft</span><span class="what">8 drafts — Meridian’s reply + 7 others, queued behind your word</span><span class="stamp hold">HELD → your OK</span></div>
       <div class="row human"><span class="t">Mar 12</span><span class="verb">■ you</span><span class="what">09:31 — <b>approved 8 drafts</b> — your name on the decision</span><span class="stamp hold">DECIDED</span></div>
       <div class="row"><span class="t">Mar 12</span><span class="verb">send</span><span class="what"><b>8/8 delivered</b> — that’s email one; the Mar 19 follow-up you approved is email two</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row"><span class="t">Mar 19</span><span class="verb">learn</span><span class="what">his “budget opened early” → credited to memory — Q3 rule updated, not broken</span><span class="stamp ok">CREDITED</span></div>
+      <div class="row"><span class="t">Mar 19</span><span class="verb">learn</span><span class="what">his “budget opened early” → lesson credited, kept — Q3 rule updated, not broken</span><span class="stamp ok">CREDITED</span></div>
       <div class="audit-f">answer assembled from the ledger · every row was written when it happened — nothing reconstructed from recollection.</div>
     </div>
-    <p class="tagline reveal">Nothing happens without a <em>trace</em>.<br>Nothing decided is <em>forgotten</em>.</p>
+    <p class="tagline reveal">Nothing happens without a <em>trace</em>.<br>Nothing decided is <em>lost</em>.</p>
     <div class="specs ent reveal">
-      <span>memory: local, yours</span>
+      <span>what it learns: local, yours</span>
       <span>signed grants &amp; consent floors</span>
       <span>append-only audit ledger</span>
       <span>no training on your data</span>
@@ -731,7 +797,7 @@ html{scroll-behavior:auto;}
     <div class="tag">no new tab to live in</div>
     <h2>Runs where you <em>already work</em>.</h2>
     <p class="body">AccInt is not another app — it plugs into <b>the coding agent you already run</b>,
-    and the memory stays on your machine.</p>
+    and everything it learns stays on your machine.</p>
     <div class="stackrows">
       <div class="srow reveal" style="--rd:0s">
         <span class="srl">AGENTS</span>
@@ -754,11 +820,26 @@ html{scroll-behavior:auto;}
       </div>
       <div class="srow reveal" style="--rd:.2s">
         <span class="srl">BUILD</span>
-        <ul class="schips" aria-label="How AccInt is built">
-          <li>one pure-Rust binary</li>
-          <li>memory local — never uploaded</li>
-          <li>no cloud dependency</li>
-        </ul>
+        <div class="gatewrap">
+          <div role="img" aria-label="What stays. What leaves. Your machine keeps everything it learns, every receipt, and drafts in progress. At the boundary stands one gate — held for your OK. The only thing that leaves your machine: the 8 messages you approved — nothing else.">
+            <div class="vt" aria-hidden="true">What stays. What leaves.</div>
+            <div class="gate" aria-hidden="true">
+              <div class="g-col stay">
+                <div class="g-h">YOUR MACHINE</div>
+                <div class="g-it">everything it learns</div>
+                <div class="g-it">every receipt</div>
+                <div class="g-it">drafts in progress</div>
+              </div>
+              <div class="g-mid"><span class="g-wire"></span><span class="g-lab">HELD → your OK</span><span class="g-wire b"></span></div>
+              <div class="g-col leave">
+                <div class="g-h">LEAVES YOUR MACHINE</div>
+                <div class="g-it">the 8 messages you approved</div>
+                <div class="g-it none">nothing else</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="ssub">one pure-Rust binary — no cloud in the loop</span>
       </div>
     </div>
   </div>
@@ -768,7 +849,7 @@ html{scroll-behavior:auto;}
   <div class="wrap">
     <div class="tag">where this goes</div>
     <h2>One operator today.<br>One <em>shared brain</em> next.</h2>
-    <p class="body">The memory at AccInt's core isn't tied to one user — judgment lives in scored,
+    <p class="body">The judgment at AccInt's core isn't tied to one user — it lives in scored,
     portable state. That sets the road:</p>
     <div class="road">
       <div class="stage now reveal" style="--rd:0s"><span class="st">NOW · LIVE</span>
@@ -777,7 +858,7 @@ html{scroll-behavior:auto;}
         accounts, compounding <b>one judgment</b>. This is what early access opens.</p></div>
       <div class="stage next reveal" style="--rd:.12s"><span class="st">NEXT</span>
         <h3>The team brain</h3>
-        <p><b>One memory, many operators.</b> Parallel agents already compound into one substrate
+        <p><b>One shared judgment, many operators.</b> Parallel agents already compound into one substrate
         today — per-person authority and consent floors turn it into a company's shared judgment,
         with the same audit plane over every operator.</p></div>
       <div class="stage later reveal" style="--rd:.24s"><span class="st">RESEARCH</span>
@@ -881,7 +962,7 @@ html{scroll-behavior:auto;}
       ['09:26','draft','8 first lines — one per person, none templated','hold','HELD → your OK'],
       ['09:31','send','<b>8/8 delivered</b> — each confirmed on the live page, not assumed','ok','VERIFIED'],
       ['09:42','run','wrote a small script — all 8 enriched into <b>your tracker</b>','ok','VERIFIED'],
-      ['+1d 06:02','learn','2 replies → what worked just became memory','ok','CREDITED'],
+      ['+1d 06:02','learn','2 replies → what worked carries into next week','ok','CREDITED'],
       ['—','refuse','"blast 400 strangers" — consent floor, never crossed','no','REFUSED',1]]},
     recruiting:{next:'next: 2 candidates to re-engage before Friday',rows:[
       ['08:50','find','<b>41 candidates</b> matched the brief — your ATS first, then LinkedIn','ok','VERIFIED'],
@@ -889,7 +970,7 @@ html{scroll-behavior:auto;}
       ['09:07','draft','9 personal first-touches — none templated','hold','HELD → your OK'],
       ['09:15','send','<b>9/9 sent</b> — each confirmed on the live page','ok','VERIFIED'],
       ['09:20','keep','ATS updated: stage, notes, next step per candidate','ok','VERIFIED'],
-      ['+1d 06:30','learn','3 replies → the sourcing angle that worked is memory now','ok','CREDITED'],
+      ['+1d 06:30','learn','3 replies → the sourcing angle that worked shapes every run after','ok','CREDITED'],
       ['—','refuse','"blast 400 InMails" — consent floor, never crossed','no','REFUSED',1]]},
     clientops:{next:'next: Monday briefs scheduled · 5 clients',rows:[
       ['06:05','run','into <b>5 client workspaces</b> — boards, CRM, portals, inbox','ok','VERIFIED'],
