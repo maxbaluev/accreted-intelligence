@@ -3,355 +3,337 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accreted Intelligence — AI that remembers what worked</title>
-<meta name="description" content="Accreted intelligence: an architecture that moves learning out of model weights and into scored external state. acc4 is a working kernel — a Recursive Language Model over late-interaction scored-token memory.">
-<meta property="og:title" content="Accreted Intelligence">
-<meta property="og:description" content="Most AI forgets. This is the architecture for AI that remembers what worked — and gets wiser.">
+<title>AccInt — an operator, not a copilot</title>
+<meta name="description" content="AccInt is an autonomous AI operator that works inside your own accounts — outreach, research, follow-ups — end to end. Every action verified against reality. Every outcome remembered. Early access.">
+<meta property="og:title" content="AccInt — an operator, not a copilot">
+<meta property="og:description" content="An autonomous AI operator that works in your own accounts, verifies every action, and gets better every week it works for you. Pre-product, real system. Early access.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://maxbaluev.github.io/accreted-intelligence/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b0e14;
-    --bg2:#11151f;
-    --ink:#e6e9ef;
-    --muted:#8b93a3;
-    --rule:#1e2433;
-    --owner:#fbbf24;   /* owner intent */
-    --read:#38bdf8;    /* retrieve */
-    --act:#a78bfa;     /* act */
-    --score:#34d399;   /* outcome */
-    --accent:var(--owner);
+    --paper:#0c1210;
+    --paper2:#101814;
+    --ink:#ede9dc;
+    --dim:#97a59b;
+    --faint:#5d6b61;
+    --line:#1f2b24;
+    --green:#43d97e;
+    --green-dim:rgba(67,217,126,.14);
+    --red:#ff7e67;
+    --serif:"Instrument Serif",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --sans:"IBM Plex Sans",system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
   body{
-    background:var(--bg);
+    background:var(--paper);
     color:var(--ink);
-    font-family:ui-sans-serif,system-ui,"Helvetica Neue",Arial,sans-serif;
+    font-family:var(--sans);
     font-size:17px;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
   }
-  a{color:var(--read);text-decoration:none;}
+  body::after{ /* grain */
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:50;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  }
+  a{color:var(--green);text-decoration:none;}
   a:hover{text-decoration:underline;}
-  .wrap{max-width:880px;margin:0 auto;padding:0 24px;}
-  code,.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 26px;}
+  .mono{font-family:var(--mono);}
 
-  /* Hero */
-  .hero{padding:96px 0 72px;border-bottom:1px solid var(--rule);
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:84px 0 76px;border-bottom:1px solid var(--line);
     background:
-      radial-gradient(1100px 480px at 18% -8%, rgba(251,191,36,.07), transparent 60%),
-      radial-gradient(900px 420px at 85% -12%, rgba(56,189,248,.07), transparent 60%);}
-  .kicker{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
-  h1{font-size:clamp(38px,6vw,58px);line-height:1.04;letter-spacing:-.015em;font-weight:800;}
-  h1 .dim{color:var(--muted);font-weight:700;}
-  .lede{margin-top:26px;font-size:clamp(18px,2.4vw,21px);color:#c2c8d4;max-width:46em;}
-  .lede b{color:var(--ink);}
-  .cta{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap;}
-  .btn{display:inline-block;padding:12px 22px;border-radius:10px;font-weight:600;font-size:15.5px;
-    border:1px solid var(--rule);color:var(--ink);background:var(--bg2);transition:transform .12s ease,border-color .12s ease;}
-  .btn:hover{text-decoration:none;transform:translateY(-1px);border-color:#39435a;}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1304;}
-  .btn.primary:hover{filter:brightness(1.06);}
-  .byline{margin-top:34px;padding:14px 18px;border:1px solid var(--rule);border-radius:12px;background:var(--bg2);
-    font-size:14.5px;color:var(--muted);max-width:46em;line-height:1.6;}
-  .byline b{color:var(--ink);}
-  .byline a{color:var(--owner);}
+      radial-gradient(1200px 600px at 80% -10%, rgba(67,217,126,.06), transparent 60%),
+      radial-gradient(800px 500px at 0% 110%, rgba(67,217,126,.04), transparent 60%);}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:40px;}}
+  .kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.18em;color:var(--green);text-transform:uppercase;}
+  .kicker .sep{color:var(--faint);margin:0 8px;}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(46px,6.4vw,72px);line-height:1.02;
+    letter-spacing:-.01em;margin-top:22px;}
+  h1 em{font-style:italic;color:var(--green);}
+  .lede{margin-top:24px;font-size:clamp(17px,2vw,19px);color:var(--dim);max-width:34em;}
+  .lede b{color:var(--ink);font-weight:600;}
 
-  /* Subscribe */
-  .subscribe{margin-top:34px;padding:24px;border:1px solid rgba(52,211,153,.35);border-radius:12px;background:var(--bg2);max-width:46em;}
-  .subscribe h3{font-size:17px;margin-bottom:6px;}
-  .subscribe p{font-size:14.5px;color:var(--muted);line-height:1.55;}
-  .subscribe form{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
-  .subscribe input[type=email]{flex:1 1 220px;padding:11px 14px;border-radius:10px;border:1px solid var(--rule);
-    background:var(--bg);color:var(--ink);font-size:15px;outline:none;}
-  .subscribe input[type=email]:focus{border-color:rgba(52,211,153,.55);}
-  .subscribe button{padding:11px 20px;border-radius:10px;border:1px solid var(--score);background:var(--score);
-    color:#04190f;font-weight:700;font-size:15px;cursor:pointer;}
-  .subscribe button:hover{filter:brightness(1.06);}
-  .subscribe .ok{margin-top:12px;color:var(--score);font-size:15px;display:none;}
-  .subscribe .hp{display:none;}
+  /* waitlist form */
+  .signup{margin-top:34px;max-width:480px;}
+  .signup form{display:flex;gap:10px;flex-wrap:wrap;}
+  .signup input[type=email]{flex:1 1 230px;padding:14px 16px;border-radius:8px;border:1px solid var(--line);
+    background:var(--paper2);color:var(--ink);font-size:15.5px;font-family:var(--sans);outline:none;transition:border-color .15s;}
+  .signup input[type=email]:focus{border-color:var(--green);}
+  .signup button{padding:14px 24px;border-radius:8px;border:none;background:var(--green);color:#06130b;
+    font-weight:600;font-size:15.5px;font-family:var(--sans);cursor:pointer;transition:filter .15s,transform .12s;}
+  .signup button:hover{filter:brightness(1.1);transform:translateY(-1px);}
+  .signup .note{margin-top:10px;font-size:13px;color:var(--faint);font-family:var(--mono);}
+  .signup .ok{display:none;margin-top:12px;color:var(--green);font-size:15px;}
+  .hp{display:none;}
 
-  /* Sections */
-  section{padding:72px 0;border-bottom:1px solid var(--rule);}
-  .tag{font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:14px;}
-  h2{font-size:clamp(26px,3.6vw,34px);letter-spacing:-.01em;line-height:1.15;margin-bottom:18px;}
-  p.body{color:#b9c0cd;max-width:46em;}
+  /* ledger card */
+  .ledger{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--paper2);
+    padding:22px 0 14px;box-shadow:0 30px 80px rgba(0,0,0,.45);}
+  .ledger::before{content:"";position:absolute;inset:0;border-radius:14px;pointer-events:none;
+    background:linear-gradient(160deg,rgba(67,217,126,.05),transparent 35%);}
+  .ledger-head{display:flex;justify-content:space-between;align-items:center;padding:0 22px 14px;
+    border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.08em;}
+  .ledger-head .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);
+    margin-right:8px;animation:pulse 2.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .row{display:grid;grid-template-columns:54px 64px 1fr auto;gap:10px;align-items:baseline;
+    padding:10px 22px;font-family:var(--mono);font-size:13px;opacity:0;transform:translateY(8px);
+    animation:rise .5s forwards;}
+  .row:nth-child(odd){background:rgba(255,255,255,.012);}
+  .row .t{color:var(--faint);}
+  .row .verb{color:var(--green);font-weight:500;}
+  .row .what{color:var(--dim);line-height:1.5;}
+  .row .what b{color:var(--ink);font-weight:500;}
+  .stamp{font-size:10.5px;letter-spacing:.1em;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+  .stamp.ok{color:var(--green);border:1px solid rgba(67,217,126,.4);background:var(--green-dim);}
+  .stamp.hold{color:#ffd27d;border:1px solid rgba(255,210,125,.35);background:rgba(255,210,125,.08);}
+  .stamp.no{color:var(--red);border:1px solid rgba(255,126,103,.4);background:rgba(255,126,103,.08);}
+  .row.refused .verb{color:var(--red);}
+  .ledger-foot{padding:12px 22px 2px;font-family:var(--mono);font-size:11.5px;color:var(--faint);}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  .row{animation-delay:var(--d,0s);}
+  @media (prefers-reduced-motion: reduce){
+    .row{animation:none;opacity:1;transform:none;}
+    .reveal{opacity:1;transform:none;transition:none;}
+  }
+
+  /* ---------- honesty strip ---------- */
+  .honest{border-bottom:1px solid var(--line);background:var(--paper2);}
+  .honest .wrap{display:flex;gap:18px;align-items:flex-start;padding:26px;}
+  .honest .mark{font-family:var(--serif);font-style:italic;font-size:34px;color:var(--green);line-height:1;}
+  .honest p{font-size:15.5px;color:var(--dim);max-width:62em;}
+  .honest p b{color:var(--ink);}
+
+  /* ---------- sections ---------- */
+  section{padding:84px 0;border-bottom:1px solid var(--line);}
+  .tag{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:16px;}
+  h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,44px);line-height:1.08;margin-bottom:18px;letter-spacing:-.005em;}
+  h2 em{font-style:italic;color:var(--green);}
+  p.body{color:var(--dim);max-width:44em;}
   p.body+p.body{margin-top:14px;}
-  p.body b{color:var(--ink);}
+  p.body b{color:var(--ink);font-weight:600;}
 
-  blockquote{margin:28px 0 0;padding:18px 22px;border-left:3px solid var(--accent);background:var(--bg2);
-    border-radius:0 10px 10px 0;color:#c9cfdb;font-size:18px;}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px;}
+  @media(max-width:820px){.steps{grid-template-columns:1fr;}}
+  .step{border:1px solid var(--line);border-radius:14px;padding:26px;background:var(--paper2);position:relative;}
+  .step .num{font-family:var(--serif);font-style:italic;font-size:52px;color:var(--green);line-height:1;opacity:.9;}
+  .step h3{font-size:17px;margin:14px 0 8px;font-weight:600;}
+  .step p{font-size:14.5px;color:var(--dim);line-height:1.6;}
+  .step p b{color:var(--ink);font-weight:500;}
 
-  /* Property cards */
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px;}
-  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
-  .card{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;}
-  .card h3{font-size:16.5px;margin-bottom:8px;}
-  .card p{font-size:15px;color:var(--muted);line-height:1.55;}
-  .card .n{color:var(--accent);font-weight:800;margin-right:8px;}
+  .law{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px;}
+  @media(max-width:820px){.law{grid-template-columns:1fr;}}
+  .law .rule{border-left:2px solid var(--green);padding:4px 0 4px 18px;}
+  .law .rule h4{font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--ink);margin-bottom:6px;}
+  .law .rule p{font-size:14px;color:var(--dim);line-height:1.6;}
 
-  /* Loop diagram */
-  .loop{display:flex;align-items:stretch;gap:10px;margin:34px 0 10px;flex-wrap:wrap;}
-  .node{flex:1 1 150px;text-align:center;padding:16px 10px;border-radius:12px;font-weight:700;font-size:15px;
-    border:1px solid var(--rule);background:var(--bg2);}
-  .node small{display:block;font-weight:500;font-size:12.5px;margin-top:5px;color:var(--muted);}
-  .node.owner{border-color:rgba(251,191,36,.45);color:var(--owner);}
-  .node.read{border-color:rgba(56,189,248,.45);color:var(--read);}
-  .node.act{border-color:rgba(167,139,250,.45);color:var(--act);}
-  .node.score{border-color:rgba(52,211,153,.45);color:var(--score);}
-  .arrow{align-self:center;color:var(--muted);font-size:20px;}
-  .loopback{margin-top:6px;text-align:center;color:var(--muted);font-size:13.5px;}
-  .loopback b{color:var(--score);}
+  .jobs{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:0 48px;max-width:54em;}
+  @media(max-width:720px){.jobs{grid-template-columns:1fr;}}
+  .job{display:flex;gap:14px;padding:16px 0;border-bottom:1px dashed var(--line);align-items:baseline;}
+  .job .arrow{color:var(--green);font-family:var(--mono);}
+  .job p{font-size:15.5px;color:var(--dim);}
+  .job p b{color:var(--ink);font-weight:600;}
 
-  /* Formula */
-  .formula{margin:26px 0;padding:22px 24px;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;
-    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:16.5px;text-align:center;color:#d7dce6;overflow-x:auto;}
-  .formula sub,.formula sup{font-size:11px;}
-  .formula .hl{color:var(--accent);font-weight:700;}
-  .fnote{font-size:13.5px;color:var(--muted);text-align:center;margin-top:-14px;margin-bottom:8px;}
+  /* science */
+  .science{background:var(--paper2);}
+  .science .links{margin-top:30px;display:flex;gap:14px;flex-wrap:wrap;}
+  .science .doc{border:1px solid var(--line);border-radius:10px;padding:14px 20px;font-family:var(--mono);
+    font-size:13.5px;color:var(--ink);background:var(--paper);transition:border-color .15s;}
+  .science .doc:hover{border-color:var(--green);text-decoration:none;}
+  .science .doc span{color:var(--faint);display:block;font-size:11.5px;margin-top:4px;}
 
-  /* Verb table */
-  .verbs{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  @media(max-width:640px){.verbs{grid-template-columns:1fr;}}
-  .verb{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;}
-  .verb code{font-size:15px;font-weight:700;}
-  .verb.read code{color:var(--read);}
-  .verb.act code{color:var(--act);}
-  .verb p{font-size:14.5px;color:var(--muted);margin-top:8px;line-height:1.55;}
+  /* final CTA */
+  .final{text-align:center;border-bottom:none;padding:100px 0;}
+  .final h2{font-size:clamp(34px,4.6vw,52px);}
+  .final .signup{margin:34px auto 0;}
+  .final .signup form{justify-content:center;}
 
-  /* Repo cards */
-  .repos{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px;}
-  @media(max-width:640px){.repos{grid-template-columns:1fr;}}
-  .repo{display:block;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;transition:border-color .12s ease;}
-  .repo:hover{text-decoration:none;border-color:#39435a;}
-  .repo b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:15px;color:var(--ink);}
-  .repo span{display:block;font-size:14px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  footer{padding:46px 0 70px;color:var(--faint);font-size:14px;border-top:1px solid var(--line);}
+  footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:baseline;}
+  footer .who b{color:var(--dim);font-weight:600;}
+  footer .links{display:flex;gap:18px;flex-wrap:wrap;}
+  footer a{color:var(--dim);}
 
-  /* Honest list */
-  ul.open{margin-top:24px;list-style:none;max-width:46em;}
-  ul.open li{position:relative;padding:10px 0 10px 28px;color:#b9c0cd;border-bottom:1px dashed var(--rule);font-size:15.5px;}
-  ul.open li::before{content:"→";position:absolute;left:2px;color:var(--accent);}
-  ul.open li b{color:var(--ink);}
-
-  /* Footer */
-  footer{padding:56px 0 72px;color:var(--muted);font-size:15px;}
-  footer .name{color:var(--ink);font-weight:700;font-size:17px;}
-  footer .links{margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;}
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
 </style>
 </head>
 <body>
 
 <header class="hero">
-  <div class="wrap">
-    <div class="kicker">acc4 · a working kernel, not a roadmap</div>
-    <h1>Accreted Intelligence<br><span class="dim">AI that remembers what worked.</span></h1>
-    <p class="lede">
-      A model that scores 90% on a benchmark today scores 90% tomorrow. It doesn't learn from deployment,
-      doesn't track which outputs led to good outcomes, doesn't remember last week's mistake.
-      It generates intelligence and throws it away. <b>Accreted intelligence</b> is the bet that this is
-      temporary: move learning out of model weights and into <b>scored external state</b> — where judgment
-      compounds from contact with reality, and the model is a <b>replaceable processor</b>.
-    </p>
-    <div class="cta">
-      <a class="btn primary" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">Read the whitepaper</a>
-      <a class="btn" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">Architecture overview</a>
-      <a class="btn" href="https://github.com/maxbaluev/accreted-intelligence">GitHub</a>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="kicker">AccInt<span class="sep">·</span>autonomous operator<span class="sep">·</span>pre-product, real</div>
+      <h1>An <em>operator</em>,<br>not a copilot.</h1>
+      <p class="lede">
+        AccInt works inside <b>your own accounts</b> — outreach, research, follow-ups, the
+        recurring ops you never get to — <b>end to end</b>. Every action is verified against
+        reality. Every outcome is remembered. <b>It gets better every week it works for you.</b>
+      </p>
+      <div class="signup">
+        <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
+          <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
+          <input type="hidden" name="_subject" value="AccInt early access">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
+          <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
+          <button type="submit">Get early access</button>
+        </form>
+        <div class="note">no spam · no calls · first invites go in order</div>
+        <div class="ok" id="subok">✓ You're on the list. You'll hear from me when your invite is ready.</div>
+      </div>
     </div>
-    <div class="byline">
-      Built end-to-end, solo, by <b>Max Baluev</b> — ex-CTO/founder; deep in agents, LLM systems, and
-      retrieval/memory. Open to <b>Staff / Principal / Founding AI engineer</b> roles — remote, GMT−3,
-      full US/EU overlap. <a href="mailto:maxbaluev@outlook.com">maxbaluev@outlook.com</a>
+
+    <div class="ledger" aria-label="Example operating session">
+      <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER</span><span>operator: accint</span></div>
+      <div class="row" style="--d:.25s"><span class="t">09:14</span><span class="verb">find</span><span class="what"><b>27 prospects</b> matched your target — pulled from your network first</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:.65s"><span class="t">09:21</span><span class="verb">rank</span><span class="what">top 8 by fit + warm-intro paths</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:1.05s"><span class="t">09:26</span><span class="verb">draft</span><span class="what">8 first lines — one per person, none templated</span><span class="stamp hold">HELD → your OK</span></div>
+      <div class="row" style="--d:1.45s"><span class="t">09:31</span><span class="verb">send</span><span class="what"><b>8/8 delivered</b> — each confirmed on the live page, not assumed</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row" style="--d:1.85s"><span class="t">06:02</span><span class="verb">learn</span><span class="what">2 replies → what worked just became memory</span><span class="stamp ok">CREDITED</span></div>
+      <div class="row refused" style="--d:2.25s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 strangers" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
+      <div class="ledger-foot">abridged from real operating sessions · drafts never leave without your word</div>
     </div>
   </div>
 </header>
 
-<section>
+<div class="honest">
   <div class="wrap">
-    <div class="tag">The problem</div>
-    <h2>Recall is not judgment.</h2>
-    <p class="body">
-      The central unsolved problem is not generating outputs — it is accumulating <b>reliable judgment</b>
-      across time. The field treats it as a memory problem and answers with RAG, vector stores, and
-      fine-tuning. But recall returns previously seen information; judgment knows <b>what worked</b> —
-      that an approach succeeded here, failed there, holds in this context but not that one.
-      In reinforcement learning this is the <b>credit assignment problem</b>, and deployed systems don't solve it:
-      they emit outputs, observe nothing about consequences, and reset.
-    </p>
-    <blockquote>
-      Recall is the easy part. Scoring is harder. <b>Binding scoring to action</b> is the part everyone
-      skips — and it is the part that decides whether intelligence compounds.
-    </blockquote>
+    <div class="mark">”</div>
+    <p><b>Honest status:</b> AccInt is pre-product. But it is not a mockup — the system runs its
+    builder's own operation today: it finds the right people, writes the first lines, sends from
+    his real accounts, verifies every send on the live page, and compounds what worked into memory.
+    <b>Its first customer is the person who built it.</b> Early access opens in small batches.</p>
   </div>
-</section>
+</div>
 
 <section>
   <div class="wrap">
-    <div class="tag">The thesis</div>
-    <h2>The intelligence is in the genome, not the organism.</h2>
-    <p class="body">
-      DNA does not think or plan. It is a scored record of what survived contact with reality. Organisms
-      are temporary processors: they express the genome, meet the environment, and either propagate the
-      successful patterns or are eliminated. Most AI inverts this — the model is treated as the intelligence,
-      state as supporting material. Accreted intelligence flips it back.
-    </p>
-    <div class="grid">
-      <div class="card"><h3><span class="n">1</span>State comes first</h3>
-        <p>The scored state determines what the system knows, avoids, and tries next — not the model's momentary disposition.</p></div>
-      <div class="card"><h3><span class="n">2</span>Reality does the scoring</h3>
-        <p>Memory rises or falls on observed outcomes — not designer guesses, not the system's own confidence.</p></div>
-      <div class="card"><h3><span class="n">3</span>The processor is replaceable</h3>
-        <p>Intelligence lives in the substrate, so the reasoning model can be swapped without losing what was learned.</p></div>
-      <div class="card"><h3><span class="n">4</span>Failure is scored knowledge</h3>
-        <p>Bad outcomes debit the units that aligned and stay retrievable as warnings. A system that forgets its mistakes becomes overconfident fast.</p></div>
+    <div class="tag">how it works</div>
+    <h2>You set the goal.<br>It does the <em>work</em>.</h2>
+    <div class="steps">
+      <div class="step reveal"><div class="num">1</div>
+        <h3>Say it in plain words</h3>
+        <p>"Find me 20 leads like our last three customers and start conversations." No prompts to
+        engineer, no workflows to build — <b>the goal is the interface</b>.</p></div>
+      <div class="step reveal"><div class="num">2</div>
+        <h3>It operates your accounts</h3>
+        <p>AccInt drives a real browser in <b>your</b> LinkedIn, email, CRM — the way a person would.
+        No API keys to beg for, no integrations to wait on. Anything that leaves your machine
+        <b>waits for your OK first</b>.</p></div>
+      <div class="step reveal"><div class="num">3</div>
+        <h3>It checks reality, then remembers</h3>
+        <p>A send isn't done until it's <b>confirmed on the live page</b>. Replies, results, and
+        failures flow back into one memory — so next week's work starts <b>smarter than this week's</b>.</p></div>
+    </div>
+
+    <div class="law">
+      <div class="rule reveal"><h4>RECEIPTS, NOT VIBES</h4>
+        <p>Every claim of "done" needs evidence from the world. The system's own opinion of itself
+        is deliberately distrusted.</p></div>
+      <div class="rule reveal"><h4>YOUR CONSENT IS STRUCTURAL</h4>
+        <p>Sending, posting, paying, deleting — hard-gated behind your word. Not a setting.
+        A law in the kernel.</p></div>
+      <div class="rule reveal"><h4>YOUR DATA STAYS YOURS</h4>
+        <p>One local memory on your machine. No training on your accounts, no data leaving
+        for someone else's model.</p></div>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="tag">The system — acc4</div>
-    <h2>Two verbs. One memory. Four links.</h2>
-    <p class="body">
-      <b>acc4</b> is a working kernel for the thesis: a <b>Recursive Language Model</b> over a
-      <b>late-interaction scored-token memory</b>. The entire reasoner interface is two verbs, and every
-      non-trivial call closes four links — owner intent, the cited memory that shaped the work, the act,
-      and the outcome that closes it. <b>Citation is the credit edge, not decoration</b>: the memory that
-      gets cited is the memory that earns or loses score when the outcome lands.
-    </p>
-
-    <div class="loop">
-      <div class="node owner">Owner intent<small>words · constraints · consent</small></div>
-      <div class="arrow">→</div>
-      <div class="node read">retrieve<small>MaxSim over scored tokens</small></div>
-      <div class="arrow">→</div>
-      <div class="node act">act<small>solve · exec · register</small></div>
-      <div class="arrow">→</div>
-      <div class="node score">outcome<small>real-world verdict</small></div>
+    <div class="tag">what it takes off your plate</div>
+    <h2>The work that eats your <em>weeks</em>.</h2>
+    <p class="body">Built first for founders and operators whose growth depends on conversations
+    they don't have time to start:</p>
+    <div class="jobs">
+      <div class="job reveal"><span class="arrow">→</span><p><b>Outreach that compounds</b> — find, rank, personalize, send, follow up; learn from every reply.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Lead research</b> — who's worth your time, with the warm path to reach them.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Follow-ups that never slip</b> — the second and third touches where deals actually live.</p></div>
+      <div class="job reveal"><span class="arrow">→</span><p><b>Recurring ops</b> — the weekly research, triage, and upkeep a person shouldn't burn hours on.</p></div>
     </div>
-    <div class="loopback">↺ <b>credit flows back</b> to the exact tokens that aligned — the loop writes and scores automatically</div>
+    <p class="body" style="margin-top:34px">Early access shapes what it learns to do for <b>your</b>
+    business — the memory makes it yours, week by week.</p>
+  </div>
+</section>
 
-    <div class="verbs">
-      <div class="verb read"><code>acc4_retrieve(query | image)</code>
-        <p>The only read. Peeks the scored memory by MaxSim — natively multimodal: text and images encode to the same
-        late-interaction tokens, so a text memo can answer an image query (ColPali-style).</p></div>
-      <div class="verb act"><code>acc4_act(runtime, input)</code>
-        <p>Does anything. <code>solve</code> recurses on a sub-goal — the tree of recursive solves <i>is</i> the
-        decomposition; no planner, no task graph. <code>exec</code> runs sandboxed code that can itself recurse over
-        the memory. <code>register</code> stores reusable code as scored tokens — no privileged lane.</p></div>
+<section class="science">
+  <div class="wrap">
+    <div class="tag">for the technically curious</div>
+    <h2>The science is <em>public</em>.</h2>
+    <p class="body">AccInt is built on <b>accreted intelligence</b> — an architecture where learning
+    lives in scored external memory, judgment compounds from real outcomes, and the model is a
+    replaceable processor. The whitepaper and architecture notes live in this repo:</p>
+    <div class="links">
+      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper.md<span>the thesis, the math, what's proven vs. open</span></a>
+      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">architecture-overview.md<span>the skimmable tour</span></a>
+      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence">github repo<span>+ open-source building blocks</span></a>
     </div>
   </div>
 </section>
 
-<section>
+<section class="final">
   <div class="wrap">
-    <div class="tag">The memory</div>
-    <h2>The token is the atom.</h2>
-    <p class="body">
-      Every entity — a knowledge memo, a runtime, an owner fact, an image — is stored as an ordered set of
-      per-token vectors. No lossy pooled embedding; retrieval ranks by <b>MaxSim</b> (ColBERT), and the aligned
-      token pairs are themselves the citation. That much is published commodity. What acc4 adds is a
-      <b>learned-evidence reweighting</b>: each document token carries a Bayesian Beta posterior summarizing how
-      its past alignments fared, and tokens reality has repeatedly confirmed pull harder than fresh ones.
-    </p>
-    <div class="formula">
-      score(q, d) = Σ<sub>i</sub> max<sub>j</sub> [ sim(q<sub>i</sub>, d<sub>j</sub>) · <span class="hl">g(π<sub>j</sub>)</span> ]
-    </div>
-    <p class="fnote">π<sub>j</sub> — token j's outcome posterior · the exact form of g and its calibration are proprietary</p>
-    <p class="body">
-      When a commitment closes, credit does not smear across a whole document — it flows to the specific tokens
-      that aligned during retrieval. The update is <b>surprise-gated</b> (confirming outcomes move a token little,
-      surprising ones move it more) and <b>reality-gated</b>: an outcome validated by reality — a real reply, a
-      passing test, a world result — carries full weight, while a <b>self-graded outcome credits only at a
-      deliberately weak prior</b>. The system structurally refuses to compound from its own belief.
-    </p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="tag">In the open</div>
-    <h2>The engine is private. The primitives are public.</h2>
-    <p class="body">Each building block ships on its own:</p>
-    <div class="repos">
-      <a class="repo" href="https://github.com/maxbaluev/maxsim-rs"><b>maxsim-rs</b>
-        <span>ColBERT-style late-interaction MaxSim scoring — zero-dependency Rust.</span></a>
-      <a class="repo" href="https://github.com/maxbaluev/colpali-retrieve"><b>colpali-retrieve</b>
-        <span>Multimodal late interaction: text queries over document-page images.</span></a>
-      <a class="repo" href="https://github.com/maxbaluev/scored-rerank"><b>scored-rerank</b>
-        <span>Ranking that learns from outcomes — Beta posteriors + Thompson sampling.</span></a>
-      <a class="repo" href="https://github.com/maxbaluev/mcp-retrieve"><b>mcp-retrieve</b>
-        <span>Late-interaction document retrieval as an MCP server.</span></a>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="tag">Honest status</div>
-    <h2>What's proven, what's open.</h2>
-    <p class="body">
-      acc4 is a working single-host research kernel — a running system with live, scored mechanisms. It trains
-      nothing; it is a memory-and-loop kernel around replaceable models. Two different model families read and
-      extend the same substrate through one interface today, and neither owns the judgment. The claims are
-      deliberately bounded, and the largest ones remain open:
-    </p>
-    <ul class="open">
-      <li><b>Substrate-on vs. off lift</b> — the single most important missing experiment: same tasks, scored substrate enabled vs. disabled, measure the delta. Falsifiable; not yet measured.</li>
-      <li><b>Scale</b> — exact MaxSim over per-token multivectors grows with the substrate; the right pruning regime without losing unit-level credit is open.</li>
-      <li><b>Credit under concurrency</b> — attributing outcomes to the right memory when many workers act in parallel is harder than in a serial loop.</li>
-      <li><b>Dependable replay</b> — turning a successful trace into a runtime that replays reliably, without re-reasoning each time.</li>
-      <li><b>The authority boundary</b> — the line between "may draft" and "may send" must stay hard as the system touches live accounts.</li>
-    </ul>
-    <blockquote>
-      A system that compounds judgment must invest as heavily in governance, credit honesty, and boundary
-      enforcement as in scoring and accumulation.
-    </blockquote>
-
-    <div class="subscribe">
-      <h3>Want the result?</h3>
-      <p>The substrate-on/off experiment is the one measurement that settles the thesis. Leave your email
-         and you'll get the numbers when they land — that's all, no newsletter.</p>
-      <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
+    <div class="tag" style="text-align:center">early access</div>
+    <h2>Stop renting your hours<br>to <em>repetitive</em> work.</h2>
+    <div class="signup">
+      <form id="subform2" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
         <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
-        <input type="hidden" name="_subject" value="New experiment-results subscriber">
+        <input type="hidden" name="_subject" value="AccInt early access">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
-        <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
-        <button type="submit">Send me the results</button>
+        <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
+        <button type="submit">Get early access</button>
       </form>
-      <div class="ok" id="subok">✓ You're on the list — you'll get the results when they land.</div>
+      <div class="note">no spam · no calls · first invites go in order</div>
+      <div class="ok" id="subok2">✓ You're on the list. You'll hear from me when your invite is ready.</div>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <div class="name">Max Baluev</div>
-    <div>Founder-engineer — autonomous agents, late-interaction retrieval, agent memory.</div>
+    <div class="who">Built by <b>Max Baluev</b> — founder-engineer; agents, retrieval, agent memory.</div>
     <div class="links">
-      <a href="mailto:maxbaluev@outlook.com">maxbaluev@outlook.com</a>
-      <a href="https://t.me/maxbaluev">Telegram</a>
-      <a href="https://github.com/maxbaluev">GitHub</a>
-      <a href="https://www.linkedin.com/in/maxbaluev">LinkedIn</a>
+      <a href="mailto:maxbaluev@outlook.com">email</a>
+      <a href="https://t.me/maxbaluev">telegram</a>
+      <a href="https://github.com/maxbaluev">github</a>
+      <a href="https://www.linkedin.com/in/maxbaluev">linkedin</a>
     </div>
   </div>
 </footer>
 
 <script>
 (function(){
-  var f=document.getElementById('subform'),ok=document.getElementById('subok');
-  if(new URLSearchParams(location.search).get('subscribed')==='1'){f.style.display='none';ok.style.display='block';}
-  f.addEventListener('submit',function(e){
-    e.preventDefault();
-    var btn=f.querySelector('button');btn.disabled=true;btn.textContent='Sending…';
-    fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
-      method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-      body:JSON.stringify({email:f.email.value,_subject:'New experiment-results subscriber',_honey:f._honey.value})
-    }).then(function(r){return r.json();}).then(function(){
-      f.style.display='none';ok.style.display='block';
-    }).catch(function(){f.submit();});
-  });
+  function wire(formId, okId){
+    var f=document.getElementById(formId),ok=document.getElementById(okId);
+    if(!f) return;
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      var btn=f.querySelector('button');btn.disabled=true;btn.textContent='Sending…';
+      fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
+        method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify({email:f.email.value,_subject:'AccInt early access',_honey:f._honey.value})
+      }).then(function(r){return r.json();}).then(function(){
+        f.style.display='none';ok.style.display='block';
+      }).catch(function(){f.submit();});
+    });
+    if(new URLSearchParams(location.search).get('subscribed')==='1'){f.style.display='none';ok.style.display='block';}
+  }
+  wire('subform','subok');wire('subform2','subok2');
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
 })();
 </script>
 </body>
