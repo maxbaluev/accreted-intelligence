@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AccInt — an operator, not a copilot</title>
-<meta name="description" content="AccInt is an operator for the work that repeats: it runs your pipeline week after week, proves every action with receipts, and gets smarter about your business every cycle. Early access.">
+<meta name="description" content="AccInt is an operator for the work that repeats: it runs your pipeline week after week, proves every action with a receipt, and gets smarter about your business every cycle. When anyone asks what happened, the answer is already written. Early access.">
 <meta property="og:title" content="AccInt — an operator, not a copilot">
-<meta property="og:description" content="An operator for the work that repeats: it runs your pipeline week after week, proves every action with receipts, and gets smarter about your business every cycle. Running today, in production. Early access.">
+<meta property="og:description" content="An operator for the work that repeats: every action a receipt, every approval named and timestamped, every lesson credited to memory — and it gets smarter about your business every cycle. Early access.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://maxbaluev.github.io/accreted-intelligence/">
 <meta property="og:image" content="https://maxbaluev.github.io/accreted-intelligence/og.png">
@@ -153,7 +153,8 @@ border:1px solid var(--line);border-radius:6px;padding:5px 12px;cursor:pointer;t
 .ltab:hover{color:var(--ink);border-color:var(--line2);}
 .ltab[aria-pressed=true]{color:var(--green);border-color:rgba(67,217,126,.45);background:var(--green-soft);}
 #ledrows{min-height:300px;}
-@media(max-width:520px){#ledrows{min-height:340px;}}
+#ledrows .row{grid-template-columns:76px 64px 1fr auto;}
+@media(max-width:520px){#ledrows{min-height:340px;}#ledrows .row{grid-template-columns:62px 50px 1fr auto;}}
 .row{display:grid;grid-template-columns:52px 64px 1fr auto;gap:10px;align-items:baseline;
 padding:10.5px 22px;font-family:var(--mono);font-size:13px;opacity:0;transform:translateY(8px);
 animation:rise .5s forwards;animation-delay:var(--d,0s);transition:background .15s;}
@@ -277,6 +278,26 @@ font-size:10.5px;letter-spacing:.2em;color:var(--green);text-transform:uppercase
 .nine::before,.nine::after{content:"";height:1px;flex:1;background:var(--line2);}
 }
 
+/* answerable — the audit plane */
+.qchips{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px;}
+.qchip{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;color:var(--ink);
+border:1px solid var(--line2);border-radius:7px;padding:8px 14px;background:rgba(15,22,17,.6);}
+.qchip i{font-style:normal;color:var(--green);}
+.audit{margin-top:26px;border:1px solid var(--line2);border-radius:16px;background:var(--paper2);padding:20px 0 8px;}
+.audit-q{margin:0 22px 16px;max-width:560px;padding:12px 16px;font-family:var(--mono);font-size:13px;
+color:var(--ink);line-height:1.6;border:1px solid var(--line2);border-radius:12px 12px 12px 3px;
+background:rgba(255,255,255,.03);}
+.audit-q .who{display:block;font-size:10px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;margin-bottom:6px;}
+.audit .row{animation:none;opacity:1;transform:none;}
+.row.human{background:rgba(255,210,125,.07);box-shadow:inset 2px 0 0 var(--amber);}
+.row.human .verb{color:var(--amber);}
+.row.human .what{color:var(--ink);}
+.audit-f{margin-top:8px;padding:12px 22px 8px;border-top:1px solid var(--line);
+font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em;line-height:1.7;}
+.tagline{margin-top:48px;font-family:var(--serif);font-size:clamp(30px,4vw,44px);line-height:1.12;letter-spacing:-.008em;max-width:17em;}
+.tagline em{font-style:italic;color:var(--green);}
+.specs.ent{margin-top:34px;}
+
 /* science */
 .science{background:linear-gradient(180deg,var(--paper2),var(--paper));}
 .science .links{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:880px;}
@@ -335,6 +356,8 @@ footer a:hover{color:var(--green);}
 .run-f{margin:auto 14px 0;}
 .knows{padding:12px 14px 14px;}
 .nine{padding:4px 14px;}
+.audit-q{margin:0 14px 14px;}
+.audit-f{padding-left:14px;padding-right:14px;}
 }
 @media (prefers-reduced-motion: reduce){
 .row,.h-anim{animation:none;opacity:1;transform:none;}
@@ -408,7 +431,7 @@ html{scroll-behavior:auto;}
       <div class="row" style="--d:1.25s"><span class="t">09:26</span><span class="verb">draft</span><span class="what">8 first lines — one per person, none templated</span><span class="stamp hold">HELD → your OK</span></div>
       <div class="row" style="--d:1.65s"><span class="t">09:31</span><span class="verb">send</span><span class="what"><b>8/8 delivered</b> — each confirmed on the live page, not assumed</span><span class="stamp ok">VERIFIED</span></div>
       <div class="row" style="--d:2.05s"><span class="t">09:42</span><span class="verb">run</span><span class="what">wrote a small script — all 8 enriched into <b>your tracker</b></span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:2.45s"><span class="t">06:02</span><span class="verb">learn</span><span class="what">2 replies → what worked just became memory</span><span class="stamp ok">CREDITED</span></div>
+      <div class="row" style="--d:2.45s"><span class="t">+1d 06:02</span><span class="verb">learn</span><span class="what">2 replies → what worked just became memory</span><span class="stamp ok">CREDITED</span></div>
       <div class="row refused" style="--d:2.85s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 strangers" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
       </div>
       <div class="ledger-type"><span id="ledtype">next: 3 follow-ups due this morning</span><span class="car"></span></div>
@@ -579,6 +602,40 @@ html{scroll-behavior:auto;}
 </div>
 </section>
 
+<section id="answerable">
+  <div class="wrap">
+    <div class="tag">for the people accountable</div>
+    <h2>When management asks <em>what happened</em> — the answer is already written.</h2>
+    <p class="body">AI at work today is unaccountable. Actions leave no receipts, approvals live in
+    someone's DM history, and the lessons evaporate with the session — so pilots stall in review, or
+    agents run as shadow ops nobody can audit. <b>AccInt is built the other way around:</b> every
+    action a receipt, every approval a held decision with a name and a timestamp, every lesson
+    credited to memory.</p>
+    <div class="qchips reveal">
+      <span class="qchip">WHAT DID IT DO <i>→ receipts</i></span>
+      <span class="qchip">WHO SAID YES <i>→ held decisions, named + timestamped</i></span>
+      <span class="qchip">WHAT DID WE LEARN <i>→ credited memory</i></span>
+    </div>
+    <div class="audit reveal" role="img" aria-label="An answer assembled from the audit ledger. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited to memory. Every row was written when it happened; nothing reconstructed from recollection.">
+      <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
+      <div class="row"><span class="t">Mar 9</span><span class="verb">find</span><span class="what"><b>Meridian back in play</b> — their CFO wrote first: “budget opened early”</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t">Mar 11</span><span class="verb">draft</span><span class="what">8 drafts — Meridian’s reply + 7 others, queued behind your word</span><span class="stamp hold">HELD → your OK</span></div>
+      <div class="row human"><span class="t">Mar 12</span><span class="verb">■ you</span><span class="what">09:31 — <b>approved 8 drafts</b> — your name on the decision</span><span class="stamp hold">DECIDED</span></div>
+      <div class="row"><span class="t">Mar 12</span><span class="verb">send</span><span class="what"><b>8/8 delivered</b> — that’s email one; the Mar 19 follow-up you approved is email two</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t">Mar 19</span><span class="verb">learn</span><span class="what">his “budget opened early” → credited to memory — Q3 rule updated, not broken</span><span class="stamp ok">CREDITED</span></div>
+      <div class="audit-f">answer assembled from the ledger · every row was written when it happened — nothing reconstructed from recollection.</div>
+    </div>
+    <p class="tagline reveal">Nothing happens without a <em>trace</em>.<br>Nothing decided is <em>forgotten</em>.</p>
+    <div class="specs ent reveal">
+      <span>memory: local, yours</span>
+      <span>signed grants &amp; consent floors</span>
+      <span>append-only audit ledger</span>
+      <span>no training on your data</span>
+      <span>agent-agnostic</span>
+    </div>
+  </div>
+</section>
+
 <section class="science" id="science">
   <div class="wrap">
     <div class="tag">for the technically curious</div>
@@ -608,11 +665,12 @@ html{scroll-behavior:auto;}
       <div class="stage next reveal" style="--rd:.12s"><span class="st">NEXT</span>
         <h3>The team brain</h3>
         <p><b>One memory, many operators.</b> Parallel agents already compound into one substrate
-        today — per-person authority and consent turn it into a company's shared judgment.</p></div>
+        today — per-person authority and consent floors turn it into a company's shared judgment,
+        with the same audit plane over every operator.</p></div>
       <div class="stage later reveal" style="--rd:.24s"><span class="st">RESEARCH</span>
         <h3>Judgment that travels</h3>
-        <p>Scored knowledge is portable: peers exchange it, and each side <b>re-verifies against its
-        own reality</b>. Organizations that learn from each other — without sharing a model.</p></div>
+        <p>Scored judgment is portable state: partner orgs exchange it, and each side <b>re-verifies
+        against its own reality</b> before trusting it. Learning travels; data and models stay home.</p></div>
     </div>
   </div>
 </section>
@@ -695,7 +753,7 @@ html{scroll-behavior:auto;}
       ['09:26','draft','8 first lines — one per person, none templated','hold','HELD → your OK'],
       ['09:31','send','<b>8/8 delivered</b> — each confirmed on the live page, not assumed','ok','VERIFIED'],
       ['09:42','run','wrote a small script — all 8 enriched into <b>your tracker</b>','ok','VERIFIED'],
-      ['06:02','learn','2 replies → what worked just became memory','ok','CREDITED'],
+      ['+1d 06:02','learn','2 replies → what worked just became memory','ok','CREDITED'],
       ['—','refuse','"blast 400 strangers" — consent floor, never crossed','no','REFUSED',1]]},
     recruiting:{next:'next: 2 candidates to re-engage before Friday',rows:[
       ['08:50','find','<b>41 candidates</b> matched the brief — your ATS first, then LinkedIn','ok','VERIFIED'],
@@ -703,7 +761,7 @@ html{scroll-behavior:auto;}
       ['09:07','draft','9 personal first-touches — none templated','hold','HELD → your OK'],
       ['09:15','send','<b>9/9 sent</b> — each confirmed on the live page','ok','VERIFIED'],
       ['09:20','keep','ATS updated: stage, notes, next step per candidate','ok','VERIFIED'],
-      ['06:30','learn','3 replies → the sourcing angle that worked is memory now','ok','CREDITED'],
+      ['+1d 06:30','learn','3 replies → the sourcing angle that worked is memory now','ok','CREDITED'],
       ['—','refuse','"blast 400 InMails" — consent floor, never crossed','no','REFUSED',1]]},
     clientops:{next:'next: Monday briefs scheduled · 5 clients',rows:[
       ['06:05','run','into <b>5 client workspaces</b> — boards, CRM, portals, inbox','ok','VERIFIED'],
@@ -711,7 +769,7 @@ html{scroll-behavior:auto;}
       ['06:52','draft','5 Monday briefs — risks first, every claim linked','hold','HELD → your OK'],
       ['07:14','keep','trackers updated from <b>what actually happened</b> — 22 rows','ok','VERIFIED'],
       ['07:25','file','briefs on your desk before coffee','ok','VERIFIED'],
-      ['06:15','learn','your edits → next Monday reads more like you','ok','CREDITED'],
+      ['+1d 06:15','learn','your edits → next Monday reads more like you','ok','CREDITED'],
       ['—','refuse','"pad the brief to look busy" — receipts only, no filler','no','REFUSED',1]]},
     research:{next:'next: watching 2 competitors for pricing moves',rows:[
       ['06:00','watch','<b>14 sources</b> scanned overnight — your market, competitors, key hires','ok','VERIFIED'],
@@ -719,7 +777,7 @@ html{scroll-behavior:auto;}
       ['06:31','run','compiled a sourced brief — <b>every claim linked to evidence</b>','ok','VERIFIED'],
       ['06:40','file','brief on your desk; watch-list + tracker updated','ok','VERIFIED'],
       ['09:02','draft','1 reach-out the brief suggests — your call','hold','HELD → your OK'],
-      ['06:00','learn','your feedback → next week’s brief gets sharper','ok','CREDITED'],
+      ['+1d 06:00','learn','your feedback → next week’s brief gets sharper','ok','CREDITED'],
       ['—','refuse','"pad it to look thorough" — receipts only, no filler','no','REFUSED',1]]}
   };
   var tabs=document.getElementById('ledtabs'),rowsEl=document.getElementById('ledrows'),typeEl=document.getElementById('ledtype');
