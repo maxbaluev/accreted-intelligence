@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accreted Intelligence — AI that remembers what worked</title>
+<meta name="description" content="Accreted intelligence: an architecture that moves learning out of model weights and into scored external state. acc4 is a working kernel — a Recursive Language Model over late-interaction scored-token memory.">
+<meta property="og:title" content="Accreted Intelligence">
+<meta property="og:description" content="Most AI forgets. This is the architecture for AI that remembers what worked — and gets wiser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://maxbaluev.github.io/accreted-intelligence/">
+<style>
+  :root{
+    --bg:#0b0e14;
+    --bg2:#11151f;
+    --ink:#e6e9ef;
+    --muted:#8b93a3;
+    --rule:#1e2433;
+    --owner:#fbbf24;   /* owner intent */
+    --read:#38bdf8;    /* retrieve */
+    --act:#a78bfa;     /* act */
+    --score:#34d399;   /* outcome */
+    --accent:var(--owner);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:ui-sans-serif,system-ui,"Helvetica Neue",Arial,sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--read);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px;}
+  code,.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+
+  /* Hero */
+  .hero{padding:96px 0 72px;border-bottom:1px solid var(--rule);
+    background:
+      radial-gradient(1100px 480px at 18% -8%, rgba(251,191,36,.07), transparent 60%),
+      radial-gradient(900px 420px at 85% -12%, rgba(56,189,248,.07), transparent 60%);}
+  .kicker{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+  h1{font-size:clamp(38px,6vw,58px);line-height:1.04;letter-spacing:-.015em;font-weight:800;}
+  h1 .dim{color:var(--muted);font-weight:700;}
+  .lede{margin-top:26px;font-size:clamp(18px,2.4vw,21px);color:#c2c8d4;max-width:46em;}
+  .lede b{color:var(--ink);}
+  .cta{margin-top:36px;display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:12px 22px;border-radius:10px;font-weight:600;font-size:15.5px;
+    border:1px solid var(--rule);color:var(--ink);background:var(--bg2);transition:transform .12s ease,border-color .12s ease;}
+  .btn:hover{text-decoration:none;transform:translateY(-1px);border-color:#39435a;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1304;}
+  .btn.primary:hover{filter:brightness(1.06);}
+
+  /* Sections */
+  section{padding:72px 0;border-bottom:1px solid var(--rule);}
+  .tag{font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:14px;}
+  h2{font-size:clamp(26px,3.6vw,34px);letter-spacing:-.01em;line-height:1.15;margin-bottom:18px;}
+  p.body{color:#b9c0cd;max-width:46em;}
+  p.body+p.body{margin-top:14px;}
+  p.body b{color:var(--ink);}
+
+  blockquote{margin:28px 0 0;padding:18px 22px;border-left:3px solid var(--accent);background:var(--bg2);
+    border-radius:0 10px 10px 0;color:#c9cfdb;font-size:18px;}
+
+  /* Property cards */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;}
+  .card h3{font-size:16.5px;margin-bottom:8px;}
+  .card p{font-size:15px;color:var(--muted);line-height:1.55;}
+  .card .n{color:var(--accent);font-weight:800;margin-right:8px;}
+
+  /* Loop diagram */
+  .loop{display:flex;align-items:stretch;gap:10px;margin:34px 0 10px;flex-wrap:wrap;}
+  .node{flex:1 1 150px;text-align:center;padding:16px 10px;border-radius:12px;font-weight:700;font-size:15px;
+    border:1px solid var(--rule);background:var(--bg2);}
+  .node small{display:block;font-weight:500;font-size:12.5px;margin-top:5px;color:var(--muted);}
+  .node.owner{border-color:rgba(251,191,36,.45);color:var(--owner);}
+  .node.read{border-color:rgba(56,189,248,.45);color:var(--read);}
+  .node.act{border-color:rgba(167,139,250,.45);color:var(--act);}
+  .node.score{border-color:rgba(52,211,153,.45);color:var(--score);}
+  .arrow{align-self:center;color:var(--muted);font-size:20px;}
+  .loopback{margin-top:6px;text-align:center;color:var(--muted);font-size:13.5px;}
+  .loopback b{color:var(--score);}
+
+  /* Formula */
+  .formula{margin:26px 0;padding:22px 24px;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:16.5px;text-align:center;color:#d7dce6;overflow-x:auto;}
+  .formula sub,.formula sup{font-size:11px;}
+  .formula .hl{color:var(--accent);font-weight:700;}
+  .fnote{font-size:13.5px;color:var(--muted);text-align:center;margin-top:-14px;margin-bottom:8px;}
+
+  /* Verb table */
+  .verbs{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.verbs{grid-template-columns:1fr;}}
+  .verb{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:20px 22px;}
+  .verb code{font-size:15px;font-weight:700;}
+  .verb.read code{color:var(--read);}
+  .verb.act code{color:var(--act);}
+  .verb p{font-size:14.5px;color:var(--muted);margin-top:8px;line-height:1.55;}
+
+  /* Repo cards */
+  .repos{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px;}
+  @media(max-width:640px){.repos{grid-template-columns:1fr;}}
+  .repo{display:block;background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;transition:border-color .12s ease;}
+  .repo:hover{text-decoration:none;border-color:#39435a;}
+  .repo b{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:15px;color:var(--ink);}
+  .repo span{display:block;font-size:14px;color:var(--muted);margin-top:6px;line-height:1.5;}
+
+  /* Honest list */
+  ul.open{margin-top:24px;list-style:none;max-width:46em;}
+  ul.open li{position:relative;padding:10px 0 10px 28px;color:#b9c0cd;border-bottom:1px dashed var(--rule);font-size:15.5px;}
+  ul.open li::before{content:"→";position:absolute;left:2px;color:var(--accent);}
+  ul.open li b{color:var(--ink);}
+
+  /* Footer */
+  footer{padding:56px 0 72px;color:var(--muted);font-size:15px;}
+  footer .name{color:var(--ink);font-weight:700;font-size:17px;}
+  footer .links{margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">acc4 · a working kernel, not a roadmap</div>
+    <h1>Accreted Intelligence<br><span class="dim">AI that remembers what worked.</span></h1>
+    <p class="lede">
+      A model that scores 90% on a benchmark today scores 90% tomorrow. It doesn't learn from deployment,
+      doesn't track which outputs led to good outcomes, doesn't remember last week's mistake.
+      It generates intelligence and throws it away. <b>Accreted intelligence</b> is the bet that this is
+      temporary: move learning out of model weights and into <b>scored external state</b> — where judgment
+      compounds from contact with reality, and the model is a <b>replaceable processor</b>.
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">Read the whitepaper</a>
+      <a class="btn" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">Architecture overview</a>
+      <a class="btn" href="https://github.com/maxbaluev/accreted-intelligence">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="tag">The problem</div>
+    <h2>Recall is not judgment.</h2>
+    <p class="body">
+      The central unsolved problem is not generating outputs — it is accumulating <b>reliable judgment</b>
+      across time. The field treats it as a memory problem and answers with RAG, vector stores, and
+      fine-tuning. But recall returns previously seen information; judgment knows <b>what worked</b> —
+      that an approach succeeded here, failed there, holds in this context but not that one.
+      In reinforcement learning this is the <b>credit assignment problem</b>, and deployed systems don't solve it:
+      they emit outputs, observe nothing about consequences, and reset.
+    </p>
+    <blockquote>
+      Recall is the easy part. Scoring is harder. <b>Binding scoring to action</b> is the part everyone
+      skips — and it is the part that decides whether intelligence compounds.
+    </blockquote>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tag">The thesis</div>
+    <h2>The intelligence is in the genome, not the organism.</h2>
+    <p class="body">
+      DNA does not think or plan. It is a scored record of what survived contact with reality. Organisms
+      are temporary processors: they express the genome, meet the environment, and either propagate the
+      successful patterns or are eliminated. Most AI inverts this — the model is treated as the intelligence,
+      state as supporting material. Accreted intelligence flips it back.
+    </p>
+    <div class="grid">
+      <div class="card"><h3><span class="n">1</span>State comes first</h3>
+        <p>The scored state determines what the system knows, avoids, and tries next — not the model's momentary disposition.</p></div>
+      <div class="card"><h3><span class="n">2</span>Reality does the scoring</h3>
+        <p>Memory rises or falls on observed outcomes — not designer guesses, not the system's own confidence.</p></div>
+      <div class="card"><h3><span class="n">3</span>The processor is replaceable</h3>
+        <p>Intelligence lives in the substrate, so the reasoning model can be swapped without losing what was learned.</p></div>
+      <div class="card"><h3><span class="n">4</span>Failure is scored knowledge</h3>
+        <p>Bad outcomes debit the units that aligned and stay retrievable as warnings. A system that forgets its mistakes becomes overconfident fast.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tag">The system — acc4</div>
+    <h2>Two verbs. One memory. Four links.</h2>
+    <p class="body">
+      <b>acc4</b> is a working kernel for the thesis: a <b>Recursive Language Model</b> over a
+      <b>late-interaction scored-token memory</b>. The entire reasoner interface is two verbs, and every
+      non-trivial call closes four links — owner intent, the cited memory that shaped the work, the act,
+      and the outcome that closes it. <b>Citation is the credit edge, not decoration</b>: the memory that
+      gets cited is the memory that earns or loses score when the outcome lands.
+    </p>
+
+    <div class="loop">
+      <div class="node owner">Owner intent<small>words · constraints · consent</small></div>
+      <div class="arrow">→</div>
+      <div class="node read">retrieve<small>MaxSim over scored tokens</small></div>
+      <div class="arrow">→</div>
+      <div class="node act">act<small>solve · exec · register</small></div>
+      <div class="arrow">→</div>
+      <div class="node score">outcome<small>real-world verdict</small></div>
+    </div>
+    <div class="loopback">↺ <b>credit flows back</b> to the exact tokens that aligned — the loop writes and scores automatically</div>
+
+    <div class="verbs">
+      <div class="verb read"><code>acc4_retrieve(query | image)</code>
+        <p>The only read. Peeks the scored memory by MaxSim — natively multimodal: text and images encode to the same
+        late-interaction tokens, so a text memo can answer an image query (ColPali-style).</p></div>
+      <div class="verb act"><code>acc4_act(runtime, input)</code>
+        <p>Does anything. <code>solve</code> recurses on a sub-goal — the tree of recursive solves <i>is</i> the
+        decomposition; no planner, no task graph. <code>exec</code> runs sandboxed code that can itself recurse over
+        the memory. <code>register</code> stores reusable code as scored tokens — no privileged lane.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tag">The memory</div>
+    <h2>The token is the atom.</h2>
+    <p class="body">
+      Every entity — a knowledge memo, a runtime, an owner fact, an image — is stored as an ordered set of
+      per-token vectors. No lossy pooled embedding; retrieval ranks by <b>MaxSim</b> (ColBERT), and the aligned
+      token pairs are themselves the citation. That much is published commodity. What acc4 adds is a
+      <b>learned-evidence reweighting</b>: each document token carries a Bayesian Beta posterior summarizing how
+      its past alignments fared, and tokens reality has repeatedly confirmed pull harder than fresh ones.
+    </p>
+    <div class="formula">
+      score(q, d) = Σ<sub>i</sub> max<sub>j</sub> [ sim(q<sub>i</sub>, d<sub>j</sub>) · <span class="hl">g(π<sub>j</sub>)</span> ]
+    </div>
+    <p class="fnote">π<sub>j</sub> — token j's outcome posterior · the exact form of g and its calibration are proprietary</p>
+    <p class="body">
+      When a commitment closes, credit does not smear across a whole document — it flows to the specific tokens
+      that aligned during retrieval. The update is <b>surprise-gated</b> (confirming outcomes move a token little,
+      surprising ones move it more) and <b>reality-gated</b>: an outcome validated by reality — a real reply, a
+      passing test, a world result — carries full weight, while a <b>self-graded outcome credits only at a
+      deliberately weak prior</b>. The system structurally refuses to compound from its own belief.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tag">In the open</div>
+    <h2>The engine is private. The primitives are public.</h2>
+    <p class="body">Each building block ships on its own:</p>
+    <div class="repos">
+      <a class="repo" href="https://github.com/maxbaluev/maxsim-rs"><b>maxsim-rs</b>
+        <span>ColBERT-style late-interaction MaxSim scoring — zero-dependency Rust.</span></a>
+      <a class="repo" href="https://github.com/maxbaluev/colpali-retrieve"><b>colpali-retrieve</b>
+        <span>Multimodal late interaction: text queries over document-page images.</span></a>
+      <a class="repo" href="https://github.com/maxbaluev/scored-rerank"><b>scored-rerank</b>
+        <span>Ranking that learns from outcomes — Beta posteriors + Thompson sampling.</span></a>
+      <a class="repo" href="https://github.com/maxbaluev/mcp-retrieve"><b>mcp-retrieve</b>
+        <span>Late-interaction document retrieval as an MCP server.</span></a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tag">Honest status</div>
+    <h2>What's proven, what's open.</h2>
+    <p class="body">
+      acc4 is a working single-host research kernel — a running system with live, scored mechanisms. It trains
+      nothing; it is a memory-and-loop kernel around replaceable models. Two different model families read and
+      extend the same substrate through one interface today, and neither owns the judgment. The claims are
+      deliberately bounded, and the largest ones remain open:
+    </p>
+    <ul class="open">
+      <li><b>Substrate-on vs. off lift</b> — the single most important missing experiment: same tasks, scored substrate enabled vs. disabled, measure the delta. Falsifiable; not yet measured.</li>
+      <li><b>Scale</b> — exact MaxSim over per-token multivectors grows with the substrate; the right pruning regime without losing unit-level credit is open.</li>
+      <li><b>Credit under concurrency</b> — attributing outcomes to the right memory when many workers act in parallel is harder than in a serial loop.</li>
+      <li><b>Dependable replay</b> — turning a successful trace into a runtime that replays reliably, without re-reasoning each time.</li>
+      <li><b>The authority boundary</b> — the line between "may draft" and "may send" must stay hard as the system touches live accounts.</li>
+    </ul>
+    <blockquote>
+      A system that compounds judgment must invest as heavily in governance, credit honesty, and boundary
+      enforcement as in scoring and accumulation.
+    </blockquote>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="name">Max Baluev</div>
+    <div>Founder-engineer — autonomous agents, late-interaction retrieval, agent memory.</div>
+    <div class="links">
+      <a href="mailto:maxbaluev@outlook.com">maxbaluev@outlook.com</a>
+      <a href="https://t.me/maxbaluev">Telegram</a>
+      <a href="https://github.com/maxbaluev">GitHub</a>
+      <a href="https://www.linkedin.com/in/maxbaluev">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
