@@ -102,27 +102,44 @@ h1 em{font-style:italic;color:var(--green);text-shadow:0 0 38px rgba(67,217,126,
 .h-anim.d4{animation-delay:.46s}.h-anim.d5{animation-delay:.6s}
 @keyframes up{to{opacity:1;transform:none;}}
 
+/* main-workflow strip */
+.flow{display:flex;align-items:flex-start;gap:9px;margin-top:26px;max-width:560px;font-family:var(--mono);}
+.fstep{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.fstep b{font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--ink);white-space:nowrap;}
+.fstep small{font-size:10px;color:var(--faint);line-height:1.5;display:block;}
+.fstep .stamp{align-self:flex-start;font-size:8.5px;padding:2px 6px;letter-spacing:.06em;}
+.farr{color:var(--faint);font-size:11px;line-height:1;margin-top:2px;opacity:.7;flex:0 0 auto;}
+@media(max-width:520px){
+.flow{flex-direction:column;align-items:stretch;gap:9px;max-width:none;}
+.farr{display:none;}
+.fstep{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:3px 9px;}
+.fstep small{min-width:0;}
+.fstep .stamp{align-self:baseline;}
+}
+
 /* waitlist form */
-.signup{margin-top:36px;max-width:520px;}
+.signup{margin-top:30px;max-width:520px;}
 .signup form{display:flex;gap:10px;flex-wrap:wrap;}
-.signup select,.signup input[type=email]{
+.signup input[type=email]{
 padding:14px 16px;border-radius:9px;border:1px solid var(--line2);
 background:rgba(15,22,17,.85);color:var(--ink);font-size:15.5px;font-family:var(--sans);outline:none;
-transition:border-color .15s, box-shadow .15s;}
-.signup select:hover,.signup input[type=email]:hover{border-color:#33453a;}
-.signup select:focus,.signup input[type=email]:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(67,217,126,.12);}
-.signup select{flex:1 1 100%;min-width:0;max-width:min(100%, calc(100vw - 52px));color:var(--dim);appearance:none;-webkit-appearance:none;cursor:pointer;font-size:14.5px;
-background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2397a59b' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
-background-repeat:no-repeat;background-position:right 14px center;}
-.signup select.chosen{color:var(--ink);}
-.signup input[type=email]{flex:1 1 230px;min-width:0;}
-.signup button{padding:14px 26px;border-radius:9px;border:none;cursor:pointer;
+transition:border-color .15s, box-shadow .15s;flex:1 1 230px;min-width:0;}
+.signup input[type=email]:hover{border-color:#33453a;}
+.signup input[type=email]:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(67,217,126,.12);}
+.pills{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:2px;}
+.pl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;margin-right:3px;}
+.pill{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);background:transparent;
+border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;
+transition:color .15s,border-color .15s,background .15s;}
+.pill:hover{color:var(--ink);border-color:var(--line2);}
+.pill[aria-pressed=true]{color:var(--green);border-color:rgba(67,217,126,.45);background:var(--green-soft);}
+.signup button[type=submit]{padding:14px 26px;border-radius:9px;border:none;cursor:pointer;
 background:linear-gradient(180deg,#54e98e,#36c46d);color:#06130b;
 font-weight:600;font-size:15.5px;font-family:var(--sans);
 box-shadow:0 6px 24px rgba(67,217,126,.22), inset 0 1px 0 rgba(255,255,255,.25);
 transition:filter .15s,transform .12s,box-shadow .15s;}
-.signup button:hover{filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 10px 30px rgba(67,217,126,.3), inset 0 1px 0 rgba(255,255,255,.25);}
-.signup button:active{transform:translateY(0);}
+.signup button[type=submit]:hover{filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 10px 30px rgba(67,217,126,.3), inset 0 1px 0 rgba(255,255,255,.25);}
+.signup button[type=submit]:active{transform:translateY(0);}
 .signup .note{margin-top:11px;font-size:12.5px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
 .signup .ok{display:none;margin-top:14px;padding:13px 16px;border:1px solid rgba(67,217,126,.4);
 border-radius:9px;background:var(--green-soft);color:var(--green);font-size:15px;}
@@ -151,7 +168,10 @@ margin-right:9px;box-shadow:0 0 10px rgba(67,217,126,.8);animation:pulse 2.4s in
 .ltab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);background:transparent;
 border:1px solid var(--line);border-radius:6px;padding:5px 12px;cursor:pointer;transition:color .15s,border-color .15s,background .15s;}
 .ltab:hover{color:var(--ink);border-color:var(--line2);}
-.ltab[aria-pressed=true]{color:var(--green);border-color:rgba(67,217,126,.45);background:var(--green-soft);}
+.ltab[aria-pressed=true],.ltab[aria-selected=true]{color:var(--green);border-color:rgba(67,217,126,.45);background:var(--green-soft);}
+.stabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:34px;}
+.stabs .ltab{font-size:12px;padding:8px 16px;border-radius:7px;}
+@media(max-width:520px){.stabs{gap:6px;}.stabs .ltab{flex:1 1 auto;text-align:center;font-size:11px;padding:7px 10px;}}
 #ledrows{min-height:300px;}
 #ledrows .row{grid-template-columns:76px 64px 1fr auto;}
 @media(max-width:520px){#ledrows{min-height:340px;}#ledrows .row{grid-template-columns:62px 50px 1fr auto;}}
@@ -218,6 +238,7 @@ border-radius:10px;padding:10px 14px;text-align:center;min-width:130px;box-shado
 .rnode.g{border-color:rgba(67,217,126,.45);} .rnode.g h5{color:var(--green);}
 .rnode.a{border-color:rgba(255,210,125,.4);} .rnode.a h5{color:var(--amber);}
 .rn1{left:50%;top:7%;} .rn2{left:93%;top:50%;} .rn3{left:50%;top:93%;} .rn4{left:7%;top:50%;}
+@media(max-width:1040px){.rn2{left:88%;} .rn4{left:12%;}}
 @media(max-width:520px){.rnode{min-width:104px;padding:8px 10px;} .rnode h5{font-size:10px;white-space:normal;} .rn2{left:88%;} .rn4{left:12%;}}
 .rcore{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;
 font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.06em;line-height:1.7;}
@@ -246,7 +267,7 @@ padding:20px 22px;background:rgba(15,22,17,.5);}
 .rule p{font-size:14px;color:var(--dim);line-height:1.62;}
 
 /* the same week, twice — story panels (ledger DNA) */
-.stories{margin-top:48px;display:grid;gap:28px;}
+.stories{margin-top:20px;display:grid;gap:28px;}
 .story{border:1px solid var(--line);border-radius:16px;background:var(--paper2);overflow:hidden;}
 .story-ask{padding:18px 24px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);
 font-size:14px;color:var(--ink);line-height:1.6;}
@@ -261,15 +282,18 @@ font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:upper
 .story .row{animation:none;opacity:1;transform:none;}
 .row.memo{background:var(--green-soft);box-shadow:inset 2px 0 0 var(--green);}
 .row.memo .what{color:var(--ink);}
+.row.replay{opacity:.8;}
+.row.replay .verb{color:var(--faint);}
+.stamp.re{color:var(--faint);border:1px dashed var(--line2);background:rgba(255,255,255,.02);}
 .run-f{margin:auto 22px 0;padding-top:12px;border-top:1px dashed var(--line);
 font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em;}
 .runcol.r9 .run-f{color:var(--green);}
 .nine{display:none;}
 .knows{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 24px 16px;
 border-top:1px solid var(--line);background:rgba(67,217,126,.03);}
-.knows .kl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;margin-right:6px;}
+.knows .kl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;flex:0 0 100%;}
 .knows .kc{font-family:var(--mono);font-size:11.5px;color:var(--green);border:1px solid rgba(67,217,126,.32);
-background:var(--green-soft);border-radius:5px;padding:4px 10px;}
+background:var(--green-soft);border-radius:5px;padding:4px 10px;flex:1 1 auto;text-align:center;}
 @media(max-width:980px){
 .runs{grid-template-columns:1fr;}
 .runcol.r9{border-left:none;}
@@ -393,23 +417,33 @@ html{scroll-behavior:auto;}
         end to end, with a receipt for every action. And the part no tool has: <b>it compounds</b>.
         What it does for you once, it does better forever.
       </p>
-      <div class="signup h-anim d4">
+      <div class="flow h-anim d4" aria-label="How a run works: you say it, it runs, it holds for your OK, it learns">
+        <div class="fstep"><b>you say it</b><small>in your words</small></div>
+        <span class="farr" aria-hidden="true">→</span>
+        <div class="fstep"><b>it runs</b><small>every step receipted</small><span class="stamp ok">VERIFIED</span></div>
+        <span class="farr" aria-hidden="true">→</span>
+        <div class="fstep"><b>it holds</b><small>sends wait for your OK, decision recorded</small><span class="stamp hold">HELD → OK</span></div>
+        <span class="farr" aria-hidden="true">→</span>
+        <div class="fstep"><b>it learns</b><small>what worked</small><span class="stamp ok">CREDITED</span></div>
+      </div>
+      <div class="signup h-anim d5">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
           <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
           <input type="hidden" name="_subject" value="AccInt early access">
           <input type="hidden" name="_captcha" value="false">
           <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
-          <select name="first_job" required aria-label="What would you hire it for first?">
-            <option value="" disabled selected>What would you hire it for first?</option>
-            <option>Run my recruiting / talent pipeline</option>
-            <option>Run client operations (agency / fractional)</option>
-            <option>My founder sales pipeline</option>
-            <option>Research &amp; monitoring briefs</option>
-            <option>Back-office / portal operations</option>
-            <option>Something else</option>
-          </select>
+          <input type="hidden" name="first_job" value="">
           <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get early access</button>
+          <div class="pills" role="group" aria-label="What would you hire it for first? Optional.">
+            <span class="pl">first job · optional</span>
+            <button type="button" class="pill" aria-pressed="false">founder sales</button>
+            <button type="button" class="pill" aria-pressed="false">recruiting</button>
+            <button type="button" class="pill" aria-pressed="false">client ops</button>
+            <button type="button" class="pill" aria-pressed="false">research</button>
+            <button type="button" class="pill" aria-pressed="false">back-office</button>
+            <button type="button" class="pill" aria-pressed="false">something else</button>
+          </div>
         </form>
         <div class="note">no spam · no calls · first invites go in order</div>
         <div class="ok" id="subok">✓ You're on the list. You'll hear from me when your invite is ready.</div>
@@ -451,6 +485,7 @@ html{scroll-behavior:auto;}
         <span>native: Windows · macOS · Linux</span>
         <span>runs on Claude Code today · agent-agnostic by design</span>
         <span>memory: local, on your machine</span>
+        <span>runs several at once: parallel terminals on different tasks · one memory · no collisions</span>
       </div>
     </div>
   </div>
@@ -521,9 +556,14 @@ html{scroll-behavior:auto;}
     <p class="body">The same ask, run one and run nine — every step a receipt, never a feature claim.
     Felt first by <b>recruiters and talent partners, fractional executives and consultants, boutique
     agencies, founders who carry their own sales</b> — and the memory makes it yours, week by week:</p>
+    <div class="stabs" role="tablist" aria-label="Pick the work you know" id="storytabs">
+      <button class="ltab" role="tab" id="stab-sales" aria-selected="true" aria-controls="spanel-sales">founder sales</button>
+      <button class="ltab" role="tab" id="stab-rec" aria-selected="false" aria-controls="spanel-rec" tabindex="-1">recruiting</button>
+      <button class="ltab" role="tab" id="stab-ops" aria-selected="false" aria-controls="spanel-ops" tabindex="-1">client ops</button>
+    </div>
     <div class="stories">
 
-<article class="story reveal" style="--rd:0s" aria-label="Founder sales — week one vs week nine">
+<article class="story" role="tabpanel" id="spanel-sales" aria-labelledby="stab-sales" tabindex="0">
 <div class="story-ask"><span class="who">you · founder sales · monday 08:58</span>“Keep my pipeline warm this week — ten good ones, in my voice, nothing spammy.”</div>
 <div class="runs">
 <div class="runcol">
@@ -539,6 +579,7 @@ html{scroll-behavior:auto;}
 <div class="nine" aria-hidden="true">9 weeks later</div>
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
+<div class="row replay"><span class="t">08:28</span><span class="verb">replay</span><span class="what">find → read → rank — 6 verified steps from runs 1–8, re-checked not re-reasoned</span><span class="stamp re">REPLAYED</span></div>
 <div class="row memo"><span class="t">08:31</span><span class="verb">skip</span><span class="what"><b>Meridian Corp</b>: their CFO said “not till Q3” in run 4 — memory holds it</span><span class="stamp ok">MEMORY</span></div>
 <div class="row"><span class="t">08:33</span><span class="verb">draft</span><span class="what">9 first lines in your voice — 2 flagged for your read</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:37</span><span class="verb">send</span><span class="what">9/9 + tracker true — everything else was verified replay</span><span class="stamp ok">VERIFIED</span></div>
@@ -548,7 +589,7 @@ html{scroll-behavior:auto;}
 <div class="knows"><span class="kl">what the memory now knows</span><span class="kc">replies 2.3× when you cite their thesis</span><span class="kc">never pitch in their earnings week</span><span class="kc">your voice: short, one ask, zero exclamation marks</span></div>
 </article>
 
-<article class="story reveal" style="--rd:.1s" aria-label="Recruiting — week one vs week nine">
+<article class="story" role="tabpanel" id="spanel-rec" aria-labelledby="stab-rec" tabindex="0" hidden>
 <div class="story-ask"><span class="who">you · recruiting · monday 08:35</span>“Run the staff-platform-engineer search — my name is on every message, so quality only.”</div>
 <div class="runs">
 <div class="runcol">
@@ -564,6 +605,7 @@ html{scroll-behavior:auto;}
 <div class="nine" aria-hidden="true">9 weeks later</div>
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
+<div class="row replay"><span class="t">08:09</span><span class="verb">replay</span><span class="what">the sourcing pass — 5 verified steps from runs 1–8, ATS + GitHub re-checked</span><span class="stamp re">REPLAYED</span></div>
 <div class="row memo"><span class="t">08:12</span><span class="verb">skip</span><span class="what"><b>Arclight</b>’s staff eng: “happy till my March vest” in run 5 — re-engage then</span><span class="stamp ok">MEMORY</span></div>
 <div class="row"><span class="t">08:14</span><span class="verb">draft</span><span class="what">6 touches — both re-engages cite what changed since you last spoke</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:17</span><span class="verb">send</span><span class="what">6/6 + ATS true — the sourcing pass was verified replay</span><span class="stamp ok">VERIFIED</span></div>
@@ -573,7 +615,7 @@ html{scroll-behavior:auto;}
 <div class="knows"><span class="kl">what the memory now knows</span><span class="kc">seniors reply to postmortems, not perks</span><span class="kc">“blast it” stays refused — named people only</span><span class="kc">thu 08–10 sends = 2.1× response</span></div>
 </article>
 
-<article class="story reveal" style="--rd:.2s" aria-label="Client ops — week one vs week nine">
+<article class="story" role="tabpanel" id="spanel-ops" aria-labelledby="stab-ops" tabindex="0" hidden>
 <div class="story-ask"><span class="who">you · client ops · sunday 21:40</span>“Monday briefs for all five clients — what moved, what’s stuck, what I should say.”</div>
 <div class="runs">
 <div class="runcol">
@@ -589,6 +631,7 @@ html{scroll-behavior:auto;}
 <div class="nine" aria-hidden="true">9 weeks later</div>
 <div class="runcol r9">
 <div class="run-h"><b>RUN 9</b><span>week nine</span></div>
+<div class="row replay"><span class="t">06:05</span><span class="verb">replay</span><span class="what">the 5-workspace pull — 9 verified steps from runs 1–8, every row re-checked</span><span class="stamp re">REPLAYED</span></div>
 <div class="row memo"><span class="t">06:09</span><span class="verb">judge</span><span class="what"><b>Halvern</b> leads with the renewal risk — you rewrote it that way in run 3</span><span class="stamp ok">MEMORY</span></div>
 <div class="row"><span class="t">06:11</span><span class="verb">draft</span><span class="what">5 briefs in your structure — 1 flagged “client tone shifted, read this one”</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">06:15</span><span class="verb">file</span><span class="what">briefs + trackers true — the pulls were verified replay</span><span class="stamp ok">VERIFIED</span></div>
@@ -660,8 +703,8 @@ html{scroll-behavior:auto;}
     <div class="road">
       <div class="stage now reveal" style="--rd:0s"><span class="st">NOW · LIVE</span>
         <h3>Your operator</h3>
-        <p>One operator, working in <b>your</b> accounts, compounding <b>your</b> judgment.
-        This is what early access opens.</p></div>
+        <p>One operator — or <b>several in parallel</b> on totally different tasks — working in your
+        accounts, compounding <b>one judgment</b>. This is what early access opens.</p></div>
       <div class="stage next reveal" style="--rd:.12s"><span class="st">NEXT</span>
         <h3>The team brain</h3>
         <p><b>One memory, many operators.</b> Parallel agents already compound into one substrate
@@ -686,17 +729,18 @@ html{scroll-behavior:auto;}
         <input type="hidden" name="_subject" value="AccInt early access">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
-        <select name="first_job" required aria-label="What would you hire it for first?">
-          <option value="" disabled selected>What would you hire it for first?</option>
-          <option>Run my recruiting / talent pipeline</option>
-          <option>Run client operations (agency / fractional)</option>
-          <option>My founder sales pipeline</option>
-          <option>Research &amp; monitoring briefs</option>
-          <option>Back-office / portal operations</option>
-          <option>Something else</option>
-        </select>
+        <input type="hidden" name="first_job" value="">
         <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get early access</button>
+        <div class="pills" role="group" aria-label="What would you hire it for first? Optional.">
+          <span class="pl">first job · optional</span>
+          <button type="button" class="pill" aria-pressed="false">founder sales</button>
+          <button type="button" class="pill" aria-pressed="false">recruiting</button>
+          <button type="button" class="pill" aria-pressed="false">client ops</button>
+          <button type="button" class="pill" aria-pressed="false">research</button>
+          <button type="button" class="pill" aria-pressed="false">back-office</button>
+          <button type="button" class="pill" aria-pressed="false">something else</button>
+        </div>
       </form>
       <div class="note">no spam · no calls · first invites go in order</div>
       <div class="ok" id="subok2">✓ You're on the list. You'll hear from me when your invite is ready.</div>
@@ -726,14 +770,19 @@ html{scroll-behavior:auto;}
   function wire(formId, okId, errId){
     var f=document.getElementById(formId),ok=document.getElementById(okId),err=document.getElementById(errId);
     if(!f) return;
-    var sel=f.querySelector('select');
-    if(sel){sel.addEventListener('change',function(){sel.classList.add('chosen');});}
+    var hid=f.querySelector('input[name=first_job]'),pills=f.querySelectorAll('.pill');
+    pills.forEach(function(p){p.addEventListener('click',function(){
+      var on=p.getAttribute('aria-pressed')==='true';
+      pills.forEach(function(x){x.setAttribute('aria-pressed','false');});
+      if(!on){p.setAttribute('aria-pressed','true');}
+      if(hid){hid.value=on?'':p.textContent;}
+    });});
     f.addEventListener('submit',function(e){
       e.preventDefault();
-      var btn=f.querySelector('button');btn.disabled=true;btn.textContent='Sending…';
+      var btn=f.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Sending…';
       fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
         method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-        body:JSON.stringify({email:f.email.value,first_job:sel?sel.value:'',_subject:'AccInt early access',_honey:f._honey.value})
+        body:JSON.stringify({email:f.email.value,first_job:hid?hid.value:'',_subject:'AccInt early access',_honey:f._honey.value})
       }).then(function(r){return r.json();}).then(function(){
         f.style.display='none';ok.style.display='block';
       }).catch(function(){if(err){err.style.display='block';}setTimeout(function(){f.submit();},600);});
@@ -792,6 +841,26 @@ html{scroll-behavior:auto;}
       });
       rowsEl.innerHTML=html;
       if(typeEl){typeEl.textContent=s.next;}
+    });
+  }
+
+  /* story switcher (#jobs) */
+  var stl=document.getElementById('storytabs');
+  if(stl){
+    var stabs=[].slice.call(stl.querySelectorAll('[role=tab]'));
+    var show=function(i,focus){
+      stabs.forEach(function(t,j){var on=j===i;
+        t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;
+        var p=document.getElementById(t.getAttribute('aria-controls'));if(p){p.hidden=!on;}
+      });
+      if(focus){stabs[i].focus();}
+    };
+    stabs.forEach(function(t,i){
+      t.addEventListener('click',function(){show(i);});
+      t.addEventListener('keydown',function(e){
+        var d=e.key==='ArrowRight'?1:(e.key==='ArrowLeft'?-1:0);
+        if(d){e.preventDefault();show((i+d+stabs.length)%stabs.length,true);}
+      });
     });
   }
 })();
