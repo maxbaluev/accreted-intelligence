@@ -458,7 +458,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
           <input type="hidden" name="_captcha" value="false">
           <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
           <input type="hidden" name="first_job" value="">
-          <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
+          <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get early access</button>
           <div class="step2" hidden>
             <p class="step2-q" aria-hidden="true">one last thing — what would you hand it first?</p>
@@ -778,7 +778,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
         <input type="hidden" name="first_job" value="">
-        <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
+        <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get early access</button>
         <div class="step2" hidden>
           <p class="step2-q" aria-hidden="true">one last thing — what would you hand it first?</p>
@@ -829,7 +829,8 @@ var PH_HOST = 'https://us.i.posthog.com'; // or https://eu.i.posthog.com
 function ph(ev,props){try{if(window.posthog&&typeof window.posthog.capture==='function'){window.posthog.capture(ev,props||{});}}catch(_e){}}
 if(typeof PH_KEY==='string'&&PH_KEY!==''){try{
 !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init Ce Ss Ig capture Ai calculateEventProperties Es register register_once register_for_session unregister unregister_for_session Ws getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ds Fs createPersonProfile Ls Ps opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Os debug I As getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'identified_only'});
+/* replay sampled 100% — drop to 20% if traffic 10x (free cap 5k/mo) */
+posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'identified_only',session_recording:{maskAllInputs:true,maskTextSelector:null,recordCanvas:false},capture_exceptions:true});
 }catch(_e){}}
 </script>
 
@@ -965,6 +966,30 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
       });
     });
   }
+
+  /* section-view beats — fires once per section per pageload */
+  if('IntersectionObserver' in window){
+    var phSeen={};
+    var phIO=new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        var n=en.target.getAttribute('data-phs');
+        if(en.isIntersecting&&n&&!phSeen[n]){phSeen[n]=1;ph('section_viewed',{section:n});phIO.unobserve(en.target);}
+      });
+    },{threshold:0.5});
+    [['header.hero','hero'],['.honest','live'],['#jobs','jobs'],['#answerable','record'],['#stack','machine'],['#roadmap','roadmap'],['#access','access']].forEach(function(p){
+      var el=document.querySelector(p[0]);
+      if(el){el.setAttribute('data-phs',p[1]);phIO.observe(el);}
+    });
+  }
+
+  /* interaction events — one delegated listener, all through ph() */
+  document.addEventListener('click',function(e){
+    if(!e.target||!e.target.closest)return;
+    if(e.target.closest('.nav-cta')){ph('cta_clicked',{placement:'nav'});return;}
+    if(e.target.closest('#subform2 button[type=submit]')){ph('cta_clicked',{placement:'final'});return;}
+    var d=e.target.closest('.doclinks .doc');
+    if(d){ph('doc_link_clicked',{doc:(d.firstChild&&d.firstChild.nodeValue||'').trim()});}
+  });
 })();
 </script>
 </body>
