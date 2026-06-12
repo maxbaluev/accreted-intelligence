@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14110b">
 <title>Accreted Intelligence — it does your work, and every action makes it smarter</title>
-<meta name="description" content="Accreted Intelligence (AccInt) is the operator you hand work to. It runs inside your own accounts, shows a receipt for every action, asks before anything leaves, and learns from every run. Everything it learns stays on your machine. Early access.">
+<meta name="description" content="Accreted Intelligence (AccInt) is the operator you hand work to. It runs inside your own accounts, shows a receipt for every action, asks before anything leaves, and every run builds the Work Model of your business, on your machine. Early access.">
 <meta property="og:title" content="Accreted Intelligence — it does your work, and every action makes it smarter">
-<meta property="og:description" content="The operator you hand work to. It runs inside your own accounts, proves every action with a receipt, asks before anything leaves, and learns from every run. Everything it learns stays on your machine. Early access.">
+<meta property="og:description" content="The operator you hand work to. It runs inside your own accounts, proves every action with a receipt, asks before anything leaves, and every run builds the Work Model of your business, on your machine. Early access.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://accint.xyz/">
 <meta property="og:image" content="https://accint.xyz/og.png">
@@ -466,6 +466,28 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 .wrap{padding:0 20px;}
 .nav-in{padding:13px 20px;}
 }
+/* first-seconds boot — the hero ledger writes itself (fail-safe: without body.anim
+   everything is simply visible; reduced-motion never gets the class's animations) */
+@media (prefers-reduced-motion: no-preference){
+body.anim .hero .kicker{animation:rise .5s .05s both;}
+body.anim .hero h1{animation:rise .55s .15s both;}
+body.anim .hero .lede{animation:rise .55s .3s both;}
+body.anim .hero .ruleline{animation:rise .5s .45s both;}
+body.anim .hero .signup{animation:rise .5s .58s both;}
+body.anim .hero .led-cap{animation:rise .5s .4s both;}
+body.anim .hero .ledger{animation:rise .6s .5s both;}
+body.anim #ledrows .row{animation:riserow .45s both;}
+body.anim #ledrows .row:nth-child(1){animation-delay:1.0s}
+body.anim #ledrows .row:nth-child(2){animation-delay:1.35s}
+body.anim #ledrows .row:nth-child(3){animation-delay:1.7s}
+body.anim #ledrows .row:nth-child(4){animation-delay:2.05s}
+body.anim #ledrows .row:nth-child(5){animation-delay:2.4s}
+body.anim #ledrows .row:nth-child(6){animation-delay:2.75s}
+body.anim #ledrows .row:nth-child(7){animation-delay:3.1s}
+body.anim .ledger-type{animation:rise .5s 3.45s both;}
+}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes riserow{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){
 .ledger-head .dot,.ledger-type .car{animation:none;}
 }
@@ -489,9 +511,9 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="kicker">Accreted Intelligence<span class="k-op"><span class="sep">·</span>autonomous operator</span><span class="sep">·</span>early access</div>
+      <div class="kicker">Accreted Intelligence<span class="k-op"><span class="sep">·</span>the operator you own</span><span class="sep">·</span>early access</div>
       <h1><span>It does your work.</span> <span>Every action makes it <em>smarter</em>.</span></h1>
-      <p class="lede">Hand it work in plain words. It runs it in your own accounts and brings back <b>a receipt for every step</b>.</p>
+      <p class="lede">Hand it work in plain words. It runs it in your own accounts with <b>a receipt for every step</b>, and every run builds <b>your Work Model</b>.</p>
       <p class="ruleline">you say it <span class="arr" aria-hidden="true">→</span> it runs, receipted <span class="arr" aria-hidden="true">→</span> holds for your OK <span class="arr" aria-hidden="true">→</span> it learns</p>
       <div class="signup">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
@@ -654,7 +676,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 <div class="row"><span class="t">08:14</span><span class="verb">draft</span><span class="what">6 touches — both re-engages cite what changed since you last spoke</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">08:17</span><span class="verb">send</span><span class="what">6/6 + ATS true — the sourcing pass was verified replay</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">10:07</span><span class="verb">file</span><span class="what"><b>two submittals</b> out to the client — a fee rides on each</span><span class="stamp ok">VERIFIED</span></div>
-<div class="run-f">6 min of decisions · the rest verified replay</div>
+<div class="run-f">week nine: the Work Model paying out — 6 min of decisions, the rest verified replay</div>
 </div>
 </div>
 <div class="learned"><span class="kl">what it now knows about your world</span>
@@ -698,12 +720,24 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 </div>
 </section>
 
+<div class="honest asset" aria-label="Your business already has a work model — it lives in people's heads and walks out the door. AccInt builds it as an asset you own: scored by results, audited on a ledger, running on your hardware.">
+  <div class="wrap">
+    <div class="mark">THE ASSET</div>
+    <div>
+      <p><b>Your business already has a work model</b> — it lives in people's heads and walks out
+      the door. AccInt builds it as an asset you own: <b>scored by results, audited on a ledger,
+      running on your hardware</b>.</p>
+    </div>
+  </div>
+</div>
+
 <section id="answerable">
   <div class="wrap">
     <div class="tag">for the people accountable</div>
     <h2>When management asks, it's already <em>written</em>.</h2>
     <p class="body">Most AI at work leaves no receipts, no record of who said yes, no lessons kept.
-    <b>AccInt writes all three down as they happen</b>.</p>
+    <b>AccInt writes all three down as they happen</b>. The ledger is what management sees;
+    the Work Model is what the operator learned.</p>
     <div class="audit" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="aud-legend" aria-hidden="true">
@@ -730,8 +764,8 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
   <div class="wrap">
     <div class="tag">the whitepaper, in one viewport</div>
     <h2>The science: a <em>Work Model</em> that compounds.</h2>
-    <p class="body">A model that scores 90% on a benchmark today scores 90% tomorrow, never 91%.
-    It does the work, then forgets what worked. AccInt keeps the learning <b>outside the model,
+    <p class="body">An AI engine that scores 90% on a benchmark today scores 90% tomorrow, never 91%.
+    It does the work, then forgets what worked. AccInt keeps the learning <b>outside the engine,
     in a scored Work Model of your operation</b>, the way DNA holds what survived while
     organisms come and go.</p>
     <div class="fig" role="img" aria-label="Figure 1 — how the Work Model is scored. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each token's Beta posterior of how often its alignments led to good outcomes. Late interaction means every token of your ask meets every token of the Work Model (ColBERT); vision is native — what it learned from a document answers a question about a screenshot (ColPali). Credit is pedagogical: the Work Model is taught by outcomes, never by its own belief — a self-graded result counts at a weak prior, full weight requires reality, and surprising outcomes teach hardest. A JEPA-style transitions ledger predicts which action improves things next and watches its own prediction error — when your world shifts, it notices.">
@@ -745,7 +779,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
         <div class="fn"><b>jepa prediction</b><span>a transitions ledger predicts which action improves things next and watches its own error — when your world shifts, it notices — LeCun [6]</span></div>
       </div>
     </div>
-    <p class="led-cap" style="margin-top:46px">The substrate behind this page, counted on 12 Jun 2026:</p>
+    <p class="led-cap" style="margin-top:46px">The Work Model behind this page, counted on 12 Jun 2026:</p>
     <div class="ledger" style="max-width:720px" aria-label="Live counts from the operator that builds and runs this page, 12 June 2026: 2,778 entities in the Work Model; 20,667 events on the append-only ledger; 1,931 outcomes validated by reality versus 372 self-graded at a weak prior; 94% success over the last 50 outcomes.">
       <div class="ledger-head"><span><span class="dot"></span>WORK MODEL READOUT</span><span>operator: accint</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">holds</span><span class="what"><b>2,778 entities</b> in the Work Model · 537 of them runnable</span><span class="stamp ok">COUNTED</span></div>
@@ -765,7 +799,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
     <p class="refs-cap">the full argument and the math live in the
     <a href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper</a>.
     the numbers above are measured, not promised: the built-in eval harness holds retrieval at
-    recall@5 = 1.000 against exact brute-force across the live substrate, and the gates, nulls and
+    recall@5 = 1.000 against exact brute-force across the live Work Model, and the gates, nulls and
     routing policy recalibrate themselves from real outcomes.</p>
   </div>
 </section>
@@ -810,9 +844,9 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
     <p class="body">AccInt is <b>one pure-Rust binary and one SQLite file</b> on your disk; the
     embedder runs as a local daemon beside it. There is no cloud in the loop and <b>no API key to
     leak</b>: nothing reasons over your data except the agent you already run.</p>
-    <p class="body">The reasoning model is <b>a replaceable processor, not the brain</b>. Judgment
-    lives in the Work Model, so you can swap the model and keep everything it learned; the same
-    substrate already runs under <b>two different model families</b> today.</p>
+    <p class="body">The AI engine is <b>replaceable, not the brain</b>. What it learned lives in
+    the Work Model, so you can swap the engine and keep all of it; the same Work Model already
+    runs under <b>two different engines</b> today.</p>
     <div class="gatewrap">
       <div role="img" aria-label="What stays. What leaves. Your machine keeps everything it learns, every receipt, and drafts in progress. At the boundary stands one gate — held for your OK. The only thing that leaves your machine: the 8 messages you approved — nothing else.">
         <div class="vt" aria-hidden="true">What stays. What leaves.</div>
@@ -872,13 +906,13 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
     <div class="road">
       <div class="stage now"><span class="st">NOW · LIVE</span>
         <h3>Your operator</h3>
-        <p>One operator on your work, compounding <b>one judgment</b>. This is what early access opens.</p></div>
+        <p>One operator on your work, compounding <b>one Work Model</b>. This is what early access opens.</p></div>
       <div class="stage next"><span class="st">NEXT</span>
         <h3>The team brain</h3>
         <p><b>One shared Work Model, many operators</b>, with per-person authority and one audit plane.</p></div>
       <div class="stage later"><span class="st">RESEARCH</span>
-        <h3>Judgment that travels</h3>
-        <p>Partner orgs exchange judgment; each side <b>re-verifies against its own reality</b>.</p></div>
+        <h3>Work Models that travel</h3>
+        <p>Partner orgs exchange them; each side <b>re-verifies against its own reality</b>.</p></div>
     </div>
   </div>
 </section>
@@ -908,7 +942,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
           </div>
         </div>
       </form>
-      <div class="note">no spam · no calls · first invites go in order</div>
+      <div class="note">invites go in order — your Work Model starts compounding from the first job you hand it</div>
       <div class="ok" id="subok2"><span class="stamp ok">ON THE LIST</span>Your invite goes out in order — no spam in between.</div>
       <div class="err" id="suberr2">Hmm, that didn't go through — retrying the classic way…</div>
     </div>
@@ -951,6 +985,11 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
 
 <script>
 (function(){
+  /* first-seconds boot: enable the load orchestration, then retire the class so
+     tab re-renders stay instant (animations use 'both' fill — removal is a no-op visually) */
+  document.body.classList.add('anim');
+  setTimeout(function(){document.body.classList.remove('anim');},3900);
+
   var nav=document.getElementById('nav');
   function onScroll(){nav.classList.toggle('scrolled',window.scrollY>24);}
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
@@ -1091,7 +1130,7 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
         if(en.isIntersecting&&n&&!phSeen[n]){phSeen[n]=1;ph('section_viewed',{section:n});phIO.unobserve(en.target);}
       });
     },{threshold:0.5});
-    [['header.hero','hero'],['.honest','live'],['#jobs','jobs'],['#answerable','record'],['#science','science'],['#stack','machine'],['#metal','metal'],['#roadmap','roadmap'],['#access','access']].forEach(function(p){
+    [['header.hero','hero'],['.honest:not(.asset)','live'],['#jobs','jobs'],['.honest.asset','asset'],['#answerable','record'],['#science','science'],['#stack','machine'],['#metal','metal'],['#roadmap','roadmap'],['#access','access']].forEach(function(p){
       var el=document.querySelector(p[0]);
       if(el){el.setAttribute('data-phs',p[1]);phIO.observe(el);}
     });
