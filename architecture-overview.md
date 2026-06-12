@@ -32,13 +32,13 @@ acc4 extends this: each document token carries a Bayesian **Beta(α, β) posteri
 
 $$\text{score}(q, d) = \sum_i \max_j \big[\, \text{sim}(q_i, d_j) \cdot g(\pi_j) \,\big]$$
 
-where $g$ is a monotonic confidence weighting — a token reality has repeatedly confirmed pulls harder than a fresh one. *(The exact form of $g$ and its calibration are proprietary.)*
+where $g$ is a monotonic confidence weighting — a token reality has repeatedly confirmed pulls harder than a fresh one. *(The exact form of `g` and its calibration are proprietary.)*
 
 ## Reality-gated credit (the discipline + general form)
 
 When an outcome closes, credit flows only to the tokens that aligned during retrieval; their Beta posteriors update Bayesian-style. The update is **surprise-gated** (a confirming outcome moves a token little, a surprising one moves it more — free-energy minimization), **reality-gated** by provenance (a self-graded close credits at a deliberately weak prior; full weight requires reality — the owner confirmed, the world replied, a sandboxed run exited cleanly, or a test passed), and **bounded** so a heavily-credited token stays correctable rather than pinned at certainty. In general form the update for an aligned token scales as
 
-$$\Delta \;\propto\; \text{surprise} \cdot \text{provenance\_weight}$$
+$$\Delta \;\propto\; \text{surprise} \cdot \text{provenance weight}$$
 
 The system cannot compound from its own belief. *(The exact surprise function, the provenance weights, the bound, and the calibration coefficients are intentionally omitted — proprietary.)*
 
