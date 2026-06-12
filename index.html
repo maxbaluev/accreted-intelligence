@@ -822,6 +822,18 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 </footer>
 
 <script>
+/* PostHog — structurally silent until a project key is pasted below. */
+var PH_KEY = '';                      // PostHog project API key — paste to activate
+var PH_HOST = 'https://us.i.posthog.com'; // or https://eu.i.posthog.com
+/* Safe capture helper: no-ops when posthog is absent; never throws into page JS. */
+function ph(ev,props){try{if(window.posthog&&typeof window.posthog.capture==='function'){window.posthog.capture(ev,props||{});}}catch(_e){}}
+if(typeof PH_KEY==='string'&&PH_KEY!==''){try{
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init Ce Ss Ig capture Ai calculateEventProperties Es register register_once register_for_session unregister unregister_for_session Ws getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ds Fs createPersonProfile Ls Ps opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Os debug I As getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-01-30'});
+}catch(_e){}}
+</script>
+
+<script>
 (function(){
   var nav=document.getElementById('nav');
   function onScroll(){nav.classList.toggle('scrolled',window.scrollY>24);}
@@ -836,6 +848,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
       step2.hidden=false;f.classList.add('asking');btn.textContent='Pick one to finish';
       opts.forEach(function(o,i){o.tabIndex=i===0?0:-1;});opts[0].focus({preventScroll:true});
       step2.scrollIntoView({block:'nearest'});
+      ph('signup_step1_submitted'); /* never the email — no PII leaves the page */
     }
     function closeStep2(refocus){
       step2.hidden=true;f.classList.remove('asking');
@@ -848,14 +861,16 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
         method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
         body:JSON.stringify({email:f.email.value,first_job:hid?hid.value:'',_subject:'AccInt early access',_honey:f._honey.value})
       }).then(function(r){return r.json();}).then(function(){
+        ph('signup_completed',{option:hid?hid.value:''});
         f.style.display='none';ok.style.display='block';
-      }).catch(function(){if(err){err.style.display='block';}setTimeout(function(){f.submit();},600);});
+      }).catch(function(){ph('signup_completed',{option:hid?hid.value:''});if(err){err.style.display='block';}setTimeout(function(){f.submit();},600);});
     }
     opts.forEach(function(o,i){
       o.addEventListener('click',function(){
         opts.forEach(function(x){x.setAttribute('aria-checked','false');});
         o.setAttribute('aria-checked','true');
         if(hid){hid.value=o.textContent;}
+        ph('first_job_picked',{option:o.textContent}); /* the PMF instrument — option only, never the email */
         closeStep2(false);send();
       });
       o.addEventListener('keydown',function(e){
@@ -920,6 +935,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
       var b=e.target.closest('.ltab');if(!b)return;
       tabs.querySelectorAll('.ltab').forEach(function(t){t.setAttribute('aria-pressed',t===b?'true':'false');});
       var s=SESS[b.dataset.s];if(!s)return;
+      ph('hero_tab_switched',{tab:b.dataset.s});
       var html='';
       s.rows.forEach(function(r,i){
         html+='<div class="row'+(r[5]?' refused':'')+'"><span class="t">'+r[0]+'</span><span class="verb">'+r[1]+'</span><span class="what">'+r[2]+'</span><span class="stamp '+r[3]+'">'+r[4]+'</span></div>';
@@ -939,6 +955,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
         var p=document.getElementById(t.getAttribute('aria-controls'));if(p){p.hidden=!on;}
       });
       if(focus){stabs[i].focus();}
+      ph('story_tab_switched',{tab:stabs[i].id.replace('stab-','')});
     };
     stabs.forEach(function(t,i){
       t.addEventListener('click',function(){show(i);});
