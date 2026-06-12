@@ -81,7 +81,6 @@ h1 em,h2 em,.tagline em{font-style:normal;text-decoration:underline;text-decorat
 text-decoration-thickness:3px;text-underline-offset:7px;}
 .lede{margin-top:24px;font-size:clamp(16px,1.9vw,18px);color:var(--dim);max-width:34em;}
 .lede b{color:var(--ink);font-weight:600;}
-.h-anim{} /* entrance animation retired — print does not fade */
 
 /* workflow rule-line — quiet, unstamped */
 .ruleline{margin-top:26px;max-width:560px;padding-top:13px;border-top:1px solid var(--line);
@@ -104,8 +103,7 @@ letter-spacing:.09em;text-transform:uppercase;}
 .signup form{position:relative;}
 .signup form.asking{z-index:30;}
 .step2{position:absolute;top:100%;left:-1px;right:-1px;z-index:30;
-background:var(--bg2);border:1px solid var(--line2);border-top:0;
-box-shadow:0 26px 52px rgba(2,6,12,.62);}
+background:var(--bg2);border:1px solid var(--rule);border-top:0;}
 .step2-q{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--orange);padding:10px 14px;}
 .step2 .opt{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:12px;letter-spacing:.04em;
 color:var(--dim);background:transparent;border:0;border-top:1px solid var(--line);padding:10px 14px;cursor:pointer;}
@@ -118,7 +116,9 @@ color:var(--dim);background:transparent;border:0;border-top:1px solid var(--line
 .signup input[type=email]{border-right:0;border-bottom:1px solid var(--line2);}
 }
 .signup .note{margin-top:11px;font-size:12px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
-.signup .ok{display:none;margin-top:14px;padding:13px 16px;border:1px solid var(--ink);color:var(--ink);font-family:var(--mono);font-size:13.5px;}
+.signup>.ok{display:none;margin-top:14px;padding:12px 14px;border:1px solid var(--line2);background:var(--bg2);
+color:var(--dim);font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;}
+.signup>.ok .stamp{margin-right:11px;}
 .signup .err{display:none;margin-top:10px;color:var(--orange);font-family:var(--mono);font-size:12.5px;}
 .hp{display:none;}
 
@@ -316,16 +316,14 @@ color:var(--ink);line-height:1.6;border:1px solid var(--line2);background:var(--
 .row.human .what{color:var(--ink);}
 .tagline{margin-top:56px;font-family:var(--mono);font-weight:700;font-size:clamp(21px,2.8vw,31px);line-height:1.35;text-transform:uppercase;max-width:24em;}
 
-/* doc links — navigation row */
-.doclinks{margin-top:52px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:880px;}
-@media(max-width:760px){.doclinks{grid-template-columns:1fr;}}
-.doc{border:1px solid var(--line2);padding:18px 20px;font-family:var(--mono);
-font-size:13px;color:var(--ink);background:var(--bg);text-decoration:none;
-display:flex;flex-direction:column;gap:5px;}
-.doc:hover{background:var(--ink);color:#0a0f17;}
+/* doc links — ruled list rows */
+.doclinks{margin-top:52px;max-width:680px;border-top:1px solid var(--line2);}
+.doc{display:grid;grid-template-columns:228px 1fr;gap:4px 22px;align-items:baseline;
+padding:13px 2px;border-bottom:1px solid var(--line);font-family:var(--mono);
+font-size:13px;color:var(--ink);text-decoration:none;}
 .doc span{color:var(--faint);font-size:11px;line-height:1.5;}
-.doc:hover span{color:#3c4654;}
-.doc::after{content:"→";margin-top:6px;}
+.doc:hover{color:var(--orange);}
+@media(max-width:560px){.doc{grid-template-columns:1fr;}}
 
 /* the machine — one machine, four doors (hub diagram) */
 .hub{margin-top:44px;max-width:780px;}
@@ -400,14 +398,17 @@ background:repeating-linear-gradient(0deg,rgba(232,230,224,.018) 0 1px,transpare
 .final h2{font-size:clamp(26px,3.6vw,40px);}
 .final .signup{margin:38px auto 0;text-align:left;}
 
-footer{padding:42px 0 64px;color:var(--faint);font-size:14px;border-top:3px solid var(--rule);}
-footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:baseline;}
-footer .who b{color:var(--dim);font-weight:600;}
-footer .links{display:flex;gap:20px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;letter-spacing:.05em;}
-footer a{color:var(--dim);}
-
-/* reveal system retired — content prints, it does not fade */
-.reveal{opacity:1;transform:none;}
+/* footer — the page's own receipt */
+footer{padding:56px 0 60px;border-top:3px solid var(--rule);}
+footer .ledger-head{flex-wrap:wrap;gap:3px 14px;}
+footer .ledger-head>span:first-child{white-space:nowrap;}
+.foot-rows{list-style:none;}
+.foot-rows .row{grid-template-columns:74px 1fr auto;}
+.colophon{display:flex;justify-content:space-between;align-items:baseline;gap:10px 26px;flex-wrap:wrap;
+margin-top:20px;padding-top:13px;border-top:1px solid var(--line);
+font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);text-transform:uppercase;}
+.c-links{display:flex;gap:18px;flex-wrap:wrap;}
+.colophon a{color:var(--dim);}
 
 @media(max-width:520px){
 .kicker{font-size:10px;letter-spacing:.12em;}
@@ -436,7 +437,7 @@ footer a{color:var(--dim);}
     <span class="word">acc<span class="dot">■</span>int</span>
     <div class="nav-links">
       <a href="#jobs">What it does</a>
-      <a href="#answerable">Answerable</a>
+      <a href="#answerable">The record</a>
       <a href="#stack">The machine</a>
       <a class="nav-cta" href="#access">Early access</a>
     </div>
@@ -446,11 +447,11 @@ footer a{color:var(--dim);}
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="kicker h-anim d1">Accreted Intelligence<span class="k-op"><span class="sep">·</span>autonomous operator</span><span class="sep">·</span>early access</div>
-      <h1 class="h-anim d2"><span>It does your work.</span> <span>Every action makes it <em>smarter</em>.</span></h1>
-      <p class="lede h-anim d3">Hand it work in plain words. It runs it in your accounts — <b>receipts included</b>.</p>
-      <p class="ruleline h-anim d4">you say it <span class="arr" aria-hidden="true">→</span> it runs, receipted <span class="arr" aria-hidden="true">→</span> holds for your OK <span class="arr" aria-hidden="true">→</span> it learns</p>
-      <div class="signup h-anim d5">
+      <div class="kicker">Accreted Intelligence<span class="k-op"><span class="sep">·</span>autonomous operator</span><span class="sep">·</span>early access</div>
+      <h1><span>It does your work.</span> <span>Every action makes it <em>smarter</em>.</span></h1>
+      <p class="lede">Hand it work in plain words. It runs it in your accounts — <b>receipts included</b>.</p>
+      <p class="ruleline">you say it <span class="arr" aria-hidden="true">→</span> it runs, receipted <span class="arr" aria-hidden="true">→</span> holds for your OK <span class="arr" aria-hidden="true">→</span> it learns</p>
+      <div class="signup">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
           <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
           <input type="hidden" name="_subject" value="AccInt early access">
@@ -472,12 +473,12 @@ footer a{color:var(--dim);}
           </div>
         </form>
         <div class="note">no spam · no calls · first invites go in order</div>
-        <div class="ok" id="subok">✓ You're on the list. You'll hear from me when your invite is ready.</div>
+        <div class="ok" id="subok"><span class="stamp ok">ON THE LIST</span>You'll hear from me when your invite is ready.</div>
         <div class="err" id="suberr">Hmm, that didn't go through — retrying the classic way…</div>
       </div>
     </div>
 
-    <div class="h-anim d5">
+    <div>
     <p class="led-cap">Tuesday, 9:14 — a real morning, running itself:</p>
     <div class="ledger" aria-label="Example operating session — Tuesday, 9:14, a real morning, running itself">
       <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER</span><span>operator: accint</span></div>
@@ -488,13 +489,13 @@ footer a{color:var(--dim);}
         <button class="ltab" aria-pressed="false" data-s="research">research briefs</button>
       </div>
       <div id="ledrows">
-      <div class="row" style="--d:.45s"><span class="t">08:50</span><span class="verb">find</span><span class="what"><b>41 candidates</b> matched the brief — your ATS first, then LinkedIn</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:.85s"><span class="t">08:58</span><span class="verb">rank</span><span class="what">shortlist of 9 — each with a why + a warm path</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:1.25s"><span class="t">09:07</span><span class="verb">draft</span><span class="what">9 personal first-touches — none templated</span><span class="stamp hold">HELD → your OK</span></div>
-      <div class="row" style="--d:1.65s"><span class="t">09:15</span><span class="verb">send</span><span class="what"><b>9/9 sent</b> — each confirmed on the live page</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:2.05s"><span class="t">09:20</span><span class="verb">keep</span><span class="what">ATS updated: stage, notes, next step per candidate</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row" style="--d:2.45s"><span class="t">+1d 06:30</span><span class="verb">learn</span><span class="what">3 replies → the sourcing angle that worked shapes every run after</span><span class="stamp ok">CREDITED</span></div>
-      <div class="row refused" style="--d:2.85s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
+      <div class="row"><span class="t">08:50</span><span class="verb">find</span><span class="what"><b>41 candidates</b> matched the brief — your ATS first, then LinkedIn</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t">08:58</span><span class="verb">rank</span><span class="what">shortlist of 9 — each with a why + a warm path</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t">09:07</span><span class="verb">draft</span><span class="what">9 personal first-touches — none templated</span><span class="stamp hold">HELD → your OK</span></div>
+      <div class="row"><span class="t">09:15</span><span class="verb">send</span><span class="what"><b>9/9 sent</b> — each confirmed on the live page</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t">09:20</span><span class="verb">keep</span><span class="what">ATS updated: stage, notes, next step per candidate</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t">+1d 06:30</span><span class="verb">learn</span><span class="what">3 replies → the sourcing angle that worked shapes every run after</span><span class="stamp ok">CREDITED</span></div>
+      <div class="row refused"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
       </div>
       <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
       <div class="ledger-foot">sessions are illustrative, shaped by real runs</div>
@@ -508,7 +509,7 @@ footer a{color:var(--dim);}
     <div class="mark">LIVE</div>
     <div>
       <p><b>Not a concept</b> — this is how AccInt already runs, every day, on a real operation.</p>
-      <div class="tritue reveal" role="img" aria-label="Three terminals. One Tuesday. Three sessions run at the same minute — talent search finds 41 candidates at 09:14, client briefs runs 5 workspaces at 09:14, founder pipeline sends 8 approved messages at 09:15 — and all three converge into one base: three operators, one owner — every lesson lands in one place, no collisions, by construction.">
+      <div class="tritue" role="img" aria-label="Three terminals. One Tuesday. Three sessions run at the same minute — talent search finds 41 candidates at 09:14, client briefs runs 5 workspaces at 09:14, founder pipeline sends 8 approved messages at 09:15 — and all three converge into one base: three operators, one owner — every lesson lands in one place, no collisions, by construction.">
         <div class="vt" aria-hidden="true">Three terminals. One Tuesday.</div>
         <div class="tt-panes" aria-hidden="true">
           <div class="tt-pane"><div class="tt-ph"><i></i>talent search</div>
@@ -543,7 +544,7 @@ footer a{color:var(--dim);}
     <h2>Hand it the work once. <em>Watch week nine.</em></h2>
     <p class="body">Felt first where the pipeline <b>is</b> the revenue — agency recruiters billing
     placements, fractional operators billing retainers, founders closing their own deals.</p>
-    <div class="curvebox reveal">
+    <div class="curvebox">
       <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
         <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
         <div class="cbar"><div class="fill" style="height:40%"></div><h6>RUN 2</h6><span>starts from<br>what worked</span></div>
@@ -661,7 +662,7 @@ footer a{color:var(--dim);}
     <h2>When management asks, it's already <em>written</em>.</h2>
     <p class="body">AI at work leaves no receipts, no record of who said yes, no lessons kept —
     <b>AccInt is built the other way around</b>.</p>
-    <div class="audit reveal" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
+    <div class="audit" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="aud-legend" aria-hidden="true">
         <span><i class="m1">①</i> what did it do → receipts</span>
@@ -679,8 +680,8 @@ footer a{color:var(--dim);}
       <aside class="co co3"><b>③ WHAT DID WE LEARN</b><span>→ the lesson — credited, kept</span></aside>
       </div>
     </div>
-    <p class="tagline reveal">Nothing happens without a <em>trace</em>.<br>Nothing decided is <em>lost</em>.</p>
-    <div class="platewrap reveal">
+    <p class="tagline">Nothing happens without a <em>trace</em>.<br>Nothing decided is <em>lost</em>.</p>
+    <div class="platewrap">
       <table class="plate" aria-label="Rating plate. Data residency: your machine. Authority: signed grants, consent floors. Record: append-only ledger. Training: never on your data. Host: agent-agnostic.">
         <caption>RATING PLATE · ACCINT OPERATOR</caption>
         <tbody>
@@ -703,7 +704,7 @@ footer a{color:var(--dim);}
     <p class="body">It plugs into <b>the coding agent you already run</b>; learning lives in a
     <b>scored external memory</b> that compounds from real outcomes — the model is a replaceable
     processor, and everything it learns stays <b>on your machine</b>.</p>
-    <div class="hub reveal" role="img" aria-label="One machine, four doors. Four agent terminals — Claude Code, live with the deepest hooks; Codex, live today over MCP; OpenCode, live today over MCP; Cursor, connects over MCP — all speak the same two verbs and converge into one binary: acc4, one pure-Rust binary, native on Windows, macOS and Linux. The binary feeds a single base ledger rule: every lesson lands in one local ledger — no cloud in the loop — yours.">
+    <div class="hub" role="img" aria-label="One machine, four doors. Four agent terminals — Claude Code, live with the deepest hooks; Codex, live today over MCP; OpenCode, live today over MCP; Cursor, connects over MCP — all speak the same two verbs and converge into one binary: acc4, one pure-Rust binary, native on Windows, macOS and Linux. The binary feeds a single base ledger rule: every lesson lands in one local ledger — no cloud in the loop — yours.">
       <div class="hub-frames" aria-hidden="true">
         <div class="hub-f deep"><div class="hub-ph"><i></i>claude code</div><div class="hub-vv">acc4_retrieve · acc4_act</div><span class="hub-tier">live · deepest hooks</span></div>
         <div class="hub-f live"><div class="hub-ph"><i></i>codex</div><div class="hub-vv">acc4_retrieve · acc4_act</div><span class="hub-tier">live today · MCP</span></div>
@@ -721,7 +722,7 @@ footer a{color:var(--dim);}
       <div class="hub-wire" aria-hidden="true"></div>
       <div class="hub-rule" aria-hidden="true"><span class="t">always</span><span class="verb">keep</span><span class="what">every lesson lands in <b>one local ledger</b> — no cloud in the loop</span><span class="stamp ok">YOURS</span></div>
     </div>
-    <div class="gatewrap reveal">
+    <div class="gatewrap">
       <div role="img" aria-label="What stays. What leaves. Your machine keeps everything it learns, every receipt, and drafts in progress. At the boundary stands one gate — held for your OK. The only thing that leaves your machine: the 8 messages you approved — nothing else.">
         <div class="vt" aria-hidden="true">What stays. What leaves.</div>
         <div class="gate" aria-hidden="true">
@@ -753,13 +754,13 @@ footer a{color:var(--dim);}
     <div class="tag">where this goes</div>
     <h2>One operator today.<br>One <em>shared brain</em> next.</h2>
     <div class="road">
-      <div class="stage now reveal" style="--rd:0s"><span class="st">NOW · LIVE</span>
+      <div class="stage now"><span class="st">NOW · LIVE</span>
         <h3>Your operator</h3>
         <p>One operator on your work, compounding <b>one judgment</b> — what early access opens.</p></div>
-      <div class="stage next reveal" style="--rd:.12s"><span class="st">NEXT</span>
+      <div class="stage next"><span class="st">NEXT</span>
         <h3>The team brain</h3>
         <p><b>One shared judgment, many operators</b> — per-person authority, one audit plane.</p></div>
-      <div class="stage later reveal" style="--rd:.24s"><span class="st">RESEARCH</span>
+      <div class="stage later"><span class="st">RESEARCH</span>
         <h3>Judgment that travels</h3>
         <p>Partner orgs exchange judgment; each side <b>re-verifies against its own reality</b>.</p></div>
     </div>
@@ -792,20 +793,30 @@ footer a{color:var(--dim);}
         </div>
       </form>
       <div class="note">no spam · no calls · first invites go in order</div>
-      <div class="ok" id="subok2">✓ You're on the list. You'll hear from me when your invite is ready.</div>
+      <div class="ok" id="subok2"><span class="stamp ok">ON THE LIST</span>You'll hear from me when your invite is ready.</div>
       <div class="err" id="suberr2">Hmm, that didn't go through — retrying the classic way…</div>
     </div>
   </div>
 </section>
 
-<footer>
+<footer aria-label="This page's own receipt — built through the operator loop with claims, receipts and owner OKs in every commit; every push held and OK'd by the owner before it left; what worked here is kept, and your signup shapes what it masters first. Built by Max Baluev.">
   <div class="wrap">
-    <div class="who">Built by <b>Max Baluev</b> — founder-engineer; agents, retrieval, agent memory.</div>
-    <div class="links">
-      <a href="mailto:maxbaluev@outlook.com">email</a>
-      <a href="https://t.me/maxbaluev">telegram</a>
-      <a href="https://github.com/maxbaluev">github</a>
-      <a href="https://www.linkedin.com/in/maxbaluev">linkedin</a>
+    <div class="ledger">
+      <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER · THIS PAGE</span><span>operator: accint</span></div>
+      <ul class="foot-rows" role="list">
+        <li class="row"><span class="verb">build</span><span class="what">this page: <b>verified passes through the operator loop</b> — claims, receipts, owner OKs in every commit</span><span class="stamp ok">VERIFIED</span></li>
+        <li class="row"><span class="verb">publish</span><span class="what">every push <b>HELD → OK'd by the owner</b> before it left</span><span class="stamp hold">HELD → OK'd</span></li>
+        <li class="row"><span class="verb">learn</span><span class="what">what worked here is kept — <b>your signup shapes what it masters first</b></span><span class="stamp ok">CREDITED</span></li>
+      </ul>
+    </div>
+    <div class="colophon">
+      <span>BUILT BY MAX BALUEV — agents, retrieval, agent memory</span>
+      <span class="c-links">
+        <a href="mailto:maxbaluev@outlook.com">email</a>
+        <a href="https://t.me/maxbaluev">telegram</a>
+        <a href="https://github.com/maxbaluev">github</a>
+        <a href="https://www.linkedin.com/in/maxbaluev">linkedin</a>
+      </span>
     </div>
   </div>
 </footer>
@@ -911,7 +922,7 @@ footer a{color:var(--dim);}
       var s=SESS[b.dataset.s];if(!s)return;
       var html='';
       s.rows.forEach(function(r,i){
-        html+='<div class="row'+(r[5]?' refused':'')+'" style="--d:'+(i*.09)+'s"><span class="t">'+r[0]+'</span><span class="verb">'+r[1]+'</span><span class="what">'+r[2]+'</span><span class="stamp '+r[3]+'">'+r[4]+'</span></div>';
+        html+='<div class="row'+(r[5]?' refused':'')+'"><span class="t">'+r[0]+'</span><span class="verb">'+r[1]+'</span><span class="what">'+r[2]+'</span><span class="stamp '+r[3]+'">'+r[4]+'</span></div>';
       });
       rowsEl.innerHTML=html;
       if(typeEl){typeEl.textContent=s.next;}
