@@ -9,10 +9,10 @@
 <meta property="og:title" content="Accreted Intelligence — it does your work, and every action makes it smarter">
 <meta property="og:description" content="The operator you hand work to. It runs inside your own accounts, proves every action with a receipt, asks before anything leaves, and learns from every run. Everything it learns stays on your machine. Early access.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://maxbaluev.github.io/accreted-intelligence/">
-<meta property="og:image" content="https://maxbaluev.github.io/accreted-intelligence/og.png">
+<meta property="og:url" content="https://accint.xyz/">
+<meta property="og:image" content="https://accint.xyz/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://maxbaluev.github.io/accreted-intelligence/og.png">
+<meta name="twitter:image" content="https://accint.xyz/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314110b'/%3E%3Crect x='6' y='12.5' width='7' height='7' fill='%23ff6a00'/%3E%3Crect x='16' y='13' width='10' height='2.4' fill='%23ece7db' opacity='.85'/%3E%3Crect x='16' y='17.7' width='6.5' height='2.4' fill='%23ece7db' opacity='.45'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -498,7 +498,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
           <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
           <input type="hidden" name="_subject" value="AccInt early access">
           <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
+          <input type="hidden" name="_next" value="https://accint.xyz/?subscribed=1">
           <input type="hidden" name="first_job" value="">
           <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get my invite</button>
@@ -729,24 +729,26 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 <section id="science">
   <div class="wrap">
     <div class="tag">the whitepaper, in one viewport</div>
-    <h2>The science: judgment that <em>compounds</em>.</h2>
+    <h2>The science: a <em>Work Model</em> that compounds.</h2>
     <p class="body">A model that scores 90% on a benchmark today scores 90% tomorrow, never 91%.
     It does the work, then forgets what worked. AccInt keeps the learning <b>outside the model,
-    in scored memory</b> — the way DNA holds what survived while organisms come and go.</p>
-    <div class="fig" role="img" aria-label="Figure 1 — how memory is scored. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each memory token's Beta posterior of how often its alignments led to good outcomes. Late interaction means every token of your ask meets every token of memory (ColBERT). Credit is reality-gated: a self-graded outcome counts at a weak prior; full weight requires reality — a reply, a passing test, your OK. Credit is also surprise-gated: confirming outcomes barely move a token, surprising ones move it most.">
-      <div class="fig-h"><span>FIG. 1 · HOW MEMORY IS SCORED</span><span>per token, not per document</span></div>
+    in a scored Work Model of your operation</b>, the way DNA holds what survived while
+    organisms come and go.</p>
+    <div class="fig" role="img" aria-label="Figure 1 — how the Work Model is scored. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each token's Beta posterior of how often its alignments led to good outcomes. Late interaction means every token of your ask meets every token of the Work Model (ColBERT); vision is native — what it learned from a document answers a question about a screenshot (ColPali). Credit is pedagogical: the Work Model is taught by outcomes, never by its own belief — a self-graded result counts at a weak prior, full weight requires reality, and surprising outcomes teach hardest. A JEPA-style transitions ledger predicts which action improves things next and watches its own prediction error — when your world shifts, it notices.">
+      <div class="fig-h"><span>FIG. 1 · HOW THE WORK MODEL IS SCORED</span><span>per token, not per document</span></div>
       <div class="fig-eq" aria-hidden="true">score(q, d) = Σ<sub>i</sub> max<sub>j</sub> [ sim(q<sub>i</sub>, d<sub>j</sub>) <span class="gp">· g(π<sub>j</sub>)</span> ]</div>
       <div aria-hidden="true">
-        <div class="fn"><b>late interaction</b><span>every token of your ask meets every token of memory; the aligned pairs are the citation — ColBERT [1], vision included via ColPali [2]</span></div>
-        <div class="fn"><b>π = α / (α+β)</b><span>each memory token carries a Beta posterior: how often its alignments led to good outcomes, on how much real evidence — Thompson [3]</span></div>
-        <div class="fn"><b>reality-gated</b><span>a self-graded outcome credits at a deliberately weak prior; full weight requires reality — a reply, a passing test, your OK</span></div>
-        <div class="fn"><b>surprise-gated</b><span>outcomes that confirm what a token already predicted barely move it; surprising ones move it most — Friston [4]</span></div>
+        <div class="fn"><b>in plain words</b><span>it remembers what worked, checks itself against reality instead of trusting its own answers, and notices when your world changes — the math below is how</span></div>
+        <div class="fn"><b>late interaction</b><span>every token of your ask meets every token of the Work Model; the aligned pairs are the citation — ColBERT [1]. vision is native: what it learned from a document answers a question about a screenshot — ColPali [2]</span></div>
+        <div class="fn"><b>π = α / (α+β)</b><span>each token carries a Beta posterior: how often its alignments led to good outcomes, on how much real evidence — Thompson [3]</span></div>
+        <div class="fn"><b>pedagogical credit</b><span>the Work Model is taught by outcomes, never by its own belief: a self-graded result counts at a weak prior; full weight requires reality — a reply, a passing test, your OK. surprising outcomes teach hardest — Friston [4]</span></div>
+        <div class="fn"><b>jepa prediction</b><span>a transitions ledger predicts which action improves things next and watches its own error — when your world shifts, it notices — LeCun [6]</span></div>
       </div>
     </div>
     <p class="led-cap" style="margin-top:46px">The substrate behind this page, counted on 12 Jun 2026:</p>
-    <div class="ledger" style="max-width:720px" aria-label="Live counts from the operator that builds and runs this page, 12 June 2026: 2,778 entities in scored memory; 20,667 events on the append-only ledger; 1,931 outcomes validated by reality versus 372 self-graded at a weak prior; 94% success over the last 50 outcomes.">
-      <div class="ledger-head"><span><span class="dot"></span>SUBSTRATE READOUT</span><span>operator: accint</span></div>
-      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">holds</span><span class="what"><b>2,778 entities</b> in scored memory · 537 of them runnable</span><span class="stamp ok">COUNTED</span></div>
+    <div class="ledger" style="max-width:720px" aria-label="Live counts from the operator that builds and runs this page, 12 June 2026: 2,778 entities in the Work Model; 20,667 events on the append-only ledger; 1,931 outcomes validated by reality versus 372 self-graded at a weak prior; 94% success over the last 50 outcomes.">
+      <div class="ledger-head"><span><span class="dot"></span>WORK MODEL READOUT</span><span>operator: accint</span></div>
+      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">holds</span><span class="what"><b>2,778 entities</b> in the Work Model · 537 of them runnable</span><span class="stamp ok">COUNTED</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">wrote</span><span class="what"><b>20,667 events</b> on the append-only ledger</span><span class="stamp ok">COUNTED</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">scored</span><span class="what"><b>1,931 outcomes validated by reality</b> · 372 self-graded, held at a weak prior</span><span class="stamp ok">CREDITED</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">ran</span><span class="what">last 50 outcomes: <b>94% good</b> — belief never counts as reality</span><span class="stamp ok">VERIFIED</span></div>
@@ -758,6 +760,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
       <li><span>Thompson (1933). <i>On the likelihood that one unknown probability exceeds another in view of the evidence of two samples.</i> Biometrika. <a href="https://www.jstor.org/stable/2332286">JSTOR:2332286</a></span></li>
       <li><span>Friston (2010). <i>The free-energy principle: a unified brain theory?</i> Nature Reviews Neuroscience. <a href="https://www.nature.com/articles/nrn2787">nature.com/nrn2787</a></span></li>
       <li><span>Xu et al. (2025). <i>Recursive Language Models.</i> <a href="https://arxiv.org/abs/2512.24601">arXiv:2512.24601</a></span></li>
+      <li><span>LeCun (2022). <i>A Path Towards Autonomous Machine Intelligence.</i> OpenReview. <a href="https://openreview.net/forum?id=BZ5a1r-kVsf">openreview:BZ5a1r-kVsf</a></span></li>
     </ol>
     <p class="refs-cap">the full argument and the math live in the
     <a href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper</a>.
@@ -771,9 +774,9 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
   <div class="wrap">
     <div class="tag">no new tab to live in</div>
     <h2>Runs where you <em>already work</em>.</h2>
-    <p class="body">It plugs into <b>the coding agent you already run</b>. Learning lives in a
-    <b>scored external memory</b> that compounds from real outcomes, and everything it learns
-    stays <b>on your machine</b>.</p>
+    <p class="body">It plugs into <b>the coding agent you already run</b> and compounds a
+    <b>scored Work Model of your operation</b> from real outcomes (what worked, what failed,
+    what to try next), and everything it learns stays <b>on your machine</b>.</p>
     <div class="hub" role="img" aria-label="One machine, four doors. Four agent terminals — native hook host, live with hook support; Codex, live today over MCP; OpenCode, live today over MCP; Cursor, connects over MCP — all speak the same two verbs and converge into one binary: acc4, one pure-Rust binary, native on Windows, macOS and Linux. The binary feeds a single base ledger rule: every lesson lands in one local ledger — no cloud in the loop — yours.">
       <div class="hub-frames" aria-hidden="true">
         <div class="hub-f deep"><div class="hub-ph"><i></i>native hook host</div><div class="hub-vv">acc4_retrieve · acc4_act</div><span class="hub-tier">live · hooks</span></div>
@@ -808,7 +811,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
     embedder runs as a local daemon beside it. There is no cloud in the loop and <b>no API key to
     leak</b>: nothing reasons over your data except the agent you already run.</p>
     <p class="body">The reasoning model is <b>a replaceable processor, not the brain</b>. Judgment
-    lives in the scored memory, so you can swap the model and keep everything it learned; the same
+    lives in the Work Model, so you can swap the model and keep everything it learned; the same
     substrate already runs under <b>two different model families</b> today.</p>
     <div class="gatewrap">
       <div role="img" aria-label="What stays. What leaves. Your machine keeps everything it learns, every receipt, and drafts in progress. At the boundary stands one gate — held for your OK. The only thing that leaves your machine: the 8 messages you approved — nothing else.">
@@ -872,7 +875,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
         <p>One operator on your work, compounding <b>one judgment</b>. This is what early access opens.</p></div>
       <div class="stage next"><span class="st">NEXT</span>
         <h3>The team brain</h3>
-        <p><b>One shared judgment, many operators</b>, with per-person authority and one audit plane.</p></div>
+        <p><b>One shared Work Model, many operators</b>, with per-person authority and one audit plane.</p></div>
       <div class="stage later"><span class="st">RESEARCH</span>
         <h3>Judgment that travels</h3>
         <p>Partner orgs exchange judgment; each side <b>re-verifies against its own reality</b>.</p></div>
@@ -889,7 +892,7 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
         <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
         <input type="hidden" name="_subject" value="AccInt early access">
         <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_next" value="https://maxbaluev.github.io/accreted-intelligence/?subscribed=1">
+        <input type="hidden" name="_next" value="https://accint.xyz/?subscribed=1">
         <input type="hidden" name="first_job" value="">
         <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get my invite</button>
@@ -1027,8 +1030,8 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
       ['—','refuse','"blast 400 InMails" — consent floor, never crossed','no','REFUSED',1]]},
     clientops:{next:'next: Monday briefs scheduled · 5 clients',rows:[
       ['06:05','run','into <b>5 client workspaces</b> — boards, CRM, portals, inbox','ok','VERIFIED'],
-      ['06:31','find','14 changes worth a partner’s eye — 3 risks flagged','ok','VERIFIED'],
-      ['06:52','draft','5 Monday briefs — risks first, every claim linked','hold','HELD → your OK'],
+      ['06:31','read','14 changes worth a partner’s eye — one risk pulled from a <b>scanned PO</b> the portal only shows as PDF','ok','VERIFIED'],
+      ['06:52','draft','5 Monday briefs — <b>the São Paulo client’s reads in Portuguese</b>','hold','HELD → your OK'],
       ['07:14','keep','trackers updated from <b>what actually happened</b> — 22 rows','ok','VERIFIED'],
       ['07:25','file','briefs on your desk before coffee','ok','VERIFIED'],
       ['+1d 06:15','learn','your edits → next Monday reads more like you','ok','CREDITED'],
