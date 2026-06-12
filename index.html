@@ -100,15 +100,19 @@ color:var(--ink);font-size:14.5px;font-family:var(--mono);min-width:0;}
 background:var(--orange);color:#0a0f17;font-weight:700;font-size:13px;font-family:var(--mono);
 letter-spacing:.09em;text-transform:uppercase;}
 .signup button[type=submit]:hover{background:var(--ink);}
-.pills{grid-column:1/-1;display:flex;flex-wrap:wrap;border-top:1px solid var(--line2);}
-.pl{flex:1 1 100%;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;padding:7px 12px;}
-.pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--dim);background:transparent;
-border:0;border-top:1px solid var(--line);border-right:1px solid var(--line);padding:8px 12px;cursor:pointer;
-flex:1 1 auto;text-align:center;}
-.pill:hover{color:var(--ink);background:var(--bg3);}
-.pill[aria-pressed=true]{color:#0a0f17;background:var(--ink);font-weight:600;}
-.pill-hint{display:none;grid-column:1/-1;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--orange);padding:8px 12px;border-top:1px solid var(--line);}
-.pill-hint.on{display:block;}
+/* step 2 — hairline drawer; absolute overlay so the ledger never moves */
+.signup form{position:relative;}
+.signup form.asking{z-index:30;}
+.step2{position:absolute;top:100%;left:-1px;right:-1px;z-index:30;
+background:var(--bg2);border:1px solid var(--line2);border-top:0;
+box-shadow:0 26px 52px rgba(2,6,12,.62);}
+.step2-q{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--orange);padding:10px 14px;}
+.step2 .opt{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+color:var(--dim);background:transparent;border:0;border-top:1px solid var(--line);padding:10px 14px;cursor:pointer;}
+.step2 .opt::after{content:"→";float:right;color:inherit;opacity:0;}
+.step2 .opt:hover,.step2 .opt[aria-checked=true]{color:#0a0f17;background:var(--ink);}
+.step2 .opt:hover::after,.step2 .opt[aria-checked=true]::after{opacity:1;}
+.step2 .opt:focus-visible{outline-offset:-2px;}
 @media(max-width:520px){
 .signup form{grid-template-columns:1fr;}
 .signup input[type=email]{border-right:0;border-bottom:1px solid var(--line2);}
@@ -117,8 +121,6 @@ flex:1 1 auto;text-align:center;}
 .signup .ok{display:none;margin-top:14px;padding:13px 16px;border:1px solid var(--ink);color:var(--ink);font-family:var(--mono);font-size:13.5px;}
 .signup .err{display:none;margin-top:10px;color:var(--orange);font-family:var(--mono);font-size:12.5px;}
 .hp{display:none;}
-.pills.nudge .pill{animation:pillnudge .6s steps(1) 3;}
-@keyframes pillnudge{0%,100%{box-shadow:none;}50%{box-shadow:inset 0 0 0 1px var(--orange);}}
 
 /* ---------- ledger card ---------- */
 .led-cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin:0 0 10px;text-transform:uppercase;}
@@ -424,7 +426,6 @@ footer a{color:var(--dim);}
 }
 @media (prefers-reduced-motion: reduce){
 .ledger-head .dot,.ledger-type .car{animation:none;}
-.pills.nudge .pill{animation:none;box-shadow:inset 0 0 0 1px var(--orange);}
 }
 </style>
 </head>
@@ -458,16 +459,17 @@ footer a{color:var(--dim);}
           <input type="hidden" name="first_job" value="">
           <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get early access</button>
-          <div class="pills" role="group" aria-label="What would you hand it first?">
-            <span class="pl">what would you hand it first? · pick one</span>
-            <button type="button" class="pill" aria-pressed="false">agency recruiting &amp; search</button>
-            <button type="button" class="pill" aria-pressed="false">fractional / agency client ops</button>
-            <button type="button" class="pill" aria-pressed="false">founder-led B2B sales</button>
-            <button type="button" class="pill" aria-pressed="false">research &amp; monitoring briefs</button>
-            <button type="button" class="pill" aria-pressed="false">back-office portal ops (no-API)</button>
-            <button type="button" class="pill" aria-pressed="false">something else</button>
+          <div class="step2" hidden>
+            <p class="step2-q" aria-hidden="true">one last thing — what would you hand it first?</p>
+            <div role="radiogroup" aria-label="One last thing — what would you hand it first?">
+              <button type="button" class="opt" role="radio" aria-checked="false">agency recruiting &amp; search</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">fractional / agency client ops</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">founder-led B2B sales</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">research &amp; monitoring briefs</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">back-office portal ops (no-API)</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">something else</button>
+            </div>
           </div>
-          <span class="pill-hint" aria-live="polite">pick one — invites go in order + fit</span>
         </form>
         <div class="note">no spam · no calls · first invites go in order</div>
         <div class="ok" id="subok">✓ You're on the list. You'll hear from me when your invite is ready.</div>
@@ -777,16 +779,17 @@ footer a{color:var(--dim);}
         <input type="hidden" name="first_job" value="">
         <input type="email" name="email" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get early access</button>
-        <div class="pills" role="group" aria-label="What would you hire it for first?">
-          <span class="pl">first job · pick one</span>
-          <button type="button" class="pill" aria-pressed="false">agency recruiting &amp; search</button>
-          <button type="button" class="pill" aria-pressed="false">fractional / agency client ops</button>
-          <button type="button" class="pill" aria-pressed="false">founder-led B2B sales</button>
-          <button type="button" class="pill" aria-pressed="false">research &amp; monitoring briefs</button>
-          <button type="button" class="pill" aria-pressed="false">back-office portal ops (no-API)</button>
-          <button type="button" class="pill" aria-pressed="false">something else</button>
+        <div class="step2" hidden>
+          <p class="step2-q" aria-hidden="true">one last thing — what would you hand it first?</p>
+          <div role="radiogroup" aria-label="One last thing — what would you hand it first?">
+            <button type="button" class="opt" role="radio" aria-checked="false">agency recruiting &amp; search</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">fractional / agency client ops</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">founder-led B2B sales</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">research &amp; monitoring briefs</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">back-office portal ops (no-API)</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">something else</button>
+          </div>
         </div>
-        <span class="pill-hint" aria-live="polite">pick one — invites go in order + fit</span>
       </form>
       <div class="note">no spam · no calls · first invites go in order</div>
       <div class="ok" id="subok2">✓ You're on the list. You'll hear from me when your invite is ready.</div>
@@ -816,30 +819,50 @@ footer a{color:var(--dim);}
   function wire(formId, okId, errId){
     var f=document.getElementById(formId),ok=document.getElementById(okId),err=document.getElementById(errId);
     if(!f) return;
-    var hid=f.querySelector('input[name=first_job]'),pills=f.querySelectorAll('.pill'),
-        prow=f.querySelector('.pills'),hint=f.querySelector('.pill-hint'),nudged=false;
-    pills.forEach(function(p){p.addEventListener('click',function(){
-      var on=p.getAttribute('aria-pressed')==='true';
-      pills.forEach(function(x){x.setAttribute('aria-pressed','false');});
-      if(!on){p.setAttribute('aria-pressed','true');}
-      if(hid){hid.value=on?'':p.textContent;}
-      if(hid&&hid.value){if(hint){hint.classList.remove('on');}if(prow){prow.classList.remove('nudge');}}
-    });});
-    f.addEventListener('submit',function(e){
-      e.preventDefault();
-      if(hid&&!hid.value&&!nudged){ /* soft-required: block once, nudge the pills */
-        nudged=true;
-        if(prow){prow.classList.remove('nudge');void prow.offsetWidth;prow.classList.add('nudge');}
-        if(hint){hint.classList.add('on');}
-        return;
-      }
-      var btn=f.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Sending…';
+    var hid=f.querySelector('input[name=first_job]'),btn=f.querySelector('button[type=submit]'),
+        step2=f.querySelector('.step2'),opts=[].slice.call(f.querySelectorAll('.opt'));
+    function openStep2(){
+      step2.hidden=false;f.classList.add('asking');btn.textContent='Pick one to finish';
+      opts.forEach(function(o,i){o.tabIndex=i===0?0:-1;});opts[0].focus({preventScroll:true});
+      step2.scrollIntoView({block:'nearest'});
+    }
+    function closeStep2(refocus){
+      step2.hidden=true;f.classList.remove('asking');
+      if(!btn.disabled){btn.textContent='Get early access';}
+      if(refocus){f.email.focus();}
+    }
+    function send(){
+      btn.disabled=true;btn.textContent='Sending…';
       fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
         method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
         body:JSON.stringify({email:f.email.value,first_job:hid?hid.value:'',_subject:'AccInt early access',_honey:f._honey.value})
       }).then(function(r){return r.json();}).then(function(){
         f.style.display='none';ok.style.display='block';
       }).catch(function(){if(err){err.style.display='block';}setTimeout(function(){f.submit();},600);});
+    }
+    opts.forEach(function(o,i){
+      o.addEventListener('click',function(){
+        opts.forEach(function(x){x.setAttribute('aria-checked','false');});
+        o.setAttribute('aria-checked','true');
+        if(hid){hid.value=o.textContent;}
+        closeStep2(false);send();
+      });
+      o.addEventListener('keydown',function(e){
+        var d=e.key==='ArrowDown'?1:(e.key==='ArrowUp'?-1:0);
+        if(!d)return;
+        e.preventDefault();
+        var j=(i+d+opts.length)%opts.length;
+        o.tabIndex=-1;opts[j].tabIndex=0;opts[j].focus();
+      });
+    });
+    f.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&!step2.hidden){e.preventDefault();closeStep2(true);}
+    });
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(!step2.hidden){opts[0].focus();return;} /* step 2 already open — the list finishes, not the button */
+      if(hid&&!hid.value){openStep2();return;}   /* valid email → reveal step 2; no POST yet */
+      send();
     });
     if(new URLSearchParams(location.search).get('subscribed')==='1'){f.style.display='none';ok.style.display='block';}
   }
