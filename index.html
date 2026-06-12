@@ -83,20 +83,10 @@ text-decoration-thickness:3px;text-underline-offset:7px;}
 .lede b{color:var(--ink);font-weight:600;}
 .h-anim{} /* entrance animation retired — print does not fade */
 
-/* main-workflow strip */
-.flow{display:flex;align-items:flex-start;gap:9px;margin-top:28px;max-width:560px;font-family:var(--mono);}
-.fstep{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:5px;}
-.fstep b{font-size:11px;font-weight:600;letter-spacing:.07em;color:var(--ink);white-space:nowrap;text-transform:uppercase;}
-.fstep small{font-size:10px;color:var(--faint);line-height:1.5;display:block;}
-.fstep .stamp{align-self:flex-start;font-size:8.5px;padding:2px 6px;letter-spacing:.06em;}
-.farr{color:var(--faint);font-size:11px;line-height:1;margin-top:2px;flex:0 0 auto;}
-@media(max-width:520px){
-.flow{flex-direction:column;align-items:stretch;gap:9px;max-width:none;}
-.farr{display:none;}
-.fstep{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:3px 9px;}
-.fstep small{min-width:0;}
-.fstep .stamp{align-self:baseline;}
-}
+/* workflow rule-line — quiet, unstamped */
+.ruleline{margin-top:26px;max-width:560px;padding-top:13px;border-top:1px solid var(--line);
+font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--faint);line-height:1.9;}
+.ruleline .arr{color:var(--rule);margin:0 7px;}
 
 /* waitlist form — hard-grid order form */
 .signup{margin-top:30px;max-width:560px;}
@@ -148,7 +138,7 @@ border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
 .ledger-tabs .ltab{flex:1 1 auto;text-align:center;font-size:9.5px;letter-spacing:.04em;padding:8px 6px;}
 .ltab:hover{color:var(--ink);background:var(--bg3);}
 .ltab[aria-pressed=true],.ltab[aria-selected=true]{color:#0a0f17;background:var(--ink);font-weight:600;}
-.stabs{display:flex;flex-wrap:wrap;margin-top:34px;border:1px solid var(--line2);border-bottom:0;width:max-content;max-width:100%;}
+.stabs{display:flex;flex-wrap:wrap;margin-top:46px;border:1px solid var(--line2);border-bottom:0;width:max-content;max-width:100%;}
 .stabs .ltab{font-size:11.5px;padding:9px 16px;}
 @media(max-width:520px){.stabs{width:100%;}.stabs .ltab{flex:1 1 auto;text-align:center;font-size:10.5px;padding:8px 10px;}}
 #ledrows{min-height:300px;}
@@ -173,13 +163,13 @@ animation:blink 1.1s steps(1) infinite;}
 
 /* ---------- honesty strip ---------- */
 .honest{background:var(--bg2);}
-.honest .wrap{display:flex;gap:20px;align-items:flex-start;padding:30px 26px;}
+.honest .wrap{display:flex;gap:20px;align-items:flex-start;padding:44px 26px;}
 .honest .mark{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#0a0f17;background:var(--ink);
 padding:5px 10px;white-space:nowrap;margin-top:3px;font-weight:700;}
 .honest p{font-size:15px;color:var(--dim);max-width:60em;}
 .honest p b{color:var(--ink);}
 /* nameplate — industrial rating plate */
-.platewrap{position:relative;display:inline-block;margin-top:38px;padding:11px;border:1px solid var(--line2);background:var(--bg2);}
+.platewrap{position:relative;display:inline-block;margin-top:48px;padding:11px;border:1px solid var(--line2);background:var(--bg2);}
 .platewrap::before{content:"";position:absolute;inset:0;pointer-events:none;background:
 radial-gradient(circle at 8px 8px,var(--rule) 2.5px,transparent 3px),
 radial-gradient(circle at calc(100% - 8px) 8px,var(--rule) 2.5px,transparent 3px),
@@ -200,7 +190,7 @@ text-align:left;text-transform:uppercase;vertical-align:top;}
 
 /* three terminals, one tuesday */
 .vt{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);margin-bottom:10px;text-transform:uppercase;}
-.tritue{margin-top:18px;max-width:680px;}
+.tritue{margin-top:24px;max-width:680px;}
 .tt-panes{display:flex;gap:12px;}
 .tt-pane{flex:1 1 0;min-width:0;border:1px solid var(--line2);background:var(--bg);padding:9px 0 3px;position:relative;}
 .tt-ph{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--faint);text-transform:uppercase;padding:0 11px 7px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -224,7 +214,9 @@ text-align:left;text-transform:uppercase;vertical-align:top;}
 }
 
 /* ---------- sections — drawing-sheet rhythm ---------- */
-section{padding:96px 0;border-top:3px solid var(--rule);scroll-margin-top:74px;counter-increment:sec;}
+section{padding:130px 0;border-top:3px solid var(--rule);scroll-margin-top:74px;counter-increment:sec;}
+@media(max-width:640px){section{padding:96px 0;}}
+.sec-alias{display:block;height:0;visibility:hidden;scroll-margin-top:74px;}
 .tag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:18px;display:flex;align-items:center;gap:12px;}
 .tag::before{content:counter(sec,decimal-leading-zero);color:var(--ink);border:1px solid var(--line2);padding:2px 7px;font-weight:600;letter-spacing:.05em;}
 h2{font-family:var(--mono);font-weight:700;font-size:clamp(23px,3vw,33px);line-height:1.22;margin-bottom:20px;text-transform:uppercase;letter-spacing:-.005em;}
@@ -232,35 +224,9 @@ p.body{color:var(--dim);max-width:44em;}
 p.body+p.body{margin-top:14px;}
 p.body b{color:var(--ink);font-weight:600;}
 
-/* two-column section layout */
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;margin-top:14px;}
-@media(max-width:840px){.duo{grid-template-columns:1fr;gap:40px;}}
-.duo>*{min-width:0;}
-.caps{display:flex;flex-direction:column;gap:18px;margin-top:30px;}
-.cap{display:flex;gap:14px;align-items:flex-start;}
-.cap .n{font-family:var(--mono);font-weight:700;font-size:12px;color:#0a0f17;background:var(--ink);
-min-width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;margin-top:2px;}
-.cap p{font-size:15px;color:var(--dim);line-height:1.6;}
-.cap p b{color:var(--ink);font-weight:600;}
-
-/* loop track */
-.ring{position:relative;width:min(430px,92%);aspect-ratio:1;margin:18px auto;}
-.ring::before{content:"";position:absolute;inset:44px;border:1px dashed var(--line2);}
-.rnode{position:absolute;transform:translate(-50%,-50%);background:var(--bg2);border:1px solid var(--line2);
-padding:10px 14px;text-align:center;min-width:130px;}
-.rnode h5{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;color:var(--ink);font-weight:600;white-space:nowrap;text-transform:uppercase;}
-.rnode span{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px;}
-.rnode.rn1{border-color:var(--orange);}
-.rnode.rn1 h5{color:var(--orange);}
-.rn1{left:50%;top:7%;} .rn2{left:93%;top:50%;} .rn3{left:50%;top:93%;} .rn4{left:7%;top:50%;}
-@media(max-width:1040px){.rn2{left:88%;} .rn4{left:12%;}}
-@media(max-width:520px){.rnode{min-width:104px;padding:8px 10px;} .rnode h5{font-size:9.5px;white-space:normal;} .rn2{left:88%;} .rn4{left:12%;}}
-.rcore{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;
-font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.06em;line-height:1.7;text-transform:uppercase;}
-.rcore .cyc{font-size:20px;display:block;color:var(--ink);}
-
 /* compounding curve — flat orange-to-steel */
-.curve{display:flex;align-items:stretch;gap:14px;height:260px;margin-top:16px;}
+.curvebox{max-width:720px;margin-top:48px;}
+.curve{display:flex;align-items:stretch;gap:14px;height:260px;}
 .cbar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;text-align:center;min-width:0;}
 .cbar .fill{border:1px solid var(--line2);background:var(--orange);}
 .cbar:nth-child(2) .fill{background:#b5551f;}
@@ -270,14 +236,6 @@ font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.06em;l
 .cbar span{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:4px;line-height:1.5;}
 .cbar.last h6{color:var(--steel);}
 .curve-cap{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:18px;letter-spacing:.04em;}
-
-/* kernel laws */
-.law{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;}
-@media(max-width:840px){.law{grid-template-columns:1fr;}}
-.rule{border:1px solid var(--line2);border-left:3px solid var(--ink);padding:20px 22px;background:var(--bg2);}
-.rule h4{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink);margin-bottom:8px;}
-.rule h4 .pil{color:var(--faint);margin-right:8px;}
-.rule p{font-size:14px;color:var(--dim);line-height:1.62;}
 
 /* the same week, twice — story panels */
 .stories{margin-top:0;display:grid;gap:28px;}
@@ -347,20 +305,18 @@ font-size:10.5px;letter-spacing:.2em;color:var(--steel);text-transform:uppercase
 .aud-grid .row{grid-template-columns:44px 50px 1fr auto auto;}
 .mk{display:inline-block;}
 }
-.audit{margin-top:26px;border:1px solid var(--line2);background:var(--bg2);padding:18px 0 8px;}
+.audit{margin-top:38px;border:1px solid var(--line2);background:var(--bg2);padding:18px 0 14px;}
 .audit-q{margin:0 18px 16px;max-width:560px;padding:12px 16px;font-family:var(--mono);font-size:13px;
 color:var(--ink);line-height:1.6;border:1px solid var(--line2);background:var(--bg3);}
 .audit-q .who{display:block;font-size:10px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;margin-bottom:6px;}
 .row.human{background:var(--orange-dim);box-shadow:inset 3px 0 0 var(--orange);}
 .row.human .verb{color:var(--orange);}
 .row.human .what{color:var(--ink);}
-.audit-f{margin-top:8px;padding:12px 18px 8px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.04em;line-height:1.7;}
-.tagline{margin-top:48px;font-family:var(--mono);font-weight:700;font-size:clamp(21px,2.8vw,31px);line-height:1.35;text-transform:uppercase;max-width:24em;}
+.tagline{margin-top:56px;font-family:var(--mono);font-weight:700;font-size:clamp(21px,2.8vw,31px);line-height:1.35;text-transform:uppercase;max-width:24em;}
 
-/* science */
-.science{background:var(--bg2);}
-.science .links{margin-top:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:880px;}
-@media(max-width:760px){.science .links{grid-template-columns:1fr;}}
+/* doc links — navigation row */
+.doclinks{margin-top:52px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:880px;}
+@media(max-width:760px){.doclinks{grid-template-columns:1fr;}}
 .doc{border:1px solid var(--line2);padding:18px 20px;font-family:var(--mono);
 font-size:13px;color:var(--ink);background:var(--bg);text-decoration:none;
 display:flex;flex-direction:column;gap:5px;}
@@ -369,10 +325,8 @@ display:flex;flex-direction:column;gap:5px;}
 .doc:hover span{color:#3c4654;}
 .doc::after{content:"→";margin-top:6px;}
 
-/* stack — one machine, four doors (hub diagram) */
-#stack{padding:64px 0;}
-#stack h2{font-size:clamp(21px,2.6vw,29px);}
-.hub{margin-top:34px;max-width:780px;}
+/* the machine — one machine, four doors (hub diagram) */
+.hub{margin-top:44px;max-width:780px;}
 .hub-frames{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 .hub-f{border:1px solid var(--line2);background:var(--bg);padding:9px 0 11px;min-width:0;}
 .hub-ph{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ink);text-transform:uppercase;padding:0 11px 7px;border-bottom:1px solid var(--line);white-space:nowrap;}
@@ -403,7 +357,7 @@ display:flex;flex-direction:column;gap:5px;}
 }
 
 /* what stays / what leaves — the consent gate */
-.gatewrap{max-width:660px;margin-top:40px;}
+.gatewrap{max-width:660px;margin-top:52px;}
 .gate{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;}
 .g-col{border:1px solid var(--line2);background:var(--bg2);padding:12px 16px 13px;min-width:0;}
 .g-col.stay{border-color:rgba(157,181,210,.45);background:var(--steel-dim);}
@@ -467,7 +421,6 @@ footer a{color:var(--dim);}
 .learned .row{padding:7px 12px;grid-template-columns:44px 56px 1fr auto;}
 .nine{padding:4px 12px;}
 .audit-q{margin:0 12px 14px;}
-.audit-f{padding-left:12px;padding-right:12px;}
 }
 @media (prefers-reduced-motion: reduce){
 .ledger-head .dot,.ledger-type .car{animation:none;}
@@ -481,10 +434,9 @@ footer a{color:var(--dim);}
   <div class="nav-in">
     <span class="word">acc<span class="dot">■</span>int</span>
     <div class="nav-links">
-      <a href="#compounds">Why it compounds</a>
-      <a href="#how">How it works</a>
       <a href="#jobs">What it does</a>
-      <a href="#science">The science</a>
+      <a href="#answerable">Answerable</a>
+      <a href="#stack">The machine</a>
       <a class="nav-cta" href="#access">Early access</a>
     </div>
   </div>
@@ -495,21 +447,8 @@ footer a{color:var(--dim);}
     <div>
       <div class="kicker h-anim d1">Accreted Intelligence<span class="k-op"><span class="sep">·</span>autonomous operator</span><span class="sep">·</span>early access</div>
       <h1 class="h-anim d2"><span>It does your work.</span> <span>Every action makes it <em>smarter</em>.</span></h1>
-      <p class="lede h-anim d3">
-        Accreted Intelligence — AccInt — is the operator you hand work to: it runs it
-        <b>inside your own accounts</b>, shows a <b>receipt for every action</b>, asks before
-        anything leaves — and it learns from the very first action, so every next one is
-        <b>sharper, faster, cheaper</b>.
-      </p>
-      <div class="flow h-anim d4" aria-label="How a run works: you say it, it runs, it holds for your OK, it learns — every repeat sharper and cheaper">
-        <div class="fstep"><b>you say it</b><small>in your words</small></div>
-        <span class="farr" aria-hidden="true">→</span>
-        <div class="fstep"><b>it runs</b><small>every step receipted</small><span class="stamp ok">VERIFIED</span></div>
-        <span class="farr" aria-hidden="true">→</span>
-        <div class="fstep"><b>it holds</b><small>sends wait for your OK, decision recorded</small><span class="stamp hold">HELD → OK</span></div>
-        <span class="farr" aria-hidden="true">→</span>
-        <div class="fstep"><b>it learns</b><small>every repeat sharper and cheaper</small><span class="stamp ok">CREDITED</span></div>
-      </div>
+      <p class="lede h-anim d3">Hand it work in plain words. It runs it in your accounts — <b>receipts included</b>.</p>
+      <p class="ruleline h-anim d4">you say it <span class="arr" aria-hidden="true">→</span> it runs, receipted <span class="arr" aria-hidden="true">→</span> holds for your OK <span class="arr" aria-hidden="true">→</span> it learns</p>
       <div class="signup h-anim d5">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
           <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
@@ -556,7 +495,7 @@ footer a{color:var(--dim);}
       <div class="row refused" style="--d:2.85s"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
       </div>
       <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
-      <div class="ledger-foot">sessions are illustrative, shaped by real runs · drafts never leave without your word</div>
+      <div class="ledger-foot">sessions are illustrative, shaped by real runs</div>
     </div>
     </div>
   </div>
@@ -566,9 +505,7 @@ footer a{color:var(--dim);}
   <div class="wrap">
     <div class="mark">LIVE</div>
     <div>
-      <p><b>Not a concept.</b> The sessions above are how AccInt already works, every day, on a real
-      operation — the sourcing, the follow-through, the records, the receipts. <b>Early access opens
-      in small batches, in waitlist order.</b></p>
+      <p><b>Not a concept</b> — this is how AccInt already runs, every day, on a real operation.</p>
       <div class="tritue reveal" role="img" aria-label="Three terminals. One Tuesday. Three sessions run at the same minute — talent search finds 41 candidates at 09:14, client briefs runs 5 workspaces at 09:14, founder pipeline sends 8 approved messages at 09:15 — and all three converge into one base: three operators, one owner — every lesson lands in one place, no collisions, by construction.">
         <div class="vt" aria-hidden="true">Three terminals. One Tuesday.</div>
         <div class="tt-panes" aria-hidden="true">
@@ -597,74 +534,22 @@ footer a{color:var(--dim);}
   </div>
 </div>
 
-<section id="compounds">
-  <div class="wrap">
-    <div class="duo">
-      <div>
-        <div class="tag">the difference</div>
-        <h2>Tools forget.<br>This one <em>compounds</em>.</h2>
-        <p class="body">Every tool you've tried forgets you the moment you close the tab — the context,
-        the corrections, what actually worked. <b>AccInt keeps it, scored by outcome.</b> And brand-new
-        tasks start smarter too — <b>judgment about your world carries over.</b></p>
-        <p class="body">Because verified steps replay instead of being re-reasoned, <b>the same job costs
-        less every time it repeats</b> — week nine runs on a fraction of the model-time week one needed.</p>
-      </div>
-      <div class="reveal">
-        <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
-          <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
-          <div class="cbar"><div class="fill" style="height:40%"></div><h6>RUN 2</h6><span>starts from<br>what worked</span></div>
-          <div class="cbar"><div class="fill" style="height:19%"></div><h6>RUN 3</h6><span>mostly<br>routine</span></div>
-          <div class="cbar last"><div class="fill" style="height:8%"></div><h6>RUN N</h6><span>verified replay —<br>near-instant, near-free</span></div>
-        </div>
-        <div class="curve-cap">the same task, run after run · effort and cost collapse together · illustrative, shaped by real replay behavior — every run still verified</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="how">
-  <div class="wrap">
-    <div class="duo">
-      <div>
-        <div class="tag">how it works</div>
-        <h2>You set the goal.<br>It does the <em>work</em>.</h2>
-        <div class="caps">
-          <div class="cap"><span class="n">1</span><p>Say it in plain words — <b>the goal is the interface</b>. No prompts to engineer, no workflows to build.</p></div>
-          <div class="cap"><span class="n">2</span><p>It uses <b>every tool a person would</b> — a real browser in your accounts, code when faster, documents and APIs when they fit. Anything that leaves your machine <b>waits for your OK</b>.</p></div>
-          <div class="cap"><span class="n">3</span><p>It <b>checks reality, then keeps the lesson</b> — done isn't done until it's confirmed; what worked and what didn't sharpens every run after.</p></div>
-        </div>
-      </div>
-      <div class="ring reveal" role="img" aria-label="The loop: you set the goal, it does the work in your accounts, proves it with receipts, keeps what worked — next time starts smarter">
-        <div class="rnode rn1"><h5>you set the goal</h5><span>plain words</span></div>
-        <div class="rnode g rn2"><h5>it does the work</h5><span>in your accounts</span></div>
-        <div class="rnode a rn3"><h5>it proves it</h5><span>receipts</span></div>
-        <div class="rnode g rn4"><h5>it learns</h5><span>what worked stays</span></div>
-        <div class="rcore"><span class="cyc">↻</span>next time<br>starts smarter</div>
-      </div>
-    </div>
-
-    <div class="law">
-      <div class="rule reveal" style="--rd:0s"><h4><span class="pil">§1</span>RECEIPTS, NOT VIBES</h4>
-        <p>Every claim of "done" needs evidence from the world. The system's own opinion of itself
-        is deliberately distrusted.</p></div>
-      <div class="rule reveal" style="--rd:.12s"><h4><span class="pil">§2</span>YOUR CONSENT IS STRUCTURAL</h4>
-        <p>Sending, posting, paying, deleting — hard-gated behind your word. Not a setting.
-        A law in the kernel.</p></div>
-      <div class="rule reveal" style="--rd:.24s"><h4><span class="pil">§3</span>YOUR DATA STAYS YOURS</h4>
-        <p>Everything it learns lives on your machine and stays yours. No training on your
-        accounts, no data leaving for someone else's model.</p></div>
-    </div>
-  </div>
-</section>
-
 <section id="jobs">
+  <span class="sec-alias" id="compounds" aria-hidden="true"></span>
   <div class="wrap">
     <div class="tag">the same week, twice</div>
     <h2>Hand it the work once. <em>Watch week nine.</em></h2>
-    <p class="body">Felt first where the pipeline <b>is</b> the revenue — <b>agency recruiters billing
-    placements, fractional operators billing retainers, founders closing their own deals</b>. The same
-    ask, run one and run nine — every step a receipt, never a feature claim — and what it learns makes
-    it yours, week by week:</p>
+    <p class="body">Felt first where the pipeline <b>is</b> the revenue — agency recruiters billing
+    placements, fractional operators billing retainers, founders closing their own deals.</p>
+    <div class="curvebox reveal">
+      <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
+        <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
+        <div class="cbar"><div class="fill" style="height:40%"></div><h6>RUN 2</h6><span>starts from<br>what worked</span></div>
+        <div class="cbar"><div class="fill" style="height:19%"></div><h6>RUN 3</h6><span>mostly<br>routine</span></div>
+        <div class="cbar last"><div class="fill" style="height:8%"></div><h6>RUN N</h6><span>verified replay —<br>near-instant, near-free</span></div>
+      </div>
+      <div class="curve-cap">verified steps replay instead of re-reasoning — the same job costs less every run · illustrative</div>
+    </div>
     <div class="stabs" role="tablist" aria-label="Pick the work you know" id="storytabs">
       <button class="ltab" role="tab" id="stab-rec" aria-selected="true" aria-controls="spanel-rec">agency recruiting</button>
       <button class="ltab" role="tab" id="stab-ops" aria-selected="false" aria-controls="spanel-ops" tabindex="-1">client retainers</button>
@@ -771,12 +656,9 @@ footer a{color:var(--dim);}
 <section id="answerable">
   <div class="wrap">
     <div class="tag">for the people accountable</div>
-    <h2>When management asks <em>what happened</em> — the answer is already written.</h2>
-    <p class="body">AI at work today is unaccountable. Actions leave no receipts, approvals live in
-    someone's DM history, and the lessons evaporate with the session — so pilots stall in review, or
-    agents run as shadow ops nobody can audit. <b>AccInt is built the other way around:</b> every
-    action a receipt, every approval a held decision with a name and a timestamp, every lesson
-    credited and kept.</p>
+    <h2>When management asks, it's already <em>written</em>.</h2>
+    <p class="body">AI at work leaves no receipts, no record of who said yes, no lessons kept —
+    <b>AccInt is built the other way around</b>.</p>
     <div class="audit reveal" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="aud-legend" aria-hidden="true">
@@ -794,7 +676,6 @@ footer a{color:var(--dim);}
       <aside class="co co2"><b>② WHO SAID YES</b><span>→ a held decision — named + timestamped</span></aside>
       <aside class="co co3"><b>③ WHAT DID WE LEARN</b><span>→ the lesson — credited, kept</span></aside>
       </div>
-      <div class="audit-f">answer assembled from the ledger · every row was written when it happened — nothing reconstructed from recollection.</div>
     </div>
     <p class="tagline reveal">Nothing happens without a <em>trace</em>.<br>Nothing decided is <em>lost</em>.</p>
     <div class="platewrap reveal">
@@ -812,27 +693,14 @@ footer a{color:var(--dim);}
   </div>
 </section>
 
-<section class="science" id="science">
-  <div class="wrap">
-    <div class="tag">for the technically curious</div>
-    <h2>The science is <em>public</em>.</h2>
-    <p class="body">AccInt is built on <b>accreted intelligence</b> — an architecture where learning
-    lives in scored external memory, judgment compounds from real outcomes, and the model is a
-    replaceable processor. The whitepaper and architecture notes live in this repo:</p>
-    <div class="links">
-      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper.md<span>the thesis, the math, what's proven vs. open</span></a>
-      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">architecture-overview.md<span>the skimmable tour</span></a>
-      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence">github repo<span>+ open-source building blocks</span></a>
-    </div>
-  </div>
-</section>
-
 <section id="stack">
+  <span class="sec-alias" id="science" aria-hidden="true"></span>
   <div class="wrap">
     <div class="tag">no new tab to live in</div>
     <h2>Runs where you <em>already work</em>.</h2>
-    <p class="body">AccInt is not another app — it plugs into <b>the coding agent you already run</b>,
-    and everything it learns stays on your machine.</p>
+    <p class="body">It plugs into <b>the coding agent you already run</b>; learning lives in a
+    <b>scored external memory</b> that compounds from real outcomes — the model is a replaceable
+    processor, and everything it learns stays <b>on your machine</b>.</p>
     <div class="hub reveal" role="img" aria-label="One machine, four doors. Four agent terminals — Claude Code, live with the deepest hooks; Codex, live today over MCP; OpenCode, live today over MCP; Cursor, connects over MCP — all speak the same two verbs and converge into one binary: acc4, one pure-Rust binary, native on Windows, macOS and Linux. The binary feeds a single base ledger rule: every lesson lands in one local ledger — no cloud in the loop — yours.">
       <div class="hub-frames" aria-hidden="true">
         <div class="hub-f deep"><div class="hub-ph"><i></i>claude code</div><div class="hub-vv">acc4_retrieve · acc4_act</div><span class="hub-tier">live · deepest hooks</span></div>
@@ -851,7 +719,6 @@ footer a{color:var(--dim);}
       <div class="hub-wire" aria-hidden="true"></div>
       <div class="hub-rule" aria-hidden="true"><span class="t">always</span><span class="verb">keep</span><span class="what">every lesson lands in <b>one local ledger</b> — no cloud in the loop</span><span class="stamp ok">YOURS</span></div>
     </div>
-    <p class="tt-cap">four doors, one machine — any MCP agent connects the same two verbs</p>
     <div class="gatewrap reveal">
       <div role="img" aria-label="What stays. What leaves. Your machine keeps everything it learns, every receipt, and drafts in progress. At the boundary stands one gate — held for your OK. The only thing that leaves your machine: the 8 messages you approved — nothing else.">
         <div class="vt" aria-hidden="true">What stays. What leaves.</div>
@@ -871,6 +738,11 @@ footer a{color:var(--dim);}
         </div>
       </div>
     </div>
+    <div class="doclinks">
+      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper.md<span>the thesis, the math, what's proven vs. open</span></a>
+      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">architecture-overview.md<span>the skimmable tour</span></a>
+      <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence">github repo<span>+ open-source building blocks</span></a>
+    </div>
   </div>
 </section>
 
@@ -878,22 +750,16 @@ footer a{color:var(--dim);}
   <div class="wrap">
     <div class="tag">where this goes</div>
     <h2>One operator today.<br>One <em>shared brain</em> next.</h2>
-    <p class="body">The judgment at AccInt's core isn't tied to one user — it lives in scored,
-    portable state. That sets the road:</p>
     <div class="road">
       <div class="stage now reveal" style="--rd:0s"><span class="st">NOW · LIVE</span>
         <h3>Your operator</h3>
-        <p>One operator — or <b>several in parallel</b> on totally different tasks — working in your
-        accounts, compounding <b>one judgment</b>. This is what early access opens.</p></div>
+        <p>One operator on your work, compounding <b>one judgment</b> — what early access opens.</p></div>
       <div class="stage next reveal" style="--rd:.12s"><span class="st">NEXT</span>
         <h3>The team brain</h3>
-        <p><b>One shared judgment, many operators.</b> Parallel agents already compound into one substrate
-        today — per-person authority and consent floors turn it into a company's shared judgment,
-        with the same audit plane over every operator.</p></div>
+        <p><b>One shared judgment, many operators</b> — per-person authority, one audit plane.</p></div>
       <div class="stage later reveal" style="--rd:.24s"><span class="st">RESEARCH</span>
         <h3>Judgment that travels</h3>
-        <p>Scored judgment is portable state: partner orgs exchange it, and each side <b>re-verifies
-        against its own reality</b> before trusting it. Learning travels; data and models stay home.</p></div>
+        <p>Partner orgs exchange judgment; each side <b>re-verifies against its own reality</b>.</p></div>
     </div>
   </div>
 </section>
