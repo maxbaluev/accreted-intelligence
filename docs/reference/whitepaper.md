@@ -57,7 +57,7 @@ flowchart LR
 
 **Two verbs.** `acc_retrieve(query | image)` is the *only* read — it peeks the scored memory by MaxSim, natively multimodal (a text query and an image both encode to late-interaction tokens, so a text memo can answer an image query, ColPali-style). `acc_act(runtime, input)` does anything: `solve` (recurse on a sub-goal), `exec` (run sandboxed code that can itself recurse over the memory), `register` (store reusable named code as scored tokens), `outcome` (close a commitment with a real-world verdict). Any registered runtime is invoked by name. Writing to memory and crediting are *not* verbs — the loop does them automatically on every call.
 
-**Recursion is the only control primitive.** There is no `decompose` operation. When a goal cannot be answered directly, the reasoner `solve`s a sub-goal; the tree those recursive solves grow *is* the decomposition. No planner, no explicit task graph — decomposition emerges. This makes acc a concrete instance of the Recursive Language Model idea (Xu et al. 2025): treat the language model as a step inside a recursive program over an external store, rather than stuffing a long context into one forward pass.
+**Recursion is the only control primitive.** There is no `decompose` operation. When a goal cannot be answered directly, the reasoner `solve`s a sub-goal; the tree those recursive solves grow *is* the decomposition. No planner, no explicit task graph — decomposition emerges. This makes acc a concrete instance of the Recursive Language Model idea (Zhang et al. 2025): treat the language model as a step inside a recursive program over an external store, rather than stuffing a long context into one forward pass.
 
 **Late-interaction scored-token memory.** Each entity — a knowledge memo, a runtime, an owner fact, a goal, an image — is stored as an ordered set of per-token vectors. There is no single-vector dense form; the token is the atom. Retrieval ranks by **MaxSim** (Khattab & Zaharia 2020):
 
@@ -143,7 +143,7 @@ maxbaluev@outlook.com | [Telegram](https://t.me/maxbaluev)
 - Dhulipala, L. et al. (2024). "MUVERA: Multi-Vector Retrieval via Fixed Dimensional Encodings." [arXiv:2405.19504](https://arxiv.org/abs/2405.19504)
 
 **Recursion, retrieval-augmentation & long context**
-- Xu, P. et al. (2025). "Recursive Language Models / Retrieval in Long-context Language Models: An Empirical Study." [arXiv:2512.24601](https://arxiv.org/abs/2512.24601)
+- Zhang, A. L., Kraska, T. & Khattab, O. (2025). "Recursive Language Models." [arXiv:2512.24601](https://arxiv.org/abs/2512.24601)
 - Lewis, P. et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *NeurIPS*. [arXiv:2005.11401](https://arxiv.org/abs/2005.11401)
 
 **Credit assignment, Bayesian scoring & active inference**
@@ -156,4 +156,4 @@ maxbaluev@outlook.com | [Telegram](https://t.me/maxbaluev)
 **Externalized intelligence & compound systems**
 - Clark, A. & Chalmers, D. (1998). "The Extended Mind." *Analysis*, 58(1). [Oxford Academic](https://academic.oup.com/analysis/article-lookup/doi/10.1093/analys/58.1.7)
 - Zaharia, M. et al. (2024). "The Shift from Models to Compound AI Systems." [BAIR Blog](https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/)
-- Kim, S. et al. (2025). "When More is Less: Understanding Multi-Agent LLM Scaling." [arXiv:2512.08296](https://arxiv.org/abs/2512.08296)
+- Kim, Y. et al. (2025). "Towards a Science of Scaling Agent Systems." [arXiv:2512.08296](https://arxiv.org/abs/2512.08296)

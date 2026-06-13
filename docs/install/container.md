@@ -1,5 +1,12 @@
 # acc — Tier-C container install (runs anywhere Docker runs)
 
+> **Status — public repo, pre-binary:** the binary-based container image and the
+> `scripts/acc-docker.sh` helper ship with the **`v0.1.0` release**. The steps below
+> build the image **from source** (the engine/dev path) and need the source tree,
+> which this binary-only public repo deliberately doesn't carry — so treat them as
+> reference until the binary lands. For now, the native
+> [`install.sh`](../../install.sh) path is the supported install.
+
 This is the **pragmatic cross-OS answer**: a reproducible Linux x86_64 image you
 can run on any host with Docker. Use it when the native `./install.sh` path is a
 poor fit:
