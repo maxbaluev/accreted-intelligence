@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14110b">
 <title>Accreted Intelligence — the learning substrate for agent work</title>
-<meta name="description" content="Accreted Intelligence (AccInt) turns agent activity into operational intelligence: actions become commitments, outcomes settle them, and a local Work Model learns which paths deserve reuse. Early access.">
+<meta name="description" content="Accreted Intelligence (AccInt) is an on-premise layer that makes the AI tools you already run — Claude, Cursor, Codex — remember what actually worked. Every action is checked against reality and kept on your machine, so the same work gets faster, cheaper, and safer each run. Early access.">
 <meta property="og:title" content="Accreted Intelligence — the learning substrate for agent work">
 <meta property="og:description" content="A local Work Model for agent-run work: commitments, receipts, authority gates, outcome credit, and reusable runtimes on hardware you control. Early access.">
 <meta property="og:type" content="website">
@@ -511,10 +511,10 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="kicker">Learning substrate for agent work<span class="k-op"><span class="sep">·</span>local Work Model</span><span class="sep">·</span>early access</div>
+      <div class="kicker">Runs on your hardware<span class="k-op"><span class="sep">·</span>makes Claude, Cursor &amp; Codex compound</span><span class="sep">·</span>early access</div>
       <h1><span>Make every agent action</span> <span>teach the <em>system</em>.</span></h1>
-      <p class="lede">Memory gives agents context. Observability gives traces. Orchestration moves tasks. <b>AccInt settles what happened against reality</b>: what the agent expected, what it did, who approved it, what came back, and which path deserves reuse — all on hardware you control.</p>
-      <p class="ruleline">agent commits <span class="arr" aria-hidden="true">→</span> action is recorded <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> the Work Model updates</p>
+      <p class="lede">Hand work to the AI agents you already run. AccInt remembers <b>what actually worked</b> — checked against what really happened — so the same job gets faster, cheaper, and safer every time you run it. All on a machine you control.</p>
+      <p class="ruleline">the agent acts <span class="arr" aria-hidden="true">→</span> you see a receipt <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> next run starts from what worked</p>
       <div class="signup">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
           <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
@@ -608,11 +608,11 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
   <span class="sec-alias" id="compounds" aria-hidden="true"></span>
   <div class="wrap">
     <div class="tag">where it starts</div>
-    <h2>Start where agents already make <em>commitments</em>.</h2>
-    <p class="body">The first buyers are not people shopping for another chatbot. They are teams already
-    handing work to agents and asking: what did the agent bet would happen, did it work, and can we reuse the safe path?
-    Start with software factories, technical agencies, research loops, sales/recruiting pipelines, client briefs,
-    and finance/admin work where a bad action has a cost.</p>
+    <h2>Best where the same work <em>runs again</em>.</h2>
+    <p class="body">If you already hand real work to agents — shipping code, research loops, recruiting and
+    sales pipelines, client briefs, finance and back-office tasks where a wrong move costs something — you keep
+    paying to rediscover what already worked. AccInt is for exactly that: the work that repeats, where getting
+    cheaper and safer each run actually compounds.</p>
     <div class="curvebox">
       <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
         <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
@@ -770,11 +770,11 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="answerable">
   <div class="wrap">
-    <div class="tag">settlement, not vibes</div>
-    <h2>When a run succeeds or fails, the lesson is <em>assignable</em>.</h2>
-    <p class="body">The hard part of agent work is not a prettier prompt. It is accountable learning:
-    <b>what the system expected, what happened, who approved it, which evidence mattered, and what reality said after</b>.
-    The ledger is what management sees; the Work Model is what future runs inherit.</p>
+    <div class="tag">every action leaves a receipt</div>
+    <h2>When someone asks "why did it do that?", it's <em>already written</em>.</h2>
+    <p class="body">Most AI work leaves no trail — no record of what it expected, who approved it, or
+    whether it actually worked. AccInt writes every step down as it happens: the receipt your team can
+    show management, and the lesson the next run inherits. Same record, two readers.</p>
     <div class="audit" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="aud-legend" aria-hidden="true">
@@ -799,17 +799,18 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="science">
   <div class="wrap">
-    <div class="tag">why this is not another memory</div>
-    <h2>The unit of learning is the settled <em>commitment</em>.</h2>
-    <p class="body">Context and memory help agents recall. AccInt asks a harder question: what did this
-    path predict, what happened, and should the system trust it again? <b>Recursive language modeling</b> routes the work, late interaction
-    grounds the evidence, JEPA-style transitions predict which action improves the state, and pedagogical RL
-    updates the scored Work Model underneath.</p>
+    <div class="tag">how it learns</div>
+    <h2>It learns the way a <em>brain</em> does.</h2>
+    <p class="body">Your brain lights up what it has seen before, predicts what happens next, acts, and
+    learns most from whatever surprised it. AccInt runs the same loop — except every prediction is
+    <b>checked against reality</b>, and the whole memory stays on your machine. The thing it learns from is
+    one <b>settled commitment</b>: what the agent expected, what it did, who approved it, what came back,
+    and whether that path earned the right to be trusted again.</p>
     <div class="fig" role="img" aria-label="Figure 1 — why this goes beyond recall. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each token's Beta posterior of how often its alignments led to good outcomes. Recursive language modeling decomposes goals and routes typed holes. Late interaction means every token of your ask meets every token of the Work Model (ColBERT); vision is native — what it learned from a document answers a question about a screenshot (ColPali). Credit is pedagogical reinforcement learning: the Work Model is taught by outcomes, never by its own belief — a self-graded result counts at a weak prior, full weight requires reality, and surprising outcomes teach hardest. A JEPA-style transitions ledger predicts which action improves things next and watches its own prediction error — when your world shifts, it notices.">
       <div class="fig-h"><span>FIG. 1 · HOW JUDGMENT COMPOUNDS</span><span>per token, not per document</span></div>
       <div class="fig-eq" aria-hidden="true">score(q, d) = Σ<sub>i</sub> max<sub>j</sub> [ sim(q<sub>i</sub>, d<sub>j</sub>) <span class="gp">· g(π<sub>j</sub>)</span> ]</div>
       <div aria-hidden="true">
-        <div class="fn"><b>in plain words</b><span>it makes agent work learnable: what the system expected, which evidence earned its keep, which path failed, who approved the boundary, and what changed in your world — the math below is how</span></div>
+        <div class="fn"><b>the brain's trick</b><span>light up what you've seen · predict what comes next · act · learn from the surprise. the four published ideas below are how AccInt runs that loop — with reality, not belief, doing the grading</span></div>
         <div class="fn"><b>recursive loop</b><span>the reasoner decomposes goals, opens typed holes, asks for authority when needed, and turns verified paths into reusable runtimes — RLM [5]</span></div>
         <div class="fn"><b>late interaction</b><span>every token of your ask meets every token of the Work Model; the aligned pairs are the citation — ColBERT [1]. vision is native: what it learned from a document answers a question about a screenshot — ColPali [2]</span></div>
         <div class="fn"><b>π = α / (α+β)</b><span>each token carries a Beta posterior: how often its alignments led to good outcomes, on how much real evidence — Thompson [3]</span></div>
@@ -844,11 +845,13 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="stack">
   <div class="wrap">
-    <div class="tag">first wedge</div>
-    <h2>For teams already running <em>agents</em>.</h2>
-    <p class="body">The first strong fit is AI-native engineering teams, technical agencies, and local-first builders
-    already using Cursor, Codex, Claude, OpenCode, or MCP-connected tools. AccInt is the durable layer below them:
-    what worked, what failed, what runtime to try next. Change agents later; the model stays <b>on your hardware</b>.</p>
+    <div class="tag">no new tool to adopt</div>
+    <h2>It plugs into the tools you <em>already run</em>.</h2>
+    <p class="body">Keep using Claude, Cursor, Codex, or OpenCode. AccInt sits underneath them and gives
+    them the one thing they lack: <b>a memory of what actually worked</b>, on your hardware. And because the
+    reasoner can write its own <b>runtimes</b>, it doesn't stop at chat — it can drive the browser, a terminal,
+    or any tool you already use, and every one of those actions lands in the same scored record. Change the
+    agent later; what it learned <b>stays yours</b>.</p>
     <div class="hub" role="img" aria-label="One machine, four doors. Four agent terminals — native hook host, live with hook support; Codex, live today over MCP; OpenCode, live today over MCP; Cursor, connects over MCP — all speak the same two verbs and converge into one binary: acc4, one pure-Rust binary, native on Windows, macOS and Linux. The binary feeds a single base ledger rule: every lesson lands in one local ledger — no cloud in the loop — yours.">
       <div class="hub-frames" aria-hidden="true">
         <div class="hub-f deep"><div class="hub-ph"><i></i>native hook host</div><div class="hub-vv">acc4_retrieve · acc4_act</div><span class="hub-tier">live · hooks</span></div>
@@ -946,8 +949,8 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     <h2>One local Work Model now.<br>Team intelligence <em>later</em>.</h2>
     <div class="road">
       <div class="stage now"><span class="st">NOW · LIVE</span>
-        <h3>Single-owner substrate</h3>
-        <p>One local Work Model under real agent work, with coding-agent proof surfaces and approval before external action.</p></div>
+        <h3>Your own operator</h3>
+        <p>One local Work Model under your real agent work, plugged into your coding agent, with your OK required before anything leaves your machine.</p></div>
       <div class="stage next"><span class="st">NEXT</span>
         <h3>Team Work Model</h3>
         <p><b>One shared World Model, many operators</b>, with per-person authority and one audit plane.</p></div>
@@ -961,7 +964,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <section class="final" id="access">
   <div class="wrap">
     <div class="tag" style="justify-content:center">early access</div>
-    <h2>Already delegating to agents?<br>Start the <em>Work Model</em>.</h2>
+    <h2>Already running AI agents?<br>Make them <em>compound</em>.</h2>
     <div class="signup">
       <form id="subform2" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
         <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
