@@ -872,6 +872,20 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
       <div class="hub-wire" aria-hidden="true"></div>
       <div class="hub-rule" aria-hidden="true"><span class="t">always</span><span class="verb">keep</span><span class="what">every lesson lands in <b>one local ledger</b> — no cloud in the loop</span><span class="stamp ok">YOURS</span></div>
     </div>
+
+    <p class="body" style="margin-top:52px">Two things compound here, not one: <b>what worked</b>, and
+    <b>how to do it</b>. When the reasoner finds a path that holds — a browser flow, a script, a tool
+    integration — it saves it as a <b>runtime</b>, and reality scores that runtime exactly like a memo.
+    No privileged lane: the browser is just another scored runtime. A flow that worked <b>replays cheaply</b>
+    next time; one that broke loses its score and isn't trusted again.</p>
+    <div class="ledger" style="max-width:680px;margin-top:22px" aria-label="Runtime ledger — capability is scored the same universal way as knowledge. The reasoner wrote a portal-login flow, verified. The browser ran it on the live page, verified. The verified flow replays — re-checked, not re-reasoned. A flow that broke is debited and not retried blind. No runtime gets a privileged lane.">
+      <div class="ledger-head"><span><span class="dot"></span>RUNTIME LEDGER</span><span>capability, scored like everything else</span></div>
+      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">write</span><span class="what"><b>runtime:portal-login</b> — the reasoner wrote the flow once</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">drive</span><span class="what">the <b>browser</b> ran it on the live page — scored by what really happened</span><span class="stamp ok">VERIFIED</span></div>
+      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">replay</span><span class="what">the verified flow — re-checked, <b>not re-reasoned</b></span><span class="stamp re">REPLAYED</span></div>
+      <div class="row refused"><span class="t" style="visibility:hidden">·</span><span class="verb">debit</span><span class="what">a flow that broke — score docked, <b>not retried blind</b></span><span class="stamp no">NOT TRUSTED</span></div>
+      <div class="ledger-foot">a browser flow, a script, a tool — every capability earns its score the same way</div>
+    </div>
     <div class="doclinks">
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/whitepaper.md">whitepaper.md<span>the thesis, the math, what's proven vs. open</span></a>
       <a class="doc" href="https://github.com/maxbaluev/accreted-intelligence/blob/master/architecture-overview.md">architecture-overview.md<span>the skimmable tour</span></a>
