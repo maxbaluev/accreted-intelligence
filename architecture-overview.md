@@ -1,17 +1,17 @@
-# acc4 — Architecture Overview
+# acc — Architecture Overview
 
 *A skimmable map of the system. The thesis lives in [whitepaper.md](whitepaper.md); this is the engineering surface, IP-protected.*
 
-## What acc4 is
+## What acc is
 
-**acc4** is a Recursive Language Model (RLM) over a late-interaction scored-token memory, implemented as a single Rust crate. A reasoner interacts with one persistent substrate through exactly **two verbs** — retrieve and act — and the substrate *learns from real outcomes* by moving the score of the individual units of memory that actually aligned with the work. Intelligence lives in the scored state, not in the model; the model is a replaceable processor. acc4 is a working single-host research kernel, honest about what is proven by reality versus self-graded versus aspirational.
+**acc** is a Recursive Language Model (RLM) over a late-interaction scored-token memory, implemented as a single Rust crate. A reasoner interacts with one persistent substrate through exactly **two verbs** — retrieve and act — and the substrate *learns from real outcomes* by moving the score of the individual units of memory that actually aligned with the work. Intelligence lives in the scored state, not in the model; the model is a replaceable processor. acc is a working single-host research kernel, honest about what is proven by reality versus self-graded versus aspirational.
 
 ## The two verbs
 
 The entire reasoner interface. There is no third verb; vision is native to `retrieve`.
 
-- **`acc4_retrieve(query | image)`** — the *only* read. Peek the memory by MaxSim. Pass text or a typed image; both encode to late-interaction tokens, so a text memo can answer an image (ColPali-style cross-modal retrieval).
-- **`acc4_act(runtime, input)`** — *do* anything. Built-in runtimes:
+- **`acc_retrieve(query | image)`** — the *only* read. Peek the memory by MaxSim. Pass text or a typed image; both encode to late-interaction tokens, so a text memo can answer an image (ColPali-style cross-modal retrieval).
+- **`acc_act(runtime, input)`** — *do* anything. Built-in runtimes:
   - `solve` — RECURSE: re-enter the loop on a sub-goal. Decomposition emerges from the recursion tree; there is no `decompose` op.
   - `exec` — run sandboxed code; inside it, the code can recurse over the memory.
   - `register` — store reusable named code (it becomes scored tokens, no privileged lane).
@@ -20,7 +20,7 @@ The entire reasoner interface. There is no third verb; vision is native to `retr
 
 Writing to memory and crediting are *not* verbs — the loop does them automatically on every call.
 
-## Late-interaction scored-token memory (commodity layer + acc4's form)
+## Late-interaction scored-token memory (commodity layer + acc's form)
 
 Each entity (knowledge, runtime, owner fact, goal, image) is stored as an ordered set of per-token vectors — no single-vector dense form, the token is the atom. Retrieval ranks by **MaxSim**:
 
@@ -28,7 +28,7 @@ $$\text{score}(q, d) = \sum_i \max_j \text{sim}(q_i, d_j)$$
 
 For each query token, take its best-matching doc token and sum. The aligned (query→doc) pairs *are* the citation. This is published commodity (ColBERT for text, ColPali for vision).
 
-acc4 extends this: each document token carries a Bayesian **Beta(α, β) posterior** (Thompson 1933) — mean $\pi_j = \alpha_j/(\alpha_j+\beta_j)$ (how often its alignments led to good outcomes) and a confidence that grows with the evidence count $\alpha_j+\beta_j$. That posterior reweights the token's contribution:
+acc extends this: each document token carries a Bayesian **Beta(α, β) posterior** (Thompson 1933) — mean $\pi_j = \alpha_j/(\alpha_j+\beta_j)$ (how often its alignments led to good outcomes) and a confidence that grows with the evidence count $\alpha_j+\beta_j$. That posterior reweights the token's contribution:
 
 $$\text{score}(q, d) = \sum_i \max_j \big[\, \text{sim}(q_i, d_j) \cdot g(\pi_j) \,\big]$$
 
@@ -44,7 +44,7 @@ The system cannot compound from its own belief. *(The exact surprise function, t
 
 ## Recursion as the primitive (RLM)
 
-acc4 is an instance of the Recursive Language Model idea: the model is a step inside a recursive program over an external store, not a single long-context forward pass. `acc4_act(solve)` re-enters the loop on a sub-goal; the tree of solves *is* the decomposition. Long context is avoided by MaxSim late interaction (the model never holds the substrate in its window) and by an in-sandbox loop where `exec` code maps the whole memory programmatically.
+acc is an instance of the Recursive Language Model idea: the model is a step inside a recursive program over an external store, not a single long-context forward pass. `acc_act(solve)` re-enters the loop on a sub-goal; the tree of solves *is* the decomposition. Long context is avoided by MaxSim late interaction (the model never holds the substrate in its window) and by an in-sandbox loop where `exec` code maps the whole memory programmatically.
 
 ## Scored runtimes + sandbox
 

@@ -2,13 +2,13 @@
 
 *A Recursive Language Model over late-interaction scored-token memory, where judgment lives in external scored state and the model is a replaceable processor.*
 
-> **Status (honest).** This describes **acc4**, a working single-host research kernel — a running system, not a roadmap. It is a proof-of-concept built to test one thesis under real use, and it is deliberately precise about what reality has validated, what is self-graded, and what remains open. Where a claim is not yet validated by controlled experiment, it says so.
+> **Status (honest).** This describes **acc**, a working single-host research kernel — a running system, not a roadmap. It is a proof-of-concept built to test one thesis under real use, and it is deliberately precise about what reality has validated, what is self-graded, and what remains open. Where a claim is not yet validated by controlled experiment, it says so.
 
 ## Abstract
 
 Large models perform impressive tasks, then forget how they did it. Each session starts near zero: what worked, what failed, and what should be avoided is rarely retained in a form that can *govern* the next decision. The result is intelligence that is generated and discarded rather than intelligence that compounds.
 
-This paper presents **accreted intelligence**: an architecture that moves learning out of model weights and into *scored external state*. Per-token memory, reusable runtimes, owner facts, warnings, commitments, and outcomes persist across sessions, models, and upgrades. The system improves by acting, observing real results, assigning credit to the specific units of memory that aligned with the work, and updating their scores — while the model remains a replaceable processor rather than the locus of intelligence. **acc4** is a working kernel for this thesis on a single host. The interface is two verbs over one memory; the discipline that makes it compound is that credit defaults to a weak prior and only reality earns full weight.
+This paper presents **accreted intelligence**: an architecture that moves learning out of model weights and into *scored external state*. Per-token memory, reusable runtimes, owner facts, warnings, commitments, and outcomes persist across sessions, models, and upgrades. The system improves by acting, observing real results, assigning credit to the specific units of memory that aligned with the work, and updating their scores — while the model remains a replaceable processor rather than the locus of intelligence. **acc** is a working kernel for this thesis on a single host. The interface is two verbs over one memory; the discipline that makes it compound is that credit defaults to a weak prior and only reality earns full weight.
 
 ## 1. The problem — intelligence that doesn't compound
 
@@ -35,7 +35,7 @@ This matters because reasoning is getting cheaper while judgment is not. If mode
 
 ## 3. The shape of the system
 
-acc4 reduces the entire reasoner interface to **two verbs**, and binds every non-trivial call to four links: owner intent, the cited memory that shaped the work, the act, and the outcome that closes it. Citation is the credit edge, not decoration — the memory that gets cited is the memory that earns (or loses) score when the outcome lands.
+acc reduces the entire reasoner interface to **two verbs**, and binds every non-trivial call to four links: owner intent, the cited memory that shaped the work, the act, and the outcome that closes it. Citation is the credit edge, not decoration — the memory that gets cited is the memory that earns (or loses) score when the outcome lands.
 
 ```mermaid
 flowchart LR
@@ -55,9 +55,9 @@ flowchart LR
     class OUTCOME score
 ```
 
-**Two verbs.** `acc4_retrieve(query | image)` is the *only* read — it peeks the scored memory by MaxSim, natively multimodal (a text query and an image both encode to late-interaction tokens, so a text memo can answer an image query, ColPali-style). `acc4_act(runtime, input)` does anything: `solve` (recurse on a sub-goal), `exec` (run sandboxed code that can itself recurse over the memory), `register` (store reusable named code as scored tokens), `outcome` (close a commitment with a real-world verdict). Any registered runtime is invoked by name. Writing to memory and crediting are *not* verbs — the loop does them automatically on every call.
+**Two verbs.** `acc_retrieve(query | image)` is the *only* read — it peeks the scored memory by MaxSim, natively multimodal (a text query and an image both encode to late-interaction tokens, so a text memo can answer an image query, ColPali-style). `acc_act(runtime, input)` does anything: `solve` (recurse on a sub-goal), `exec` (run sandboxed code that can itself recurse over the memory), `register` (store reusable named code as scored tokens), `outcome` (close a commitment with a real-world verdict). Any registered runtime is invoked by name. Writing to memory and crediting are *not* verbs — the loop does them automatically on every call.
 
-**Recursion is the only control primitive.** There is no `decompose` operation. When a goal cannot be answered directly, the reasoner `solve`s a sub-goal; the tree those recursive solves grow *is* the decomposition. No planner, no explicit task graph — decomposition emerges. This makes acc4 a concrete instance of the Recursive Language Model idea (Xu et al. 2025): treat the language model as a step inside a recursive program over an external store, rather than stuffing a long context into one forward pass.
+**Recursion is the only control primitive.** There is no `decompose` operation. When a goal cannot be answered directly, the reasoner `solve`s a sub-goal; the tree those recursive solves grow *is* the decomposition. No planner, no explicit task graph — decomposition emerges. This makes acc a concrete instance of the Recursive Language Model idea (Xu et al. 2025): treat the language model as a step inside a recursive program over an external store, rather than stuffing a long context into one forward pass.
 
 **Late-interaction scored-token memory.** Each entity — a knowledge memo, a runtime, an owner fact, a goal, an image — is stored as an ordered set of per-token vectors. There is no single-vector dense form; the token is the atom. Retrieval ranks by **MaxSim** (Khattab & Zaharia 2020):
 
@@ -65,11 +65,11 @@ $$\text{score}(q, d) = \sum_i \max_j \text{sim}(q_i, d_j)$$
 
 For each query token, take its best-matching document token; sum those bests. The aligned query-token-to-document-token pairs are themselves the citation — relevance is computed by late interaction, not by a lossy pooled embedding. This is published commodity (ColBERT for text; ColPali for vision, Faysse et al. 2024).
 
-What acc4 adds on top is a learned-evidence reweighting of that score. Each document token carries a Bayesian **Beta(α, β) posterior** (Thompson 1933) summarizing how its past alignments fared: its mean
+What acc adds on top is a learned-evidence reweighting of that score. Each document token carries a Bayesian **Beta(α, β) posterior** (Thompson 1933) summarizing how its past alignments fared: its mean
 
 $$\pi_j = \frac{\alpha_j}{\alpha_j + \beta_j}$$
 
-is *how often* this token's alignments led to good outcomes, and the evidence count $\alpha_j + \beta_j$ is the *confidence* that estimate carries (it grows as reality weighs in). acc4 extends plain MaxSim by weighting each token's contribution by this posterior:
+is *how often* this token's alignments led to good outcomes, and the evidence count $\alpha_j + \beta_j$ is the *confidence* that estimate carries (it grows as reality weighs in). acc extends plain MaxSim by weighting each token's contribution by this posterior:
 
 $$\text{score}(q, d) = \sum_i \max_j \big[\, \text{sim}(q_i, d_j) \cdot g(\pi_j) \,\big]$$
 
@@ -83,7 +83,7 @@ where $\pi_j$ is document token $j$'s Beta posterior and $g$ is a monotonic conf
 
 ## 4. Reality-gated credit
 
-A score is only as good as the evidence behind it. The honesty discipline at acc4's center is that **the system refuses to compound from its own belief.**
+A score is only as good as the evidence behind it. The honesty discipline at acc's center is that **the system refuses to compound from its own belief.**
 
 When a commitment closes, credit does not smear across a whole document. It flows to the specific tokens that aligned during retrieval; their Beta posteriors update Bayesian-style — a good outcome adds to a token's α, a bad one to its β, which moves both its mean $\pi_j = \alpha/(\alpha+\beta)$ and its confidence $\alpha+\beta$. The update is **surprise-gated** — an outcome that confirms what a token already predicted moves it little; a surprising one moves it more (free-energy minimization, Friston 2010, applied to practical judgment rather than sensory prediction) — and **reality-gated**, scaled by provenance: an outcome validated by reality (a real reply, a passing test, a world result) carries full weight, while a self-graded outcome contributes only a deliberately weak prior. In general form, the update for an aligned token scales as
 
@@ -97,17 +97,17 @@ The Beta posterior (Thompson 1933) is load-bearing precisely because it separate
 
 ## 5. Processor independence
 
-A property acc4 demonstrates concretely: intelligence is not bound to any one reasoning engine. The scored substrate is read and extended by two different model families through one interface today, and neither owns the judgment — it lives in the state. The reasoning processor is swappable, and demonstrably swapped.
+A property acc demonstrates concretely: intelligence is not bound to any one reasoning engine. The scored substrate is read and extended by two different model families through one interface today, and neither owns the judgment — it lives in the state. The reasoning processor is swappable, and demonstrably swapped.
 
 The claim is bounded, on purpose. Processor independence is real *at the interface* — the two verbs, the schema, and the retrieval bindings are model-agnostic. It is **not** a claim of total model neutrality. The **encoder is part of the substrate's identity**: one substrate is pinned to one late-interaction encoder, and changing that pin requires a full re-encode — you cannot mix encoders on one memory. The operating contract also shapes behavior. So the *reasoning* processor is a free variable; the *encoder* and the kernel contract are not.
 
-Processor independence does not imply topology independence either. Multi-agent decomposition can degrade performance on sequential reasoning versus a single capable agent (Kim et al. 2025). acc4's recursion is single-reasoner-first: one reasoner tightly bound to the substrate, recursing on sub-goals, delegating to an isolated worker only for implementation. Adding processors adds coordination cost, not judgment.
+Processor independence does not imply topology independence either. Multi-agent decomposition can degrade performance on sequential reasoning versus a single capable agent (Kim et al. 2025). acc's recursion is single-reasoner-first: one reasoner tightly bound to the substrate, recursing on sub-goals, delegating to an isolated worker only for implementation. Adding processors adds coordination cost, not judgment.
 
 ## 6. Boundaries & frontier
 
-What acc4 is and isn't, stated plainly:
+What acc is and isn't, stated plainly:
 
-- **Not a trained foundation model.** acc4 trains nothing. It is a memory-and-loop kernel around replaceable models. Its intelligence is the scored substrate, not learned weights.
+- **Not a trained foundation model.** acc trains nothing. It is a memory-and-loop kernel around replaceable models. Its intelligence is the scored substrate, not learned weights.
 - **Not proof of general competence.** It is a working single-host kernel with promising mechanism-level behavior — not a demonstration of human- or institution-level intelligence.
 - **Not proven at scale.** MaxSim over per-token multivectors is exact but grows with the substrate. How far it stays fast and accurate, and what the right approximate-search / pruning regime looks like *without* losing unit-level credit, is open.
 - **Self-graded credit is weak and must be labeled.** It credits at a weak prior and is never to be presented as reality. The provenance discipline is only as honest as the evidence chain behind each close — and a self-improving substrate can corrupt its own scoring in subtle ways, so that chain is something to govern, not assume.
@@ -126,9 +126,9 @@ A system that compounds judgment must invest as heavily in governance, credit ho
 
 An intelligence that resets every session can be useful, but it cannot compound. It keeps paying to rediscover what it should already know.
 
-acc4 is a bet that this is temporary, reduced to its smallest honest form: **two verbs over one late-interaction scored-token memory**, where credit attaches to the units that aligned, runtimes are scored code with no privileged lane, outcomes are weighted by whether *reality* validated them, and the reasoning processor is replaceable while the substrate persists. The four links are made structural by hard enforcement; the trust-kernel — credit honesty and an owner-authority floor — keeps the system from compounding self-belief or acting beyond consent.
+acc is a bet that this is temporary, reduced to its smallest honest form: **two verbs over one late-interaction scored-token memory**, where credit attaches to the units that aligned, runtimes are scored code with no privileged lane, outcomes are weighted by whether *reality* validated them, and the reasoning processor is replaceable while the substrate persists. The four links are made structural by hard enforcement; the trust-kernel — credit honesty and an owner-authority floor — keeps the system from compounding self-belief or acting beyond consent.
 
-acc4 demonstrates a *working kernel* for accreted intelligence on a single host. It does not solve intelligence, and it is honest about the gap between its mechanisms (live, scored, running) and its largest claims (substrate-on lift, scale, replay), which remain unproven. The open question is no longer whether this kind of architecture is possible. It is who will build it well, measure it honestly, and govern it carefully.
+acc demonstrates a *working kernel* for accreted intelligence on a single host. It does not solve intelligence, and it is honest about the gap between its mechanisms (live, scored, running) and its largest claims (substrate-on lift, scale, replay), which remain unproven. The open question is no longer whether this kind of architecture is possible. It is who will build it well, measure it honestly, and govern it carefully.
 
 ---
 

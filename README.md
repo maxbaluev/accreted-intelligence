@@ -6,7 +6,7 @@ A model that scores 90% on a benchmark today scores 90% tomorrow. It doesn't lea
 
 **Accreted intelligence** is the bet that this is temporary: move learning out of model weights and into *scored external state* — where judgment compounds from contact with reality, and the model is a **replaceable processor** rather than the locus of intelligence.
 
-**acc4** is a working kernel for that thesis: a Recursive Language Model over a late-interaction scored-token memory. Two verbs over one memory; credit defaults to a weak prior, and only reality earns full weight.
+**acc** is a working kernel for that thesis: a Recursive Language Model over a late-interaction scored-token memory. Two verbs over one memory; credit defaults to a weak prior, and only reality earns full weight.
 
 ### Read
 - **[Whitepaper →](whitepaper.md)** — the problem (credit assignment + retrieval-to-action binding), the thesis, the architecture *with the math*, and an honest account of what's proven vs. open.
