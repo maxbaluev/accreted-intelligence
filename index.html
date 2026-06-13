@@ -513,7 +513,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     <div>
       <div class="kicker">Runs on your hardware<span class="k-op"><span class="sep">·</span>makes Claude, Cursor &amp; Codex compound</span><span class="sep">·</span>early access</div>
       <h1><span>Make every agent action</span> <span>teach the <em>system</em>.</span></h1>
-      <p class="lede">Hand work to the AI agents you already run. AccInt remembers <b>what actually worked</b> — checked against what really happened — so the same job gets faster, cheaper, and safer every time you run it. All on a machine you control.</p>
+      <p class="lede">Hand work to the AI agents you already run. AccInt learns <b>what actually worked</b> — checked against reality, shaped by how you decide — and predicts the better path before the next run starts. The same job gets faster, safer, and <b>genuinely better</b> each time. All on a machine you control.</p>
       <p class="ruleline">the agent acts <span class="arr" aria-hidden="true">→</span> you see a receipt <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> next run starts from what worked</p>
       <div class="signup">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
@@ -612,7 +612,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     <p class="body">If you already hand real work to agents — shipping code, research loops, recruiting and
     sales pipelines, client briefs, finance and back-office tasks where a wrong move costs something — you keep
     paying to rediscover what already worked. AccInt is for exactly that: the work that repeats, where getting
-    cheaper and safer each run actually compounds.</p>
+    cheaper, safer, and <b>better</b> each run actually compounds.</p>
     <div class="curvebox">
       <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
         <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
@@ -620,7 +620,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
         <div class="cbar"><div class="fill" style="height:19%"></div><h6>RUN 3</h6><span>mostly<br>routine</span></div>
         <div class="cbar last"><div class="fill" style="height:8%"></div><h6>RUN N</h6><span>verified replay —<br>near-instant, near-free</span></div>
       </div>
-      <div class="curve-cap">verified steps replay instead of re-reasoning — the same job costs less every run</div>
+      <div class="curve-cap">verified steps replay instead of re-reasoning, and the next run starts from the better path — the same job costs less and lands better every run</div>
     </div>
     <div class="stabs" role="tablist" aria-label="Pick the work you know" id="storytabs">
       <button class="ltab" role="tab" id="stab-rec" aria-selected="true" aria-controls="spanel-rec">agency recruiting</button>
@@ -801,11 +801,11 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
   <div class="wrap">
     <div class="tag">how it learns</div>
     <h2>It learns the way a <em>brain</em> does.</h2>
-    <p class="body">Your brain lights up what it has seen before, predicts what happens next, acts, and
-    learns most from whatever surprised it. AccInt runs the same loop — except every prediction is
-    <b>checked against reality</b>, and the whole memory stays on your machine. The thing it learns from is
-    one <b>settled commitment</b>: what the agent expected, what it did, who approved it, what came back,
-    and whether that path earned the right to be trusted again.</p>
+    <p class="body">Your brain lights up what it has seen before, predicts what happens next in the
+    <b>space of meaning</b>, acts, and learns most from whatever surprised it. AccInt runs the same loop —
+    except every prediction is <b>checked against reality</b>, shaped by how you decide, and the whole memory
+    stays on your machine. The thing it learns from is one <b>settled commitment</b>: what the agent expected,
+    what it did, who approved it, what came back, and whether that path earned the right to be trusted again.</p>
     <div class="fig" role="img" aria-label="Figure 1 — why this goes beyond recall. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each token's Beta posterior of how often its alignments led to good outcomes. Recursive language modeling decomposes goals and routes typed holes. Late interaction means every token of your ask meets every token of the Work Model (ColBERT); vision is native — what it learned from a document answers a question about a screenshot (ColPali). Credit is pedagogical reinforcement learning: the Work Model is taught by outcomes, never by its own belief — a self-graded result counts at a weak prior, full weight requires reality, and surprising outcomes teach hardest. A JEPA-style transitions ledger predicts which action improves things next and watches its own prediction error — when your world shifts, it notices.">
       <div class="fig-h"><span>FIG. 1 · HOW JUDGMENT COMPOUNDS</span><span>per token, not per document</span></div>
       <div class="fig-eq" aria-hidden="true">score(q, d) = Σ<sub>i</sub> max<sub>j</sub> [ sim(q<sub>i</sub>, d<sub>j</sub>) <span class="gp">· g(π<sub>j</sub>)</span> ]</div>
