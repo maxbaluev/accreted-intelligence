@@ -1,0 +1,18 @@
+name: integrity
+
+# The public repo is the canonical home of the open integration layer (plugins, installers,
+# docs, site). This check keeps it honest on every push and PR — no dependency on the
+# private engine repo's test suite.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: integrity checks (links, brand, plugin markers, install syntax)
+        run: bash scripts/check-integrity.sh
