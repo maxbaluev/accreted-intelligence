@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14110b">
-<title>Accreted Intelligence — a World Model for human work</title>
-<meta name="description" content="Accreted Intelligence (AccInt) is a World Model for human work that runs fully on hardware you control. Agents recurse through goals, tools, accounts and outcomes; pedagogical RL turns verified runs into dynamic runtimes and a Work Model you own. Early access.">
-<meta property="og:title" content="Accreted Intelligence — a World Model for human work">
-<meta property="og:description" content="A World Model for human work that runs fully on hardware you control. Agents recurse through goals, tools, accounts and outcomes; pedagogical RL turns verified runs into dynamic runtimes and a Work Model you own. Early access.">
+<title>Accreted Intelligence — verified judgment for agents</title>
+<meta name="description" content="Accreted Intelligence (AccInt) gives agents a local World Model of verified judgment: receipts, authority gates, pedagogical RL from real outcomes, and reusable runtimes on hardware you control. Early access.">
+<meta property="og:title" content="Accreted Intelligence — verified judgment for agents">
+<meta property="og:description" content="A local World Model of verified judgment for agents: receipts, authority gates, pedagogical RL from real outcomes, and reusable runtimes on hardware you control. Early access.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://accint.xyz/">
 <meta property="og:image" content="https://accint.xyz/og.png">
@@ -246,7 +246,7 @@ p.body b{color:var(--ink);font-weight:600;}
 .cbar.last h6{color:var(--steel);}
 .curve-cap{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:18px;letter-spacing:.04em;}
 
-/* the same week, twice — story panels */
+/* repeated-work story panels */
 .stories{margin-top:0;display:grid;gap:28px;}
 .story{border:1px solid var(--line2);background:var(--bg2);}
 /* the ask is a HUMAN voice — serif italic; machine rows stay mono */
@@ -511,10 +511,10 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="kicker">World Model for human work<span class="k-op"><span class="sep">·</span>fully on your hardware</span><span class="sep">·</span>early access</div>
-      <h1><span>A World Model for your work.</span> <span>Agents act, learn, and <em>compound</em>.</span></h1>
-      <p class="lede">AccInt runs fully on hardware you control and gives agents a live model of <b>goals, tools, accounts, documents, decisions, runtimes, and outcomes</b>. Hand it technical or non-technical work; it recurses until the job is done, keeps receipts, and learns by pedagogical reinforcement learning: real outcomes, not belief, carry the weight.</p>
-      <p class="ruleline">you give the goal <span class="arr" aria-hidden="true">→</span> it recurses through tools <span class="arr" aria-hidden="true">→</span> holds at authority gates <span class="arr" aria-hidden="true">→</span> the outcome teaches the model</p>
+      <div class="kicker">Local World Model for human work<span class="k-op"><span class="sep">·</span>fully on your hardware</span><span class="sep">·</span>early access</div>
+      <h1><span>Give agents judgment</span> <span>that survives the <em>run</em>.</span></h1>
+      <p class="lede">Agents already have context. AccInt adds the local layer most of them lack: <b>what they did, who approved it, what happened next, and which path earned reuse</b>. It runs on hardware you control; pedagogical RL lets real outcomes, not belief, teach the model.</p>
+      <p class="ruleline">one real job <span class="arr" aria-hidden="true">→</span> receipts + authority gates <span class="arr" aria-hidden="true">→</span> outcome credit <span class="arr" aria-hidden="true">→</span> reusable runtime</p>
       <div class="signup">
         <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
           <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
@@ -525,13 +525,13 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
           <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
           <button type="submit">Get my invite</button>
           <div class="step2" hidden>
-            <p class="step2-q" aria-hidden="true">one last thing — what part of your working world should it learn first?</p>
-            <div role="radiogroup" aria-label="One last thing — what part of your working world should it learn first?">
-              <button type="button" class="opt" role="radio" aria-checked="false">technical / coding workflows</button>
+            <p class="step2-q" aria-hidden="true">one last thing — what real job should it learn first?</p>
+            <div role="radiogroup" aria-label="One last thing — what real job should it learn first?">
+              <button type="button" class="opt" role="radio" aria-checked="false">software / agent workflows</button>
               <button type="button" class="opt" role="radio" aria-checked="false">research &amp; monitoring</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">sales / recruiting outreach</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">client ops &amp; back office</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">finance &amp; admin work</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">sales / recruiting pipeline</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">client ops &amp; briefs</button>
+              <button type="button" class="opt" role="radio" aria-checked="false">finance &amp; admin</button>
               <button type="button" class="opt" role="radio" aria-checked="false">something else</button>
             </div>
           </div>
@@ -543,7 +543,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     </div>
 
     <div>
-    <p class="led-cap">World Model in motion — Tuesday, 9:14:</p>
+    <p class="led-cap">one job becoming learned work — Tuesday, 9:14:</p>
     <div class="ledger" aria-label="Example operating session — Tuesday, 9:14, a real morning, running itself">
       <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER</span><span>operator: accint</span></div>
       <div class="ledger-tabs" id="ledtabs">
@@ -563,7 +563,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
       <div class="row refused"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
       </div>
       <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
-      <div class="ledger-foot">sessions patterned on real operating runs</div>
+      <div class="ledger-foot">one repeated job, receipted before it becomes routine</div>
     </div>
     </div>
   </div>
@@ -573,9 +573,9 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
   <div class="wrap">
     <div class="mark">LIVE</div>
     <div>
-      <p><b>AccInt is running while you read this.</b> A live operation runs on it every day —
-      several agents at once, one local World Model running on the owner's hardware. The reasoner recurses;
-      the paths that work become reusable runtimes. This Tuesday, at the same minute:</p>
+      <p><b>AccInt is running while you read this.</b> Today it is a single-owner local system:
+      several agent terminals, one World Model on the owner's hardware, and human approval at the boundary.
+      The product ambition is broad; the proof is concrete — paths that work become reusable runtimes.</p>
       <div class="tritue" role="img" aria-label="Three terminals. One Tuesday. Three sessions run at the same minute — talent search finds 41 candidates at 09:14, client briefs runs 5 workspaces at 09:14, founder pipeline sends 8 approved messages at 09:15 — and all three converge into one base: three operators, one owner — every lesson lands in one place, no collisions, by construction.">
         <div class="vt" aria-hidden="true">Three terminals. One Tuesday.</div>
         <div class="tt-panes" aria-hidden="true">
@@ -606,12 +606,12 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <section id="jobs">
   <span class="sec-alias" id="compounds" aria-hidden="true"></span>
   <div class="wrap">
-    <div class="tag">the same goal, later</div>
-    <h2>Work becomes a <em>runtime</em>.</h2>
-    <p class="body">The first run may reason recursively. When a path works, AccInt keeps it as a
-    scored runtime: a reusable way to do that kind of work again. Felt first where the pipeline
-    <b>is</b> the revenue: searches, briefs, outreach, research, invoices, and technical workflows
-    that should improve instead of reset.</p>
+    <div class="tag">start here</div>
+    <h2>Pick one repeated job with <em>stakes</em>.</h2>
+    <p class="body">A new kind of job still needs reasoning. AccInt keeps the receipts, the approvals,
+    the mistakes, and the outcomes. When a path works, it becomes a scored runtime: a safer way
+    to do that kind of work again. Felt first where repeated work carries money or trust:
+    searches, briefs, outreach, research, invoices, and technical workflows that should improve instead of reset.</p>
     <div class="curvebox">
       <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
         <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
@@ -681,7 +681,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <div class="row"><span class="t">06:11</span><span class="verb">draft</span><span class="what">3 nudges — the at-risk one rewritten softer, the way you did it in run 5</span><span class="stamp hold">HELD → your OK</span></div>
 <div class="row"><span class="t">06:15</span><span class="verb">send</span><span class="what">3/3 + books true — the rest was verified replay</span><span class="stamp ok">VERIFIED</span></div>
 <div class="row"><span class="t">+2d</span><span class="verb">learn</span><span class="what"><b>2 paid before Friday</b> — the soft-tone lesson earns its credit</span><span class="stamp ok">CREDITED</span></div>
-<div class="run-f">5 min at the desk · the receivables move themselves</div>
+<div class="run-f">5 min at the desk · the receivables move with receipts</div>
 </div>
 </div>
 <div class="learned"><span class="kl">what it now knows about your world</span>
@@ -756,12 +756,12 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 </div>
 </section>
 
-<div class="honest asset" aria-label="Your company already has a world model of the work — it lives in people's heads and walks out the door. AccInt builds it as an asset you own: scored by results, audited on a ledger, running fully on your hardware.">
+<div class="honest asset" aria-label="Your company already has a model of how work gets done — it lives in people's heads and walks out the door. AccInt turns it into a local asset you own: scored by results, audited on a ledger, running fully on your hardware.">
   <div class="wrap">
     <div class="mark">THE ASSET</div>
     <div>
-      <p><b>Your company already has a world model of the work</b> — it lives in people's heads and walks out
-      the door. AccInt builds it as an asset you own: <b>scored by results, audited on a ledger,
+      <p><b>Your company already has a model of how work gets done</b> — it lives in people's heads and walks out
+      the door. AccInt turns it into a local asset you own: <b>scored by results, audited on a ledger,
       running fully on your hardware</b>.</p>
     </div>
   </div>
@@ -769,11 +769,11 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="answerable">
   <div class="wrap">
-    <div class="tag">for the people accountable</div>
-    <h2>When management asks, it's already <em>written</em>.</h2>
-    <p class="body">Most AI at work leaves no receipts, no record of who said yes, no lessons kept.
-    <b>AccInt writes all three down as they happen</b>. The ledger is what management sees;
-    the World Model is what agents use to act next.</p>
+    <div class="tag">trust before autonomy</div>
+    <h2>If it acts, it leaves a <em>receipt</em>.</h2>
+    <p class="body">The point is not unsupervised autonomy. The point is controlled compounding:
+    <b>what happened, who approved it, and what was learned</b> are written as the work happens.
+    The ledger is what management sees; the World Model is what agents use to act next.</p>
     <div class="audit" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="aud-legend" aria-hidden="true">
@@ -798,17 +798,17 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="science">
   <div class="wrap">
-    <div class="tag">RLM + JEPA + late interaction + pedagogical RL</div>
-    <h2>The science: a <em>World Model</em> that recurses.</h2>
-    <p class="body">A static AI engine does not learn your operation. AccInt keeps learning outside the engine:
-    <b>recursive language modeling</b> decomposes goals and opens holes, late interaction grounds perception,
-    JEPA-style transitions predict which action improves the state, and pedagogical reinforcement learning updates the
-    scored Work Model underneath.</p>
-    <div class="fig" role="img" aria-label="Figure 1 — how the World Model is scored. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each token's Beta posterior of how often its alignments led to good outcomes. Recursive language modeling decomposes goals and routes typed holes. Late interaction means every token of your ask meets every token of the Work Model (ColBERT); vision is native — what it learned from a document answers a question about a screenshot (ColPali). Credit is pedagogical reinforcement learning: the Work Model is taught by outcomes, never by its own belief — a self-graded result counts at a weak prior, full weight requires reality, and surprising outcomes teach hardest. A JEPA-style transitions ledger predicts which action improves things next and watches its own prediction error — when your world shifts, it notices.">
-      <div class="fig-h"><span>FIG. 1 · HOW THE WORLD MODEL IS SCORED</span><span>per token, not per document</span></div>
+    <div class="tag">beyond recall · credit assignment</div>
+    <h2>Recall is not judgment. <em>Outcomes are.</em></h2>
+    <p class="body">Context and memory help agents recall. AccInt scores whether the retrieved unit
+    helped a real outcome. <b>Recursive language modeling</b> routes the work, late interaction grounds
+    the evidence, JEPA-style transitions predict which action improves the state, and pedagogical RL
+    updates the scored Work Model underneath.</p>
+    <div class="fig" role="img" aria-label="Figure 1 — why this goes beyond recall. The retrieval score of a query against a document sums, over query tokens, the best-matching document token similarity, weighted by g of pi — each token's Beta posterior of how often its alignments led to good outcomes. Recursive language modeling decomposes goals and routes typed holes. Late interaction means every token of your ask meets every token of the Work Model (ColBERT); vision is native — what it learned from a document answers a question about a screenshot (ColPali). Credit is pedagogical reinforcement learning: the Work Model is taught by outcomes, never by its own belief — a self-graded result counts at a weak prior, full weight requires reality, and surprising outcomes teach hardest. A JEPA-style transitions ledger predicts which action improves things next and watches its own prediction error — when your world shifts, it notices.">
+      <div class="fig-h"><span>FIG. 1 · HOW JUDGMENT COMPOUNDS</span><span>per token, not per document</span></div>
       <div class="fig-eq" aria-hidden="true">score(q, d) = Σ<sub>i</sub> max<sub>j</sub> [ sim(q<sub>i</sub>, d<sub>j</sub>) <span class="gp">· g(π<sub>j</sub>)</span> ]</div>
       <div aria-hidden="true">
-        <div class="fn"><b>in plain words</b><span>it recurses through the job, keeps what worked, checks itself against reality instead of trusting its own answers, and notices when your world changes — the math below is how</span></div>
+        <div class="fn"><b>in plain words</b><span>it keeps context accountable: which recalled pieces earned their keep, which failed, and what changed in your world — the math below is how</span></div>
         <div class="fn"><b>recursive loop</b><span>the reasoner decomposes goals, opens typed holes, asks for authority when needed, and turns verified paths into reusable runtimes — RLM [5]</span></div>
         <div class="fn"><b>late interaction</b><span>every token of your ask meets every token of the Work Model; the aligned pairs are the citation — ColBERT [1]. vision is native: what it learned from a document answers a question about a screenshot — ColPali [2]</span></div>
         <div class="fn"><b>π = α / (α+β)</b><span>each token carries a Beta posterior: how often its alignments led to good outcomes, on how much real evidence — Thompson [3]</span></div>
@@ -816,10 +816,10 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
         <div class="fn"><b>jepa prediction</b><span>a transitions ledger predicts which action improves things next and watches its own error — when your world shifts, it notices — LeCun [6]</span></div>
       </div>
     </div>
-    <p class="led-cap" style="margin-top:46px">The World Model behind this page, counted on 12 Jun 2026:</p>
+    <p class="led-cap" style="margin-top:46px">The local model behind this page, counted on 12 Jun 2026:</p>
     <div class="ledger" style="max-width:720px" aria-label="Live counts from the operator that builds and runs this page, 12 June 2026: 2,778 entities in the local World Model; 20,667 events on the append-only ledger; 1,931 outcomes validated by reality versus 372 self-graded at a weak prior; 94% success over the last 50 outcomes.">
       <div class="ledger-head"><span><span class="dot"></span>WORLD MODEL READOUT</span><span>operator: accint</span></div>
-      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">holds</span><span class="what"><b>2,778 entities</b> in the Work Model · 537 of them runnable</span><span class="stamp ok">COUNTED</span></div>
+      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">holds</span><span class="what"><b>2,778 entities</b> in the local Work Model · 537 of them runnable</span><span class="stamp ok">COUNTED</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">wrote</span><span class="what"><b>20,667 events</b> on the append-only ledger</span><span class="stamp ok">COUNTED</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">scored</span><span class="what"><b>1,931 outcomes validated by reality</b> · 372 self-graded, held at a weak prior</span><span class="stamp ok">CREDITED</span></div>
       <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">ran</span><span class="what">last 50 outcomes: <b>94% good</b> — belief never counts as reality</span><span class="stamp ok">VERIFIED</span></div>
@@ -843,9 +843,9 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="stack">
   <div class="wrap">
-    <div class="tag">no new tab to live in</div>
-    <h2>Agents plug into one <em>World Model</em>.</h2>
-    <p class="body">Today the proof surfaces are coding-agent terminals. The product boundary is broader:
+    <div class="tag">where it works now</div>
+    <h2>Use today's agents. Keep the learning <em>local</em>.</h2>
+    <p class="body">The live wedge is coding-agent terminals and MCP-connected tools. The product boundary is broader:
     any agent that can observe, act, and report outcomes can compound the same local World Model —
     what worked, what failed, what runtime to try next. Change agents later; the model stays <b>on your hardware</b>.</p>
     <div class="hub" role="img" aria-label="One machine, four doors. Four agent terminals — native hook host, live with hook support; Codex, live today over MCP; OpenCode, live today over MCP; Cursor, connects over MCP — all speak the same two verbs and converge into one binary: acc4, one pure-Rust binary, native on Windows, macOS and Linux. The binary feeds a single base ledger rule: every lesson lands in one local ledger — no cloud in the loop — yours.">
@@ -876,9 +876,9 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="metal">
   <div class="wrap">
-    <div class="tag">on premise</div>
-    <h2>Runs entirely on <em>your metal</em>.</h2>
-    <p class="body">AccInt runs fully on <b>a computer you control</b>: one small program and one data file
+    <div class="tag">your hardware</div>
+    <h2>No cloud brain to <em>rent</em>.</h2>
+    <p class="body">AccInt runs on <b>a computer you control</b>: one small program and one data file
     (a pure-Rust binary and a SQLite file, for those keeping score). There is no cloud control plane in the loop
     and <b>no API key to leak</b>: nothing reads your data except the operator itself.</p>
     <p class="body">The AI engine is <b>replaceable, not the brain</b>. What it learned lives in
@@ -941,14 +941,14 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section id="roadmap">
   <div class="wrap">
-    <div class="tag">where this goes</div>
-    <h2>One operator today.<br>One shared <em>World Model</em> next.</h2>
+    <div class="tag">truth in roadmap</div>
+    <h2>One local operator now.<br>Team World Models <em>later</em>.</h2>
     <div class="road">
       <div class="stage now"><span class="st">NOW · LIVE</span>
-        <h3>Your operator</h3>
-        <p>One operator on your work, compounding <b>one World Model</b>. This is what early access opens.</p></div>
+        <h3>Single-owner system</h3>
+        <p>One local operator on your work, with coding-agent proof surfaces and approval before external action.</p></div>
       <div class="stage next"><span class="st">NEXT</span>
-        <h3>The team model</h3>
+        <h3>Team Work Model</h3>
         <p><b>One shared World Model, many operators</b>, with per-person authority and one audit plane.</p></div>
       <div class="stage later"><span class="st">RESEARCH</span>
         <h3>World Models that travel</h3>
@@ -960,7 +960,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <section class="final" id="access">
   <div class="wrap">
     <div class="tag" style="justify-content:center">early access</div>
-    <h2>Give it one real job.<br>Start your <em>World Model</em>.</h2>
+    <h2>Bring one repeated job.<br>Make it <em>improve</em>.</h2>
     <div class="signup">
       <form id="subform2" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
         <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
@@ -971,18 +971,18 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
         <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
         <button type="submit">Get my invite</button>
         <div class="step2" hidden>
-          <p class="step2-q" aria-hidden="true">one last thing — what part of your working world should it learn first?</p>
-          <div role="radiogroup" aria-label="One last thing — what part of your working world should it learn first?">
-            <button type="button" class="opt" role="radio" aria-checked="false">technical / coding workflows</button>
+          <p class="step2-q" aria-hidden="true">one last thing — what real job should it learn first?</p>
+          <div role="radiogroup" aria-label="One last thing — what real job should it learn first?">
+            <button type="button" class="opt" role="radio" aria-checked="false">software / agent workflows</button>
             <button type="button" class="opt" role="radio" aria-checked="false">research &amp; monitoring</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">sales / recruiting outreach</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">client ops &amp; back office</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">finance &amp; admin work</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">sales / recruiting pipeline</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">client ops &amp; briefs</button>
+            <button type="button" class="opt" role="radio" aria-checked="false">finance &amp; admin</button>
             <button type="button" class="opt" role="radio" aria-checked="false">something else</button>
           </div>
         </div>
       </form>
-      <div class="note">invites go in order — your local World Model starts compounding on your hardware from the first job you hand it</div>
+      <div class="note">invites go in order — your local World Model earns credit from the first verified run</div>
       <div class="ok" id="subok2"><span class="stamp ok">ON THE LIST</span>Your invite goes out in order — no spam in between.</div>
       <div class="err" id="suberr2">Hmm, that didn't go through — retrying the classic way…</div>
     </div>
@@ -1000,7 +1000,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
       </ul>
     </div>
     <div class="colophon">
-      <span>ACCRETED INTELLIGENCE — the World Model for human work</span>
+      <span>ACCRETED INTELLIGENCE — verified judgment for agents</span>
       <span class="c-links">
         <a href="mailto:maxbaluev@outlook.com">email</a>
         <a href="https://t.me/maxbaluev">telegram</a>
