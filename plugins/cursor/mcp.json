@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "acc": {
+      "command": "acc",
+      "args": ["mcp"],
+      "env": {
+        "ACC_MCP_CALL_DEADLINE_SECS": "45"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "acc hook turn-start --host cursor"
+      }
+    ],
+    "stop": [
+      {
+        "command": "acc hook turn-end --host cursor"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "acc hook post-tool --host cursor"
+      }
+    ]
+  }
+}

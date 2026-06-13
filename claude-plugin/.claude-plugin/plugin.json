@@ -1,0 +1,6 @@
+{
+  "name": "acc",
+  "version": "0.1.0",
+  "_version_note": "Baseline 0.1.0 == Cargo.toml at first public release. The plugin version is loosely coupled to the engine version: it bumps independently, and may diverge from the engine, only when the plugin's hook/MCP surface (manifest, hook mappings, skills) changes on its own.",
+  "description": "scored-memory loop — two verbs (acc_retrieve + acc_act) + lifecycle hooks"
+}

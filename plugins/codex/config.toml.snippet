@@ -1,0 +1,15 @@
+# acc × Codex CLI — append to ~/.codex/config.toml (owner applies this; nothing
+# here edits your config for you).
+#
+# NOTE ON ORDER: `notify` is a TOP-LEVEL key. Keep it ABOVE any [section] header in
+# your config.toml — placed after one, TOML attaches it to that table and Codex
+# ignores it.
+notify = ["bash", "/ABSOLUTE/PATH/TO/acc/plugins/codex/notify-acc.sh"]
+
+# Two-verb MCP access to the accreted scored memory (acc_retrieve / acc_act).
+[mcp_servers.acc]
+command = "acc"
+args = ["mcp"]
+env = { "ACC_MCP_CALL_DEADLINE_SECS" = "45" }
+tool_timeout_sec = 60
+# Cross-project memory: add "ACC_DB" = "/home/you/acc.db" to env above.

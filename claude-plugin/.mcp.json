@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "acc": {
+      "command": "acc",
+      "args": [
+        "--db",
+        "acc.db",
+        "mcp"
+      ],
+      "alwaysLoad": true
+    }
+  }
+}

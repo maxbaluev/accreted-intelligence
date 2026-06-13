@@ -1,0 +1,54 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "acc hook session-start --host claude-code", "timeout": 600 }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "acc hook turn-start --host claude-code", "timeout": 600 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "acc hook post-tool --host claude-code", "timeout": 600 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "acc hook turn-end --host claude-code", "timeout": 600 }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          { "type": "command", "command": "acc hook compact --host claude-code", "timeout": 600 }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "acc hook subagent-start --host claude-code", "timeout": 600 }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "acc hook subagent-end --host claude-code", "timeout": 600 }
+        ]
+      }
+    ]
+  }
+}

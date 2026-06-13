@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["/ABSOLUTE/PATH/TO/acc/plugins/opencode/acc.ts"],
+  "command": {
+    "goal": {
+      "description": "Run an autonomous acc goal loop",
+      "template": "Start an acc goal loop for this owner goal:\n\n$ARGUMENTS\n\nUse the configured acc MCP tools in this OpenCode session:\n1. Call `acc_retrieve` with the goal first and cite the relevant [ids].\n2. Call `acc_act` with runtime \"solve\" and the goal. If it returns a `brain_frame`, reason in this session and submit the resolution with `acc_act` runtime \"continue\" using the `frame_id`.\n3. Do the actual work, recursively using `acc_retrieve`/`acc_act` when memory or judgment is missing. Do not introduce a second reasoner or background agent.\n4. Persist autonomously through routine blockers: inspect, edit, run commands, fix failures, and verify. Stop only for owner-held facts, consent/security boundaries, or external actions requiring authority.\n5. Record `acc_act` runtime \"outcome\" against the commitment with verification evidence, then report the result, cited [ids], and any clean blocker."
+    }
+  },
+  "mcp": {
+    "acc": {
+      "type": "local",
+      "command": ["acc", "mcp"],
+      "enabled": true,
+      "timeout": 60000,
+      "environment": {
+        "ACC_MCP_CALL_DEADLINE_SECS": "45"
+      }
+    }
+  }
+}
