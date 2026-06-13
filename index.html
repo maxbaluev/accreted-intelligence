@@ -236,6 +236,13 @@ text-align:left;text-transform:uppercase;vertical-align:top;}
 .wtile.soon .wmark{color:var(--dim);}
 .wcap{margin-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--faint);}
 .wcap b{color:var(--dim);font-weight:500;}
+/* ---------- stat strip (science readout — distinct from the row-ledgers) ---------- */
+.statstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line2);border:1px solid var(--line2);max-width:720px;}
+@media(max-width:560px){.statstrip{grid-template-columns:repeat(2,1fr);}}
+.stat{background:var(--bg2);padding:20px 16px;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.stat b{font-family:var(--mono);font-size:clamp(24px,3.4vw,30px);font-weight:600;color:var(--ink);letter-spacing:-.01em;line-height:1;}
+.stat b.hot{color:var(--orange);}
+.stat span{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--faint);line-height:1.5;}
 
 /* ---------- sections — drawing-sheet rhythm ---------- */
 section{padding:130px 0;border-top:3px solid var(--rule);scroll-margin-top:74px;counter-increment:sec;}
@@ -595,11 +602,11 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     <div class="wstack" role="img" aria-label="Works with coding agents: Claude Code, Codex, OpenCode and Cursor today; VS Code, Hermes and OpenClaw coming.">
       <div class="wtile "><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg><span class="nm">Claude Code</span></div>
       <div class="wtile "><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.6 6.8L21 11l-6.4 2.2L12 20l-2.6-6.8L3 11l6.4-2.2z"/></svg><span class="nm">Codex</span></div>
-      <div class="wtile "><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/></svg><span class="nm">OpenCode</span></div>
+      <div class="wtile "><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><rect x="15" y="15" width="6" height="6"/></svg><span class="nm">OpenCode</span></div>
       <div class="wtile "><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg><span class="nm">Cursor</span></div>
       <div class="wtile soon"><svg class="wmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg><span class="nm">VS Code</span></div>
-      <div class="wtile soon"><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/></svg><span class="nm">Hermes</span></div>
-      <div class="wtile soon"><svg class="wmark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/></svg><span class="nm">OpenClaw</span></div>
+      <div class="wtile soon"><svg class="wmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.5" r="2.6" fill="currentColor" stroke="none"/><path d="M9.4 10.5C6 7.5 3 7.5 1.5 8.8M14.6 10.5C18 7.5 21 7.5 22.5 8.8"/></svg><span class="nm">Hermes</span></div>
+      <div class="wtile soon"><svg class="wmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3c-2.5 2.5-2.5 6 0 8.5M16 3c2.5 2.5 2.5 6 0 8.5M8 11.5l4 9.5 4-9.5"/></svg><span class="nm">OpenClaw</span></div>
     </div>
     <p class="wcap">live in <b>Claude Code, Codex, OpenCode &amp; Cursor</b> — VS Code, Hermes &amp; OpenClaw coming</p>
     <div class="wlab" aria-hidden="true">your computer</div>
@@ -863,14 +870,12 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
         <div class="fn"><b>jepa prediction</b><span>a transitions ledger predicts which action improves things next and watches its own error — when your world shifts, it notices — LeCun [6]</span></div>
       </div>
     </div>
-    <p class="led-cap" style="margin-top:46px">The local model behind this page, counted on 12 Jun 2026:</p>
-    <div class="ledger" style="max-width:720px" aria-label="Live counts from the operator that builds and runs this page, 12 June 2026: 2,778 entities in the local World Model; 20,667 events on the append-only ledger; 1,931 outcomes validated by reality versus 372 self-graded at a weak prior; 94% success over the last 50 outcomes.">
-      <div class="ledger-head"><span><span class="dot"></span>WORLD MODEL READOUT</span><span>operator: accint</span></div>
-      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">holds</span><span class="what"><b>2,778 entities</b> in the local Work Model · 537 of them runnable</span><span class="stamp ok">COUNTED</span></div>
-      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">wrote</span><span class="what"><b>20,667 events</b> on the append-only ledger</span><span class="stamp ok">COUNTED</span></div>
-      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">scored</span><span class="what"><b>1,931 outcomes validated by reality</b> · 372 self-graded, held at a weak prior</span><span class="stamp ok">CREDITED</span></div>
-      <div class="row"><span class="t" style="visibility:hidden">·</span><span class="verb">ran</span><span class="what">last 50 outcomes: <b>94% good</b> — belief never counts as reality</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="ledger-foot">live counts from the operator that builds and runs this very page</div>
+    <p class="led-cap" style="margin-top:46px">The Work Model behind this page, counted on 12 Jun 2026:</p>
+    <div class="statstrip" role="img" aria-label="Live counts from the operator that builds and runs this page, 12 June 2026: 2,778 entities in the Work Model, 537 of them runnable; 20,667 events on the ledger; 1,931 outcomes checked against reality versus 372 self-graded at a weak prior; 94% good over the last 50 outcomes.">
+      <div class="stat"><b>2,778</b><span>entities · 537 runnable</span></div>
+      <div class="stat"><b>20,667</b><span>events on the ledger</span></div>
+      <div class="stat"><b>1,931</b><span>checked against reality · 372 self-graded</span></div>
+      <div class="stat"><b class="hot">94%</b><span>good, last 50 — belief never counts as reality</span></div>
     </div>
     <ol class="refs" aria-label="References">
       <li><span>Khattab &amp; Zaharia (2020). <i>ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT.</i> SIGIR. <a href="https://arxiv.org/abs/2004.12832">arXiv:2004.12832</a></span></li>
