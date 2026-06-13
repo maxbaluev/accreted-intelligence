@@ -20,7 +20,7 @@ container GPU-passthrough overhead. The container is the **portability floor**.
 > the LateOn floor, an unsupported OS/arch) it prints this container path as a
 > terminal verdict instead of installing a broken native lane. You can also force it
 > with `ACC_TIER=container ./install.sh`. The tier ladder is documented in
-> [docs/INSTALL_WITH_CLAUDE.md](INSTALL_WITH_CLAUDE.md).
+> [the conversational install path](with-claude.md).
 
 > **Verification status: PARTIAL (2026-06-06) — build infra-blocked, not verified.**
 > A real `docker build -t acc:verify .` was attempted on a Docker 29.5.2 host

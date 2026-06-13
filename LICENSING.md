@@ -11,7 +11,7 @@ read, audit, fork, modify, and redistribute it. Contributions are welcome (see
 [CONTRIBUTING.md](CONTRIBUTING.md)). This covers:
 
 - the installers: `install.sh`, `install.ps1`, `bootstrap/`
-- the coding-agent plugins: `plugins/**` and `claude-plugin/**`
+- the coding-agent plugins: `plugins/**` (including `plugins/claude/**`, the reference host)
 
 Auditing these is encouraged — they are exactly what touches your system at install time.
 
@@ -32,7 +32,7 @@ right to it.
 
 | Layer | What | License |
 |---|---|---|
-| Glue | install scripts, `plugins/`, `claude-plugin/` | Apache-2.0 (open) |
+| Glue | install scripts, `plugins/` (incl. `plugins/claude/`) | Apache-2.0 (open) |
 | Binary | the prebuilt `acc` engine | EULA (proprietary, draft) |
 | Engine source | scoring / calibration / prediction internals | not published |
 | Your substrate | `acc.db` | yours |

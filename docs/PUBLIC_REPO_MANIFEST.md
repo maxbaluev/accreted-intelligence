@@ -13,9 +13,9 @@ time, while the engine's scoring/calibration internals stay private.
 
 ## PUBLIC — ships to `accreted-intelligence`
 
-- **Install surface:** `install.sh`, `install.ps1`, `bootstrap/install`, `bootstrap/install.ps1`, `Dockerfile`, `docs/INSTALL_*.md`
-- **Plugins (integration glue):** `plugins/**`, `claude-plugin/**` — REQUIRED public: the installer fetches `plugins/` into `~/.local/share/acc/plugins`
-- **Public docs:** `README.md`, `docs/whitepaper.md`, `docs/architecture-overview.md` (principles public, numeric constants proprietary), `CHANGELOG.md`
+- **Install surface:** `install.sh`, `install.ps1`, `bootstrap/install`, `bootstrap/install.ps1`, `Dockerfile`, `docs/install/**`
+- **Plugins (integration glue):** `plugins/**` (including `plugins/claude/**`, the reference host) — REQUIRED public: the installer fetches `plugins/` into `~/.local/share/acc/plugins`
+- **Public docs:** `README.md`, `docs/**` — the three-layer tree: concept/glossary/quickstart/first-session (Layer 1–2), `docs/reference/whitepaper.md`, `docs/reference/architecture-overview.md`, `docs/reference/trust-model.md` (principles public, numeric constants proprietary), `CHANGELOG.md`
 - **Releases:** prebuilt multi-OS binaries + `sha256sums.txt` (via GitHub Releases)
 - **Community infra:** `.github/ISSUE_TEMPLATE/**`, `.github/SECURITY.md`, `CONTRIBUTING.md`, `LICENSE-APACHE-2.0.txt`, `EULA.md`, `LICENSING.md`, this manifest
 

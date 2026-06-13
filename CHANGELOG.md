@@ -1,5 +1,9 @@
 # Changelog
 
+This repo compounds through the same loop it ships — every entry below is a
+commitment that passed the operator loop: built, held for approval, merged,
+credited. The running readout is live at [accint.xyz](https://accint.xyz).
+
 All notable changes to acc are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project aims at
 [Semantic Versioning](https://semver.org/).
@@ -68,7 +72,7 @@ First public release. `0.1.0` is the intentional baseline across all three versi
 surfaces, which are kept in lockstep at release:
 
 - `Cargo.toml` (`version = "0.1.0"`) — the engine.
-- `claude-plugin/.claude-plugin/plugin.json` (`"version": "0.1.0"`) — the Claude
+- `plugins/claude/.claude-plugin/plugin.json` (`"version": "0.1.0"`) — the Claude
   Code plugin (loosely coupled to the engine; it bumps independently only when the
   plugin's hook/MCP surface changes on its own).
 - The git tag (`v0.1.0`) — the release marker.

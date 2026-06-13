@@ -79,7 +79,7 @@ Many terminals share what compounds — the substrate, the warm encoder daemon, 
 | Structural enforcement of the four links | Scaling MaxSim memory well past a single host |
 | Owner-authority floor; weak self-graded prior | Hardening the reachable-network / send boundary |
 
-The mechanisms in the left column are running today. The right column is honest open work — the largest claims (substrate lift, scale, replay) are *not* yet validated by controlled experiment.
+The mechanisms in the left column are running today. The right column is honest open work — the largest claims (substrate lift, scale, replay) are *not* yet validated by controlled experiment. The live system, not a demo — the measured readout runs at [accint.xyz](https://accint.xyz).
 
 ---
 

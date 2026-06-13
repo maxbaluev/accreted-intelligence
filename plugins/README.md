@@ -36,10 +36,15 @@ coach/context text the host may surface back into the session.
 
 | Host | Adapter | MCP (two verbs) | Lifecycle recording |
 |---|---|---|---|
-| Claude Code | [`../claude-plugin/`](../claude-plugin/) (reference host) | `.mcp.json` | all eight events, wired natively (`--host claude-code`) |
+| Claude Code | [`claude/`](claude/) (reference host) | `.mcp.json` | all eight events, wired natively (`--host claude-code`) |
 | OpenCode | [`opencode/`](opencode/) | `opencode.json` `mcp` block | plugin (`acc.ts`): session/turn/tool/subagent/compact/end |
 | Codex CLI | [`codex/`](codex/) | `config.toml` `[mcp_servers.acc]` | `notify` hook → `turn-end` per completed turn |
 | Cursor | [`cursor/`](cursor/) | `.cursor/mcp.json` | agent hooks: `beforeSubmitPrompt` → `turn-start`, `stop` → `turn-end`, `afterFileEdit` → `post-tool` (authored against docs, not live-tested here) |
+
+`claude/` is the reference host — native lifecycle + skills; the other three
+translate their host's signals into the one generic envelope. Same substrate,
+same two verbs, different richness of wiring. (Cursor specifically is authored
+against docs, not live-tested.)
 
 ## Automatic wiring — `acc hosts-sync`
 

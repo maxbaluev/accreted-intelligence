@@ -966,14 +966,14 @@ fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
 # PHASE 12 — claude plugin (the DISTRIBUTION artifact). Validates the versioned plugin
-# folder's manifests (claude-plugin/) with python3 json.load and prints how to use the
+# folder's manifests (plugins/claude/) with python3 json.load and prints how to use the
 # plugin in OTHER projects. This phase deliberately does NOT rewire this repo's own
 # .claude/settings.json — the repo keeps direct hook wiring; the plugin folder exists so
 # other projects can consume the same eight-event lifecycle + the two MCP verbs. Pure
 # read (idempotent, fail-soft): a broken manifest warns and the install continues.
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 12 — claude plugin manifests (distribution artifact)"
-PLUGIN_DIR="$REPO/claude-plugin"
+PLUGIN_DIR="$REPO/plugins/claude"
 PLUGIN_BAD=""
 for m in .claude-plugin/plugin.json hooks/hooks.json .mcp.json; do
   if [ ! -f "$PLUGIN_DIR/$m" ]; then
@@ -983,12 +983,12 @@ for m in .claude-plugin/plugin.json hooks/hooks.json .mcp.json; do
   fi
 done
 if [ -n "$PLUGIN_BAD" ]; then
-  phase_result "claude_plugin" "failed" "claude-plugin/ manifest check:$PLUGIN_BAD" "fix the manifest(s) under claude-plugin/ — fail-soft, install continues (this repo's .claude/settings.json is untouched either way)"
+  phase_result "claude_plugin" "failed" "plugins/claude/ manifest check:$PLUGIN_BAD" "fix the manifest(s) under plugins/claude/ — fail-soft, install continues (this repo's .claude/settings.json is untouched either way)"
 else
   say "this repo keeps DIRECT hook wiring in .claude/settings.json — nothing here is rewired; the plugin folder is the distribution artifact for OTHER projects"
   say "use it elsewhere:   claude --plugin-dir $PLUGIN_DIR"
   say "or copy the skills: cp -r $PLUGIN_DIR/skills/* <project>/.claude/skills/"
-  phase_result "claude_plugin" "ok" "claude-plugin/ manifests valid (plugin.json · hooks/hooks.json · .mcp.json) — distribution artifact only; this repo's own wiring untouched" "phase 13: hosts-sync"
+  phase_result "claude_plugin" "ok" "plugins/claude/ manifests valid (plugin.json · hooks/hooks.json · .mcp.json) — distribution artifact only; this repo's own wiring untouched" "phase 13: hosts-sync"
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════

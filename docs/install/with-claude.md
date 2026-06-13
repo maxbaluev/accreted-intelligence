@@ -7,7 +7,7 @@ machine-readable contract** (`acc doctor --json`) instead of guessing. No manual
 pasting, no "did it work?" — Claude reads the doctor report and tells you the truth.
 
 If you would rather run it yourself, the README's `./install.sh` and the
-[container path](INSTALL_CONTAINER.md) are the same install underneath. This doc is for
+[container path](container.md) are the same install underneath. This doc is for
 when you want Claude to drive.
 
 ## The one paste
@@ -64,7 +64,7 @@ your consent at the boundary** (the clone/install/daemon steps touch your machin
      container** (`scripts/acc-docker.sh`), a reproducible Linux image that runs
      anywhere Docker runs, with your substrate on an owner-owned mounted volume. Full
      details and the GPU/CPU-floor tradeoff live in
-     [docs/INSTALL_CONTAINER.md](INSTALL_CONTAINER.md). The native installer **detects
+     [the container path](container.md). The native installer **detects
      this case itself**: on a host where no native tier fits, `./install.sh` prints the
      container path as a terminal verdict instead of installing a broken native lane.
 
@@ -128,7 +128,7 @@ OS/arch, total RAM):
 | Apple Silicon, RAM ≥ 32 / 16 GB | `8b-full` / `4b-full` | ColQwen3-8B/4B full bf16 · mps |
 | linux aarch64 / Intel-mac, RAM ≥ 32 / 16 GB | `8b-full` / `4b-full` | ColQwen3-8B/4B full bf16 · cpu |
 | below the floors | `lateon` | LateOn text-only · cpu (or mps ≥ 16 GB) |
-| nothing viable natively | `container` | → [docs/INSTALL_CONTAINER.md](INSTALL_CONTAINER.md) |
+| nothing viable natively | `container` | → [the container path](container.md) |
 
 Override the auto-pick with `ACC_TIER=<8b-awq|4b-awq|8b-cpu|4b-cpu|8b-full|4b-full|lateon|container>`.
 
@@ -167,7 +167,7 @@ Override the auto-pick with `ACC_TIER=<8b-awq|4b-awq|8b-cpu|4b-cpu|8b-full|4b-fu
    | `substrate` | the `acc.db` opens; entity count + pinned model | run `./install.sh`, or ingest one memory to create it |
    | `embedder` | the warm daemon answers a real encode round-trip | `acc embedder` (first run downloads the model — minutes) |
    | `model_pin` | the encoder's vector dim matches the substrate's | re-pin / re-ingest under one model (never mix embedders) |
-   | `sandbox` | `bwrap` is available so `act exec` runs isolated | install bubblewrap, or use the container ([here](INSTALL_CONTAINER.md)) |
+   | `sandbox` | `bwrap` is available so `act exec` runs isolated | install bubblewrap, or use the container ([here](container.md)) |
    | `mcp` | `.mcp.json` registers the `acc` server for Claude Code | re-run `./install.sh` (writes the wiring) |
    | `hooks` | the three four-link hooks are present under `.claude/hooks/` | re-run `./install.sh` to restore them |
    | `brain/session` | the continuation-frame lane is live — the interactive session is the reasoner | — (always ok; no credential, ever — see the no-credential note below) |
@@ -236,7 +236,7 @@ it. The common ones:
 
 - **`sandbox` warn — "no sandbox available" (`bwrap` missing).** `act exec` refuses to
   run unsandboxed by design. Fix: install bubblewrap (`apt install bubblewrap` on Linux),
-  or run acc in the **container** ([docs/INSTALL_CONTAINER.md](INSTALL_CONTAINER.md)),
+  or run acc in the **container** ([the container path](container.md)),
   which carries its own sandbox. On macOS there's no `bwrap`; runtimes run under acc's
   built-in deadline (or use the container).
 - **`embedder` warn — daemon down / "still warming".** The first run downloads the model
@@ -262,12 +262,12 @@ it. The common ones:
 |---|---|---|
 | Linux x86_64 with a GPU you control | native `./install.sh` | full multimodal ColQwen lane, no container overhead |
 | Linux x86_64/aarch64 or macOS, root-ish | native `./install.sh` | functional; embedder on cpu/mps |
-| Windows | native `install.ps1` | same phase-machine in PowerShell; the **container** ([here](INSTALL_CONTAINER.md)) is the fallback for locked-down hosts |
-| Locked-down / no-root / "must just work" | **container** ([here](INSTALL_CONTAINER.md)) | the image carries its deps; CPU floor works with no GPU |
+| Windows | native `install.ps1` | same phase-machine in PowerShell; the **container** ([here](container.md)) is the fallback for locked-down hosts |
+| Locked-down / no-root / "must just work" | **container** ([here](container.md)) | the image carries its deps; CPU floor works with no GPU |
 
 The container defaults to the universal CPU floor (LateOn, text-only); the GPU/ColQwen
 lane (and cross-modal sight via `acc_retrieve` with an `image` input) is opt-in. See
-[docs/INSTALL_CONTAINER.md](INSTALL_CONTAINER.md) for the full tradeoff and the
+[the container path](container.md) for the full tradeoff and the
 `docker exec -i` MCP wiring.
 
 ## The two machine-readable contracts (install → verify)
