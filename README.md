@@ -1,3 +1,5 @@
+> 🚧 **Early access.** The whitepaper, architecture, integration glue, and installers are public for review. Prebuilt binary **releases are coming shortly** — the install one-liner below works once the first release is published. Watch the **Releases** tab to get notified.
+
 # Accreted Intelligence (AccInt)
 
 acc is a memory + tool loop for Claude Code: it retrieves scored memory and runs
