@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14110b">
 <title>Accreted Intelligence — the learning substrate for agent work</title>
-<meta name="description" content="Accreted Intelligence (AccInt) is an on-premise layer that makes the AI tools you already run — Claude, Cursor, Codex — remember what actually worked. Every action is checked against reality and kept on your machine, so the same work gets faster, cheaper, and safer each run. Early access.">
+<meta name="description" content="Accreted Intelligence (AccInt) is an on-premise layer that makes the AI tools you already run — Claude, Codex, Cursor — remember what actually worked. Every action is checked against reality and kept on your machine, so the same work gets faster, cheaper, and safer each run. Swap the model, keep the expertise. Install in one line; runs on hardware you control.">
 <meta property="og:title" content="Accreted Intelligence — the learning substrate for agent work">
-<meta property="og:description" content="A local Work Model for agent-run work: commitments, receipts, authority gates, outcome credit, and reusable runtimes on hardware you control. Early access.">
+<meta property="og:description" content="A local Work Model for agent-run work: commitments, receipts, authority gates, outcome credit, and reusable runtimes on hardware you control. Swap the model, keep the company veteran. Open install, one line.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://accint.xyz/">
 <meta property="og:image" content="https://accint.xyz/og.png">
@@ -93,40 +93,36 @@ text-decoration-thickness:3px;text-underline-offset:6px;}
 font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--faint);line-height:1.9;}
 .ruleline .arr{color:var(--rule);margin:0 7px;}
 
-/* waitlist form — hard-grid order form */
-.signup{margin-top:30px;max-width:560px;}
-.signup form{display:grid;grid-template-columns:minmax(0,1fr) auto;border:1px solid var(--line2);background:var(--bg2);}
-.signup input[type=email]{
-padding:14px 16px;border:0;border-right:1px solid var(--line2);background:transparent;
-color:var(--ink);font-size:14.5px;font-family:var(--mono);min-width:0;}
-.signup input[type=email]::placeholder{color:var(--faint);}
-.signup input[type=email]:focus-visible{outline-offset:-2px;}
-.signup button[type=submit]{padding:14px 24px;border:0;cursor:pointer;
-background:var(--orange);color:#14110b;font-weight:700;font-size:13px;font-family:var(--mono);
-letter-spacing:.09em;text-transform:uppercase;}
-.signup button[type=submit]:hover{background:var(--ink);}
-/* step 2 — hairline drawer; absolute overlay so the ledger never moves */
-.signup form{position:relative;}
-.signup form.asking{z-index:30;}
-.step2{position:absolute;top:100%;left:-1px;right:-1px;z-index:30;
-background:var(--bg2);border:1px solid var(--rule);border-top:0;}
-.step2-q{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--orange);padding:10px 14px;}
-.step2 .opt{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:12px;letter-spacing:.04em;
-color:var(--dim);background:transparent;border:0;border-top:1px solid var(--line);padding:12px 14px;cursor:pointer;}
-.step2 .opt::after{content:"→";float:right;color:inherit;opacity:0;}
-.step2 .opt:hover,.step2 .opt[aria-checked=true]{color:#14110b;background:var(--ink);}
-.step2 .opt:hover::after,.step2 .opt[aria-checked=true]::after{opacity:1;}
-.step2 .opt:focus-visible{outline-offset:-2px;}
-@media(max-width:520px){
-.signup form{grid-template-columns:1fr;}
-.signup input[type=email]{border-right:0;border-bottom:1px solid var(--line2);}
-}
-.signup .note{margin-top:11px;font-size:12px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
-.signup>.ok{display:none;margin-top:14px;padding:12px 14px;border:1px solid var(--line2);background:var(--bg2);
-color:var(--dim);font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;}
-.signup>.ok .stamp{margin-right:11px;}
-.signup .err{display:none;margin-top:10px;color:var(--orange);font-family:var(--mono);font-size:12.5px;}
-.hp{display:none;}
+/* ---------- install block (the conversion: copy the command, run it) ---------- */
+.dek{margin-top:18px;font-family:var(--mono);font-size:clamp(13px,1.7vw,15.5px);letter-spacing:.01em;
+color:var(--ink);font-weight:600;}
+.dek b{color:var(--orange);font-weight:600;}
+.install{margin-top:26px;max-width:560px;}
+.os-tabs{display:flex;}
+.os-tab{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+color:var(--dim);background:var(--bg2);border:1px solid var(--line2);border-bottom:0;
+padding:8px 15px;cursor:pointer;margin-bottom:-1px;position:relative;z-index:2;}
+.os-tab[aria-selected=true]{color:var(--ink);background:var(--bg3);border-color:var(--rule);}
+.os-tab:focus-visible{outline-offset:-2px;}
+.cmd{display:flex;align-items:stretch;border:1px solid var(--rule);background:var(--bg2);}
+.cmd code{flex:1 1 auto;min-width:0;padding:14px 16px;font-family:var(--mono);font-size:13px;
+color:var(--ink);overflow-x:auto;white-space:nowrap;line-height:1.5;}
+.cmd[data-os=nix] code::before{content:"$ ";color:var(--orange);}
+.cmd[data-os=win] code::before{content:"PS> ";color:var(--orange);}
+.copy{flex:0 0 auto;border:0;border-left:1px solid var(--line2);cursor:pointer;
+background:var(--orange);color:#14110b;font-weight:700;font-size:12px;font-family:var(--mono);
+letter-spacing:.09em;text-transform:uppercase;padding:0 20px;white-space:nowrap;}
+.copy:hover{background:var(--ink);}
+.copy.done{background:var(--steel);color:#14110b;}
+.cmd-then{margin-top:13px;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.02em;line-height:1.7;}
+.cmd-then span{color:var(--dim);}
+.install-2nd{margin-top:16px;display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);
+font-size:12px;letter-spacing:.03em;}
+.install-2nd a{color:var(--dim);text-decoration:none;}
+.install-2nd a:hover{color:var(--orange);}
+.install-2nd .gh{color:var(--ink);}
+.install .note{margin-top:13px;font-size:12px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
+@media(max-width:520px){.cmd code{font-size:11.5px;padding:12px 12px;}.copy{padding:0 14px;}}
 
 /* ---------- ledger card ---------- */
 .led-cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin:0 0 10px;text-transform:uppercase;}
@@ -455,7 +451,7 @@ border:1px solid transparent;line-height:1.5;align-self:flex-start;margin-bottom
 content:"";position:absolute;inset:0;pointer-events:none;
 background:repeating-linear-gradient(0deg,rgba(236,231,219,.018) 0 1px,transparent 1px 4px);}
 .final h2{font-size:clamp(26px,3.6vw,40px);}
-.final .signup{margin:38px auto 0;text-align:left;}
+.final .install{margin:38px auto 0;text-align:left;}
 
 /* footer — the page's own receipt */
 footer{padding:56px 0 60px;border-top:3px solid var(--rule);}
@@ -493,9 +489,10 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 @media (prefers-reduced-motion: no-preference){
 body.anim .hero .kicker{animation:rise .5s .05s both;}
 body.anim .hero h1{animation:rise .55s .15s both;}
-body.anim .hero .lede{animation:rise .55s .3s both;}
-body.anim .hero .ruleline{animation:rise .5s .45s both;}
-body.anim .hero .signup{animation:rise .5s .58s both;}
+body.anim .hero .dek{animation:rise .5s .28s both;}
+body.anim .hero .lede{animation:rise .55s .36s both;}
+body.anim .hero .ruleline{animation:rise .5s .5s both;}
+body.anim .hero .install{animation:rise .5s .62s both;}
 body.anim .hero .led-cap{animation:rise .5s .4s both;}
 body.anim .hero .ledger{animation:rise .6s .5s both;}
 body.anim #ledrows .row{animation:riserow .45s both;}
@@ -525,7 +522,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
       <a href="#jobs">It compounds</a>
       <a href="#science">How it learns</a>
       <a href="#metal">You own it</a>
-      <a class="nav-cta" href="#access">Early access</a>
+      <a class="nav-cta" href="#access">Install</a>
     </div>
   </div>
 </nav>
@@ -533,35 +530,30 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="kicker">Runs on your hardware<span class="k-op"><span class="sep">·</span>works with Claude, Cursor &amp; Codex</span><span class="sep">·</span>early access</div>
+      <div class="kicker">Runs on your hardware<span class="k-op"><span class="sep">·</span>works with Claude, Codex &amp; Cursor</span><span class="sep">·</span>open install</div>
       <h1><span>Make your AI work</span> <span><em>compound</em>.</span></h1>
-      <p class="lede">Hand work to the AI agents you already run. AccInt learns <b>what actually worked</b> — checked against reality, shaped by how you decide — and predicts the better path before the next run starts. The same job gets faster, safer, and <b>genuinely better</b> each time. All on a machine you control.</p>
+      <p class="dek">Offload the task. <b>Never the learning.</b></p>
+      <p class="lede">Hand work to the AI agents you already run. AccInt keeps <b>what actually worked</b> — checked against reality, shaped by how you decide — so the same job gets faster, safer, and <b>genuinely better</b> each run. The learning is <b>yours</b>: swap the model and keep the company veteran. Your work compounds into capital you own — on a machine you control.</p>
       <p class="ruleline">the agent acts <span class="arr" aria-hidden="true">→</span> you see a receipt <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> next run starts from what worked</p>
-      <div class="signup">
-        <form id="subform" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
-          <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
-          <input type="hidden" name="_subject" value="AccInt early access">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_next" value="https://accint.xyz/?subscribed=1">
-          <input type="hidden" name="first_job" value="">
-          <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
-          <button type="submit">Get my invite</button>
-          <div class="step2" hidden>
-            <p class="step2-q" aria-hidden="true">one last thing — where do agents already touch real work?</p>
-            <div role="radiogroup" aria-label="One last thing — where do agents already touch real work?">
-              <button type="button" class="opt" role="radio" aria-checked="false">AI-native engineering team</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">technical agency / consultancy</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">research &amp; monitoring</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">sales / recruiting pipeline</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">client ops / account work</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">local-first / on-prem AI</button>
-              <button type="button" class="opt" role="radio" aria-checked="false">something else</button>
-            </div>
-          </div>
-        </form>
-        <div class="note">no spam · no calls · first invites go in order</div>
-        <div class="ok" id="subok"><span class="stamp ok">ON THE LIST</span>Your invite goes out in order — no spam in between.</div>
-        <div class="err" id="suberr">Hmm, that didn't go through — retrying the classic way…</div>
+      <div class="install" aria-label="Install AccInt">
+        <div class="os-tabs" role="tablist" aria-label="Choose your platform">
+          <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
+          <button class="os-tab" role="tab" data-os="win" aria-selected="false" tabindex="-1">Windows</button>
+        </div>
+        <div class="cmd" data-os="nix">
+          <code id="cmd-nix">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
+          <button class="copy" data-target="cmd-nix" aria-label="Copy install command">copy</button>
+        </div>
+        <div class="cmd" data-os="win" hidden>
+          <code id="cmd-win">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
+          <button class="copy" data-target="cmd-win" aria-label="Copy install command">copy</button>
+        </div>
+        <p class="cmd-then"># then, in the agent you already run, just say it:<br><span>&ldquo;keep my pipeline warm this week — 10 good ones, my voice&rdquo;</span></p>
+        <div class="install-2nd">
+          <a class="gh" href="https://github.com/maxbaluev/accreted-intelligence">★ Star &amp; watch on GitHub</a>
+          <a href="https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/whitepaper.md">Read the whitepaper →</a>
+        </div>
+        <div class="note">the installer probes your hardware and prints the reason · no account, no API key</div>
       </div>
     </div>
 
@@ -663,7 +655,9 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     paying to rediscover what already worked. AccInt is for exactly that: the work that repeats, where getting
     cheaper, safer, and <b>better</b> each run actually compounds. And the learning isn't trapped in one
     task: it picks up the patterns in how your work actually goes — your tools, your preferences, the paths
-    that hold up — so new, related jobs <b>start from that experience</b>, not just the model's defaults.</p>
+    that hold up — so new, related jobs <b>start from that experience</b>, not just the model's defaults.
+    What accumulates is <b>capital you own</b>: your team's judgment, made replayable and compounding on your
+    machine — not commoditized into someone else's model.</p>
     <div class="curvebox">
       <div class="curve" role="img" aria-label="The same task, run after run: reasoning effort and cost collapse to a near-instant, near-free verified replay">
         <div class="cbar"><div class="fill" style="height:72%"></div><h6>RUN 1</h6><span>reasons<br>every step</span></div>
@@ -927,7 +921,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     and <b>no API key to leak</b>: nothing reads your data except the operator itself.</p>
     <p class="body">The AI engine is <b>replaceable, not the brain</b>. What it learned lives in
     the World Model, so you can swap the engine and keep all of it; the same local World Model already
-    runs under <b>two different engines</b> today.</p>
+    runs under <b>two different engines</b> today. Change the generalist model — <b>keep the company veteran</b>.</p>
     <div class="gatewrap">
       <div role="img" aria-label="What stays. What leaves. Your machine keeps everything it learns, every receipt, and drafts in progress. At the boundary stands one gate — held for your OK. The only thing that leaves your machine: the 8 messages you approved — nothing else.">
         <div class="vt" aria-hidden="true">What stays. What leaves.</div>
@@ -1003,45 +997,38 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 
 <section class="final" id="access">
   <div class="wrap">
-    <div class="tag" style="justify-content:center">early access</div>
-    <h2>Already running AI agents?<br>Make them <em>compound</em>.</h2>
-    <div class="signup">
-      <form id="subform2" action="https://formsubmit.co/b941cd5819f8a10c7b6f3cd2eefdbc01" method="POST">
-        <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
-        <input type="hidden" name="_subject" value="AccInt early access">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_next" value="https://accint.xyz/?subscribed=1">
-        <input type="hidden" name="first_job" value="">
-        <input type="email" name="email" class="ph-no-capture" placeholder="you@company.com" required aria-label="Email address">
-        <button type="submit">Get my invite</button>
-        <div class="step2" hidden>
-          <p class="step2-q" aria-hidden="true">one last thing — where do agents already touch real work?</p>
-          <div role="radiogroup" aria-label="One last thing — where do agents already touch real work?">
-            <button type="button" class="opt" role="radio" aria-checked="false">AI-native engineering team</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">research &amp; monitoring</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">technical agency / consultancy</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">sales / recruiting pipeline</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">client ops / account work</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">local-first / on-prem AI</button>
-            <button type="button" class="opt" role="radio" aria-checked="false">something else</button>
-          </div>
-        </div>
-      </form>
-      <div class="note">invites go in order — strongest fit first: teams already putting agents near real work</div>
-      <div class="ok" id="subok2"><span class="stamp ok">ON THE LIST</span>Your invite goes out in order — no spam in between.</div>
-      <div class="err" id="suberr2">Hmm, that didn't go through — retrying the classic way…</div>
+    <div class="tag" style="justify-content:center">install</div>
+    <h2>Already running AI agents?<br>Give them a memory <em>you own</em>.</h2>
+    <div class="install" aria-label="Install AccInt">
+      <div class="os-tabs" role="tablist" aria-label="Choose your platform">
+        <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
+        <button class="os-tab" role="tab" data-os="win" aria-selected="false" tabindex="-1">Windows</button>
+      </div>
+      <div class="cmd" data-os="nix">
+        <code id="cmd-nix2">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
+        <button class="copy" data-target="cmd-nix2" aria-label="Copy install command">copy</button>
+      </div>
+      <div class="cmd" data-os="win" hidden>
+        <code id="cmd-win2">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
+        <button class="copy" data-target="cmd-win2" aria-label="Copy install command">copy</button>
+      </div>
+      <div class="install-2nd">
+        <a class="gh" href="https://github.com/maxbaluev/accreted-intelligence">★ Star &amp; watch on GitHub</a>
+        <a href="https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/whitepaper.md">Read the whitepaper →</a>
+      </div>
+      <div class="note">runs on your hardware · swap the model anytime · what it learns never leaves</div>
     </div>
   </div>
 </section>
 
-<footer aria-label="This page's own receipt — built through the operator loop with claims, receipts and owner OKs in every commit; every push held and OK'd by the owner before it left; what worked here is kept, and your signup shapes what it masters first.">
+<footer aria-label="This page's own receipt — built through the operator loop with claims, receipts and owner OKs in every commit; every push held and OK'd by the owner before it left; what worked here is kept, and your first run shapes what it masters first.">
   <div class="wrap">
     <div class="ledger">
       <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER · THIS PAGE</span><span>operator: accint</span></div>
       <ul class="foot-rows" role="list">
         <li class="row"><span class="verb">build</span><span class="what">this page: <b>verified passes through the operator loop</b> — claims, receipts, owner OKs in every commit</span><span class="stamp ok">VERIFIED</span></li>
         <li class="row"><span class="verb">publish</span><span class="what">every push <b>HELD → OK'd by the owner</b> before it left</span><span class="stamp hold">HELD → OK'd</span></li>
-        <li class="row"><span class="verb">learn</span><span class="what">what worked here is kept — <b>your signup shapes what it masters first</b></span><span class="stamp ok">CREDITED</span></li>
+        <li class="row"><span class="verb">learn</span><span class="what">what worked here is kept — <b>your first run shapes what it masters first</b></span><span class="stamp ok">CREDITED</span></li>
       </ul>
     </div>
     <div class="colophon">
@@ -1079,60 +1066,38 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
   function onScroll(){nav.classList.toggle('scrolled',window.scrollY>24);}
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
 
-  function wire(formId, okId, errId){
-    var f=document.getElementById(formId),ok=document.getElementById(okId),err=document.getElementById(errId);
-    if(!f) return;
-    var hid=f.querySelector('input[name=first_job]'),btn=f.querySelector('button[type=submit]'),
-        step2=f.querySelector('.step2'),opts=[].slice.call(f.querySelectorAll('.opt'));
-    function openStep2(){
-      step2.hidden=false;f.classList.add('asking');btn.textContent='Pick one to finish';
-      opts.forEach(function(o,i){o.tabIndex=i===0?0:-1;});opts[0].focus({preventScroll:true});
-      step2.scrollIntoView({block:'nearest'});
-      ph('signup_step1_submitted'); /* never the email — no PII leaves the page */
+  /* install block — OS tabs + one-click copy + funnel events (no PII, no form) */
+  function fallbackCopy(t){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);}catch(_e){}}
+  var isWin=/Win/i.test((navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||navigator.userAgent||'');
+  [].slice.call(document.querySelectorAll('.install')).forEach(function(box){
+    var tabs=[].slice.call(box.querySelectorAll('.os-tab')),cmds=[].slice.call(box.querySelectorAll('.cmd'));
+    function showOS(os){
+      tabs.forEach(function(t){var on=t.dataset.os===os;t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;});
+      cmds.forEach(function(c){c.hidden=c.dataset.os!==os;});
     }
-    function closeStep2(refocus){
-      step2.hidden=true;f.classList.remove('asking');
-      if(!btn.disabled){btn.textContent='Get my invite';}
-      if(refocus){f.email.focus();}
-    }
-    function send(){
-      btn.disabled=true;btn.textContent='Sending…';
-      fetch('https://formsubmit.co/ajax/b941cd5819f8a10c7b6f3cd2eefdbc01',{
-        method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-        body:JSON.stringify({email:f.email.value,first_job:hid?hid.value:'',_subject:'AccInt early access',_honey:f._honey.value})
-      }).then(function(r){return r.json();}).then(function(){
-        ph('signup_completed',{option:hid?hid.value:''});
-        f.style.display='none';ok.style.display='block';
-      }).catch(function(){ph('signup_completed',{option:hid?hid.value:''});if(err){err.style.display='block';}setTimeout(function(){f.submit();},600);});
-    }
-    opts.forEach(function(o,i){
-      o.addEventListener('click',function(){
-        opts.forEach(function(x){x.setAttribute('aria-checked','false');});
-        o.setAttribute('aria-checked','true');
-        if(hid){hid.value=o.textContent;}
-        ph('first_job_picked',{option:o.textContent}); /* funnel signal — option only, never the email */
-        closeStep2(false);send();
-      });
-      o.addEventListener('keydown',function(e){
-        var d=e.key==='ArrowDown'?1:(e.key==='ArrowUp'?-1:0);
-        if(!d)return;
-        e.preventDefault();
-        var j=(i+d+opts.length)%opts.length;
-        o.tabIndex=-1;opts[j].tabIndex=0;opts[j].focus();
+    tabs.forEach(function(t,i){
+      t.addEventListener('click',function(){showOS(t.dataset.os);ph('os_selected',{os:t.dataset.os});});
+      t.addEventListener('keydown',function(e){
+        var d=e.key==='ArrowRight'?1:(e.key==='ArrowLeft'?-1:0);
+        if(d){e.preventDefault();var j=(i+d+tabs.length)%tabs.length;showOS(tabs[j].dataset.os);tabs[j].focus();}
       });
     });
-    f.addEventListener('keydown',function(e){
-      if(e.key==='Escape'&&!step2.hidden){e.preventDefault();closeStep2(true);}
+    [].slice.call(box.querySelectorAll('.copy')).forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var code=document.getElementById(btn.dataset.target),txt=code?code.textContent:'',
+            os=(btn.closest('.cmd')&&btn.closest('.cmd').getAttribute('data-os'))||'';
+        function done(){btn.classList.add('done');var o=btn.textContent;btn.textContent='copied ✓';
+          setTimeout(function(){btn.classList.remove('done');btn.textContent=o;},1600);}
+        ph('install_command_copied',{os:os}); /* the north-star micro-conversion */
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(txt).then(done).catch(function(){fallbackCopy(txt);done();});
+        }else{fallbackCopy(txt);done();}
+      });
     });
-    f.addEventListener('submit',function(e){
-      e.preventDefault();
-      if(!step2.hidden){opts[0].focus();return;} /* step 2 already open — the list finishes, not the button */
-      if(hid&&!hid.value){openStep2();return;}   /* valid email → reveal step 2; no POST yet */
-      send();
-    });
-    if(new URLSearchParams(location.search).get('subscribed')==='1'){f.style.display='none';ok.style.display='block';}
-  }
-  wire('subform','subok','suberr');wire('subform2','subok2','suberr2');
+    if(isWin){showOS('win');}
+  });
 
   /* ledger domain tabs */
   var SESS={
@@ -1233,7 +1198,7 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
   document.addEventListener('click',function(e){
     if(!e.target||!e.target.closest)return;
     if(e.target.closest('.nav-cta')){ph('cta_clicked',{placement:'nav'});return;}
-    if(e.target.closest('#subform2 button[type=submit]')){ph('cta_clicked',{placement:'final'});return;}
+    if(e.target.closest('.install-2nd .gh')){ph('github_clicked');return;}
     var d=e.target.closest('.doclinks .doc');
     if(d){ph('doc_link_clicked',{doc:(d.firstChild&&d.firstChild.nodeValue||'').trim()});}
   });
