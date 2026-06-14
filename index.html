@@ -1124,9 +1124,13 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
         var code=document.getElementById(btn.dataset.target),txt=code?code.textContent:'',
             os=(btn.closest('.cmd')&&btn.closest('.cmd').getAttribute('data-os'))||'';
         /* Carry the correlation nonce into the COPIED text only — the displayed command
-           stays unchanged. The user's shell exports ACC_INSTALL_REF so the installer can
-           persist it and merge into the same anonymous web person (no PII, content-free). */
-        if(install_ref){txt='ACC_INSTALL_REF='+install_ref+' '+txt;}
+           stays unchanged. The env var must scope to the SHELL THAT RUNS THE INSTALLER
+           (the process after the pipe), not to curl/irm — so inject per-OS so the installer
+           sees ACC_INSTALL_REF and can persist it (merge into the same anonymous web person). */
+        if(install_ref){
+          if(os==='win'){ txt='$env:ACC_INSTALL_REF=\''+install_ref+'\'; '+txt; }
+          else { txt=txt.replace('| sh','| ACC_INSTALL_REF='+install_ref+' sh'); }
+        }
         function done(){btn.classList.add('done');var o=btn.textContent;btn.textContent='copied ✓';
           setTimeout(function(){btn.classList.remove('done');btn.textContent=o;},1600);}
         ph('install_command_copied',{os:os, install_ref:install_ref}); /* the north-star micro-conversion */
