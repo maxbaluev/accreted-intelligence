@@ -1138,6 +1138,13 @@ telemetry_consent_prompt() {
 }
 
 step "phase 15 — telemetry consent (opt-in, default No)"
+# install_ref — the anonymous web↔install correlation token (random nonce from the landing
+# page; no PII, content-free). Persist it BEFORE the consent prompt and on EVERY path
+# (interactive, non-interactive, no-TTY) — it costs nothing and lets a later opt-in merge
+# this install into the same anonymous web person. Fail-soft: never aborts the installer.
+if [ "$DRY_RUN" != "1" ] && [ -n "${ACC_INSTALL_REF:-}" ]; then
+  { mkdir -p "$HOME/.config/accint" && printf '%s' "$ACC_INSTALL_REF" > "$HOME/.config/accint/install_ref" && chmod 600 "$HOME/.config/accint/install_ref"; } || true
+fi
 if [ "$DRY_RUN" = "1" ]; then
   phase_result "telemetry" "would" "ask for opt-in anonymous telemetry on an interactive TTY (event names only; default No; no TTY → skip, stays off)"
 elif [ ! -t 0 ] || [ "${ACC_NONINTERACTIVE:-0}" = "1" ]; then
