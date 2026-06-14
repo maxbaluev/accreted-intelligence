@@ -526,8 +526,8 @@ fi
 # sha256sums.txt, where <version> = the pushed tag (vX.Y.Z) on tag-push releases.
 PREBUILT_TARGET=""
 case "$OS/$ARCH" in
-  Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-gnu" ;;
-  Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-gnu" ;;
+  Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-musl" ;;
+  Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-musl" ;;
   Darwin/arm64|Darwin/aarch64) PREBUILT_TARGET="aarch64-apple-darwin" ;;
 esac
 RELEASE_BASE="https://github.com/maxbaluev/accreted-intelligence/releases"
