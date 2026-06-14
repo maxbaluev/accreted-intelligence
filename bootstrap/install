@@ -53,27 +53,40 @@ if [ -f "$DEST/plugins/opencode/acc.ts" ] \
    && [ ! -f "$ACC_DATA_DIR/plugins/opencode/acc.ts" ]; then
   if mkdir -p "$ACC_DATA_DIR/plugins" \
      && cp -R "$DEST/plugins/." "$ACC_DATA_DIR/plugins/" 2>/dev/null; then
-    chmod +x "$ACC_DATA_DIR/plugins/codex/notify-acc.sh" 2>/dev/null || true
     echo "acc bootstrap: provisioned plugins/ -> $ACC_DATA_DIR/plugins (convergers wire the real on-disk path)"
   else
     echo "acc bootstrap: could not provision plugins/ to $ACC_DATA_DIR (fail-soft -- hosts-sync skips plugin/notify, no dead path)" >&2
   fi
 fi
 
-# Cargo.toml-presence gate (mirrors install.sh prebuilt_fetch's "version unreadable from
-# Cargo.toml" guard): the public release repo ships binaries + installer + docs only, NO
-# engine source. With no Cargo.toml the source build in install.sh cannot work, so fail
-# FAST with an honest, target-aware message instead of handing off to a doomed build.
+# Prebuilt-availability gate (the public release repo ships binaries + installer + docs only,
+# NO engine source). With no Cargo.toml the SOURCE build in install.sh cannot work — but the
+# PREBUILT-fetch lane can: install.sh resolves the version from the latest release tag and
+# downloads + sha256-verifies the prebuilt for this target. So DON'T abort when a prebuilt
+# exists for this OS/arch — hand off and let install.sh fetch/verify (with its own source
+# fallback). Abort ONLY when there is genuinely no prebuilt target for this machine.
 if [ ! -f "$DEST/Cargo.toml" ]; then
-  TARGET="$(uname -s 2>/dev/null || echo unknown)/$(uname -m 2>/dev/null || echo unknown)"
+  OS="$(uname -s 2>/dev/null || echo unknown)"
+  ARCH="$(uname -m 2>/dev/null || echo unknown)"
+  TARGET="$OS/$ARCH"
   RELEASES="https://github.com/maxbaluev/accreted-intelligence/releases"
-  case "$(uname -s 2>/dev/null || echo unknown)" in
-    Darwin)
-      echo "acc bootstrap: no engine source in $DEST (public release repo) and the macOS prebuilt is coming soon -- track $RELEASES" >&2 ;;
-    *)
-      echo "acc bootstrap: no engine source in $DEST (public release repo) and no acc prebuilt is published for $TARGET yet -- track $RELEASES" >&2 ;;
+  # Same prebuilt-target table as install.sh phase 3 (acc-v<ver>-<target>.tar.gz).
+  PREBUILT_TARGET=""
+  case "$OS/$ARCH" in
+    Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-gnu" ;;
+    Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-gnu" ;;
+    Darwin/arm64|Darwin/aarch64) PREBUILT_TARGET="aarch64-apple-darwin" ;;
   esac
-  exit 1
+  if [ -z "$PREBUILT_TARGET" ]; then
+    case "$OS" in
+      Darwin)
+        echo "acc bootstrap: no engine source in $DEST (public release repo) and the macOS prebuilt is coming soon -- track $RELEASES" >&2 ;;
+      *)
+        echo "acc bootstrap: no engine source in $DEST (public release repo) and no acc prebuilt is published for $TARGET yet -- track $RELEASES" >&2 ;;
+    esac
+    exit 1
+  fi
+  echo "acc bootstrap: no engine source in $DEST (public release repo) — handing off for the prebuilt $PREBUILT_TARGET binary (install.sh resolves the latest release tag, fetches + sha256-verifies)"
 fi
 
 echo "acc bootstrap: handing off to $DEST/install.sh"

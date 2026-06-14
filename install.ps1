@@ -525,14 +525,34 @@ Emit-Phase 'sysdeps_sandbox' 'skipped' "windows: no bwrap -- exec runtimes run u
 # install.sh's exit-1; see header).
 # =========================================================================================
 Step 'phase 3 -- install acc (prebuilt fetch -> source build)'
+# Latest-release-tag version resolver (mirrors src/update.rs release_url/tag_name, ~lines
+# 312/501): GET the releases/latest API, read .tag_name (e.g. "v0.1.0"), strip leading "v"
+# -> the version. This is the ONLY version source on the public binary-only path (no
+# Cargo.toml). Source-clone path: Cargo.toml wins and this is never called. Fail-soft: any
+# failure (offline / rate-limit / non-2xx / no published release yet -- the v0.1.0 release
+# may still be a DRAFT, so /latest can 404) returns '' and the prebuilt lane refuses honestly.
+$ReleaseApi = 'https://api.github.com/repos/maxbaluev/accreted-intelligence/releases/latest'
+function Resolve-LatestVersion {
+  try {
+    $resp = Invoke-RestMethod -Uri $ReleaseApi -Headers @{ 'Accept' = 'application/vnd.github+json'; 'User-Agent' = 'acc-install' } -TimeoutSec 30 -UseBasicParsing
+    $tag = ('' + $resp.tag_name).Trim()
+    if ($tag -match '^v(.+)$') { return $Matches[1] }
+    return $tag
+  } catch { return '' }
+}
+
 $SrcVer = ''
 $CargoToml = Join-Path $Repo 'Cargo.toml'
-if (-not (Test-Path $CargoToml)) {
-  Emit-Phase 'binary' 'failed' ("not an acc checkout: $CargoToml missing -- run install.ps1 from the repo root") 'git clone the repo, then: .\install.ps1'
-  exit 1
+if (Test-Path $CargoToml) {
+  $vm = Select-String -Path $CargoToml -Pattern '^version\s*=\s*"([^"]+)"' | Select-Object -First 1
+  if ($vm) { $SrcVer = $vm.Matches[0].Groups[1].Value }
+} else {
+  # Public binary-only path: no Cargo.toml (no engine source). Resolve the version from the
+  # latest published release tag so the artifact name (acc-v<ver>-<target>) is correct; the
+  # fetch+verify+source-fallback walk below is unchanged. Do NOT abort -- a prebuilt may exist.
+  $SrcVer = Resolve-LatestVersion
+  if ($SrcVer) { Say ("resolved acc v$SrcVer from the latest published release tag (no Cargo.toml -- binary-only install)") }
 }
-$vm = Select-String -Path $CargoToml -Pattern '^version\s*=\s*"([^"]+)"' | Select-Object -First 1
-if ($vm) { $SrcVer = $vm.Matches[0].Groups[1].Value }
 $HeadSha = ''
 if (Have 'git') {
   $r = Invoke-Native 'git' @('-C', $Repo, 'rev-parse', '--short', 'HEAD')
@@ -578,7 +598,7 @@ $script:PrebuiltId = ''; $script:PrebuiltSrc = ''
 # Refusal rules: missing manifest entry or a hash MISMATCH REFUSE the binary -- it is
 # deleted with the tmp dir and never reaches the bin dir.
 function Invoke-PrebuiltFetch {
-  if (-not $SrcVer) { Say 'crate version unreadable from Cargo.toml -- building from source'; return $false }
+  if (-not $SrcVer) { Say 'acc version unresolved (no Cargo.toml and no published release tag) -- building from source'; return $false }
   $tmp = Join-Path ([IO.Path]::GetTempPath()) ('acc-prebuilt-' + [IO.Path]::GetRandomFileName())
   try {
     $null = New-Item -ItemType Directory -Path $tmp -Force

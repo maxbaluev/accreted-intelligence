@@ -155,7 +155,12 @@ pkg_install() {
     zypper)  maybe_sudo zypper --non-interactive install -y "$p" ;;
     apk)     maybe_sudo apk add --no-progress "$p" ;;
     brew)    [ "$DRY_RUN" = "1" ] && { say "WOULD: brew install $p"; return 0; }; brew install "$p" ;;
-    *) warn "no known package manager — install '$p' manually"; return 1 ;;
+    *) if [ "$OS" = "Darwin" ]; then
+         warn "macOS: no Homebrew — cannot auto-install '$p'. Install Homebrew (https://brew.sh) then re-run ./install.sh, or install '$p' manually."
+       else
+         warn "no known package manager — install '$p' manually"
+       fi
+       return 1 ;;
   esac
 }
 
@@ -450,7 +455,10 @@ if [ "$OS" = "Linux" ]; then
 else
   warn "macOS: no bwrap — exec runtimes REFUSE to run unsandboxed (acc returns an error, never runs unsandboxed code); retrieve/solve/outcome still work. For sandboxed exec on macOS, use the container (docs/INSTALL_CONTAINER.md)."
   phase_result "sysdeps_sandbox" "skipped" "macOS: no bwrap — exec runtimes refuse unsandboxed code (retrieve/solve/outcome still work); use the container for sandboxed exec. Camoufox still keeps the browser host-side."
-  have cc || act "install Xcode CLT (C linker)" xcode-select --install || true
+  if ! have cc; then
+    act "install Xcode CLT (C linker)" xcode-select --install || true
+    have cc || warn "macOS: a system dialog is installing the Xcode Command Line Tools — COMPLETE it, then re-run ./install.sh (Apple Silicon installs from the prebuilt binary; Intel/source builds need the CLT)."
+  fi
   # macOS ships system libsqlite3 (the Xcode CLT provides the sqlite3.h header) —
   # rusqlite links it, no bundled amalgamation compile. No action needed here.
 fi
@@ -469,6 +477,34 @@ fi
 step "phase 3 — install acc (prebuilt fetch → source build)"
 SRC_VER="$(grep -m1 '^version' "$REPO/Cargo.toml" 2>/dev/null | cut -d'"' -f2 || echo '')"
 HEAD_SHA="$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo '')"
+
+# Latest-release-tag version resolver (mirrors src/update.rs release_url/tag_name, ~lines
+# 312/501): GET the releases/latest API, extract `.tag_name` (e.g. "v0.1.0"), strip the
+# leading "v" → the version. This is the ONLY version source on the public binary-only path
+# (no Cargo.toml → the grep above yields empty). On the source-clone path Cargo.toml wins and
+# this is never called. curl-only, fail-soft: any failure (offline / rate-limit / non-2xx /
+# no published release yet — the v0.1.0 release may still be a DRAFT, so /latest can 404)
+# echoes empty, and the prebuilt lane then refuses honestly + falls back to source.
+RELEASE_API="https://api.github.com/repos/maxbaluev/accreted-intelligence/releases/latest"
+resolve_latest_version() {
+  have curl || { echo ""; return; }
+  local body tag
+  body="$(curl -fsSL --connect-timeout 15 --retry 2 --max-time 30 \
+            -H 'Accept: application/vnd.github+json' -H 'User-Agent: acc-install' \
+            "$RELEASE_API" 2>/dev/null)" || { echo ""; return; }
+  # Extract the first "tag_name": "vX.Y.Z" value, then strip the leading v.
+  tag="$(printf '%s' "$body" \
+          | grep -m1 '"tag_name"' \
+          | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+  case "$tag" in v[0-9]*) tag="${tag#v}" ;; esac
+  echo "$tag"
+}
+# Public binary-only path: no Cargo.toml → resolve the version from the latest release tag so
+# the ARTIFACT name (acc-v<ver>-<target>) is correct instead of the broken empty "acc-v-".
+if [ -z "$SRC_VER" ]; then
+  SRC_VER="$(resolve_latest_version)"
+  [ -n "$SRC_VER" ] && say "resolved acc v$SRC_VER from the latest published release tag (no Cargo.toml — binary-only install)"
+fi
 
 # Version probe — token 2 of the identity line `acc <ver>+<sha> (<target>)`. (The old
 # last-word parse yielded `(<target>)` and could never match — tests/build_identity.rs (c).)
@@ -511,7 +547,7 @@ sha256_of() {
 # manifest entry, missing sha tool, or a hash MISMATCH all REFUSE the binary — it is
 # deleted with the tmp dir and never reaches the bin dir.
 prebuilt_fetch() {
-  [ -n "$SRC_VER" ] || { say "crate version unreadable from Cargo.toml — building from source"; return 1; }
+  [ -n "$SRC_VER" ] || { say "acc version unresolved (no Cargo.toml and no published release tag) — building from source"; return 1; }
   [ -n "$PREBUILT_TARGET" ] || { say "no prebuilt release target for $OS/$ARCH — building from source"; return 1; }
   have curl || { say "curl not available — building from source"; return 1; }
   have tar  || { say "tar not available — building from source"; return 1; }
@@ -611,13 +647,13 @@ PLUGINS_DEST="$ACC_DATA_DIR/plugins"
 # The plugin files the convergers + probes reference (kept in sync with plugins/ tree;
 # the marker probe is plugins/opencode/acc.ts — it MUST be among these).
 PLUGINS_FILES="opencode/acc.ts opencode/opencode.json.snippet opencode/README.md \
-codex/notify-acc.sh codex/hooks.json codex/config.toml.snippet codex/README.md \
+codex/hooks.json codex/config.toml.snippet codex/README.md \
 cursor/rules-acc.mdc cursor/hooks.json cursor/mcp.json cursor/README.md README.md"
 PLUGINS_RAW_BASE="https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/plugins"
 
 provision_plugins() {
   # Already provisioned (idempotent postcondition = the marker exists under the data dir).
-  if [ -f "$PLUGINS_DEST/opencode/acc.ts" ] && [ -f "$PLUGINS_DEST/codex/notify-acc.sh" ]; then
+  if [ -f "$PLUGINS_DEST/opencode/acc.ts" ] && [ -f "$PLUGINS_DEST/codex/hooks.json" ]; then
     say "plugins already provisioned at $PLUGINS_DEST"
     return 0
   fi
@@ -625,7 +661,6 @@ provision_plugins() {
   # (a) install-from-clone / dev: copy the local plugins/ tree verbatim.
   if [ -d "$REPO/plugins" ] && [ -f "$REPO/plugins/opencode/acc.ts" ]; then
     cp -R "$REPO/plugins/." "$PLUGINS_DEST/" || { warn "copy from $REPO/plugins failed"; return 1; }
-    chmod +x "$PLUGINS_DEST/codex/notify-acc.sh" 2>/dev/null || true
     ok "plugins copied from $REPO/plugins → $PLUGINS_DEST"
     return 0
   fi
@@ -640,8 +675,7 @@ provision_plugins() {
       got=$((got + 1))
     fi
   done
-  if [ -f "$PLUGINS_DEST/opencode/acc.ts" ] && [ -f "$PLUGINS_DEST/codex/notify-acc.sh" ]; then
-    chmod +x "$PLUGINS_DEST/codex/notify-acc.sh" 2>/dev/null || true
+  if [ -f "$PLUGINS_DEST/opencode/acc.ts" ] && [ -f "$PLUGINS_DEST/codex/hooks.json" ]; then
     ok "plugins fetched ($got files) from $PLUGINS_RAW_BASE → $PLUGINS_DEST"
     return 0
   fi

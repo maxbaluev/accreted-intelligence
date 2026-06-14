@@ -98,18 +98,10 @@ permanent harmless fallback), Codex's `notify` surface fires once per completed
 turn and records the `turn-end` boundary through the ONE generic hook envelope.
 Either way, everything the model itself does through the two MCP verbs — solves,
 retrievals, outcomes — compounds into `acc.db`, which is where the real
-compounding happens. [`notify-acc.sh`](notify-acc.sh) is strictly fail-open:
-junk JSON, a missing `jq`/`python3`, or a missing `acc` binary all exit 0
-silently.
-
-## Verify (no model call)
-
-```
-bash -n plugins/codex/notify-acc.sh
-ACC_DB=/tmp/probe.db bash plugins/codex/notify-acc.sh \
-  '{"type":"agent-turn-complete","turn-id":"t-1","last-assistant-message":"done"}'
-echo $?   # → 0
-```
+compounding happens. The pre-trust turn-end fallback is wired NATIVELY via
+`acc hook codex-notify` (no shell script): it parses Codex's notify JSON
+in-process and is strictly fail-open — junk JSON, missing fields, or a missing
+`acc` binary all exit 0 silently.
 
 ## Depth limitations (honest four-link reach)
 

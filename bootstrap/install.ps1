@@ -46,19 +46,22 @@ if (Test-Path (Join-Path $Dest '.git')) {
   }
 }
 
-# Cargo.toml-presence gate (mirrors install.ps1 Invoke-PrebuiltFetch's "version unreadable
-# from Cargo.toml" guard): the public release repo ships binaries + installer + docs only,
-# NO engine source. With no Cargo.toml the source build in install.ps1 cannot work, so fail
-# FAST with an honest, target-aware message instead of handing off to a doomed build.
+# Prebuilt-availability gate (the public release repo ships binaries + installer + docs only,
+# NO engine source). With no Cargo.toml the SOURCE build in install.ps1 cannot work -- but the
+# PREBUILT-fetch lane can: install.ps1 resolves the version from the latest release tag and
+# downloads + sha256-verifies the prebuilt (acc-v<ver>-x86_64-pc-windows-msvc.zip). So DON'T
+# abort on Windows when a prebuilt exists -- hand off and let install.ps1 fetch/verify (with
+# its own source fallback). Abort ONLY when there is genuinely no prebuilt target (e.g. a
+# cross-platform pwsh host on macOS where the macOS prebuilt is still pending).
 if (-not (Test-Path (Join-Path $Dest 'Cargo.toml'))) {
   $Releases = 'https://github.com/maxbaluev/accreted-intelligence/releases'
   $IsMac = $false
   try { $IsMac = [bool](Get-Variable -Name 'IsMacOS' -ValueOnly -ErrorAction SilentlyContinue) } catch { $IsMac = $false }
   if ($IsMac) {
     throw "acc bootstrap: no engine source in $Dest (public release repo) and the macOS prebuilt is coming soon -- track $Releases"
-  } else {
-    throw "acc bootstrap: no engine source in $Dest (public release repo) and no acc prebuilt is published for this target yet -- track $Releases"
   }
+  # Windows: the x86_64-pc-windows-msvc prebuilt is published -- hand off to install.ps1.
+  Write-Host "acc bootstrap: no engine source in $Dest (public release repo) -- handing off for the prebuilt x86_64-pc-windows-msvc binary (install.ps1 resolves the latest release tag, fetches + sha256-verifies)"
 }
 
 $Installer = Join-Path $Dest 'install.ps1'
