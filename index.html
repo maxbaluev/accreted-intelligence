@@ -57,8 +57,34 @@ a:hover{color:var(--orange);}
 :focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
 .wrap{max-width:1080px;margin:0 auto;padding:0 26px;position:relative;}
 
+/* ---------- early-release banner (stacks above the fixed nav via --banner-h) ---------- */
+:root{--banner-h:42px;}
+.early-banner{position:fixed;top:0;left:0;right:0;z-index:50;
+background:linear-gradient(180deg,rgba(255,106,0,.13),rgba(255,106,0,.05)),var(--bg);
+border-bottom:1px solid rgba(255,106,0,.34);}
+.eb-in{max-width:1080px;margin:0 auto;padding:9px 26px;display:flex;align-items:center;gap:14px;
+font-family:var(--mono);font-size:12px;letter-spacing:.02em;line-height:1.45;}
+.eb-pill{flex:0 0 auto;font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+color:#14110b;background:var(--orange);padding:3px 8px;white-space:nowrap;}
+.eb-msg{flex:1 1 auto;min-width:0;color:var(--dim);}
+.eb-msg b{color:var(--ink);font-weight:600;}
+.eb-msg code{font-family:var(--mono);font-size:11.5px;color:var(--orange);
+background:rgba(255,106,0,.10);border:1px solid rgba(255,106,0,.30);padding:1px 6px;}
+.eb-link{flex:0 0 auto;white-space:nowrap;color:var(--ink);font-weight:600;text-decoration:none;
+border-bottom:1px solid var(--rule);}
+.eb-link:hover{color:var(--orange);border-color:var(--orange);}
+.eb-x{flex:0 0 auto;cursor:pointer;background:transparent;border:0;color:var(--faint);
+font-family:var(--mono);font-size:15px;line-height:1;padding:3px 2px;}
+.eb-x:hover{color:var(--ink);}
+html.eb-off .early-banner{display:none;}
+@media(max-width:760px){
+.eb-in{flex-wrap:wrap;gap:7px 12px;padding:8px 18px;}
+.eb-msg{flex:1 1 100%;order:3;font-size:11.5px;}
+.eb-link{order:2;margin-left:auto;}
+}
+
 /* ---------- nav ---------- */
-nav{position:fixed;top:0;left:0;right:0;z-index:40;border-bottom:1px solid transparent;}
+nav{position:fixed;top:var(--banner-h);left:0;right:0;z-index:40;border-bottom:1px solid transparent;}
 nav.scrolled{background:var(--bg);border-bottom-color:var(--line2);}
 .nav-in{max-width:1080px;margin:0 auto;padding:13px 26px;display:flex;align-items:center;gap:28px;}
 .word{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.1em;color:var(--ink);text-transform:uppercase;}
@@ -71,13 +97,13 @@ nav.scrolled{background:var(--bg);border-bottom-color:var(--line2);}
 @media(max-width:760px){.nav-links a:not(.nav-cta){display:none;}}
 
 /* ---------- hero ---------- */
-.hero{position:relative;padding:150px 0 90px;border-bottom:1px solid var(--line2);}
+.hero{position:relative;padding:calc(150px + var(--banner-h)) 0 90px;border-bottom:1px solid var(--line2);}
 .hero::before{ /* faint terminal scanlines — header only */
 content:"";position:absolute;inset:0;pointer-events:none;
 background:repeating-linear-gradient(0deg,rgba(236,231,219,.03) 0 1px,transparent 1px 4px);}
 .hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:56px;align-items:center;}
 .hero-grid>*{min-width:0;}
-@media(max-width:920px){.hero-grid{grid-template-columns:1fr;gap:46px;}.hero{padding-top:120px;}}
+@media(max-width:920px){.hero-grid{grid-template-columns:1fr;gap:46px;}.hero{padding-top:calc(120px + var(--banner-h));}}
 .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;}
 .kicker .sep{color:var(--rule);margin:0 8px;}
 h1{font-family:var(--serif);font-weight:600;font-size:clamp(31px,4.4vw,52px);line-height:1.07;
@@ -306,9 +332,9 @@ letter-spacing:.1em;color:var(--steel);text-transform:uppercase;}
 .stat span{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--faint);line-height:1.5;}
 
 /* ---------- sections — drawing-sheet rhythm ---------- */
-section{padding:130px 0;border-top:3px solid var(--rule);scroll-margin-top:74px;counter-increment:sec;}
+section{padding:130px 0;border-top:3px solid var(--rule);scroll-margin-top:calc(74px + var(--banner-h));counter-increment:sec;}
 @media(max-width:640px){section{padding:96px 0;}}
-.sec-alias{display:block;height:0;visibility:hidden;scroll-margin-top:74px;}
+.sec-alias{display:block;height:0;visibility:hidden;scroll-margin-top:calc(74px + var(--banner-h));}
 .tag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:18px;display:flex;align-items:center;gap:12px;}
 .tag::before{content:counter(sec,decimal-leading-zero);color:var(--ink);border:1px solid var(--line2);padding:2px 7px;font-weight:600;letter-spacing:.05em;}
 h2{font-family:var(--serif);font-weight:600;font-size:clamp(27px,3.4vw,38px);line-height:1.14;margin-bottom:20px;letter-spacing:-.008em;}
@@ -576,8 +602,19 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 .ledger-head .dot,.ledger-type .car{animation:none;}
 }
 </style>
+<script>/* no-flash: honor a prior dismissal of the early-release banner before first paint */
+try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.classList.add('eb-off');document.documentElement.style.setProperty('--banner-h','0px');}}catch(_e){}</script>
 </head>
 <body>
+
+<div class="early-banner" id="early-banner" role="region" aria-label="Early release notice">
+  <div class="eb-in">
+    <span class="eb-pill">Early release</span>
+    <p class="eb-msg"><b>Aloha&nbsp;👋</b> acc is young, so you may hit rough edges. Found a bug? Run <code>acc report</code> for a sanitized diagnostic — no memory, no secrets, you file it yourself.</p>
+    <a class="eb-link" id="eb-report" href="https://github.com/maxbaluev/accreted-intelligence/issues/new" target="_blank" rel="noopener">Report a bug →</a>
+    <button class="eb-x" id="eb-dismiss" type="button" aria-label="Dismiss early release notice" title="Dismiss">✕</button>
+  </div>
+</div>
 
 <nav id="nav">
   <div class="nav-in">
@@ -1210,6 +1247,26 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
   var nav=document.getElementById('nav');
   function onScroll(){nav.classList.toggle('scrolled',window.scrollY>24);}
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  /* early-release banner — measure its real height into --banner-h so the fixed nav and
+     anchor offsets stack exactly, even when the copy wraps; dismiss persists in localStorage */
+  var ebDismissed=false;try{ebDismissed=localStorage.getItem('acc_eb_dismissed')==='1';}catch(_e){}
+  var eb=document.getElementById('early-banner');
+  function ebMeasure(){if(eb&&!ebDismissed){document.documentElement.style.setProperty('--banner-h',eb.offsetHeight+'px');}}
+  if(eb&&!ebDismissed){
+    ebMeasure();window.addEventListener('resize',ebMeasure,{passive:true});
+    if(window.requestAnimationFrame){requestAnimationFrame(ebMeasure);}
+    var ebX=document.getElementById('eb-dismiss');
+    if(ebX){ebX.addEventListener('click',function(){
+      ebDismissed=true;
+      try{localStorage.setItem('acc_eb_dismissed','1');}catch(_e){}
+      document.documentElement.classList.add('eb-off');
+      document.documentElement.style.setProperty('--banner-h','0px');
+      ph('early_banner_dismissed',{});
+    });}
+    var ebR=document.getElementById('eb-report');
+    if(ebR){ebR.addEventListener('click',function(){ph('bug_report_clicked',{placement:'early_banner'});});}
+  }
 
   /* install block — OS tabs + one-click copy + funnel events (no PII, no form) */
   function fallbackCopy(t){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');
