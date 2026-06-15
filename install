@@ -1,0 +1,94 @@
+#!/bin/sh
+# acc bootstrap -- the one-line entry point. Fetches the repo, then hands off to the
+# real installer (install.sh, the deterministic phase-machine). This script contains
+# ZERO install logic of its own: resolve source -> clone/update -> exec. The installer
+# owns everything else (deps, build, tier ladder, daemons, wiring, verify).
+#
+#   curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh
+#
+# Flags after `sh -s --` pass straight through to install.sh, e.g. the no-side-effect
+# preview:
+#
+#   curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh -s -- --dry-run --json
+#
+# Env: ACC_REPO  git URL to fetch   (default: https://github.com/maxbaluev/accreted-intelligence.git)
+#      ACC_SRC   checkout directory (default: ${XDG_DATA_HOME:-$HOME/.local/share}/acc/src)
+#
+# No sudo, no second installer, nothing clever -- git is the only requirement here.
+set -eu
+
+REPO_URL="${ACC_REPO:-https://github.com/maxbaluev/accreted-intelligence.git}"
+DEST="${ACC_SRC:-${XDG_DATA_HOME:-$HOME/.local/share}/acc/src}"
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "acc bootstrap: git not found -- install git first (debian/ubuntu: apt install git; fedora: dnf install git; macos: xcode-select --install or brew install git)" >&2
+  exit 1
+fi
+
+if [ -d "$DEST/.git" ]; then
+  echo "acc bootstrap: updating existing checkout at $DEST"
+  if ! git -C "$DEST" pull --ff-only; then
+    echo "acc bootstrap: pull failed (local changes or diverged history) -- continuing with the existing checkout at $DEST" >&2
+  fi
+else
+  echo "acc bootstrap: cloning $REPO_URL -> $DEST"
+  mkdir -p "$(dirname "$DEST")"
+  git clone --depth 1 "$REPO_URL" "$DEST"
+fi
+
+# Plugins on disk (solved:a78f0ba601287cad: U-PLUGINS-ON-DISK) — the public one-liner path.
+# A binary-only release ships ONLY the bare `acc` binary; without `plugins/` on disk the
+# binary's detect_repo_root falls to the build-host CARGO_MANIFEST_DIR and the OpenCode/Codex
+# convergers write a DEAD plugin/notify path. install.sh provisions plugins in its phase 3b,
+# but the Cargo.toml gate below EXITS before the install.sh handoff on the bare public path
+# (no engine source) -- so mirror the provisioning here: copy the cloned `plugins/` tree
+# (the public release repo ships the adapters even without engine source) into the per-user
+# data dir the binary's platform::data_dir() probes. Idempotent, fail-soft (a missing tree
+# just means hosts-sync skips plugin/notify -- never a dead path).
+case "$(uname -s 2>/dev/null || echo unknown)" in
+  Darwin) ACC_DATA_DIR="$HOME/Library/Application Support/acc" ;;
+  *)      ACC_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/acc" ;;
+esac
+if [ -f "$DEST/plugins/opencode/acc.ts" ] \
+   && [ ! -f "$ACC_DATA_DIR/plugins/opencode/acc.ts" ]; then
+  if mkdir -p "$ACC_DATA_DIR/plugins" \
+     && cp -R "$DEST/plugins/." "$ACC_DATA_DIR/plugins/" 2>/dev/null; then
+    echo "acc bootstrap: provisioned plugins/ -> $ACC_DATA_DIR/plugins (convergers wire the real on-disk path)"
+  else
+    echo "acc bootstrap: could not provision plugins/ to $ACC_DATA_DIR (fail-soft -- hosts-sync skips plugin/notify, no dead path)" >&2
+  fi
+fi
+
+# Prebuilt-availability gate (the public release repo ships binaries + installer + docs only,
+# NO engine source). With no Cargo.toml the SOURCE build in install.sh cannot work — but the
+# PREBUILT-fetch lane can: install.sh resolves the version from the latest release tag and
+# downloads + sha256-verifies the prebuilt for this target. So DON'T abort when a prebuilt
+# exists for this OS/arch — hand off and let install.sh fetch/verify (with its own source
+# fallback). Abort ONLY when there is genuinely no prebuilt target for this machine.
+if [ ! -f "$DEST/Cargo.toml" ]; then
+  OS="$(uname -s 2>/dev/null || echo unknown)"
+  ARCH="$(uname -m 2>/dev/null || echo unknown)"
+  TARGET="$OS/$ARCH"
+  RELEASES="https://github.com/maxbaluev/accreted-intelligence/releases"
+  # Same prebuilt-target table as install.sh phase 3 (acc-v<ver>-<target>.tar.gz).
+  PREBUILT_TARGET=""
+  case "$OS/$ARCH" in
+    Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-musl" ;;
+    Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-musl" ;;
+    Darwin/arm64|Darwin/aarch64) PREBUILT_TARGET="aarch64-apple-darwin" ;;
+  esac
+  if [ -z "$PREBUILT_TARGET" ]; then
+    case "$OS" in
+      Darwin)
+        echo "acc bootstrap: no engine source in $DEST (public release repo) and the macOS prebuilt is coming soon -- track $RELEASES" >&2 ;;
+      *)
+        echo "acc bootstrap: no engine source in $DEST (public release repo) and no acc prebuilt is published for $TARGET yet -- track $RELEASES" >&2 ;;
+    esac
+    exit 1
+  fi
+  echo "acc bootstrap: no engine source in $DEST (public release repo) — handing off for the prebuilt $PREBUILT_TARGET binary (install.sh resolves the latest release tag, fetches + sha256-verifies)"
+fi
+
+echo "acc bootstrap: handing off to $DEST/install.sh"
+cd "$DEST"
+exec ./install.sh "$@"

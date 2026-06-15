@@ -149,6 +149,23 @@ font-size:12px;letter-spacing:.03em;}
 .install-2nd .gh{color:var(--ink);}
 .install .note{margin-top:13px;font-size:12px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
 @media(max-width:520px){.cmd code{font-size:11.5px;padding:12px 12px;}.copy{padding:0 14px;}}
+/* primary/backup switcher — agent-paste (default) vs manual one-liner */
+.sw-tabs{display:flex;gap:0;margin-bottom:14px;}
+.sw-tab{flex:0 1 auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+color:var(--dim);background:var(--bg2);border:1px solid var(--line2);padding:9px 16px;cursor:pointer;
+white-space:nowrap;}
+.sw-tab+.sw-tab{border-left:0;}
+.sw-tab[aria-selected=true]{color:#14110b;background:var(--orange);border-color:var(--orange);font-weight:700;}
+.sw-tab:focus-visible{outline-offset:-2px;}
+.sw-panel[hidden]{display:none;}
+/* the agent-paste block is prose, not a one-liner — let it wrap */
+.cmd.prose{align-items:stretch;}
+.cmd.prose code{white-space:normal;overflow-x:visible;line-height:1.6;letter-spacing:.005em;}
+.cmd.prose code::before{content:none;}
+.cmd.prose .copy{align-self:stretch;display:flex;align-items:center;}
+.agent-foot{margin-top:13px;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.02em;line-height:1.6;}
+.agent-foot b{color:var(--dim);font-weight:600;}
+@media(max-width:520px){.sw-tab{padding:9px 11px;font-size:10px;}.cmd.prose code{font-size:11.5px;}}
 
 /* ---------- ledger card ---------- */
 .led-cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin:0 0 10px;text-transform:uppercase;}
@@ -638,17 +655,30 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
       <p class="lede">Hand work to the AI agents you already run. AccInt builds a <b>Work Model of your business</b> — it learns what actually worked, checked against your own results and <b>shaped by how you decide</b>, and <b>predicts the better path</b> before the next run starts. The same job gets faster, safer, and <b>genuinely better</b> every time it runs. The learning is <b>yours</b>: swap the model, keep the company veteran. Your work turns into <b>capital you own</b>, on a machine you control.</p>
       <p class="ruleline">it predicts the better path <span class="arr" aria-hidden="true">→</span> acts in your accounts, receipted <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> the Work Model sharpens</p>
       <div class="install" aria-label="Install AccInt">
-        <div class="os-tabs" role="tablist" aria-label="Choose your platform">
-          <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
-          <button class="os-tab" role="tab" data-os="win" aria-selected="false" tabindex="-1">Windows</button>
+        <div class="sw-tabs" role="tablist" aria-label="Choose how to install">
+          <button class="sw-tab" role="tab" data-panel="agent" aria-selected="true" aria-controls="ipanel-agent">Paste into your agent</button>
+          <button class="sw-tab" role="tab" data-panel="manual" aria-selected="false" tabindex="-1" aria-controls="ipanel-manual">Manual install</button>
         </div>
-        <div class="cmd" data-os="nix">
-          <code id="cmd-nix">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
-          <button class="copy" data-target="cmd-nix" aria-label="Copy install command">copy</button>
+        <div class="sw-panel" data-panel="agent" id="ipanel-agent">
+          <div class="cmd prose">
+            <code id="agent-prompt">Install AccInt for yourself — local memory that learns what works across all my projects and makes you better over time. Run the installer for my OS — macOS/Linux: curl -fsSL https://accint.xyz/install | sh · Windows PowerShell: irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex — then run `acc hosts-sync` to wire yourself, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks before anything leaves my machine.</code>
+            <button class="copy" data-target="agent-prompt" aria-label="Copy the agent prompt">copy</button>
+          </div>
+          <p class="agent-foot">Works in <b>Claude Code · Codex · Cursor · OpenCode</b> — paste it into the one you already use.</p>
         </div>
-        <div class="cmd" data-os="win" hidden>
-          <code id="cmd-win">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
-          <button class="copy" data-target="cmd-win" aria-label="Copy install command">copy</button>
+        <div class="sw-panel" data-panel="manual" id="ipanel-manual" hidden>
+          <div class="os-tabs" role="tablist" aria-label="Choose your platform">
+            <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
+            <button class="os-tab" role="tab" data-os="win" aria-selected="false" tabindex="-1">Windows</button>
+          </div>
+          <div class="cmd" data-os="nix">
+            <code id="cmd-nix">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
+            <button class="copy" data-target="cmd-nix" aria-label="Copy install command">copy</button>
+          </div>
+          <div class="cmd" data-os="win" hidden>
+            <code id="cmd-win">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
+            <button class="copy" data-target="cmd-win" aria-label="Copy install command">copy</button>
+          </div>
         </div>
         <p class="cmd-then"># then, in the agent you already run, just say it:<br><span>&ldquo;keep my pipeline warm this week — 10 good ones, my voice&rdquo;</span></p>
         <div class="install-2nd">
@@ -1178,17 +1208,30 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
     <div class="tag" style="justify-content:center">install</div>
     <h2>Already running AI agents?<br>Turn their work into <em>expertise you own</em>.</h2>
     <div class="install" aria-label="Install AccInt">
-      <div class="os-tabs" role="tablist" aria-label="Choose your platform">
-        <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
-        <button class="os-tab" role="tab" data-os="win" aria-selected="false" tabindex="-1">Windows</button>
+      <div class="sw-tabs" role="tablist" aria-label="Choose how to install">
+        <button class="sw-tab" role="tab" data-panel="agent" aria-selected="true" aria-controls="ipanel-agent2">Paste into your agent</button>
+        <button class="sw-tab" role="tab" data-panel="manual" aria-selected="false" tabindex="-1" aria-controls="ipanel-manual2">Manual install</button>
       </div>
-      <div class="cmd" data-os="nix">
-        <code id="cmd-nix2">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
-        <button class="copy" data-target="cmd-nix2" aria-label="Copy install command">copy</button>
+      <div class="sw-panel" data-panel="agent" id="ipanel-agent2">
+        <div class="cmd prose">
+          <code id="agent-prompt2">Install AccInt for yourself — local memory that learns what works across all my projects and makes you better over time. Run the installer for my OS — macOS/Linux: curl -fsSL https://accint.xyz/install | sh · Windows PowerShell: irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex — then run `acc hosts-sync` to wire yourself, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks before anything leaves my machine.</code>
+          <button class="copy" data-target="agent-prompt2" aria-label="Copy the agent prompt">copy</button>
+        </div>
+        <p class="agent-foot">Works in <b>Claude Code · Codex · Cursor · OpenCode</b> — paste it into the one you already use.</p>
       </div>
-      <div class="cmd" data-os="win" hidden>
-        <code id="cmd-win2">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
-        <button class="copy" data-target="cmd-win2" aria-label="Copy install command">copy</button>
+      <div class="sw-panel" data-panel="manual" id="ipanel-manual2" hidden>
+        <div class="os-tabs" role="tablist" aria-label="Choose your platform">
+          <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
+          <button class="os-tab" role="tab" data-os="win" aria-selected="false" tabindex="-1">Windows</button>
+        </div>
+        <div class="cmd" data-os="nix">
+          <code id="cmd-nix2">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
+          <button class="copy" data-target="cmd-nix2" aria-label="Copy install command">copy</button>
+        </div>
+        <div class="cmd" data-os="win" hidden>
+          <code id="cmd-win2">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
+          <button class="copy" data-target="cmd-win2" aria-label="Copy install command">copy</button>
+        </div>
       </div>
       <div class="install-2nd">
         <a class="gh" href="https://github.com/maxbaluev/accreted-intelligence">★ Star &amp; watch on GitHub</a>
@@ -1274,6 +1317,20 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
     document.execCommand('copy');document.body.removeChild(ta);}catch(_e){}}
   var isWin=/Win/i.test((navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||navigator.userAgent||'');
   [].slice.call(document.querySelectorAll('.install')).forEach(function(box){
+    /* primary/backup switcher — agent-paste (default) vs manual one-liner */
+    var swtabs=[].slice.call(box.querySelectorAll('.sw-tab')),
+        panels=[].slice.call(box.querySelectorAll('.sw-panel'));
+    function showPanel(name){
+      swtabs.forEach(function(t){var on=t.dataset.panel===name;t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;});
+      panels.forEach(function(p){p.hidden=p.dataset.panel!==name;});
+    }
+    swtabs.forEach(function(t,i){
+      t.addEventListener('click',function(){showPanel(t.dataset.panel);ph('install_mode_selected',{mode:t.dataset.panel});});
+      t.addEventListener('keydown',function(e){
+        var d=e.key==='ArrowRight'?1:(e.key==='ArrowLeft'?-1:0);
+        if(d){e.preventDefault();var j=(i+d+swtabs.length)%swtabs.length;showPanel(swtabs[j].dataset.panel);swtabs[j].focus();}
+      });
+    });
     var tabs=[].slice.call(box.querySelectorAll('.os-tab')),cmds=[].slice.call(box.querySelectorAll('.cmd'));
     function showOS(os){
       tabs.forEach(function(t){var on=t.dataset.os===os;t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;});
