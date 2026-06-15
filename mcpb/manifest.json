@@ -4,7 +4,7 @@
   "display_name": "AccInt",
   "version": "0.1.1",
   "description": "Local Work Model MCP server for agent work that learns from real outcomes.",
-  "long_description": "AccInt exposes a local Work Model to MCP clients. Agents use acc_retrieve to read the scored substrate and acc_act to solve, execute bounded local work, register reusable runtimes, and close outcomes. The database stays on the user's machine; this bundle ships the local acc binary only, not any acc.db substrate.",
+  "long_description": "AccInt exposes a local Work Model to MCP clients. Agents use acc_retrieve to read the scored substrate and acc_act to solve, execute bounded local work, register reusable runtimes, and close outcomes. The database stays on the user's machine; this bundle ships the local acc binary only — no acc.db substrate. It is standalone: on first use it creates the substrate automatically at the configured path and downloads the embedding model (several GB, one-time), with no separate installer. The memory starts empty and compounds from your own work.",
   "author": {
     "name": "Max Baluev",
     "url": "https://github.com/maxbaluev"
@@ -65,8 +65,8 @@
     "db_path": {
       "type": "file",
       "title": "AccInt database",
-      "description": "Path to the local AccInt SQLite substrate (acc.db). Use an existing acc.db or create one with the installer first.",
-      "required": true,
+      "description": "Path to the local AccInt SQLite substrate (acc.db). Created automatically on first run if it doesn't exist — the default is fine for most users; no installer required.",
+      "required": false,
       "default": "${HOME}/acc.db"
     }
   }
