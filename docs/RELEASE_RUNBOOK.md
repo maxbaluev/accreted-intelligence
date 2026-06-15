@@ -35,7 +35,12 @@ source).
 4. **Tag and release** — `git tag vX.Y.Z`, push the tag, and
    `gh release create vX.Y.Z --repo maxbaluev/accreted-intelligence` with the
    prebuilt binaries + `sha256sums.txt` as assets (no source in the release).
-5. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
+5. **Package MCPB assets** — after the release binaries are attached, run
+   `scripts/package-mcpb.sh vX.Y.Z all` from this public clone and attach the
+   generated `dist/acc-mcp-*.mcpb` + `.sha256` files to the same release. Use
+   `docs/registry/mcp-registry.md` for the official MCP Registry `server.json`
+   and `mcp-publisher` steps.
+6. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
    from `index.html` + `CNAME` at repo root; confirm the deep-doc links resolve on
    the published default branch.
 
