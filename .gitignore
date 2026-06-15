@@ -1,0 +1,9 @@
+# Local git worktrees (build/landing/docs work happens here) — never part of the
+# published tree, and they pollute scripts/check-integrity.sh with stale matches.
+.worktrees/
+
+# hosts-sync writes one of these beside any file it changes
+*.acc-backup-*
+
+# OS / editor noise
+.DS_Store
