@@ -1,5 +1,12 @@
 # Accreted Intelligence
 
+[![Stars](https://img.shields.io/github/stars/maxbaluev/accreted-intelligence?style=flat&logo=github&color=f5c518)](https://github.com/maxbaluev/accreted-intelligence/stargazers)
+[![License](https://img.shields.io/badge/license-Apache--2.0%20(glue)-blue)](LICENSE-APACHE-2.0.txt)
+[![MCP](https://img.shields.io/badge/MCP-server-1f6feb)](https://modelcontextprotocol.io)
+[![Works with](https://img.shields.io/badge/works%20with-Claude%20Code%20·%20OpenCode%20·%20Codex%20·%20Cursor-7c3aed)](#install)
+[![Platform](https://img.shields.io/badge/platform-Linux%20·%20macOS%20·%20Windows-555)](#install)
+[![Live](https://img.shields.io/badge/live-accint.xyz-3fb950)](https://accint.xyz)
+
 > Most AI forgets. This is the learning substrate for AI that remembers what worked, and gets wiser.
 
 A learning substrate for agent work. `acc` is a local Work Model that makes the AI tools you already run (Claude Code, Codex, OpenCode, Cursor) remember what actually worked. Hand work to your agent. `acc` learns what held up, checked against reality and shaped by how you decide, and starts the next run from the better path. The same job gets faster and lands better each time. All on a machine you control.
