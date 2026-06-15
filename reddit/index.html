@@ -107,15 +107,25 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
 .community-actions{border-left:1px solid var(--line);padding:22px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 .community-link{display:block;text-align:center;text-decoration:none;background:var(--orange);color:#14110b;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:12px 14px}
 .community-link:hover{background:var(--ink);color:#14110b}
+.community-link.alt{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.community-link.alt:hover{background:var(--ink);border-color:var(--ink);color:#14110b}
 .community-note{color:var(--faint);font-family:var(--mono);font-size:11px;line-height:1.55}
+.post-prompts{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.post-prompt{display:block;text-decoration:none;border:1px solid var(--line);background:#120f0a;padding:15px;min-height:138px}
+.post-prompt:hover{border-color:var(--orange);background:var(--bg3);color:var(--ink)}
+.post-prompt b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--orange)}
+.post-prompt span{display:block;margin-top:8px;color:var(--ink);font-size:14px;font-weight:700;line-height:1.25}
+.post-prompt small{display:block;margin-top:8px;color:var(--faint);font-family:var(--mono);font-size:11px;line-height:1.45}
+.mobile-rail{display:none}
 .footer{padding:34px 0;color:var(--faint);font-family:var(--mono);font-size:12px}
 .footerin{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media(max-width:900px){
-  .grid,.cards,.channel{grid-template-columns:1fr}
+  .grid,.cards,.channel,.post-prompts{grid-template-columns:1fr}
   .hero{padding-top:58px}
 }
 @media(max-width:560px){
-  .wrap,.topin{width:min(100%,390px);margin-left:0;margin-right:auto;padding-left:18px;padding-right:18px}
+  body{padding-bottom:82px}
+  .wrap,.topin{width:100%;max-width:100%;margin-left:auto;margin-right:auto;padding-left:18px;padding-right:18px}
   .topin{align-items:flex-start}
   .nav{gap:12px;flex-wrap:wrap;justify-content:flex-end}
   .nav a:not(.cta){display:none}
@@ -129,6 +139,10 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
   .stamp{justify-self:start}
   .community{grid-template-columns:1fr}
   .community-actions{border-left:0;border-top:1px solid var(--line)}
+  .post-prompt{min-height:0}
+  .mobile-rail{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-top:1px solid var(--rule)}
+  .mobile-rail a{display:block;text-align:center;text-decoration:none;background:var(--orange);color:#14110b;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:13px 10px}
+  .mobile-rail a:first-child{background:var(--ink)}
 }
 </style>
 </head>
@@ -245,15 +259,38 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
           <div class="tag">Reddit community</div>
           <h3>Bring real agent-work friction, not generic AI hype.</h3>
           <p>We opened r/AccretedIntelligence as a public workbench for Work Models, work packets, open promises, evidence packets, approval gates, and outcome credit. The useful posts are concrete: install friction, teardown notes, failure reports, and operator workflows.</p>
+          <div class="post-prompts" aria-label="Useful first posts">
+            <a class="post-prompt" data-track="reddit_template_clicked" data-template="failure_report" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Failure%20report%3A%20agent%20said%20done%20but%20evidence%20was%20missing&selftext=Tool%20and%20task%3A%0A%0AWhat%20the%20agent%20claimed%3A%0A%0AWhat%20the%20repo%20or%20system%20actually%20showed%3A%0A%0AWhat%20evidence%20would%20have%20made%20this%20trustworthy%3A%0A%0AWhat%20I%20want%20a%20Work%20Model%20to%20track%20next%20time%3A" target="_blank" rel="noopener">
+              <b>Template</b>
+              <span>Failure report</span>
+              <small>When the agent says done but the evidence does not hold.</small>
+            </a>
+            <a class="post-prompt" data-track="reddit_template_clicked" data-template="install_friction" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Install%20friction%3A%20where%20AccInt%20setup%20broke%20or%20felt%20unclear&selftext=Machine%20and%20agent%3A%0A%0AInstall%20path%20used%3A%0A%0AWhere%20it%20broke%20or%20felt%20unclear%3A%0A%0AExact%20error%20or%20confusing%20step%3A%0A%0AWhat%20would%20have%20made%20the%20next%20step%20obvious%3A" target="_blank" rel="noopener">
+              <b>Template</b>
+              <span>Install friction</span>
+              <small>Useful for improving the first real human install path.</small>
+            </a>
+            <a class="post-prompt" data-track="reddit_template_clicked" data-template="workflow_teardown" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Workflow%20teardown%3A%20where%20does%20my%20agent%20work%20break%20first%3F&selftext=Agent%20workflow%3A%0A%0AWhere%20I%20still%20have%20to%20babysit%3A%0A%0AWhat%20state%20gets%20lost%20between%20runs%3A%0A%0AWhat%20should%20be%20owner-gated%20before%20anything%20leaves%20the%20machine%3A%0A%0AWhat%20would%20count%20as%20evidence%20that%20the%20work%20is%20actually%20done%3A" target="_blank" rel="noopener">
+              <b>Template</b>
+              <span>Workflow teardown</span>
+              <small>Concrete operator friction beats abstract agent takes.</small>
+            </a>
+          </div>
         </div>
         <div class="community-actions">
           <a class="community-link" data-track="reddit_community_clicked" href="https://www.reddit.com/r/AccretedIntelligence/?utm_source=accint&utm_medium=reddit_landing&utm_campaign=work_model" target="_blank" rel="noopener">Join r/AccretedIntelligence</a>
-          <p class="community-note">If your agent looked productive but increased your review load, that is the kind of report that helps.</p>
+          <a class="community-link alt" data-track="reddit_template_clicked" data-template="workflow_teardown_side" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Workflow%20teardown%3A%20where%20does%20my%20agent%20work%20break%20first%3F&selftext=Agent%20workflow%3A%0A%0AWhere%20I%20still%20have%20to%20babysit%3A%0A%0AWhat%20state%20gets%20lost%20between%20runs%3A%0A%0AWhat%20should%20be%20owner-gated%20before%20anything%20leaves%20the%20machine%3A%0A%0AWhat%20would%20count%20as%20evidence%20that%20the%20work%20is%20actually%20done%3A" target="_blank" rel="noopener">Post a teardown</a>
+          <p class="community-note">If your agent looked productive but increased your review load, that is the kind of report that helps. Keep links out unless they are necessary evidence.</p>
         </div>
       </div>
     </div>
   </section>
 </main>
+
+<div class="mobile-rail" aria-label="Mobile actions">
+  <a href="#install" data-track="mobile_install_clicked">Install</a>
+  <a href="https://www.reddit.com/r/AccretedIntelligence/?utm_source=accint&utm_medium=mobile_rail&utm_campaign=work_model" data-track="reddit_community_clicked" target="_blank" rel="noopener">Join Reddit</a>
+</div>
 
 <footer class="footer">
   <div class="wrap footerin">
@@ -306,9 +343,23 @@ ph('reddit_landing_viewed',Object.assign({install_ref:install_ref},source_props)
     a.addEventListener('click',function(){
       ph('reddit_community_clicked',Object.assign({
         destination:'r/AccretedIntelligence',
-        placement:(a.closest('.footer')?'footer':'community_section'),
+        placement:(a.closest('.footer')?'footer':(a.closest('.mobile-rail')?'mobile_rail':'community_section')),
         install_ref:install_ref
       },source_props));
+    });
+  });
+  [].slice.call(document.querySelectorAll('[data-track="reddit_template_clicked"]')).forEach(function(a){
+    a.addEventListener('click',function(){
+      ph('reddit_post_template_clicked',Object.assign({
+        template:a.getAttribute('data-template')||'unknown',
+        placement:(a.closest('.community-actions')?'community_side':'community_templates'),
+        install_ref:install_ref
+      },source_props));
+    });
+  });
+  [].slice.call(document.querySelectorAll('[data-track="mobile_install_clicked"]')).forEach(function(a){
+    a.addEventListener('click',function(){
+      ph('reddit_mobile_install_clicked',Object.assign({install_ref:install_ref},source_props));
     });
   });
   [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
