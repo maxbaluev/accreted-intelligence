@@ -106,6 +106,40 @@ Read the depth:
 - **The reasoner is replaceable at the interface, but the memory is not.** What `acc` learned lives in the Work Model, so a replaceable reasoner reads it through the same two verbs. Two reasoning engines have been driven against one substrate. The encoder and the operating contract are part of the substrate's identity rather than free variables: one substrate is pinned to one encoder.
 - **Consent at the boundary.** Owner authority is required before anything that sends, publishes, deploys, transfers, deletes important data, or uses your credentials. The gate is hard rather than advisory. A held decision is named and timestamped, and nothing leaves without it.
 
+## FAQ: Work Model vs memory
+
+### Is this just agent memory?
+
+No. Memory recalls context. A Work Model records whether that context helped real work land.
+
+`acc` stores remembered facts, but it also stores commitments, actions, approval gates, outcomes, failures, and reusable runtimes. The important question is not only "what should the agent remember?" It is "which remembered thing earned trust after reality answered?"
+
+### How is this different from a vector database, Mem0, Supermemory, Hermes, or markdown memory files?
+
+Those tools are useful when the problem is recall or shared context. `acc` sits one layer lower in the work loop:
+
+```text
+memory          -> what might be relevant?
+trace           -> what happened?
+eval            -> did the output look good?
+acc Work Model  -> what was attempted, who approved it, what happened in reality,
+                  and which path deserves reuse next time?
+```
+
+The distinction is outcome credit. A retrieved memory, script, browser recipe, or runtime becomes more trusted only when the resulting work is confirmed by reality: a passing test, an owner approval, a delivered action, a reply, or another grounded outcome.
+
+### Does anything leave my machine?
+
+The Work Model does not require a cloud memory account. The substrate is a local SQLite file, retrieval runs locally, and the embedder runs as a local daemon. External actions are gated: sends, publishes, deploys, transfers, deletes, or credentialed actions require owner authority and leave a receipt.
+
+### What counts as reality?
+
+Not model confidence. Reality means something outside the model confirmed the result: a test passed, the owner approved, the browser observed delivery, the world replied, or a runtime produced a grounded result. Self-graded work is kept as weak evidence, not promoted to full truth.
+
+### What is open and what is private?
+
+The installer, host adapters, docs, and public building blocks are open. The engine source for the late-interaction memory, appraisal/prediction layers, and credit math is private for now. The public repo says which claims are proven, which are young, and which parts are not open.
+
 ---
 
 ## Works with the tools you already run
