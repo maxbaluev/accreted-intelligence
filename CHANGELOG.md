@@ -66,6 +66,48 @@ All notable changes to acc are recorded here. The format follows
   depth line and doctor grounding ladder now report binding parity when the
   hooks.json is present, advisory when only `notify` is.
 
+## [0.1.2] — 2026-06-15
+
+New-user install / update / download hardening, from a real fresh-machine install log
+(CachyOS + RTX 4090) and a new user's `acc report`. Engine binaries are fully-static musl
+(any Linux, no glibc floor); prebuilts ship for Linux x86_64 + arm64, macOS (Apple
+Silicon), and Windows, with `.mcpb` MCP bundles for all four platforms.
+
+### Fixed
+
+- **The memory engine never warmed on a fresh machine.** The AWQ encoder pinned
+  `transformers==4.57.1` (which renamed `PytorchGELUTanh` → `GELUTanh`) against
+  `autoawq==0.2.9` (which still imports the old name) → hard `ImportError` → the embedder
+  crash-looped → retrieval was dead and the install ended `DEGRADED`. A fresh `uv` resolve
+  hit it; dev machines were masked by a warm cache. Restored the alias.
+- **Silent auto-update would have bricked `acc` on the next release.** The background stager
+  staged the raw release `.tar.gz` (no extraction) and the swap never set the executable bit,
+  so apply-on-boot would have swapped a non-executable gzip blob over the binary. It now
+  extracts the binary and `chmod +x`'s the swap; stale archive-stagings self-heal.
+- **A 10-minute false "still downloading…".** A permanent encoder failure now fails fast with
+  the real error instead of waiting out the clock.
+- **`acc doctor` no longer false-warns** "rebuild with `cargo install`" on a prebuilt
+  release install (the distribution repo has no `Cargo.toml`); the skew is reported as expected.
+- **Honest install end** — a degraded install says so and leads with the one next step; the
+  per-project wiring hints point to `acc hosts-sync --project .`; `acc report` (a sanitized,
+  pre-filled GitHub issue) is surfaced as the escalation path.
+- **`sudo` no longer prompts/hangs** in a piped `curl | sh` install (TTY-gated).
+- **Browser: new-user multimodal routing is structural-first.**
+
+### Added
+
+- **Visible model + encoder-env downloads on release installs** — `acc prefetch <model>`
+  (model weights, live progress) and `acc warm-encoder <model>` (the multi-GB torch/awq env,
+  live progress) are embedded in the binary, so install phases 4 & 6 show the download with
+  progress instead of hiding it inside the first embedder start.
+
+### Changed
+
+- **Anonymous usage telemetry is ON by default** (event names only — never your data, prompts,
+  files, or memory). Opt out any time: `acc telemetry off`, or `ACC_NO_TELEMETRY=1` before
+  install. `install.ps1` reaches Windows parity.
+- The first-run briefing now teaches what the install set up and the explicit next action.
+
 ## [0.1.0] — 2026-06-13
 
 First public release. `0.1.0` is the intentional baseline across all three version
