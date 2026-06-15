@@ -89,8 +89,9 @@ curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/downlo
 ./mcp-publisher publish
 ```
 
-For unattended publishing from GitHub Actions, use GitHub OIDC instead of the
-device-code login:
+For unattended publishing from GitHub Actions, use the tracked
+[`../../.github/workflows/publish-mcp.yml`](../../.github/workflows/publish-mcp.yml)
+workflow. It authenticates with GitHub OIDC instead of the device-code login:
 
 ```yaml
 permissions:
@@ -108,5 +109,5 @@ steps:
     run: ./mcp-publisher publish
 ```
 
-Keep this as a manual maintainer step until the release pipeline attaches MCPB
-assets and updates `server.json` with real `fileSha256` values for the release.
+Keep this workflow on manual dispatch until the release pipeline attaches MCPB
+assets and updates `server.json` with real `fileSha256` values for each release.

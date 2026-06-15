@@ -40,7 +40,8 @@ source).
    generated `dist/acc-mcp-*.mcpb` + `.sha256` files to the same release. Copy
    `dist/server.mcpb-all.json` to `server.json`, commit it, and use
    `docs/registry/mcp-registry.md` for the official MCP Registry
-   `mcp-publisher` steps.
+   `mcp-publisher` steps. The tracked `publish-mcp-registry` workflow is manual
+   and uses GitHub OIDC, so no maintainer token needs to be stored.
 6. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
    from `index.html` + `CNAME` at repo root; confirm the deep-doc links resolve on
    the published default branch.
