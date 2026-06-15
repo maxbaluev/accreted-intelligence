@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14110b">
 <title>Accreted Intelligence — the learning substrate for agent work</title>
-<meta name="description" content="Accreted Intelligence (AccInt) is an on-premise layer that makes the AI tools you already run — Claude, Codex, Cursor — remember what actually worked. Every action is checked against reality and kept on your machine, so the same work gets faster, cheaper, and safer each run. Swap the model, keep the expertise. Install in one line; runs on hardware you control.">
+<meta name="description" content="AccInt is a local Work Model for AI agents: memory plus receipts, approval gates, outcome credit, and reusable runtimes. Claude Code, Codex, OpenCode, and Cursor keep what actually worked on hardware you control.">
 <meta property="og:title" content="Accreted Intelligence — the learning substrate for agent work">
-<meta property="og:description" content="A local Work Model for agent-run work: commitments, receipts, authority gates, outcome credit, and reusable runtimes on hardware you control. Swap the model, keep the company veteran. Open install, one line.">
+<meta property="og:description" content="Memory recalls context. A Work Model records whether that context helped real work land. AccInt runs locally under Claude Code, Codex, OpenCode, and Cursor.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://accint.xyz/">
 <meta property="og:image" content="https://accint.xyz/og.png">
@@ -164,6 +164,13 @@ display:flex;gap:8px;align-items:center;}
 .ledger-type .car{display:inline-block;width:7px;height:14px;background:var(--ink);
 animation:blink 1.1s steps(1) infinite;}
 .ledger-foot{padding:8px 18px 4px;font-family:var(--mono);font-size:10.5px;color:var(--faint);}
+#faq .row{grid-template-columns:1px minmax(82px,96px) 1fr auto;}
+#faq .row .verb{white-space:normal;}
+@media(max-width:620px){
+#faq .ledger{max-width:100% !important;}
+#faq .row{grid-template-columns:1px minmax(74px,86px) 1fr;gap:8px;}
+#faq .stamp{grid-column:2 / -1;justify-self:start;margin-top:2px;}
+}
 
 /* ---------- honesty strip ---------- */
 .honest{background:var(--bg2);}
@@ -915,6 +922,50 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     the numbers above are measured, not promised: the built-in eval harness holds retrieval at
     recall@5 = 1.000 against exact brute-force across the live Work Model, and the gates, nulls and
     routing policy recalibrate themselves from real outcomes.</p>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="tag">plain answers</div>
+    <h2>Not just memory. A <em>Work Model</em>.</h2>
+    <p class="body">Memory recalls context. AccInt records whether that context helped real work land.
+    The durable asset is not a bag of facts; it is the loop around the work: the commitment, the action,
+    the approval boundary, the outcome, and the path that earned reuse.</p>
+    <div class="ledger" style="max-width:760px;margin-top:22px" aria-label="Frequently asked questions about AccInt versus memory tools.">
+      <div class="ledger-head"><span><span class="dot"></span>FAQ</span><span>memory vs. Work Model</span></div>
+      <div class="row">
+        <span class="t" style="visibility:hidden">.</span>
+        <span class="verb">memory?</span>
+        <span class="what"><b>No.</b> Memory asks what the agent should recall. AccInt asks which recalled thing earned trust after reality answered.</span>
+        <span class="stamp ok">ANSWERED</span>
+      </div>
+      <div class="row">
+        <span class="t" style="visibility:hidden">.</span>
+        <span class="verb">vector db?</span>
+        <span class="what">Retrieval is necessary, not sufficient. AccInt adds commitments, receipts, approvals, outcomes, and scored reuse.</span>
+        <span class="stamp ok">BOUND</span>
+      </div>
+      <div class="row">
+        <span class="t" style="visibility:hidden">.</span>
+        <span class="verb">Hermes?</span>
+        <span class="what">Cross-agent memory is useful. AccInt sits under the agent choice and keeps the verified lessons when you swap engines.</span>
+        <span class="stamp ok">COMPATIBLE</span>
+      </div>
+      <div class="row">
+        <span class="t" style="visibility:hidden">.</span>
+        <span class="verb">leaves?</span>
+        <span class="what">The Work Model stays local. Sends, publishes, deploys, deletes, transfers, and credentialed actions hit the owner gate first.</span>
+        <span class="stamp hold">HELD -> OK</span>
+      </div>
+      <div class="row">
+        <span class="t" style="visibility:hidden">.</span>
+        <span class="verb">reality?</span>
+        <span class="what">A passing test, your approval, an observed delivery, a reply, or a grounded runtime result. Belief stays weak evidence.</span>
+        <span class="stamp ok">CREDITED</span>
+      </div>
+    </div>
+    <p class="tagline">Useful memory tells the agent what happened. AccInt tells the next run what <em>deserved trust</em>.</p>
   </div>
 </section>
 
