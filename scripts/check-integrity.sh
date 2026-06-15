@@ -19,7 +19,7 @@ done
 if [ -f "plugins/claude/.claude-plugin/plugin.json" ]; then note "claude plugin manifest: ok"; else note "claude plugin manifest: MISSING"; fail=1; fi
 
 echo "== no stale brand / no personal contact =="
-if grep -rIn 'acc4' --include='*.md' --include='*.sh' --include='*.ps1' --include='*.json' --exclude=check-integrity.sh . | grep -v 'CHANGELOG.md' | grep -v '\.git/'; then
+if grep -rIn 'acc4' --include='*.md' --include='*.sh' --include='*.ps1' --include='*.json' --exclude=check-integrity.sh --exclude-dir=.git --exclude-dir=.worktrees . | grep -v 'CHANGELOG.md'; then
   note "FOUND stale 'acc4' references above"; fail=1
 else note "no stale acc4: ok"; fi
 if grep -nE 'maxbaluev@outlook|t\.me/' README.md 2>/dev/null; then
@@ -28,7 +28,7 @@ else note "README contact neutral: ok"; fi
 
 echo "== relative markdown links resolve =="
 broken_list=$(
-  find . -name '*.md' -not -path './.git/*' | while IFS= read -r md; do
+  find . -name '*.md' -not -path './.git/*' -not -path './.worktrees/*' | while IFS= read -r md; do
     dir=$(dirname "$md")
     grep -oE '\]\([^)]+\)' "$md" | sed -E 's/^\]\(//; s/\)$//' | while IFS= read -r link; do
       case "$link" in http://*|https://*|mailto:*|\#*|//*) continue ;; esac
