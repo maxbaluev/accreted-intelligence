@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# (run under bash — uses bash arrays + $'…' escapes. The bootstrap checks `command -v bash`
+#  before exec'ing this file, so a busybox/dash-only host fails early with a clear message
+#  rather than mid-parse on the first array.)
 # acc installer — deterministic PHASE-MACHINE. Fresh machine → working organism, on any
 # POSIX OS. Numbered, idempotent, individually re-runnable phases; resume is structural
 # (each phase checks its own postcondition first — no state file). Drives a 3-model tier
@@ -21,6 +24,8 @@
 #   linux x86_64, RAM ≥24/12GB             → ColQwen3 8B/4B-AWQ on cpu (slow, multimodal)
 #   darwin (Apple Silicon), RAM ≥32/16GB   → ColQwen3 8B/4B full bf16 on mps
 #   linux aarch64 / Intel-mac, RAM ≥32/16GB→ ColQwen3 8B/4B full bf16 on cpu
+#   any NVIDIA GPU, free VRAM ≥2GB         → LateOn text-only ON cuda (small ~0.6GB model fits a
+#                                            ~4GB GPU; runs on the GPU, not a slow cpu encode)
 #   anything below the floors                → LateOn text-only (cpu, or mps ≥16GB)
 #   DISK FLOOR (every rung): expected model download (static sizes mirrored from
 #     encoders/prefetch.py) + 2048MB headroom must fit the free disk at the HF cache
@@ -44,6 +49,11 @@
 #                                            next}; final line = overall verdict + the
 #                                            `acc doctor --json` handoff (Claude-as-installer)
 #         ./install.sh --dry-run --json      both: machine-readable dry walk, exit 0
+#         ./install.sh --persist-path        OPT-IN: append the ~/.local/bin export to your
+#                                            shell rc (~/.bashrc or ~/.profile) so a NEW
+#                                            terminal finds `acc`. Default is advisory-print
+#                                            only — the installer NEVER edits your rc unless
+#                                            you pass this flag.
 #   Env: ACC_NO_BROWSER=1   skip the browser capability
 #        ACC_NONINTERACTIVE=1 never prompt; skip sudo steps, just warn
 #        ACC_TIER=<lane>    force the embedder lane (skip the host probe's pick)
@@ -61,16 +71,23 @@ REPO="$PWD"
 # ── flags ───────────────────────────────────────────────────────────────────────────
 DRY_RUN=0
 JSON=0
+PERSIST_PATH=0
 ARGS=()
 for a in "$@"; do
   case "$a" in
     --dry-run) DRY_RUN=1 ;;
     --json)    JSON=1 ;;
+    --persist-path) PERSIST_PATH=1 ;;
     -h|--help) sed -n '2,/^set -euo pipefail$/p' "$0" | sed '$d'; exit 0 ;;
     *)         ARGS+=("$a") ;;
   esac
 done
-DB="${ARGS[0]:-$PWD/acc.db}"
+# DB default is set AFTER OS is known (below) so a release install (non-git) writes the db
+# to the per-OS CANONICAL DATA DIR — the SAME path `db::canonical_db_path` resolves a bare
+# `acc.db` to outside a git repo. Otherwise bare `acc report`/`acc doctor` (read-only, cannot
+# create) look in the canonical dir while the installer wrote it under $PWD — the exact split
+# that hard-FAILED for a real user. An explicit path arg ($ARGS[0]) still wins.
+DB_ARG="${ARGS[0]:-}"
 
 EMB_SOCK="/tmp/acc-embedder.sock"
 ENCODER_SCRIPT_FULL="$REPO/encoders/li_encode.py"           # LateOn / full-bf16 lanes
@@ -81,15 +98,65 @@ BROWSER_VENV="$BROWSER_HOME/venv"
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
+# The per-OS CANONICAL DATA DIR — mirrors `crate::platform::data_dir()` (linux/other:
+# ${XDG_DATA_HOME:-~/.local/share}/acc; macOS: ~/Library/Application Support/acc). The
+# substrate db default lives here so the installer, the wired MCP (relative `acc.db` →
+# same canonical dir off-git via db::canonical_db_path), and bare read-only `acc` commands
+# all agree on ONE db. (The ACC_DATA_DIR used later for plugins recomputes the same value.)
+case "$OS" in
+  Darwin) CANON_DATA_DIR="$HOME/Library/Application Support/acc" ;;
+  *)      CANON_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/acc" ;;
+esac
+DB="${DB_ARG:-$CANON_DATA_DIR/acc.db}"
+
+# REPO_IS_CLONE — is $REPO the HIDDEN bootstrap clone (~/.local/share/acc/src, the dir the
+# one-liner clones into and cd's to), rather than a real project the user works in? The
+# bootstrap clones to ${ACC_SRC:-$CANON_DATA_DIR/src} and exec's this script from there, so
+# $REPO == that path on the public one-liner path. When $REPO is the clone, we must NOT wire
+# Claude-Code PROJECT files (.mcp.json / .claude/settings.json) INTO it — the user never opens
+# Claude Code in the clone dir, so that wiring is dead. The one-Work-Model pivot makes those
+# project files unnecessary anyway: phase 13 (`acc hosts-sync`) wires Claude Code GLOBALLY
+# (~/.claude.json + ~/.claude/settings.json on the one global db), so acc works in every
+# directory. A genuine dev clone of the repo (a real project the dev works in) is NOT under
+# the data dir, so this stays false there (its own tracked project files are left as-is).
+CLONE_DIR="${ACC_SRC:-$CANON_DATA_DIR/src}"
+if [ "$REPO" = "$CLONE_DIR" ] || [ "$REPO" = "$CANON_DATA_DIR/src" ]; then
+  REPO_IS_CLONE=1
+else
+  REPO_IS_CLONE=0
+fi
+
+# ── interactivity + color/Unicode gating ──────────────────────────────────────────────
+# NON-INTERACTIVE = stdout is not a TTY (piped / captured by an agent's Bash tool / a
+# `curl … | sh` redirect), OR the caller set ACC_NONINTERACTIVE=1. In this mode the
+# installer must NEVER block on a long synchronous wait (a coding-agent shell has a command
+# TIMEOUT that would kill a half-finished install) — the embedder warm-wait is skipped and
+# the model warms in the background. It also drives the output surface below: an agent that
+# CAPTURES stdout must receive plain ASCII, never raw ANSI escape codes or Unicode glyphs
+# (they show up as literal \033[..m / mojibake and corrupt the captured guidance).
+if [ "${ACC_NONINTERACTIVE:-0}" = "1" ] || ! [ -t 1 ]; then NONINTERACTIVE=1; else NONINTERACTIVE=0; fi
+# USE_COLOR: only when stdout is a real TTY AND NO_COLOR is unset (https://no-color.org).
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then USE_COLOR=1; else USE_COLOR=0; fi
+# Color codes + status glyphs collapse to empty / ASCII when color is off. The glyph
+# fallbacks ([ok]/[!]/>) are pure ASCII so a captured stream stays clean and readable.
+if [ "$USE_COLOR" = "1" ]; then
+  C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_BOLD=$'\033[1m'; C_RESET=$'\033[0m'
+  G_OK=$'\033[32m✓\033[0m'; G_WARN=$'\033[33m!\033[0m'; G_STEP=$'\033[1m▸ '
+else
+  C_GREEN=''; C_YELLOW=''; C_BOLD=''; C_RESET=''
+  G_OK='[ok]'; G_WARN='[!]'; G_STEP='> '
+fi
+
 # ── output surface ────────────────────────────────────────────────────────────────────
-# Human mode → pretty ✓/⚠ lines. JSON mode → exactly one object per phase + a final
+# Human mode → pretty status lines. JSON mode → exactly one object per phase + a final
 # verdict object. Everything that would clutter the JSON stream goes to stderr in JSON mode.
+# Color/glyphs are gated on USE_COLOR above so a captured (non-TTY) stream is plain ASCII.
 have() { command -v "$1" >/dev/null 2>&1; }
 log()  { [ "$JSON" = "1" ] && printf '%s\n' "$*" >&2 || printf '  %s\n' "$*"; }
 say()  { log "$@"; }
-ok()   { [ "$JSON" = "1" ] && printf '  \033[32m✓\033[0m %s\n' "$*" >&2 || printf '  \033[32m✓\033[0m %s\n' "$*"; }
-warn() { [ "$JSON" = "1" ] && printf '  \033[33m!\033[0m %s\n' "$*" >&2 || printf '  \033[33m!\033[0m %s\n' "$*"; }
-step() { [ "$JSON" = "1" ] && printf '\n\033[1m▸ %s\033[0m\n' "$*" >&2 || printf '\n\033[1m▸ %s\033[0m\n' "$*"; }
+ok()   { [ "$JSON" = "1" ] && printf '  %s %s\n' "$G_OK" "$*" >&2 || printf '  %s %s\n' "$G_OK" "$*"; }
+warn() { [ "$JSON" = "1" ] && printf '  %s %s\n' "$G_WARN" "$*" >&2 || printf '  %s %s\n' "$G_WARN" "$*"; }
+step() { [ "$JSON" = "1" ] && printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET" >&2 || printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET"; }
 
 # json_phase NAME STATUS DETAIL NEXT — emit one machine-readable phase line (JSON mode only).
 # STATUS ∈ ok|failed|skipped|would. DETAIL/NEXT are free text (newlines/quotes escaped).
@@ -195,6 +262,10 @@ pkg_install() {
 AWQ_8B_VRAM=10000; AWQ_4B_VRAM=5000
 AWQ_8B_CPU_RAM=24000; AWQ_4B_CPU_RAM=12000
 FULL_8B_RAM=32000;  FULL_4B_RAM=16000
+# Small-VRAM cuda floor (MB): LateOn (dim-128, ~0.6GB) runs ON cuda when a GPU is present but
+# below every ColQwen floor — mirrors src/selector.rs LATEON_MIN_VRAM_MB so phase 0 and `acc
+# pin` agree (a ~4GB GPU runs the small model on the GPU, not a 10–100× slower cpu encode).
+LATEON_VRAM=2000
 
 # DISK FLOOR (MB) — model weights land in the HF cache; the pick's expected download
 # (static sizes mirrored from encoders/prefetch.py STATIC_EXPECTED_BYTES) + headroom
@@ -278,7 +349,7 @@ select_tier() {
       4b-cpu)  TIER=4b-cpu;  MODEL_ID=TomoroAI/tomoro-ai-colqwen3-embed-4b-awq; DEVICE=cpu;  ENCODER_SCRIPT="$ENCODER_SCRIPT_AWQ" ;;
       8b-full) TIER=8b-full; MODEL_ID=TomoroAI/tomoro-colqwen3-embed-8b; DEVICE="$([ "$mps" = 1 ] && echo mps || echo cpu)"; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL" ;;
       4b-full) TIER=4b-full; MODEL_ID=TomoroAI/tomoro-colqwen3-embed-4b; DEVICE="$([ "$mps" = 1 ] && echo mps || echo cpu)"; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL" ;;
-      lateon)  TIER=lateon;  MODEL_ID=lightonai/LateOn; DEVICE="$([ "$mps" = 1 ] && [ "$ram" -ge "$FULL_4B_RAM" ] && echo mps || echo cpu)"; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL" ;;
+      lateon)  TIER=lateon;  MODEL_ID=lightonai/LateOn; DEVICE="$([ "$gpu" = 1 ] && [ "$vram" -ge "$LATEON_VRAM" ] && echo cuda || { [ "$mps" = 1 ] && [ "$ram" -ge "$FULL_4B_RAM" ] && echo mps || echo cpu; })"; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL" ;;
       container) TIER=container; MODEL_ID=""; DEVICE=""; ENCODER_SCRIPT="" ;;
       *) warn "unknown ACC_TIER='$forced' — ignoring, falling back to host probe"; forced="" ;;
     esac
@@ -326,6 +397,14 @@ select_tier() {
   if [ "$gpu" = 1 ] && [ "$awq" = 0 ] && [ "$ram" -ge "$FULL_4B_RAM" ]; then
     TIER=4b-full; MODEL_ID=TomoroAI/tomoro-colqwen3-embed-4b; DEVICE=cpu; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
     TIER_REASON="GPU present but no AWQ lane / under VRAM floor, RAM ${ram}MB ≥ ${FULL_4B_RAM} → ColQwen3-4B full bf16 on cpu (degraded)"; return
+  fi
+  # 8.5: small-VRAM cuda — a cuda GPU is PRESENT but every ColQwen rung's VRAM/RAM floor was
+  # missed (e.g. a ~4GB GPU on a low-RAM box). Run LateOn (dim-128, ~0.6GB) ON cuda rather than
+  # dropping a present GPU to a 10–100× slower cpu encode. LateOn loads through plain transformers
+  # on cuda (no AWQ/triton dep), so this rung does NOT require awq. Mirrors src/selector.rs.
+  if [ "$gpu" = 1 ] && [ "$vram" -ge "$LATEON_VRAM" ]; then
+    TIER=lateon; MODEL_ID=lightonai/LateOn; DEVICE=cuda; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
+    TIER_REASON="cuda present, free VRAM ${vram}MB ≥ ${LATEON_VRAM} but under every ColQwen floor → LateOn (text-only) on cuda — small model fits the GPU"; return
   fi
   # 9: LateOn — the light text-only tier, and now the DEFAULT for any host with NO usable
   # accelerator (no cuda GPU, no mps): a new user's first run is fast + small (~0.6GB) on ANY OS
@@ -380,7 +459,7 @@ apply_disk_floor() {
 # ── phase 0 banner + selection ────────────────────────────────────────────────────────
 step "phase 0 — probe host + select embedder tier"
 [ "$DRY_RUN" = "1" ] && say "(dry-run: walking every phase, mutating NOTHING)"
-say "Accreted Intelligence (AccInt) — acc is a memory + tool loop for Claude Code: retrieve scored memory, run sandboxed actions, learn from real outcomes."
+say "Accreted Intelligence (AccInt) — acc is a Work Model + tool loop for Claude Code: retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes."
 say "host: $OS/$ARCH · substrate: $DB"
 [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ] || warn "untested OS '$OS' — proceeding best-effort (Windows: use install.ps1; container as fallback)"
 
@@ -400,7 +479,7 @@ if have acc; then
 fi
 if [ -n "$OLD_ACC_ID" ] || [ -f "$DB" ]; then
   UPDATE_MODE=1
-  say "existing install detected (binary: ${OLD_ACC_ID:-none} · substrate: $([ -f "$DB" ] && echo present || echo none)) — UPDATE mode: your memory at $DB is never touched"
+  say "existing install detected (binary: ${OLD_ACC_ID:-none} · substrate: $([ -f "$DB" ] && echo present || echo none)) — UPDATE mode: your Work Model at $DB is never touched"
 fi
 select_tier
 HF_CACHE="$(hf_cache_dir)"
@@ -500,7 +579,14 @@ else
   phase_result "sysdeps_sandbox" "skipped" "macOS: no bwrap — exec runtimes refuse unsandboxed code (retrieve/solve/outcome still work); use the container for sandboxed exec. Camoufox still keeps the browser host-side."
   if ! have cc; then
     act "install Xcode CLT (C linker)" xcode-select --install || true
-    have cc || warn "macOS: a system dialog is installing the Xcode Command Line Tools — COMPLETE it, then re-run ./install.sh (Apple Silicon installs from the prebuilt binary; Intel/source builds need the CLT)."
+    # xcode-select --install opens an ASYNC GUI dialog and returns immediately — `cc` does
+    # NOT exist until the user finishes that dialog. Proceeding into phase 3 now starts the
+    # cargo build before the linker exists → a cryptic compiler/linker error. HARD-STOP here
+    # (real runs only — dry-run never mutates and must walk every phase to exit 0).
+    if [ "$DRY_RUN" != "1" ] && ! have cc; then
+      phase_result "sysdeps_clt" "failed" "Xcode Command Line Tools not yet installed — a system dialog just opened to install them (the C linker 'cc' is required for the Intel/source build)" "FINISH the Command Line Tools install dialog, then re-run ./install.sh"
+      exit 1
+    fi
   fi
   # macOS ships system libsqlite3 (the Xcode CLT provides the sqlite3.h header) —
   # rusqlite links it, no bundled amalgamation compile. No action needed here.
@@ -902,7 +988,7 @@ elif [ -f "$DB" ]; then
   if "$ACC_BIN" --db "$DB" status >/dev/null 2>&1 && "$ACC_BIN" --db "$DB" commitments >/dev/null 2>&1; then
     phase_result "substrate" "ok" "substrate exists at $DB (opens clean — preserved, never clobbered)"
   else
-    phase_result "substrate" "failed" "substrate at $DB does not open with this binary (schema from a different epoch?)" "update acc to the latest release; your memory is preserved (never modify, move, or delete the db)"; exit 1
+    phase_result "substrate" "failed" "substrate at $DB does not open with this binary (schema from a different epoch?)" "update acc to the latest release; your Work Model is preserved (never modify, move, or delete the db)"; exit 1
   fi
 elif [ "$DRY_RUN" = "1" ]; then
   phase_result "substrate" "would" "create a fresh substrate at $DB" "phase 8: embedder daemon"
@@ -973,6 +1059,17 @@ fi
 step "phase 10 — seed core runtimes (waits for the embedder)"
 if [ "$DRY_RUN" = "1" ]; then
   phase_result "seed" "would" "wait for the embedder to warm, then converge the browser daemon + seed runtime:browser" "phase 11: wiring"
+elif [ "$NONINTERACTIVE" = "1" ]; then
+  # NON-INTERACTIVE (piped / captured / agent shell / ACC_NONINTERACTIVE=1): the blocking
+  # 600s warm-wait below would hide the multi-GB first-run model download inside a synchronous
+  # loop — an agent's Bash-tool TIMEOUT kills the install mid-wait, leaving a half-state and
+  # never printing the next-step guidance. The critical path (binary, .mcp.json, hooks) is
+  # complete or runs in the phases AFTER this one; the embedder warms in the BACKGROUND on its
+  # own. So SKIP the wait entirely, name the background warm + how to check it, and let the
+  # remaining phases (wiring, verify) run so the script EXITS PROMPTLY. (warm stays 0 → the
+  # final verdict prints the honest "warming in background" path, not happy-path try-these.)
+  warm=0; emb_died=0
+  phase_result "seed" "skipped" "non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background — downloading the model, several GB on first run). Check progress in a few minutes with: acc --db $DB doctor" "acc --db $DB browser start (after the model finishes loading)"
 else
   say "waiting for the embedder (first run may download the model — several GB, takes minutes)…"
   warm=0; emb_died=0
@@ -1000,7 +1097,7 @@ except Exception:
     # TERMINAL signature (none of these are transient-download messages) and bail NOW with the
     # real error, routed through the emb_died branch (which prints the actionable fix).
     if [ "$i" -ge 3 ] && [ -f /tmp/acc-embedder.log ] \
-       && grep -Eq 'ImportError|cannot import name|WARMUP FAILED|refusing further respawn|serve failed' /tmp/acc-embedder.log 2>/dev/null; then
+       && grep -Eq 'ImportError|cannot import name|WARMUP FAILED|WORKER CRASH-LOOP|refusing respawn|serve failed' /tmp/acc-embedder.log 2>/dev/null; then
       emb_died=1
       say "[embedder] hard failure detected in /tmp/acc-embedder.log — not waiting out the 10-min clock"
       break
@@ -1041,7 +1138,15 @@ fi
 # is left unchanged; a pre-alwaysLoad entry is upgraded IN PLACE (key added, rest preserved).
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 11 — register acc as an MCP server (.mcp.json)"
-if [ "$DRY_RUN" = "1" ]; then
+if [ "$REPO_IS_CLONE" = "1" ]; then
+  # The clone dir is NOT a project the user works in — wiring .mcp.json there is dead config
+  # (Claude Code launches MCP servers from the dir the user OPENS, never the hidden clone).
+  # The one-Work-Model pivot: Claude Code is now wired GLOBALLY in phase 13 (`acc hosts-sync`
+  # registers the user-scope ~/.claude.json mcpServers.acc on the ONE global db), so NO
+  # per-project step is needed — acc works in every directory the moment phase 13 runs. We
+  # record the honest skip here; phase 13 does the real global wiring.
+  phase_result "mcp_wiring" "skipped" "global install — not wiring .mcp.json into the hidden clone dir ($REPO). Claude Code is wired GLOBALLY in phase 13 (acc hosts-sync → ~/.claude.json, one global Work Model) — no per-project step needed." "phase 13 wires Claude Code globally (acc hosts-sync)"
+elif [ "$DRY_RUN" = "1" ]; then
   if [ -f "$REPO/.mcp.json" ] && python3 -c 'import json,sys;e=json.load(open(sys.argv[1])).get("mcpServers",{}).get("acc");sys.exit(0 if isinstance(e,dict) and e.get("alwaysLoad") is True else 1)' "$REPO/.mcp.json" 2>/dev/null; then
     phase_result "mcp_wiring" "ok" ".mcp.json already registers the acc server with alwaysLoad (would leave unchanged)"
   else
@@ -1093,7 +1198,13 @@ fi
 step "phase 11b — register acc's Claude Code hooks (.claude/settings.json)"
 HOOKS_BIN="$ACC_BIN"
 [ -x "$HOOKS_BIN" ] || HOOKS_BIN="$(command -v acc || true)"
-if [ -z "$HOOKS_BIN" ] || [ ! -x "$HOOKS_BIN" ]; then
+if [ "$REPO_IS_CLONE" = "1" ]; then
+  # Same as phase 11: the hidden clone is not a project the user opens, so wiring its
+  # .claude/settings.json is dead. The one-Work-Model pivot: phase 13 (`acc hosts-sync`) now
+  # writes acc's hooks GLOBALLY into ~/.claude/settings.json (the user settings), so the hooks
+  # fire in every directory — no per-project step. Record the honest skip; phase 13 does it.
+  phase_result "hooks_wiring" "skipped" "global install — not wiring .claude/settings.json into the hidden clone dir ($REPO). Claude Code hooks are wired GLOBALLY in phase 13 (acc hosts-sync → ~/.claude/settings.json) — no per-project step needed." "phase 13 wires Claude Code globally (acc hosts-sync)"
+elif [ -z "$HOOKS_BIN" ] || [ ! -x "$HOOKS_BIN" ]; then
   phase_result "hooks_wiring" "skipped" "acc binary not available yet (dry-run on a fresh host) — run \`acc hooks-wire\` after the real install" "acc hooks-wire"
 elif [ "$DRY_RUN" = "1" ]; then
   # Dry-run: report the verdict WITHOUT writing. On the dev clone (tracked settings.json) the
@@ -1145,16 +1256,20 @@ else
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
-# PHASE 13 — host wiring: `acc hosts-sync` converges every OTHER coding agent installed
-# on this machine (OpenCode, Codex CLI, Cursor) onto the substrate — two-verb MCP +
-# lifecycle recording, ADD-ONLY (an existing acc entry is never rewritten; drift is
-# reported), one .acc-backup-<ts> sibling per actually-changed file. Fail-soft: wiring
-# a sibling host is convenience — it never fails the install. Honors --dry-run (passed
-# through: unified-diff preview, nothing written) and ACC_HOSTS_SYNC=off (no-op inside
-# the binary). Idempotent + re-runnable: install a new agent later and just re-run
-# `acc hosts-sync` (or start a session — the fingerprint trigger re-converges).
+# PHASE 13 — host wiring: `acc hosts-sync` converges EVERY coding agent installed on this
+# machine onto the ONE global substrate — the one-Work-Model pivot. ALL FOUR agents wire
+# GLOBALLY here: Claude Code (user-scope ~/.claude.json mcpServers.acc + ~/.claude/settings.json
+# hooks, on the canonical global db), OpenCode, Codex CLI, Cursor — each two-verb MCP +
+# lifecycle recording, ADD-ONLY (an existing acc entry is never rewritten; drift is reported),
+# one .acc-backup-<ts> sibling per actually-changed file. So a fresh install leaves all agents
+# working on one compounding memory with NO per-project step. Fail-soft: wiring an agent is
+# convenience — it never fails the install. Honors --dry-run (unified-diff preview, nothing
+# written) and ACC_HOSTS_SYNC=off (no-op inside the binary). Idempotent + re-runnable: install
+# a new agent later and just re-run `acc hosts-sync` (or start a session — the fingerprint
+# trigger re-converges). The OPTIONAL isolation override is `acc hosts-sync --project .`
+# (a separate per-project .mcp.json + db for confidential/separated work).
 # ════════════════════════════════════════════════════════════════════════════════════════
-step "phase 13 — wire installed coding agents (acc hosts-sync)"
+step "phase 13 — wire installed coding agents globally (acc hosts-sync)"
 HOSTS_BIN="$ACC_BIN"
 [ -x "$HOSTS_BIN" ] || HOSTS_BIN="$(command -v acc || true)"
 if [ -z "$HOSTS_BIN" ] || [ ! -x "$HOSTS_BIN" ]; then
@@ -1232,14 +1347,14 @@ TELEMETRY_OPTOUT="opt out any time: acc telemetry off  (or set ACC_NO_TELEMETRY=
 
 step "phase 15 — telemetry (anonymous usage events, on by default)"
 if [ "$DRY_RUN" = "1" ]; then
-  phase_result "telemetry" "would" "enable anonymous usage telemetry by default (event names only — never your data, prompts, files, or memory; opt-out: acc telemetry off)"
+  phase_result "telemetry" "would" "enable anonymous usage telemetry by default (event names only — never your data, prompts, files, or Work Model; opt-out: acc telemetry off)"
 elif [ "${ACC_NO_TELEMETRY:-0}" = "1" ]; then
   phase_result "telemetry" "skipped" "ACC_NO_TELEMETRY=1 — telemetry stays off" "$TELEMETRY_LATER"
 elif "$ACC_BIN" telemetry on --key "$TELEMETRY_KEY" --host us >/dev/null 2>&1; then
   # One real event: `telemetry status` runs the app_opened instrumentation, queued through the
   # normal pipeline (no custom capture path here).
   "$ACC_BIN" telemetry status >/dev/null 2>&1 || true
-  phase_result "telemetry" "ok" "anonymous usage telemetry ON (event names only — never your data, prompts, files, or memory). $TELEMETRY_OPTOUT"
+  phase_result "telemetry" "ok" "anonymous usage telemetry ON (event names only — never your data, prompts, files, or Work Model). $TELEMETRY_OPTOUT"
 else
   phase_result "telemetry" "skipped" "could not enable telemetry (non-fatal) — $TELEMETRY_LATER"
 fi
@@ -1252,7 +1367,7 @@ if [ "$JSON" = "1" ]; then
   if [ "$DRY_RUN" = "1" ]; then
     json_phase "verdict" "would" "dry-run complete: all phases walked, nothing mutated; tier=$TIER ($MODEL_ID on $DEVICE)" "run ./install.sh (no --dry-run) to install"
   elif [ "$UPDATE_MODE" = "1" ]; then
-    json_phase "verdict" "ok" "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?}; tier=$TIER ($MODEL_ID on $DEVICE); memory at $DB untouched (schema migrates automatically on first open). Verify with the doctor handoff." "acc --db $DB doctor --json"
+    json_phase "verdict" "ok" "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?}; tier=$TIER ($MODEL_ID on $DEVICE); Work Model at $DB untouched (schema migrates automatically on first open). Verify with the doctor handoff." "acc --db $DB doctor --json"
   else
     json_phase "verdict" "ok" "install complete; tier=$TIER ($MODEL_ID on $DEVICE). Verify with the doctor handoff." "acc --db $DB doctor --json"
   fi
@@ -1266,47 +1381,71 @@ if [ "$DRY_RUN" = "1" ]; then
   say "Run ./install.sh (no --dry-run) to install for real."
   exit 0
 fi
+# NEXT-STEP guidance. The one-Work-Model pivot: phase 13 wired ALL your agents (Claude Code,
+# OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding memory — they work in EVERY directory
+# now, with no per-project step. So the next step is simply: open Claude Code anywhere and talk.
+# The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project onto its own db.
+cc_next_lines() {
+  cat <<CCNEXT
+Next — acc is wired into all your agents (Claude Code, OpenCode, Codex, Cursor) GLOBALLY on ONE
+Work Model that compounds across every task and project. Open Claude Code in ANY directory and just
+say what you want done in plain words ("research X", "draft an email to Y"). On first open it
+shows what is set up and starts learning how you work; nothing leaves your machine without your OK.
+(The two verbs acc_retrieve + acc_act appear after a restart / reload MCP if Claude Code is open.)
+Optional — isolate a project on its OWN separate Work Model (confidential / separated work):
+  cd <your-project> && acc hosts-sync --project .
+The CLI lane works right now with no restart: acc --db $DB retrieve "…"  ·  acc --db $DB ingest …
+CCNEXT
+}
+
 if [ "$UPDATE_MODE" = "1" ]; then
-  ok "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?} — memory at $DB untouched (schema migrates automatically on first open)"
+  ok "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?} — Work Model at $DB untouched (schema migrates automatically on first open)"
   printf '\nClaude Code: if it is open, reload MCP to pick up the new binary.\n'
+elif [ "$NONINTERACTIVE" = "1" ] && [ "${warm:-0}" != "1" ]; then
+  # NON-INTERACTIVE path: we deliberately SKIPPED the blocking warm-wait (phase 10), so the
+  # embedder is warming in the BACKGROUND — this is NOT a failure. Print a clear line and exit
+  # 0 promptly (an agent's captured stdout shows the next step without ever hitting its timeout).
+  ok "acc installed. Your Work Model is warming up — downloading the model in the background (several GB on first run)."
+  cat <<BGWARM
+
+Check progress in a few minutes:
+  acc --db $DB doctor        (expect: embedder OK once the model finishes loading)
+
+Once the embedder is warm, retrieval is live. The CLI works immediately:
+  acc --db $DB ingest hello "acc is live — the Work Model is recording"
+  acc --db $DB retrieve "what acc is"   (works once the embedder reports OK above)
+
+BGWARM
+  cc_next_lines
 elif [ "${warm:-0}" != "1" ]; then
-  # DEGRADED honesty: the memory engine (embedder) never warmed, so retrieve/ingest CANNOT work
-  # yet — do NOT claim "complete" or print happy-path try-these that would just fail. Lead with
-  # the ONE manual step the user must take next. (install is stage 0 of onboarding — name the
-  # next action explicitly whenever manual recovery is required.)
-  warn "acc installed, but the memory engine (embedder) did NOT come up — retrieval + ingest won't work yet."
+  # DEGRADED honesty (interactive run, embedder really failed to warm): retrieve/ingest CANNOT
+  # work yet — do NOT claim "complete" or print happy-path try-these that would just fail. Lead
+  # with the ONE manual step the user must take next. (install is stage 0 of onboarding — name
+  # the next action explicitly whenever manual recovery is required.)
+  warn "acc installed, but the embedder (the encoder daemon) did NOT come up — retrieval + ingest won't work yet."
   cat <<DEGRADED
 
 Fix this FIRST (then acc is fully live):
   1. See why it failed:   tail -n 30 /tmp/acc-embedder.log
   2. Start the embedder:  acc embedder            (first run downloads the model — several GB, minutes)
   3. Re-check health:     acc --db $DB doctor     (expect: embedder OK, verdict OK)
-  4. Still stuck?         acc report              (builds a SANITIZED report — no memory, no secrets, just
+  4. Still stuck?         acc report              (builds a SANITIZED report — no Work Model data, no secrets, just
                           structural health — and prints a pre-filled GitHub issue link to file at
                           github.com/maxbaluev/accreted-intelligence/issues)
 
-Once the embedder is warm, open Claude Code in this directory and just say what you want done in
-plain words — it will show what is set up and learn how you work from real tasks.
 DEGRADED
+  cc_next_lines
 else
-  ok "acc install complete — memory engine warm, all systems live."
+  ok "acc install complete — embedder warm, all systems live."
   cat <<TRY
 
 Try these now:
   1. Check health:        acc --db $DB doctor
-  2. Create one memory:   acc --db $DB ingest hello "acc is installed and memory retrieval works"
-  3. Retrieve it:         acc --db $DB retrieve "memory retrieval"
+  2. Add one entry:       acc --db $DB ingest hello "acc is live — the Work Model is recording"
+  3. Retrieve it:         acc --db $DB retrieve "what acc is"
 
-Next — the real workflow: open Claude Code in THIS directory and just say what you want done in
-plain words ("research X", "draft an email to Y"). On first open it shows what is set up and starts
-learning how you work; nothing leaves your machine without your OK. (.mcp.json exposes the two
-verbs acc_retrieve + acc_act; if Claude Code is already open, reload MCP.)
-
-To use acc in your OWN project, run these in that project's directory:
-  acc hosts-sync --project .     # wires acc into Claude Code there (.mcp.json) + Cursor/Codex
-  acc hooks-wire                 # adds acc's Claude Code lifecycle hooks (briefing + grounding + Stop guard)
-Codex and opencode are already wired globally — they work in every directory.
 TRY
+  cc_next_lines
 fi
 
 # PATH-PERSIST ADVISORY (prebuilt lane): the binary lands in ~/.local/bin and this run exported
@@ -1321,9 +1460,30 @@ if [ -x "$BIN_DIR/acc" ]; then
     [ -f "$rc" ] && grep -qF "$BIN_DIR" "$rc" 2>/dev/null && { in_rc=1; break; }
   done
   if [ "$in_rc" = "0" ]; then
-    printf '\n\033[1m▸ PATH note\033[0m\n'
-    printf '  acc is installed at %s, but that dir is not on your shell PATH for NEW terminals.\n' "$BIN_DIR"
-    printf '  Add this line to your ~/.bashrc (or ~/.profile), then start a new terminal:\n'
-    printf '      \033[1mexport PATH="%s:$PATH"\033[0m\n' "$BIN_DIR"
+    EXPORT_LINE="export PATH=\"$BIN_DIR:\$PATH\""
+    if [ "$PERSIST_PATH" = "1" ]; then
+      # OPT-IN persist: the user explicitly asked us to edit their rc. Append the export to
+      # ~/.bashrc when it exists, else ~/.profile; print exactly what we changed. We NEVER
+      # reach this branch without --persist-path — the default stays advisory-print only.
+      RC_TARGET="$HOME/.bashrc"; [ -f "$RC_TARGET" ] || RC_TARGET="$HOME/.profile"
+      if [ "$DRY_RUN" = "1" ]; then
+        say "WOULD append to $RC_TARGET: $EXPORT_LINE"
+      else
+        {
+          printf '\n# added by acc install.sh --persist-path\n'
+          printf '%s\n' "$EXPORT_LINE"
+        } >> "$RC_TARGET"
+        printf '\n%sPATH persisted%s\n' "$G_STEP" "$C_RESET"
+        printf '  Appended to %s:\n' "$RC_TARGET"
+        printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
+        printf '  Start a new terminal (or `source %s`) to pick it up.\n' "$RC_TARGET"
+      fi
+    else
+      printf '\n%sPATH note%s\n' "$G_STEP" "$C_RESET"
+      printf '  acc is installed at %s, but that dir is not on your shell PATH for NEW terminals.\n' "$BIN_DIR"
+      printf '  Add this line to your ~/.bashrc (or ~/.profile), then start a new terminal:\n'
+      printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
+      printf '  Or re-run with %s--persist-path%s to have the installer append it for you.\n' "$C_BOLD" "$C_RESET"
+    fi
   fi
 fi

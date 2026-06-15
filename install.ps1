@@ -12,6 +12,8 @@ WINDOWS TIER LADDER (full bf16 only -- AWQ/triton has NO windows wheels, never s
 mirrors src/selector.rs select_model_for_os windows branch so phase 0 and `acc pin` AGREE):
   NVIDIA, free VRAM >= 20GB  -> ColQwen3-8B full bf16 on cuda (torch-cuda resolves natively)
   NVIDIA, free VRAM >= 12GB  -> ColQwen3-4B full bf16 on cuda
+  NVIDIA, free VRAM >= 2GB   -> LateOn text-only ON cuda (small ~0.6GB model fits a ~4GB GPU --
+                               runs on the GPU instead of a 10-100x slower cpu encode)
   no usable GPU, RAM >= 2GB  -> LateOn text-only on cpu (light ~0.6GB default; multimodal needs
                                a cuda GPU, or force ACC_TIER=8b-full/4b-full to run it on cpu)
   below                      -> the CONTAINER tier path (docs/INSTALL_CONTAINER.md)
@@ -101,10 +103,23 @@ if ($PSVersionTable.PSVersion.Major -ge 6) { $script:OnWindows = $IsWindows }
 
 $Repo = $PSScriptRoot
 Set-Location $Repo
-if (-not $DbPath) { $DbPath = Join-Path $Repo 'acc.db' }
+# $DbPath default is set AFTER $ConfigHome is computed below: a RELEASE install (non-git)
+# must write the db to the per-OS CANONICAL DATA DIR (%APPDATA%\acc\acc.db) -- the SAME path
+# `db::canonical_db_path` now resolves a bare `acc.db` to outside a git repo. Otherwise bare
+# `acc report`/`acc doctor` (read-only, cannot create) look in the canonical dir while the
+# installer wrote the db under $Repo -- the exact split that hard-FAILED for a real user.
 
 $NonInteractive = $NonInteractive -or ($env:ACC_NONINTERACTIVE -eq '1')
 $NoBrowser = ($env:ACC_NO_BROWSER -eq '1')
+
+# NON-INTERACTIVE also covers a redirected/captured stdout (an agent's shell pipes our output
+# and enforces a command TIMEOUT) -- in that mode the embedder warm-wait below must NOT block,
+# or the agent kills the install mid-wait and never sees the next-step guidance. Mirrors
+# install.sh's `! [ -t 1 ]`. Write-Host -ForegroundColor already strips its colors when
+# redirected, so no extra ANSI guard is needed on the PowerShell side.
+$OutputRedirected = $false
+try { $OutputRedirected = [Console]::IsOutputRedirected } catch { $OutputRedirected = $false }
+$NonInteractive = $NonInteractive -or $OutputRedirected
 
 # Windows config/cache homes (the engine port contract). On a non-windows dry-run host,
 # GetFolderPath maps to the XDG equivalents -- reported, never mutated.
@@ -117,6 +132,12 @@ function Get-WinLocalAppData {
   return [Environment]::GetFolderPath('LocalApplicationData')
 }
 $ConfigHome     = Join-Path (Get-WinAppData) 'acc'        # auth.json + model.json (src/brain.rs contract)
+# The substrate db lives in the CANONICAL DATA DIR ($ConfigHome = %APPDATA%\acc), matching
+# `crate::platform::data_dir().join("acc.db")` -- the exact path `db::canonical_db_path`
+# resolves a bare `acc.db` to for a non-git release install. So the installer, the wired MCP
+# (relative `acc.db` -> same canonical dir off-git), and bare read-only `acc` commands all
+# agree on ONE db. An explicit -DbPath argument still wins (absolute paths pass through).
+if (-not $DbPath) { $DbPath = Join-Path $ConfigHome 'acc.db' }
 $CacheHome      = Join-Path (Get-WinLocalAppData) 'acc'   # caches
 $RunDir         = Join-Path $CacheHome 'run'               # daemon endpoint home
 $EmbPortFile    = Join-Path $RunDir 'embedder.port'
@@ -131,6 +152,25 @@ $BrowserPython  = Join-Path $BrowserScripts 'python.exe'
 $BrowserProfiles = Join-Path $BrowserHome 'profiles'
 
 $EncoderScript  = Join-Path (Join-Path $Repo 'encoders') 'li_encode.py'   # the ONE windows lane (PEP508 markers resolve torch per platform)
+
+# RepoIsClone -- is $Repo the HIDDEN bootstrap clone ($env:LOCALAPPDATA\acc\src, the dir the
+# one-liner clones into and runs from), rather than a project the user opens? The bootstrap
+# clones to $env:ACC_SRC (default $env:LOCALAPPDATA\acc\src) and runs this script from there,
+# so $Repo == that path on the public one-liner path. When $Repo is the clone we must NOT wire
+# Claude Code PROJECT files (.mcp.json / .claude\settings.json) into it -- the user never opens
+# Claude Code in the clone, so that wiring is dead. The one-Work-Model pivot makes those project
+# files unnecessary anyway: phase 14 (`acc hosts-sync`) wires Claude Code GLOBALLY (~/.claude.json
+# + ~/.claude/settings.json on the one global db), so acc works in every directory. A real dev
+# clone the user works in is NOT under LocalAppData, so this stays $false there. Mirrors
+# install.sh's REPO_IS_CLONE.
+$CloneDir = if ($env:ACC_SRC) { $env:ACC_SRC } else { Join-Path (Get-WinLocalAppData) 'acc\src' }
+$RepoIsClone = $false
+try {
+  $rp = (Resolve-Path -LiteralPath $Repo -ErrorAction SilentlyContinue).Path
+  $cp = (Resolve-Path -LiteralPath $CloneDir -ErrorAction SilentlyContinue).Path
+  if ($rp -and $cp) { $RepoIsClone = ($rp.TrimEnd('\','/') -ieq $cp.TrimEnd('\','/')) }
+  elseif ($Repo) { $RepoIsClone = ($Repo.TrimEnd('\','/') -ieq $CloneDir.TrimEnd('\','/')) }
+} catch { $RepoIsClone = $false }
 
 $EnginePendingNote = 'engine windows lane pending -- the acc windows engine port is in flight (src embedder/daemon lanes); this phase activates once cargo build --release succeeds on windows'
 
@@ -219,6 +259,10 @@ function Invoke-NativeChatter([string]$Exe, [string[]]$Argv) {
 # disagreed before: phase 0 used 10/5GB and prefetched an 8B the Rust pin would never select).
 $CUDA_8B_VRAM = 20000; $CUDA_4B_VRAM = 12000
 $LATEON_RAM   = 2000
+# Small-VRAM cuda floor (MB): LateOn (dim-128, ~0.6GB) runs ON cuda when a GPU is present but
+# below the full-bf16 floors. MIRROR src/selector.rs LATEON_MIN_VRAM_MB so phase 0 and the Rust
+# `acc pin` AGREE -- a ~4GB GPU (the real 3938MiB install) runs the small model on cuda, not cpu.
+$LATEON_VRAM  = 2000
 
 # DISK FLOOR (MB) -- model weights land in the HF cache; the pick's expected download
 # (static sizes mirrored from encoders/prefetch.py STATIC_EXPECTED_BYTES) + headroom
@@ -349,6 +393,13 @@ function Select-Tier {
     $script:Tier = '4b-full'; $script:ModelId = 'TomoroAI/tomoro-colqwen3-embed-4b'; $script:Device = 'cuda'
     $script:TierReason = "GPU ${vram}MB free >= ${CUDA_4B_VRAM} (< ${CUDA_8B_VRAM} for 8B) -> ColQwen3-4B full bf16 on cuda"; return
   }
+  # 2.5: small-VRAM cuda -- a GPU is present but under the full-bf16 floors (e.g. a ~4GB laptop
+  # GPU: the real 3938MiB install). Still run LateOn (dim-128, ~0.6GB) ON cuda rather than dropping
+  # a present GPU to a 10-100x slower cpu encode. Mirrors src/selector.rs select_model_for_os.
+  if (($gpu -eq 1) -and ($vram -ge $LATEON_VRAM)) {
+    $script:Tier = 'lateon'; $script:ModelId = 'lightonai/LateOn'; $script:Device = 'cuda'
+    $script:TierReason = "GPU ${vram}MB free >= ${LATEON_VRAM} (< ${CUDA_4B_VRAM} for 4B full) -> LateOn (text-only) on cuda -- small model fits the GPU"; return
+  }
   # 3: LateOn -- the light text-only DEFAULT for any windows host with NO usable GPU. Windows has
   # no AWQ/triton lane AND no fresh cpu-ColQwen lane in the selector, so a no-GPU pick is LateOn
   # (matches src/selector.rs select_model_for_os windows branch + the cross-OS new-user default:
@@ -402,7 +453,7 @@ function Apply-DiskFloor {
 # -- phase 0 banner + selection -----------------------------------------------------------
 Step 'phase 0 -- probe host + select embedder tier'
 if ($DryRun) { Say '(dry-run: walking every phase, mutating NOTHING)' }
-Say 'acc is a memory + tool loop for Claude Code: retrieve scored memory, run sandboxed actions, learn from real outcomes.'
+Say 'acc is a Work Model + tool loop for Claude Code: retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes.'
 $OsBuild = Get-OsBuild
 $Arch = Get-Arch
 Say ("host: $OsBuild / $Arch - substrate: $DbPath")
@@ -765,6 +816,78 @@ if ($IdMatch) {
 }
 
 # =========================================================================================
+# PHASE 3b -- plugins on disk (mirrors install.sh phase 3b; solved:a78f0ba601287cad). A
+# binary-only release ships ONLY the `acc` binary -- no plugins/ tree. Without this,
+# detect_repo_root falls back to the build-host path and the OpenCode/Codex convergers write
+# a DEAD plugin/notify path into the user's configs (silently breaking OpenCode plugin-load +
+# Codex notify). Fix: provision plugins/ into the per-user data dir (%APPDATA%\acc -- the same
+# dir platform::data_dir() resolves to on Windows and detect_repo_root probes), then export
+# ACC_REPO_ROOT to it so the hosts-sync phase wires the REAL on-disk path. Source: copy the
+# local plugins/ when present (install-from-clone); else FETCH from the public raw URLs
+# (mirrors the prebuilt fetch). Idempotent; fail-soft (hosts-sync skips the field rather than
+# writing a dead path).
+# =========================================================================================
+Step 'phase 3b -- provision plugins/ to the per-user data dir (%APPDATA%\acc)'
+$PluginsDest    = Join-Path $ConfigHome 'plugins'
+$PluginsMarkerA = Join-Path $PluginsDest 'opencode\acc.ts'
+$PluginsMarkerB = Join-Path $PluginsDest 'codex\notify-acc.sh'
+$PluginsFiles   = @(
+  'opencode/acc.ts', 'opencode/opencode.json.snippet', 'opencode/README.md',
+  'codex/notify-acc.sh', 'codex/hooks.json', 'codex/config.toml.snippet', 'codex/README.md',
+  'cursor/rules-acc.mdc', 'cursor/hooks.json', 'cursor/mcp.json', 'cursor/README.md', 'README.md'
+)
+$PluginsRawBase = 'https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/plugins'
+$LocalPlugins   = Join-Path $Repo 'plugins'
+$LocalMarker    = Join-Path $LocalPlugins 'opencode\acc.ts'
+if ($DryRun) {
+  if (Test-Path $LocalMarker) {
+    Say "WOULD: copy $LocalPlugins -> $PluginsDest (local tree present)"
+  } else {
+    Say "WOULD: fetch plugins/ from $PluginsRawBase -> $PluginsDest (no local tree -- bare-binary path)"
+  }
+  Emit-Phase 'plugins' 'would' "provision plugins/ into $PluginsDest (probed by detect_repo_root; convergers wire the REAL path)" 'phase 4: encoder env'
+} else {
+  $PluginsOk = $false
+  if ((Test-Path $PluginsMarkerA) -and (Test-Path $PluginsMarkerB)) {
+    Say "plugins already provisioned at $PluginsDest"
+    $PluginsOk = $true
+  } elseif (Test-Path $LocalMarker) {
+    # (a) install-from-clone: copy the local plugins/ tree verbatim.
+    try {
+      New-Item -ItemType Directory -Force -Path $PluginsDest | Out-Null
+      Copy-Item -Path (Join-Path $LocalPlugins '*') -Destination $PluginsDest -Recurse -Force
+      Ok "plugins copied from $LocalPlugins -> $PluginsDest"
+      $PluginsOk = $true
+    } catch { Warn "copy from $LocalPlugins failed: $_" }
+  } else {
+    # (b) bare-binary path: FETCH the tree from the public raw URLs (Invoke-WebRequest is
+    # built in -- no curl dependency). Fail-soft: a partial fetch leaves the markers absent
+    # and hosts-sync then skips the plugin/notify field (never a dead path).
+    $got = 0
+    foreach ($f in $PluginsFiles) {
+      $dest = Join-Path $PluginsDest ($f -replace '/', '\')
+      New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+      try {
+        Invoke-WebRequest -UseBasicParsing -Uri "$PluginsRawBase/$f" -OutFile $dest -TimeoutSec 60
+        $got++
+      } catch { }
+    }
+    if ((Test-Path $PluginsMarkerA) -and (Test-Path $PluginsMarkerB)) {
+      Ok "plugins fetched ($got files) from $PluginsRawBase -> $PluginsDest"
+      $PluginsOk = $true
+    } else {
+      Warn "plugins fetch incomplete (markers missing) -- hosts-sync will skip plugin/notify wiring (no dead path)"
+    }
+  }
+  if ($PluginsOk) {
+    $env:ACC_REPO_ROOT = $ConfigHome
+    Emit-Phase 'plugins' 'ok' "plugins at $PluginsDest; ACC_REPO_ROOT -> $ConfigHome (convergers wire the real path)" 'phase 4: encoder env'
+  } else {
+    Emit-Phase 'plugins' 'skipped' 'no local plugins/ and fetch failed -- hosts-sync skips plugin/notify wiring (no dead path written)' 'phase 4: encoder env'
+  }
+}
+
+# =========================================================================================
 # PHASE 4 -- encoder env: materialize the tier's Python deps with `uv sync --script`
 # (PEP-723 inline deps; PEP508 markers resolve torch/torch-cuda natively per platform --
 # the SAME encoders/li_encode.py lane install.sh uses for full/LateOn tiers). Pays the
@@ -1014,7 +1137,17 @@ if (Test-EmbedderWarm) {
     if ($alive) {
       Emit-Phase 'embedder_daemon' 'ok' ("embedder starting -- model loads in background (first run downloads it). Log: $EmbLogOut") 'phase 10: browser'
     } else {
-      Emit-Phase 'embedder_daemon' 'skipped' ("daemon exited immediately -- the windows embedder lane may not be live in this build yet (engine port in flight). Log: $EmbLogErr") 'check the log; re-run after the engine windows lane lands'
+      # The native-windows embedder engine IS live in this build (platform/windows.rs +
+      # local_ipc.rs TCP-loopback lane). A daemon that exits within 2s is a REAL failure
+      # (model load crash, missing CUDA/driver, import error) -- NOT an unfinished lane.
+      # Surface it as a failure with the error log + concrete recovery, never a soft hedge.
+      $errTail = ''
+      if (Test-Path $EmbLogErr) {
+        try { $errTail = ((Get-Content $EmbLogErr -Tail 3 -ErrorAction SilentlyContinue) -join ' | ') } catch { $errTail = '' }
+      }
+      $det = "embedder daemon exited within 2s -- a real start failure (model load / CUDA-driver / import error), not a pending lane. Log: $EmbLogErr"
+      if ($errTail) { $det = "$det -- last: $errTail" }
+      Emit-Phase 'embedder_daemon' 'failed' $det ("read the error above + $EmbLogErr, fix the cause, then: acc embedder  (or use the container: docs/INSTALL_CONTAINER.md)")
     }
   } else {
     Emit-Phase 'embedder_daemon' 'skipped' 'could not start the embedder daemon' ("manually: acc embedder (log: $EmbLogOut)")
@@ -1086,12 +1219,56 @@ if ($DryRun) {
   Emit-Phase 'seed' 'would' 'wait for the embedder to warm, then converge the Camoufox browser daemon + seed runtime:browser' 'phase 12: wiring'
 } elseif (-not $BinaryAvailable) {
   Emit-Phase 'seed' 'skipped' ("seeding requires the acc binary + warm embedder -- $EnginePendingNote") 'after the port lands: re-run .\install.ps1'
+} elseif ($NonInteractive) {
+  # NON-INTERACTIVE (output redirected / captured / -NonInteractive / ACC_NONINTERACTIVE=1):
+  # the 600s warm-wait below hides the multi-GB first-run model download inside a synchronous
+  # loop -- an agent's command TIMEOUT kills the install mid-wait, leaving a half-state and
+  # never printing the next step. The critical path (binary, .mcp.json, hooks) runs in the
+  # phases AFTER this one; the embedder warms in the BACKGROUND on its own. SKIP the wait, name
+  # the background warm + how to check it, and let the remaining phases run so the script exits
+  # promptly. ($warm stays $false -> the final block prints the honest "warming in background".)
+  $warm = $false
+  $embDied = $false
+  Emit-Phase 'seed' 'skipped' ("non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background -- downloading the model, several GB on first run). Check progress in a few minutes with: acc --db $DbPath doctor") ("acc --db $DbPath browser start (after the model finishes loading)")
 } else {
   Say 'waiting for the embedder (first run may download the model -- several GB, takes minutes)...'
   $warm = $false
+  $embDied = $false
   for ($i = 0; $i -lt 600; $i++) {
     if (Test-EmbedderWarm) { $warm = $true; break }
-    if ((($i % 10) -eq 0) -and ($i -gt 0)) { Say ("[embedder wait ${i}s/600s] not ready yet -- model may still be downloading/warming (log: $EmbLogOut)") }
+    # FAIL-FAST BAIL (a): the daemon process EXITED. A crash-on-start (model load failure,
+    # missing CUDA/driver, import error) would otherwise burn the full 600s printing
+    # 'may still be downloading' then a bare timeout. Mirror install.sh:990 -- if the
+    # embedder process we started is gone, the daemon EXITED; stop waiting now.
+    if (($null -ne $script:EmbProc) -and ($script:EmbProc.HasExited)) {
+      $embDied = $true
+      Say '[embedder] daemon process exited -- see the log'
+      break
+    }
+    # FAIL-FAST BAIL (b): permanent-failure scan. The daemon is a SUPERVISOR that respawns a
+    # crash-looping worker, so the HasExited check above never fires on a hard ImportError /
+    # bad-model load -- the worker dies, the daemon lives, and the loop burns the full 600s.
+    # Scan the embedder log for a TERMINAL signature (none are transient-download messages)
+    # and bail NOW. Mirrors install.sh:1002-1007 (same signature set: src subproc_encoder.rs:505
+    # emits 'WORKER CRASH-LOOP -- ... refusing respawns').
+    if ($i -ge 3) {
+      $sig = 'ImportError|cannot import name|WARMUP FAILED|serve failed|WORKER CRASH-LOOP|refusing respawn'
+      foreach ($log in @($EmbLogErr, $EmbLogOut)) {
+        if ($embDied) { break }
+        if (Test-Path $log) {
+          try {
+            $hit = Select-String -Path $log -Pattern $sig -Quiet -ErrorAction SilentlyContinue
+          } catch { $hit = $false }
+          if ($hit) {
+            $embDied = $true
+            Say "[embedder] hard failure detected in $log -- not waiting out the 10-min clock"
+            break
+          }
+        }
+      }
+      if ($embDied) { break }
+    }
+    if ((($i % 10) -eq 0) -and ($i -gt 0)) { Say ("[embedder wait ${i}s/600s] model loading into memory/VRAM (weights pre-fetched; first load takes a moment) (log: $EmbLogOut)") }
     Start-Sleep -Seconds 1
   }
   if ($warm) {
@@ -1107,7 +1284,22 @@ if ($DryRun) {
       Emit-Phase 'seed' 'ok' 'embedder warm (browser skipped)' 'phase 12: wiring'
     }
   } else {
-    Emit-Phase 'seed' 'skipped' 'embedder did not warm within 10min (the windows embedder lane may still be pending -- check the log)' ("later: re-run .\install.ps1 (log: $EmbLogOut)")
+    # On EITHER an early exit (the daemon/worker crashed) OR the 600s timeout, tail the
+    # embedder logs so the real CUDA/driver/import error surfaces instead of a bare
+    # 'did not warm'. The native-windows embedder engine IS live in this build, so a
+    # non-warm embedder is a REAL failure -- give the actual error + concrete recovery,
+    # never a 'lane may be pending' hedge. Mirrors install.sh:1019-1033.
+    foreach ($log in @($EmbLogErr, $EmbLogOut)) {
+      if (Test-Path $log) {
+        Say ("-- last lines of $log --")
+        try { (Get-Content $log -Tail 20 -ErrorAction SilentlyContinue) | ForEach-Object { Say ("  $_") } } catch { }
+      }
+    }
+    if ($embDied) {
+      Emit-Phase 'seed' 'failed' ("embedder daemon/worker crashed before warming (see the log tail above + $EmbLogErr -- likely model-load / CUDA-driver / import error)") ("fix the error above, then: acc embedder  ;  acc --db $DbPath browser start  (or use the container: docs/INSTALL_CONTAINER.md)")
+    } else {
+      Emit-Phase 'seed' 'failed' ("embedder did not warm within 10min (see the log tail above + $EmbLogOut) -- a real stall, not a pending lane") ("inspect the log; once it loads run: acc --db $DbPath browser start  (or use the container: docs/INSTALL_CONTAINER.md)")
+    }
   }
 }
 
@@ -1131,7 +1323,14 @@ function Test-McpHasAccAlwaysLoad {
     return [bool](($e.PSObject.Properties['alwaysLoad']) -and ($e.alwaysLoad -eq $true))
   } catch { return $false }
 }
-if ($DryRun) {
+if ($RepoIsClone) {
+  # The clone dir is NOT a project the user opens -- wiring .mcp.json there is dead config
+  # (Claude Code launches MCP servers from the dir the user OPENS, never the hidden clone).
+  # The one-Work-Model pivot: Claude Code is wired GLOBALLY in phase 14 (`acc hosts-sync`
+  # registers ~/.claude.json mcpServers.acc on the ONE global db), so NO per-project step is
+  # needed -- acc works in every directory the moment phase 14 runs. Honest skip here.
+  Emit-Phase 'mcp_wiring' 'skipped' ("global install -- not wiring .mcp.json into the hidden clone dir ($Repo). Claude Code is wired GLOBALLY in phase 14 (acc hosts-sync -> ~/.claude.json, one global Work Model) -- no per-project step needed.") 'phase 14 wires Claude Code globally (acc hosts-sync)'
+} elseif ($DryRun) {
   if (Test-McpHasAccAlwaysLoad) {
     Emit-Phase 'mcp_wiring' 'ok' '.mcp.json already registers the acc server with alwaysLoad (would leave unchanged)'
   } else {
@@ -1189,7 +1388,13 @@ if ($DryRun) {
 # =========================================================================================
 Step 'phase 13 -- register acc''s Claude Code hooks (.claude/settings.json)'
 $SettingsPath = Join-Path (Join-Path $Repo '.claude') 'settings.json'
-if (-not $BinaryAvailable) {
+if ($RepoIsClone) {
+  # Same as phase 12: the hidden clone is not a project the user opens, so wiring its
+  # .claude\settings.json is dead. The one-Work-Model pivot: phase 14 (`acc hosts-sync`) now
+  # writes acc's hooks GLOBALLY into ~/.claude/settings.json (the user settings), so the hooks
+  # fire in every directory -- no per-project step. Honest skip; phase 14 does it.
+  Emit-Phase 'hooks_wiring' 'skipped' ("global install -- not wiring .claude\settings.json into the hidden clone dir ($Repo). Claude Code hooks are wired GLOBALLY in phase 14 (acc hosts-sync -> ~/.claude/settings.json) -- no per-project step needed.") 'phase 14 wires Claude Code globally (acc hosts-sync)'
+} elseif (-not $BinaryAvailable) {
   Emit-Phase 'hooks_wiring' 'skipped' ("hooks-wire requires the acc binary -- $EnginePendingNote") 'after the engine port lands: acc hooks-wire'
 } elseif ($DryRun) {
   # Dry-run: report the would-action WITHOUT writing. On the dev clone (tracked settings.json)
@@ -1222,14 +1427,18 @@ if (-not $BinaryAvailable) {
 }
 
 # =========================================================================================
-# PHASE 14 -- host wiring: `acc hosts-sync` converges every OTHER coding agent installed on
-# this machine (OpenCode, Codex CLI, Cursor) onto the substrate -- two-verb MCP + lifecycle
-# recording, ADD-ONLY (an existing acc entry is never rewritten), one backup per changed
-# file. Fail-soft: wiring a sibling host is convenience -- it NEVER fails the install. Honors
-# -DryRun (passed through: preview, nothing written) and ACC_HOSTS_SYNC=off (escape -> skip).
-# Mirror of install.sh phase 13. Needs the built binary -- skips with the pending note until then.
+# PHASE 14 -- host wiring: `acc hosts-sync` converges EVERY coding agent installed on this
+# machine onto the ONE global substrate -- the one-Work-Model pivot. ALL FOUR agents wire
+# GLOBALLY here: Claude Code (user-scope ~/.claude.json mcpServers.acc + ~/.claude/settings.json
+# hooks, on the canonical global db), OpenCode, Codex CLI, Cursor -- each two-verb MCP +
+# lifecycle recording, ADD-ONLY (an existing acc entry is never rewritten), one backup per
+# changed file. A fresh install leaves all agents on one compounding memory with NO per-project
+# step. Fail-soft: wiring an agent is convenience -- it NEVER fails the install. Honors -DryRun
+# (preview, nothing written) and ACC_HOSTS_SYNC=off (escape -> skip). The optional isolation
+# override is `acc hosts-sync --project .`. Mirror of install.sh phase 13. Needs the built
+# binary -- skips with the pending note until then.
 # =========================================================================================
-Step 'phase 14 -- wire installed coding agents (acc hosts-sync)'
+Step 'phase 14 -- wire installed coding agents globally (acc hosts-sync)'
 if (-not $BinaryAvailable) {
   Emit-Phase 'hosts_sync' 'skipped' ("hosts-sync requires the acc binary -- $EnginePendingNote") 'after the engine port lands: acc hosts-sync'
 } elseif ($env:ACC_HOSTS_SYNC -eq 'off') {
@@ -1273,7 +1482,7 @@ try {
 
 Step 'phase 15 -- telemetry (anonymous usage events, on by default)'
 if ($DryRun) {
-  Emit-Phase 'telemetry' 'would' 'enable anonymous usage telemetry by default (event names only -- never your data, prompts, files, or memory; opt-out: acc telemetry off)' 'phase 16: verify'
+  Emit-Phase 'telemetry' 'would' 'enable anonymous usage telemetry by default (event names only -- never your data, prompts, files, or Work Model; opt-out: acc telemetry off)' 'phase 16: verify'
 } elseif ($env:ACC_NO_TELEMETRY -eq '1') {
   Emit-Phase 'telemetry' 'skipped' 'ACC_NO_TELEMETRY=1 -- telemetry stays off' 'enable later: acc telemetry on --key <your key> --host us'
 } elseif (-not $TelemetryKey) {
@@ -1285,7 +1494,7 @@ if ($DryRun) {
       # One real event: `telemetry status` runs the app_opened instrumentation, queued through
       # the normal pipeline (no custom capture path here).
       & $Acc telemetry status *> $null
-      Emit-Phase 'telemetry' 'ok' 'anonymous usage telemetry ON (event names only -- never your data, prompts, files, or memory). opt out: acc telemetry off' 'phase 16: verify'
+      Emit-Phase 'telemetry' 'ok' 'anonymous usage telemetry ON (event names only -- never your data, prompts, files, or Work Model). opt out: acc telemetry off' 'phase 16: verify'
     } else {
       Emit-Phase 'telemetry' 'skipped' 'could not enable telemetry (non-fatal)' 'enable later: acc telemetry on --key <your key> --host us'
     }
@@ -1350,19 +1559,55 @@ if ($script:AnyFailed) {
   Say 'Re-run .\install.ps1 once the acc windows engine lane lands; each phase resumes from its postcondition.'
   exit 1
 }
+
+# NEXT-STEP guidance. The one-Work-Model pivot: phase 14 wired ALL agents (Claude Code,
+# OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding memory -- they work in EVERY
+# directory now, no per-project step. So the next step is simply: open Claude Code anywhere
+# and talk. The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project
+# onto its own db. Mirrors install.sh's cc_next_lines.
+$CcNext = @"
+acc is wired into all your agents (Claude Code, OpenCode, Codex, Cursor) GLOBALLY on ONE Work Model
+that compounds across every task and project. Open Claude Code in ANY directory and just say what
+you want done in plain words. The two verbs (acc_retrieve + acc_act) appear after a restart / reload
+MCP if Claude Code is open.
+Optional -- isolate a project on its OWN separate Work Model (confidential / separated work):
+  cd <your-project>; acc hosts-sync --project .
+The CLI lane works right now with no restart: acc --db $DbPath retrieve "..."  ;  acc --db $DbPath ingest ...
+"@
+
+if ($NonInteractive -and (-not $warm)) {
+  # NON-INTERACTIVE path: we deliberately SKIPPED the blocking warm-wait (phase 11), so the
+  # embedder is warming in the BACKGROUND -- NOT a failure. Print a clear line and exit 0
+  # promptly (a captured stdout shows the next step without ever hitting the agent's timeout).
+  Ok 'acc installed. Your Work Model is warming up -- downloading the model in the background (several GB on first run).'
+  Write-Chatter @"
+
+Check progress in a few minutes:
+  acc --db $DbPath doctor        (expect: embedder OK once the model finishes loading)
+
+Once the embedder is warm, retrieval is live. The CLI works immediately:
+  acc --db $DbPath ingest hello "acc is live -- the Work Model is recording"
+  acc --db $DbPath retrieve "what acc is"   (works once the embedder reports OK above)
+
+$CcNext
+
+There is no login, credential, OAuth, or API key -- ever; the interactive session IS the brain.
+"@
+  exit 0
+}
+
 Ok 'acc install complete.'
 Write-Chatter @"
 
 Try these now:
   1. Check health:        acc --db $DbPath doctor
-  2. Create one memory:   acc --db $DbPath ingest hello "acc is installed and memory retrieval works"
-  3. Retrieve it:         acc --db $DbPath retrieve "memory retrieval"
+  2. Add one entry:       acc --db $DbPath ingest hello "acc is live -- the Work Model is recording"
+  3. Retrieve it:         acc --db $DbPath retrieve "what acc is"
 
-Claude Code: open this directory -- .mcp.json exposes the two verbs (acc_retrieve + acc_act).
-If Claude Code is already open, reload MCP.
+$CcNext
+
+Brain-backed solve works by opening your interactive agent (Claude Code / Codex / OpenCode)
+on this project -- the MCP picks it up; the interactive session IS the brain. Work Model
+retrieval already works. There is no login, credential, OAuth, or API key -- ever.
 "@
-$AuthPath = Join-Path $ConfigHome 'auth.json'
-if (-not (Test-Path $AuthPath)) {
-  Warn 'brain auth not detected: memory retrieval works now; for brain-backed solve run: acc brain auth login'
-}
 exit 0
