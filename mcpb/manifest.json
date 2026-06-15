@@ -1,0 +1,73 @@
+{
+  "manifest_version": "0.3",
+  "name": "accint",
+  "display_name": "AccInt",
+  "version": "0.1.1",
+  "description": "Local Work Model MCP server for agent work that learns from real outcomes.",
+  "long_description": "AccInt exposes a local Work Model to MCP clients. Agents use acc_retrieve to read the scored substrate and acc_act to solve, execute bounded local work, register reusable runtimes, and close outcomes. The database stays on the user's machine; this bundle ships the local acc binary only, not any acc.db substrate.",
+  "author": {
+    "name": "Max Baluev",
+    "url": "https://github.com/maxbaluev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxbaluev/accreted-intelligence.git"
+  },
+  "homepage": "https://accint.xyz",
+  "documentation": "https://github.com/maxbaluev/accreted-intelligence#readme",
+  "support": "https://github.com/maxbaluev/accreted-intelligence/issues",
+  "server": {
+    "type": "binary",
+    "entry_point": "server/acc",
+    "mcp_config": {
+      "command": "${__dirname}/server/acc",
+      "args": [
+        "--db",
+        "${user_config.db_path}",
+        "mcp"
+      ],
+      "env": {},
+      "platform_overrides": {
+        "win32": {
+          "command": "${__dirname}/server/acc.exe"
+        }
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "acc_retrieve",
+      "description": "Retrieve scored Work Model context by late interaction."
+    },
+    {
+      "name": "acc_act",
+      "description": "Run a Work Model action such as solve, continue, exec, register, or outcome."
+    }
+  ],
+  "tools_generated": false,
+  "keywords": [
+    "mcp",
+    "agent-memory",
+    "ai-agents",
+    "work-model",
+    "local-first",
+    "rust"
+  ],
+  "license": "LicenseRef-AccInt-EULA",
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
+  },
+  "user_config": {
+    "db_path": {
+      "type": "file",
+      "title": "AccInt database",
+      "description": "Path to the local AccInt SQLite substrate (acc.db). Use an existing acc.db or create one with the installer first.",
+      "required": true,
+      "default": "${HOME}/acc.db"
+    }
+  }
+}

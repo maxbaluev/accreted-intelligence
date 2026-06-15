@@ -5,5 +5,8 @@
 # hosts-sync writes one of these beside any file it changes
 *.acc-backup-*
 
+# Local package outputs; release assets are attached to GitHub Releases instead.
+dist/
+
 # OS / editor noise
 .DS_Store

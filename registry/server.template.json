@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.maxbaluev/accint",
+  "title": "AccInt",
+  "description": "Local Work Model MCP server for agent work that learns from real outcomes.",
+  "version": "0.1.1",
+  "websiteUrl": "https://accint.xyz",
+  "repository": {
+    "url": "https://github.com/maxbaluev/accreted-intelligence",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.1/acc-mcp-v0.1.1-REPLACE_WITH_TARGET.mcpb",
+      "fileSha256": "REPLACE_WITH_64_HEX_SHA256",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "status": "template",
+      "note": "Copy to server.json only after replacing the MCPB asset URL target and fileSha256."
+    }
+  }
+}
