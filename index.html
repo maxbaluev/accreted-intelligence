@@ -164,6 +164,27 @@ display:flex;gap:8px;align-items:center;}
 .ledger-type .car{display:inline-block;width:7px;height:14px;background:var(--ink);
 animation:blink 1.1s steps(1) infinite;}
 .ledger-foot{padding:8px 18px 4px;font-family:var(--mono);font-size:10.5px;color:var(--faint);}
+/* ---------- hero · your Work Model (predict → reality → learn) ---------- */
+.wm{border:1px solid var(--line2);background:var(--bg2);}
+.wm-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 16px;border-bottom:2px solid var(--line2);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+.wm-head .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:8px;vertical-align:middle;}
+.wm-head .wm-cyc{color:var(--steel);letter-spacing:.08em;text-transform:none;font-size:10px;}
+.wm-steps{list-style:none;margin:0;padding:0;}
+.wm-step{display:grid;grid-template-columns:24px 1fr;grid-template-rows:auto auto;column-gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);}
+.wm-step:last-child{border-bottom:none;}
+.wm-step .wi{grid-column:1;grid-row:1 / span 2;align-self:center;font-family:var(--mono);font-size:15px;line-height:1;text-align:center;color:var(--dim);}
+.wm-step .wb{grid-column:2;grid-row:1;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink);text-transform:uppercase;}
+.wm-step .wd{grid-column:2;grid-row:2;font-family:var(--mono);font-size:10.5px;line-height:1.45;color:var(--faint);margin-top:3px;}
+.wm-step.predict .wi,.wm-step.predict .wb{color:var(--steel);}
+.wm-step.learn{background:var(--orange-dim);}
+.wm-step.learn .wi,.wm-step.learn .wb{color:var(--orange);}
+.wm-foot{padding:11px 16px 12px;font-family:var(--mono);font-size:10.5px;line-height:1.55;color:var(--faint);letter-spacing:.02em;border-top:1px solid var(--line2);}
+.wm-foot b{color:var(--dim);font-weight:500;}
+body.anim .wm-step{animation:riserow .5s both;}
+body.anim .wm-step:nth-child(1){animation-delay:.85s}
+body.anim .wm-step:nth-child(2){animation-delay:1.2s}
+body.anim .wm-step:nth-child(3){animation-delay:1.6s}
+body.anim .wm-step:nth-child(4){animation-delay:2.0s}
 #faq .row{grid-template-columns:1px minmax(82px,96px) 1fr auto;}
 #faq .row .verb{white-space:normal;}
 @media(max-width:620px){
@@ -565,8 +586,8 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
       <div class="kicker">Runs on your hardware<span class="k-op"><span class="sep">·</span>works with Claude, Codex &amp; Cursor</span><span class="sep">·</span>open install</div>
       <h1><span>Make your AI work</span> <span><em>compound</em>.</span></h1>
       <p class="dek">Offload the task. <b>Never the learning.</b></p>
-      <p class="lede">Hand work to the AI agents you already run. AccInt keeps <b>what actually worked</b>, checked against your own results, and starts the next run from there. The same job gets <b>better and cheaper</b> every time it runs. The learning is <b>yours</b>: swap the model, keep the company veteran. Your work turns into <b>capital you own</b>, on a machine you control.</p>
-      <p class="ruleline">the agent acts <span class="arr" aria-hidden="true">→</span> you see a receipt <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> next run starts from what worked</p>
+      <p class="lede">Hand work to the AI agents you already run. AccInt builds a <b>Work Model of your business</b> — it learns what actually worked, checked against your own results and <b>shaped by how you decide</b>, and <b>predicts the better path</b> before the next run starts. The same job gets faster, safer, and <b>genuinely better</b> every time it runs. The learning is <b>yours</b>: swap the model, keep the company veteran. Your work turns into <b>capital you own</b>, on a machine you control.</p>
+      <p class="ruleline">it predicts the better path <span class="arr" aria-hidden="true">→</span> acts in your accounts, receipted <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> the Work Model sharpens</p>
       <div class="install" aria-label="Install AccInt">
         <div class="os-tabs" role="tablist" aria-label="Choose your platform">
           <button class="os-tab" role="tab" data-os="nix" aria-selected="true">macOS · Linux</button>
@@ -590,27 +611,16 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     </div>
 
     <div>
-    <p class="led-cap">a commitment settling — Tuesday, 9:14:</p>
-    <div class="ledger" aria-label="Example operating session — Tuesday, 9:14, a real agent run with commitments, receipts, approval, and outcome credit">
-      <div class="ledger-head"><span><span class="dot"></span>SESSION LEDGER</span><span>operator: accint</span></div>
-      <div class="ledger-tabs" id="ledtabs">
-        <button class="ltab" aria-pressed="true" data-s="recruiting">agency recruiting</button>
-        <button class="ltab" aria-pressed="false" data-s="clientops">client retainers</button>
-        <button class="ltab" aria-pressed="false" data-s="sales">founder sales</button>
-        <button class="ltab" aria-pressed="false" data-s="research">research briefs</button>
-        <button class="ltab" aria-pressed="false" data-s="finance">finance ops</button>
-      </div>
-      <div id="ledrows">
-      <div class="row"><span class="t">08:50</span><span class="verb">find</span><span class="what"><b>41 candidates</b> matched the brief — your ATS first, then LinkedIn</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row"><span class="t">08:58</span><span class="verb">rank</span><span class="what">shortlist of 9 — each with a why + a warm path</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row"><span class="t">09:07</span><span class="verb">draft</span><span class="what">9 personal first-touches — none templated</span><span class="stamp hold">HELD → your OK</span></div>
-      <div class="row"><span class="t">09:15</span><span class="verb">send</span><span class="what"><b>9/9 sent</b> — each confirmed on the live page</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row"><span class="t">09:20</span><span class="verb">keep</span><span class="what">ATS updated: stage, notes, next step per candidate</span><span class="stamp ok">VERIFIED</span></div>
-      <div class="row"><span class="t">+1d 06:30</span><span class="verb">learn</span><span class="what">3 replies → the sourcing angle that worked shapes every run after</span><span class="stamp ok">CREDITED</span></div>
-      <div class="row refused"><span class="t">—</span><span class="verb">refuse</span><span class="what">"blast 400 InMails" — consent floor, never crossed</span><span class="stamp no">REFUSED</span></div>
-      </div>
-      <div class="ledger-type"><span id="ledtype">next: 2 candidates to re-engage before Friday</span><span class="car"></span></div>
-      <div class="ledger-foot">not a transcript after the fact — commitments are written as the work happens</div>
+    <p class="led-cap">what compounds underneath:</p>
+    <div class="wm" role="img" aria-label="Your Work Model — it predicts, then reality grades it. One, predict: it predicts the better path from everything that worked in your world before. Two, act: it acts in your real accounts, holding anything that leaves your machine for your OK. Three, reality grades it: a real reply or a passing test grades the result, not the AI's own word. Four, the model sharpens: credit flows to what worked, so the next call starts better. This is not memory, which only stores what was said — it is a model that predicts the better path and learns from what really happened.">
+      <div class="wm-head" aria-hidden="true"><span><span class="dot"></span>your Work Model</span><span class="wm-cyc">predict → reality → learn</span></div>
+      <ol class="wm-steps" aria-hidden="true">
+        <li class="wm-step predict"><span class="wi">◇</span><span class="wb">predict</span><span class="wd">the better path — from everything that worked in your world before</span></li>
+        <li class="wm-step act"><span class="wi">▸</span><span class="wb">act</span><span class="wd">in your real accounts · held for your OK</span></li>
+        <li class="wm-step real"><span class="wi">✓</span><span class="wb">reality grades it</span><span class="wd">a real reply · a passing test — not the AI’s own word</span></li>
+        <li class="wm-step learn"><span class="wi">↑</span><span class="wb">the model sharpens</span><span class="wd">credit flows to what worked · the next call starts better</span></li>
+      </ol>
+      <div class="wm-foot" aria-hidden="true">memory stores what was said. this <b>predicts the better path</b> — and <b>learns from what really happened</b>.</div>
     </div>
     </div>
   </div>
@@ -620,9 +630,9 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
   <div class="wrap">
     <div class="tag">how it works</div>
     <h2>Every run feeds the <em>next</em>.</h2>
-    <p class="body">Hand it work in plain words. It runs each step with a receipt, holds anything that
+    <p class="body">Hand it work in plain words. It runs each step <b>in your real accounts</b> with a receipt, holds anything that
     leaves your machine for your OK, then lets <b>reality</b> settle it — the reply that lands, the test
-    that passes, the invoice that clears. That verdict is what it keeps, so the next run doesn’t start
+    that passes, the invoice that clears. That verdict <b>updates your Work Model</b>, so the next run doesn’t start
     over. It <b>starts from what already worked</b>.</p>
     <div class="loop" role="img" aria-label="The learning loop, in four steps that close into a cycle. One, say: you say it in plain words, in the agent you already run. Two, run: it runs every step with a receipt and holds anything that leaves your machine for your OK. Three, settle: reality settles it — the reply lands, the test passes, the invoice clears — marked verified. Four, keep: it keeps the verdict, scored by what actually worked, on your machine. Then the loop closes — the next run starts from what worked, not from zero.">
       <div class="loop-flow" aria-hidden="true">
@@ -692,7 +702,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     <p class="body">If you already hand real work to agents (shipping code, research loops, recruiting and
     sales pipelines, client briefs, finance and back-office work where a wrong move costs something), you keep
     paying to rediscover what already worked. Most AI re-reasons every task from scratch, so you pay full
-    price every time. AccInt replays the verified steps instead, so the <b>same job costs less every run</b>
+    price every time. AccInt <b>predicts the path that worked</b>, then replays the verified steps instead, so the <b>same job costs less every run</b>
     and keeps dropping as it learns. The learning isn't stuck in one task either. It picks up how your work
     really goes — your tools, your preferences, the paths that hold up — so related jobs <b>start from that
     experience</b> instead of the model's defaults. What builds up is <b>capital you own</b>: your team's
@@ -858,7 +868,7 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
     <h2>When someone asks "why did it do that?", it's <em>already written</em>.</h2>
     <p class="body">Most AI work leaves no trail — no record of what it expected, who approved it, or
     whether it actually worked. AccInt writes every step down as it happens: the receipt your team can
-    show management, and the lesson the next run inherits. Same record, two readers.</p>
+    show management, and the lesson your Work Model inherits. Same record, two readers.</p>
     <div class="audit" role="img" aria-label="An answer assembled from the audit ledger, with three governance callouts bound to the rows that answer them. Management asks: why did Meridian's CFO get two emails in March? The trail answers: March 9, found — Meridian's CFO wrote first, verified. March 11, eight drafts held for your OK. March 12 at 09:31, you approved 8 drafts — a human decision with a name and a timestamp. March 12, all eight delivered, verified — the approved follow-up was email two. March 19, the lesson was credited and kept. Callout one — what did it do — points at the verified receipt rows. Callout two — who said yes — points at the named human decision row. Callout three — what did we learn — points at the credited row. Every row was written when it happened; nothing reconstructed from recollection.">
       <div class="audit-q"><span class="who">management · thursday</span>“why did Meridian’s CFO get two emails in March?”</div>
       <div class="aud-legend" aria-hidden="true">
@@ -1063,14 +1073,14 @@ body.anim .ledger-type{animation:rise .5s 3.45s both;}
 <section id="roadmap">
   <div class="wrap">
     <div class="tag">where it goes</div>
-    <h2>One world model today.<br>A <em>collective</em> one tomorrow.</h2>
+    <h2>One Work Model today.<br>A <em>collective</em> one tomorrow.</h2>
     <div class="road">
       <div class="stage now"><span class="st">NOW · LIVE</span>
-        <h3>Your world model</h3>
-        <p>A working world model of your operation, on your machine — scored by real outcomes today, with your OK required before anything leaves. <b>The readout above is it, running.</b></p></div>
+        <h3>Your Work Model</h3>
+        <p>A working Work Model of your operation, on your machine — scored by real outcomes today, with your OK required before anything leaves. <b>The readout above is it, running.</b></p></div>
       <div class="stage next"><span class="st">NEXT</span>
-        <h3>Your team's world model</h3>
-        <p>Many operators, <b>one shared world model</b> — per-person authority, one audit plane — so your team's experience compounds together, not in scattered chats.</p></div>
+        <h3>Your team's Work Model</h3>
+        <p>Many operators, <b>one shared Work Model</b> — per-person authority, one audit plane — so your team's experience compounds together, not in scattered chats.</p></div>
       <div class="stage later"><span class="st">HORIZON</span>
         <h3>Collective accreted intelligence</h3>
         <p>World models that compound <b>peer-to-peer in vector space</b> — each node re-verifying against its own reality, so the network gets smarter with <b>no central brain</b> to trust.</p></div>
@@ -1194,64 +1204,7 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
     if(isWin){showOS('win');}
   });
 
-  /* ledger domain tabs */
-  var SESS={
-    sales:{next:'next: 3 follow-ups due this morning',rows:[
-      ['09:14','find','<b>27 prospects</b> matched your target — pulled from your network first','ok','VERIFIED'],
-      ['09:21','rank','top 8 by fit + warm-intro paths','ok','VERIFIED'],
-      ['09:26','draft','8 first lines — one per person, none templated','hold','HELD → your OK'],
-      ['09:31','send','<b>8/8 delivered</b> — each confirmed on the live page, not assumed','ok','VERIFIED'],
-      ['09:42','run','wrote a small script — all 8 enriched into <b>your tracker</b>','ok','VERIFIED'],
-      ['+1d 06:02','learn','2 replies → what worked carries into next week','ok','CREDITED'],
-      ['—','refuse','"blast 400 strangers" — consent floor, never crossed','no','REFUSED',1]]},
-    recruiting:{next:'next: 2 candidates to re-engage before Friday',rows:[
-      ['08:50','find','<b>41 candidates</b> matched the brief — your ATS first, then LinkedIn','ok','VERIFIED'],
-      ['08:58','rank','shortlist of 9 — each with a why + a warm path','ok','VERIFIED'],
-      ['09:07','draft','9 personal first-touches — none templated','hold','HELD → your OK'],
-      ['09:15','send','<b>9/9 sent</b> — each confirmed on the live page','ok','VERIFIED'],
-      ['09:20','keep','ATS updated: stage, notes, next step per candidate','ok','VERIFIED'],
-      ['+1d 06:30','learn','3 replies → the sourcing angle that worked shapes every run after','ok','CREDITED'],
-      ['—','refuse','"blast 400 InMails" — consent floor, never crossed','no','REFUSED',1]]},
-    clientops:{next:'next: Monday briefs scheduled · 5 clients',rows:[
-      ['06:05','run','into <b>5 client workspaces</b> — boards, CRM, portals, inbox','ok','VERIFIED'],
-      ['06:31','read','14 changes worth a partner’s eye — one risk pulled from a <b>scanned PO</b> the portal only shows as PDF','ok','VERIFIED'],
-      ['06:52','draft','5 Monday briefs — <b>the São Paulo client’s reads in Portuguese</b>','hold','HELD → your OK'],
-      ['07:14','keep','trackers updated from <b>what actually happened</b> — 22 rows','ok','VERIFIED'],
-      ['07:25','file','briefs on your desk before coffee','ok','VERIFIED'],
-      ['+1d 06:15','learn','your edits → next Monday reads more like you','ok','CREDITED'],
-      ['—','refuse','"pad the brief to look busy" — receipts only, no filler','no','REFUSED',1]]},
-    research:{next:'next: watching 2 competitors for pricing moves',rows:[
-      ['06:00','watch','<b>14 sources</b> scanned overnight — your market, competitors, key hires','ok','VERIFIED'],
-      ['06:20','find','3 developments that actually matter to you','ok','VERIFIED'],
-      ['06:31','run','compiled a sourced brief — <b>every claim linked to evidence</b>','ok','VERIFIED'],
-      ['06:40','file','brief on your desk; watch-list + tracker updated','ok','VERIFIED'],
-      ['09:02','draft','1 reach-out the brief suggests — your call','hold','HELD → your OK'],
-      ['+1d 06:00','learn','your feedback → next week’s brief gets sharper','ok','CREDITED'],
-      ['—','refuse','"pad it to look thorough" — receipts only, no filler','no','REFUSED',1]]},
-    finance:{next:'next: 2 promise-dates due Thursday — watching',rows:[
-      ['06:10','run','into <b>the AR aging</b> — 5 client portals, 2 inboxes, the books','ok','VERIFIED'],
-      ['06:24','read','31 invoices reconciled — one payment matched from a <b>scanned remittance PDF</b>','ok','VERIFIED'],
-      ['06:40','find','<b>7 overdue</b> worth a nudge — 2 flagged "at-risk, soften it"','ok','VERIFIED'],
-      ['06:55','draft','7 nudges — each cites the invoice, the work, the date agreed','hold','HELD → your OK'],
-      ['07:18','keep','books true: status, promise date, next step — per invoice','ok','VERIFIED'],
-      ['+2d','learn','<b>4 paid within 48h</b> → the tuesday timing is credited','ok','CREDITED'],
-      ['—','refuse','"threaten late fees across the book" — relationship floor, never crossed','no','REFUSED',1]]}
-  };
-  var tabs=document.getElementById('ledtabs'),rowsEl=document.getElementById('ledrows'),typeEl=document.getElementById('ledtype');
-  if(tabs&&rowsEl){
-    tabs.addEventListener('click',function(e){
-      var b=e.target.closest('.ltab');if(!b)return;
-      tabs.querySelectorAll('.ltab').forEach(function(t){t.setAttribute('aria-pressed',t===b?'true':'false');});
-      var s=SESS[b.dataset.s];if(!s)return;
-      ph('hero_tab_switched',{tab:b.dataset.s});
-      var html='';
-      s.rows.forEach(function(r,i){
-        html+='<div class="row'+(r[5]?' refused':'')+'"><span class="t">'+r[0]+'</span><span class="verb">'+r[1]+'</span><span class="what">'+r[2]+'</span><span class="stamp '+r[3]+'">'+r[4]+'</span></div>';
-      });
-      rowsEl.innerHTML=html;
-      if(typeEl){typeEl.textContent=s.next;}
-    });
-  }
+  /* hero device is static (single commitment settling) — no tab JS */
 
   /* story switcher (#jobs) */
   var stl=document.getElementById('storytabs');
