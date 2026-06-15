@@ -16,6 +16,7 @@ Outputs:
   dist/acc-mcp-<tag>-<target>.mcpb
   dist/acc-mcp-<tag>-<target>.sha256
   dist/server.<target>.json
+  dist/server.mcpb-all.json (when target is all)
 EOF
 }
 
@@ -178,10 +179,39 @@ Path(output).write_text(json.dumps(data, indent=2) + "\n")
 PY
 }
 
+write_all_server_json() {
+  python3 - registry/server.template.json dist/server.mcpb-all.json "$version" "${targets[@]}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+template, output, version, *targets = sys.argv[1:]
+data = json.loads(Path(template).read_text())
+data["version"] = version
+packages = []
+
+for target in targets:
+    generated = Path(f"dist/server.{target}.json")
+    if not generated.exists():
+        raise SystemExit(f"missing generated server file: {generated}")
+    package = json.loads(generated.read_text())["packages"][0]
+    packages.append(package)
+
+data["packages"] = packages
+data["_meta"]["io.modelcontextprotocol.registry/publisher-provided"] = {
+    "packager": "scripts/package-mcpb.sh",
+    "releaseTargets": targets,
+}
+Path(output).write_text(json.dumps(data, indent=2) + "\n")
+PY
+  printf 'wrote %s\n' "dist/server.mcpb-all.json"
+}
+
 if [ "$target" = "all" ]; then
   for one in "${targets[@]}"; do
     build_one "$one"
   done
+  write_all_server_json
 else
   build_one "$target"
 fi
