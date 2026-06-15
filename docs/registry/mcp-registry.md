@@ -35,6 +35,8 @@ and the registry metadata points to those assets with a SHA-256 hash.
   copied into each bundle.
 - [`../../scripts/package-mcpb.sh`](../../scripts/package-mcpb.sh) — builds
   `dist/acc-mcp-<tag>-<target>.mcpb` from a published GitHub Release binary.
+- [`../../server.json`](../../server.json) — current registry metadata for the
+  latest published MCPB assets.
 - [`../../registry/server.template.json`](../../registry/server.template.json) —
   template for the registry `server.json`.
 
@@ -66,7 +68,10 @@ Release. Do not commit `dist/`; release artifacts belong on GitHub Releases.
 
 ## Publish
 
-Use the generated multi-package file:
+For the current release, the root [`../../server.json`](../../server.json) is
+already the publishable metadata file.
+
+For a new release, regenerate it from the generated multi-package file:
 
 ```bash
 cp dist/server.mcpb-all.json server.json
@@ -76,7 +81,7 @@ The official registry validates every package entry in `packages[]`. Keeping all
 four MCPB assets in one `server.json` lets the registry metadata point at each
 platform bundle while preserving one MCP server name.
 
-Then publish with the official `mcp-publisher`:
+Publish with the official `mcp-publisher`:
 
 ```bash
 curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
@@ -104,4 +109,4 @@ steps:
 ```
 
 Keep this as a manual maintainer step until the release pipeline attaches MCPB
-assets and produces a real `server.json` with real `fileSha256` values.
+assets and updates `server.json` with real `fileSha256` values for the release.
