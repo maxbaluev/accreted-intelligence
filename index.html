@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&display=swap" rel="stylesheet">
 <style>
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;}
 :root{
 color-scheme:dark;
 /* warm dark-paper ground — one temperature across every neutral (the old set mixed a
@@ -82,6 +82,13 @@ html.eb-off .early-banner{display:none;}
 .eb-msg{flex:1 1 100%;order:3;font-size:11.5px;}
 .eb-link{order:2;margin-left:auto;}
 }
+@media(max-width:520px){
+.eb-in{width:min(100%,390px);max-width:100%;margin-left:0;margin-right:auto;gap:7px 10px;}
+.eb-pill{order:1;}
+.eb-x{order:2;margin-left:auto;}
+.eb-msg{order:3;flex-basis:100%;}
+.eb-link{order:4;margin-left:0;white-space:normal;}
+}
 
 /* ---------- nav ---------- */
 nav{position:fixed;top:var(--banner-h);left:0;right:0;z-index:40;border-bottom:1px solid transparent;}
@@ -95,6 +102,12 @@ nav.scrolled{background:var(--bg);border-bottom-color:var(--line2);}
 .nav-cta{padding:8px 16px;background:var(--orange);border:1px solid var(--orange);color:#14110b !important;font-weight:700;}
 .nav-cta:hover{background:var(--ink);border-color:var(--ink);}
 @media(max-width:760px){.nav-links a:not(.nav-cta){display:none;}}
+@media(max-width:520px){
+.wrap,.nav-in{width:min(100%,390px);max-width:100%;margin-left:0;margin-right:auto;}
+.nav-in{gap:12px;}
+.nav-links{margin-left:0;}
+.nav-cta{padding:8px 12px;font-size:10px;letter-spacing:.08em;white-space:nowrap;}
+}
 
 /* ---------- hero ---------- */
 .hero{position:relative;padding:calc(150px + var(--banner-h)) 0 90px;border-bottom:1px solid var(--line2);}
@@ -127,7 +140,7 @@ color:var(--ink);font-weight:600;}
 .os-tabs{display:flex;}
 .os-tab{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
 color:var(--dim);background:var(--bg2);border:1px solid var(--line2);border-bottom:0;
-padding:8px 15px;cursor:pointer;margin-bottom:-1px;position:relative;z-index:2;}
+padding:8px 15px;cursor:pointer;margin-bottom:-1px;position:relative;z-index:2;min-width:0;}
 .os-tab[aria-selected=true]{color:var(--ink);background:var(--bg3);border-color:var(--rule);}
 .os-tab:focus-visible{outline-offset:-2px;}
 .cmd{display:flex;align-items:stretch;border:1px solid var(--rule);background:var(--bg2);}
@@ -150,22 +163,31 @@ font-size:12px;letter-spacing:.03em;}
 .install .note{margin-top:13px;font-size:12px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
 @media(max-width:520px){.cmd code{font-size:11.5px;padding:12px 12px;}.copy{padding:0 14px;}}
 /* primary/backup switcher — agent-paste (default) vs manual one-liner */
-.sw-tabs{display:flex;gap:0;margin-bottom:14px;}
+.sw-tabs{display:flex;flex-wrap:wrap;gap:0;margin-bottom:14px;}
 .sw-tab{flex:0 1 auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
 color:var(--dim);background:var(--bg2);border:1px solid var(--line2);padding:9px 16px;cursor:pointer;
-white-space:nowrap;}
+white-space:nowrap;min-width:0;}
 .sw-tab+.sw-tab{border-left:0;}
 .sw-tab[aria-selected=true]{color:#14110b;background:var(--orange);border-color:var(--orange);font-weight:700;}
 .sw-tab:focus-visible{outline-offset:-2px;}
 .sw-panel[hidden]{display:none;}
 /* the agent-paste block is prose, not a one-liner — let it wrap */
 .cmd.prose{align-items:stretch;}
-.cmd.prose code{white-space:normal;overflow-x:visible;line-height:1.6;letter-spacing:.005em;}
+.cmd.prose code{white-space:normal;overflow-x:visible;line-height:1.6;letter-spacing:.005em;overflow-wrap:anywhere;word-break:break-word;}
 .cmd.prose code::before{content:none;}
 .cmd.prose .copy{align-self:stretch;display:flex;align-items:center;}
 .agent-foot{margin-top:13px;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.02em;line-height:1.6;}
 .agent-foot b{color:var(--dim);font-weight:600;}
-@media(max-width:520px){.sw-tab{padding:9px 11px;font-size:10px;}.cmd.prose code{font-size:11.5px;}}
+@media(max-width:520px){
+.install{width:100%;max-width:100%;}
+.sw-tabs{display:grid;grid-template-columns:1fr 1fr;}
+.sw-tab{padding:9px 10px;font-size:10px;white-space:normal;line-height:1.35;text-align:center;}
+.cmd{display:block;}
+.cmd code{display:block;white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
+.cmd .copy{width:100%;border-left:0;border-top:1px solid var(--line2);padding:12px 14px;}
+.cmd.prose code{font-size:11.5px;}
+.cmd.prose .copy{display:block;}
+}
 
 /* ---------- ledger card ---------- */
 .led-cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin:0 0 10px;text-transform:uppercase;}
@@ -181,7 +203,7 @@ margin-right:9px;animation:blink 1.4s steps(1) infinite;}
 @keyframes blink{50%{opacity:0;}}
 .ledger-tabs{display:flex;flex-wrap:wrap;}
 .ltab{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--dim);background:transparent;
-border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 12px;cursor:pointer;text-transform:uppercase;}
+border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 12px;cursor:pointer;text-transform:uppercase;min-width:0;}
 .ledger-tabs .ltab{flex:1 1 auto;text-align:center;font-size:10px;letter-spacing:.04em;padding:9px 6px;}
 .ltab:hover{color:var(--ink);background:var(--bg3);}
 .ltab[aria-pressed=true],.ltab[aria-selected=true]{color:#14110b;background:var(--ink);font-weight:600;}
@@ -575,10 +597,20 @@ font-family:var(--mono);font-size:11px;letter-spacing:.07em;color:var(--faint);t
 
 @media(max-width:520px){
 .kicker{font-size:10px;letter-spacing:.12em;}
-.row{grid-template-columns:40px 50px 1fr auto;gap:7px;font-size:11.5px;padding:10px 12px;}
-.stamp{font-size:9px;padding:2px 7px;letter-spacing:.06em;}
+.row{gap:7px;font-size:11.5px;padding:10px 12px;}
+.stamp{font-size:9px;padding:2px 7px;letter-spacing:.06em;white-space:normal;}
 .ledger-head{padding:10px 12px;font-size:10px;}
 .ledger-type,.ledger-foot{padding-left:12px;padding-right:12px;}
+.ledger-tabs .ltab{flex:1 1 50%;white-space:normal;overflow-wrap:anywhere;line-height:1.35;padding:10px 6px;}
+#ledrows{min-height:0;}
+#ledrows .row,.runcol .row,.learned .row{grid-template-columns:48px minmax(0,1fr);}
+#ledrows .row .t,.runcol .row .t,.learned .row .t{grid-column:1;grid-row:1 / span 3;}
+#ledrows .row .verb,.runcol .row .verb,.learned .row .verb{grid-column:2;grid-row:1;}
+#ledrows .row .what,.runcol .row .what,.learned .row .what{grid-column:2;grid-row:2;}
+#ledrows .row .stamp,.runcol .row .stamp,.learned .row .stamp{grid-column:2;grid-row:3;justify-self:start;margin-top:3px;}
+.foot-rows .row{grid-template-columns:1fr;}
+.foot-rows .row .verb,.foot-rows .row .what,.foot-rows .row .stamp{grid-column:1;}
+.foot-rows .row .stamp{justify-self:start;margin-top:3px;}
 .honest .wrap{flex-direction:column;gap:12px;}
 .story-ask{padding:16px 12px 14px;font-size:12.5px;}
 .run-h{padding:0 12px 10px;}
@@ -654,7 +686,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
       <p class="dek">Offload the task. <b>Never the learning.</b></p>
       <p class="lede">AI agents are powerful but <b>amnesiac</b>: every run burns your tokens on real work, ships an output, then forgets. You <b>rent</b> capability — you never build it. AccInt changes the unit from a task that evaporates to an <b>investment that compounds</b>. Hand work to the agents you already run, and <b>two things</b> compound into one owned asset — a <b>Work Model of your business</b>: your <b>intellect</b> (what you decide, what good looks like, what you'll never allow) and your <b>agents' tokens</b> (every verified path distilled into a runtime that <b>replays instead of re-reasoning</b>). It learns what actually worked, checked against your own results, and <b>predicts the better path</b> before the next run starts. So the same job gets cheaper, faster, and <b>genuinely better</b> every time it runs. The learning is <b>yours</b>: swap the model, keep the company veteran. Your work turns into <b>capital you own</b>, on a machine you control.</p>
       <p class="ruleline">it predicts the better path <span class="arr" aria-hidden="true">→</span> acts in your accounts, receipted <span class="arr" aria-hidden="true">→</span> reality settles it <span class="arr" aria-hidden="true">→</span> the Work Model sharpens</p>
-      <div class="install" aria-label="Install AccInt">
+      <div class="install" data-placement="hero" aria-label="Install AccInt">
         <div class="sw-tabs" role="tablist" aria-label="Choose how to install">
           <button class="sw-tab" role="tab" data-panel="agent" aria-selected="true" aria-controls="ipanel-agent">Paste into your agent</button>
           <button class="sw-tab" role="tab" data-panel="manual" aria-selected="false" tabindex="-1" aria-controls="ipanel-manual">Manual install</button>
@@ -662,7 +694,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
         <div class="sw-panel" data-panel="agent" id="ipanel-agent">
           <div class="cmd prose">
             <code id="agent-prompt">Install AccInt for yourself — a local Work Model that learns what actually worked across my projects (scored by my real results) and predicts the better path, so you get genuinely better at my work over time. Run the installer for my OS — macOS/Linux: curl -fsSL https://accint.xyz/install | sh · Windows PowerShell: irm https://accint.xyz/install.ps1 | iex — then run `acc hosts-sync` to wire yourself onto it, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks before anything leaves my machine.</code>
-            <button class="copy" data-target="agent-prompt" aria-label="Copy the agent prompt">copy</button>
+            <button class="copy" data-target="agent-prompt" data-kind="agent_prompt" aria-label="Copy the agent prompt">copy</button>
           </div>
           <p class="agent-foot">Works in <b>Claude Code · Codex · Cursor · OpenCode</b> — paste it into the one you already use.</p>
         </div>
@@ -673,11 +705,11 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
           </div>
           <div class="cmd" data-os="nix">
             <code id="cmd-nix">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
-            <button class="copy" data-target="cmd-nix" aria-label="Copy install command">copy</button>
+            <button class="copy" data-target="cmd-nix" data-kind="manual_command" aria-label="Copy install command">copy</button>
           </div>
           <div class="cmd" data-os="win" hidden>
             <code id="cmd-win">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
-            <button class="copy" data-target="cmd-win" aria-label="Copy install command">copy</button>
+            <button class="copy" data-target="cmd-win" data-kind="manual_command" aria-label="Copy install command">copy</button>
           </div>
         </div>
         <p class="cmd-then"># then, in the agent you already run, just say it:<br><span>&ldquo;keep my pipeline warm this week — 10 good ones, my voice&rdquo;</span></p>
@@ -1209,15 +1241,15 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
   <div class="wrap">
     <div class="tag" style="justify-content:center">install</div>
     <h2>Already running AI agents?<br>Turn their work into <em>expertise you own</em>.</h2>
-    <div class="install" aria-label="Install AccInt">
+    <div class="install" data-placement="final" aria-label="Install AccInt">
       <div class="sw-tabs" role="tablist" aria-label="Choose how to install">
         <button class="sw-tab" role="tab" data-panel="agent" aria-selected="true" aria-controls="ipanel-agent2">Paste into your agent</button>
         <button class="sw-tab" role="tab" data-panel="manual" aria-selected="false" tabindex="-1" aria-controls="ipanel-manual2">Manual install</button>
       </div>
       <div class="sw-panel" data-panel="agent" id="ipanel-agent2">
         <div class="cmd prose">
-          <code id="agent-prompt2">Install AccInt for yourself — local memory that learns what works across all my projects and makes you better over time. Run the installer for my OS — macOS/Linux: curl -fsSL https://accint.xyz/install | sh · Windows PowerShell: irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex — then run `acc hosts-sync` to wire yourself, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks before anything leaves my machine.</code>
-          <button class="copy" data-target="agent-prompt2" aria-label="Copy the agent prompt">copy</button>
+          <code id="agent-prompt2">Install AccInt for yourself — a local Work Model that learns what actually worked across my projects (scored by my real results) and predicts the better path, so you get genuinely better at my work over time. Run the installer for my OS — macOS/Linux: curl -fsSL https://accint.xyz/install | sh · Windows PowerShell: irm https://accint.xyz/install.ps1 | iex — then run `acc hosts-sync` to wire yourself onto it, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks before anything leaves my machine.</code>
+          <button class="copy" data-target="agent-prompt2" data-kind="agent_prompt" aria-label="Copy the agent prompt">copy</button>
         </div>
         <p class="agent-foot">Works in <b>Claude Code · Codex · Cursor · OpenCode</b> — paste it into the one you already use.</p>
       </div>
@@ -1228,11 +1260,11 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
         </div>
         <div class="cmd" data-os="nix">
           <code id="cmd-nix2">curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh</code>
-          <button class="copy" data-target="cmd-nix2" aria-label="Copy install command">copy</button>
+          <button class="copy" data-target="cmd-nix2" data-kind="manual_command" aria-label="Copy install command">copy</button>
         </div>
         <div class="cmd" data-os="win" hidden>
           <code id="cmd-win2">irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex</code>
-          <button class="copy" data-target="cmd-win2" aria-label="Copy install command">copy</button>
+          <button class="copy" data-target="cmd-win2" data-kind="manual_command" aria-label="Copy install command">copy</button>
         </div>
       </div>
       <div class="install-2nd">
@@ -1318,7 +1350,20 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
     ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
     document.execCommand('copy');document.body.removeChild(ta);}catch(_e){}}
   var isWin=/Win/i.test((navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||navigator.userAgent||'');
+  function withInstallRef(txt,kind,os){
+    if(!install_ref){return txt;}
+    if(kind==='agent_prompt'){
+      return txt
+        .replace('curl -fsSL https://accint.xyz/install | sh','curl -fsSL https://accint.xyz/install | ACC_INSTALL_REF='+install_ref+' sh')
+        .replace('curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh','curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF='+install_ref+' sh')
+        .replace('irm https://accint.xyz/install.ps1 | iex',"$env:ACC_INSTALL_REF='"+install_ref+"'; irm https://accint.xyz/install.ps1 | iex")
+        .replace('irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex',"$env:ACC_INSTALL_REF='"+install_ref+"'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex");
+    }
+    if(os==='win'){return "$env:ACC_INSTALL_REF='"+install_ref+"'; "+txt;}
+    return txt.replace('| sh','| ACC_INSTALL_REF='+install_ref+' sh');
+  }
   [].slice.call(document.querySelectorAll('.install')).forEach(function(box){
+    var placement=box.getAttribute('data-placement')||'unknown';
     /* primary/backup switcher — agent-paste (default) vs manual one-liner */
     var swtabs=[].slice.call(box.querySelectorAll('.sw-tab')),
         panels=[].slice.call(box.querySelectorAll('.sw-panel'));
@@ -1327,7 +1372,7 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
       panels.forEach(function(p){p.hidden=p.dataset.panel!==name;});
     }
     swtabs.forEach(function(t,i){
-      t.addEventListener('click',function(){showPanel(t.dataset.panel);ph('install_mode_selected',{mode:t.dataset.panel});});
+      t.addEventListener('click',function(){showPanel(t.dataset.panel);ph('install_method_selected',{method:t.dataset.panel,placement:placement});});
       t.addEventListener('keydown',function(e){
         var d=e.key==='ArrowRight'?1:(e.key==='ArrowLeft'?-1:0);
         if(d){e.preventDefault();var j=(i+d+swtabs.length)%swtabs.length;showPanel(swtabs[j].dataset.panel);swtabs[j].focus();}
@@ -1339,7 +1384,7 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
       cmds.forEach(function(c){c.hidden=c.dataset.os!==os;});
     }
     tabs.forEach(function(t,i){
-      t.addEventListener('click',function(){showOS(t.dataset.os);ph('os_selected',{os:t.dataset.os});});
+      t.addEventListener('click',function(){showOS(t.dataset.os);ph('os_selected',{os:t.dataset.os,placement:placement,method:'manual'});});
       t.addEventListener('keydown',function(e){
         var d=e.key==='ArrowRight'?1:(e.key==='ArrowLeft'?-1:0);
         if(d){e.preventDefault();var j=(i+d+tabs.length)%tabs.length;showOS(tabs[j].dataset.os);tabs[j].focus();}
@@ -1348,18 +1393,23 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
     [].slice.call(box.querySelectorAll('.copy')).forEach(function(btn){
       btn.addEventListener('click',function(){
         var code=document.getElementById(btn.dataset.target),txt=code?code.textContent:'',
-            os=(btn.closest('.cmd')&&btn.closest('.cmd').getAttribute('data-os'))||'';
+            os=(btn.closest('.cmd')&&btn.closest('.cmd').getAttribute('data-os'))||'',
+            kind=btn.getAttribute('data-kind')||((btn.closest('.cmd.prose'))?'agent_prompt':'manual_command'),
+            osGuess=os||((isWin)?'win':'nix');
         /* Carry the correlation nonce into the COPIED text only — the displayed command
            stays unchanged. The env var must scope to the SHELL THAT RUNS THE INSTALLER
            (the process after the pipe), not to curl/irm — so inject per-OS so the installer
            sees ACC_INSTALL_REF and can persist it (merge into the same anonymous web person). */
-        if(install_ref){
-          if(os==='win'){ txt='$env:ACC_INSTALL_REF=\''+install_ref+'\'; '+txt; }
-          else { txt=txt.replace('| sh','| ACC_INSTALL_REF='+install_ref+' sh'); }
-        }
+        txt=withInstallRef(txt,kind,os);
         function done(){btn.classList.add('done');var o=btn.textContent;btn.textContent='copied ✓';
           setTimeout(function(){btn.classList.remove('done');btn.textContent=o;},1600);}
-        ph('install_command_copied',{os:os, install_ref:install_ref}); /* the north-star micro-conversion */
+        if(kind==='agent_prompt'){
+          ph('install_agent_prompt_copied',{placement:placement,os_guess:osGuess,install_ref:install_ref});
+          ph('install_command_copied',{method:'agent_prompt',os:osGuess,placement:placement,install_ref:install_ref});
+        }else{
+          ph('manual_install_command_copied',{placement:placement,os:os,install_ref:install_ref});
+          ph('install_command_copied',{method:'manual_command',os:os,placement:placement,install_ref:install_ref});
+        }
         if(navigator.clipboard&&navigator.clipboard.writeText){
           navigator.clipboard.writeText(txt).then(done).catch(function(){fallbackCopy(txt);done();});
         }else{fallbackCopy(txt);done();}
