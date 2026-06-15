@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14110b">
 <title>Accreted Intelligence — the learning substrate for agent work</title>
-<meta name="description" content="AccInt is a local Work Model for AI agents: memory plus receipts, approval gates, outcome credit, and reusable runtimes. Claude Code, Codex, OpenCode, and Cursor keep what actually worked on hardware you control.">
+<meta name="description" content="AccInt is a local Work Model for AI agents: open promises, evidence, approval gates, outcome credit, and reusable runtimes. Claude Code, Codex, OpenCode, and Cursor keep accountable work state on hardware you control.">
 <meta property="og:title" content="Accreted Intelligence — the learning substrate for agent work">
-<meta property="og:description" content="Memory recalls context. A Work Model records whether that context helped real work land. AccInt runs locally under Claude Code, Codex, OpenCode, and Cursor.">
+<meta property="og:description" content="A Work Model records what is open, what changed, what passed, and what actually worked. AccInt runs locally under Claude Code, Codex, OpenCode, and Cursor.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://accint.xyz/">
 <meta property="og:image" content="https://accint.xyz/og.png">
@@ -22,7 +22,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;}
 :root{
 color-scheme:dark;
 /* warm dark-paper ground — one temperature across every neutral (the old set mixed a
-   warm ink onto cool navy); steel stays as the cool SEMANTIC accent for memory rows */
+   warm ink onto cool navy); steel stays as the cool SEMANTIC accent for ledger rows */
 --bg:#14110b;
 --bg2:#181410;
 --bg3:#1e1913;
@@ -659,7 +659,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
 <div class="early-banner" id="early-banner" role="region" aria-label="Early release notice">
   <div class="eb-in">
     <span class="eb-pill">Early release</span>
-    <p class="eb-msg"><b>Aloha&nbsp;👋</b> acc is young, so you may hit rough edges. Found a bug? Run <code>acc report</code> for a sanitized diagnostic — no memory, no secrets, you file it yourself.</p>
+    <p class="eb-msg"><b>Aloha&nbsp;👋</b> acc is young, so you may hit rough edges. Found a bug? Run <code>acc report</code> for a sanitized diagnostic — no Work Model contents, no secrets, you file it yourself.</p>
     <a class="eb-link" id="eb-report" href="https://github.com/maxbaluev/accreted-intelligence/issues/new" target="_blank" rel="noopener">Report a bug →</a>
     <button class="eb-x" id="eb-dismiss" type="button" aria-label="Dismiss early release notice" title="Dismiss">✕</button>
   </div>
@@ -684,7 +684,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
       <div class="kicker">A <b>Work Model you own</b><span class="k-op"><span class="sep">·</span>on your hardware</span><span class="sep">·</span>no account, no API key</div>
       <h1><span>Make your AI work</span> <span><em>compound</em>.</span></h1>
       <p class="dek">Offload the task. <b>Never the learning.</b></p>
-      <p class="lede">Your agents do real work, then forget it the moment they answer. AccInt keeps <b>what actually worked</b>, scored by your own results, so <b>every run starts ahead of the last</b>.</p>
+      <p class="lede">Your agents do real work, then drop the accountable state the moment they answer. AccInt keeps <b>what actually worked</b>, scored by your own results, so <b>every run starts ahead of the last</b>.</p>
       <div class="install" data-placement="hero" aria-label="Install AccInt">
         <div class="sw-tabs" role="tablist" aria-label="Choose how to install">
           <button class="sw-tab" role="tab" data-panel="agent" aria-selected="true" aria-controls="ipanel-agent">Paste into your agent</button>
@@ -722,7 +722,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
 
     <div>
     <p class="led-cap">what compounds underneath:</p>
-    <div class="wm" role="img" aria-label="Your Work Model — it predicts, then reality grades it. One, predict: it predicts the better path from everything that worked in your world before. Two, act: it acts in your real accounts, holding anything that leaves your machine for your OK. Three, reality grades it: a real reply or a passing test grades the result, not the AI's own word. Four, the model sharpens: credit flows to what worked, so the next call starts better. This is not memory, which only stores what was said — it is a model that predicts the better path and learns from what really happened.">
+    <div class="wm" role="img" aria-label="Your Work Model — it predicts, then reality grades it. One, predict: it predicts the better path from everything that worked in your world before. Two, act: it acts in your real accounts, holding anything that leaves your machine for your OK. Three, reality grades it: a real reply or a passing test grades the result, not the AI's own word. Four, the model sharpens: credit flows to what worked, so the next call starts better. This is not a notes bucket — it is a model that predicts the better path and learns from what really happened.">
       <div class="wm-head" aria-hidden="true"><span><span class="dot"></span>your Work Model</span><span class="wm-cyc">predict → reality → learn</span></div>
       <ol class="wm-steps" aria-hidden="true">
         <li class="wm-step predict"><span class="wi">◇</span><span class="wb">predict</span><span class="wd">the better path — from everything that worked in your world before</span></li>
@@ -730,7 +730,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
         <li class="wm-step real"><span class="wi">✓</span><span class="wb">reality grades it</span><span class="wd">a real reply · a passing test — not the AI’s own word</span></li>
         <li class="wm-step learn"><span class="wi">↑</span><span class="wb">the model sharpens</span><span class="wd">credit flows to what worked · the next call starts better</span></li>
       </ol>
-      <div class="wm-foot" aria-hidden="true">memory stores what was said. this <b>predicts the better path</b> — and <b>learns from what really happened</b>.</div>
+      <div class="wm-foot" aria-hidden="true">notes store what was said. this <b>predicts the better path</b> — and <b>learns from what really happened</b>.</div>
     </div>
     </div>
   </div>
@@ -811,7 +811,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
   <div class="wrap">
     <div class="tag">the part you keep</div>
     <h2>Your judgment becomes capital you <em>own</em>.</h2>
-    <p class="body">This isn't a memory of what happened. It's judgment about what works in your world: your
+    <p class="body">This isn't a transcript of what happened. It's judgment about what works in your world: your
     voice, your standards, what a good outcome looks like, what you will never allow. AccInt grades it against
     your own results, keeps it on your machine, and runs it on every job, not only the ones you are in the
     room for. Change the model and it stays. Change the machine and it stays. The reasoning engine is a part
@@ -992,11 +992,11 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
 </div>
 </section>
 
-<div class="honest asset" aria-label="Memory remembers context. Observability shows traces. Automation runs playbooks. AccInt closes the loop: commitment, action, approval, outcome, reusable path.">
+<div class="honest asset" aria-label="Recall layers surface context. Observability shows traces. Automation runs playbooks. AccInt closes the loop: commitment, action, approval, outcome, reusable path.">
   <div class="wrap">
     <div class="mark">THE GAP</div>
     <div>
-      <p><b>Memory remembers context. Observability shows traces. Automation runs playbooks.</b>
+      <p><b>Recall layers surface context. Observability shows traces. Automation runs playbooks.</b>
       AccInt closes the learning loop: <b>commitment → action → approval → outcome → reusable path</b>, scored by results,
       audited on a ledger, running fully on your hardware.</p>
     </div>
@@ -1080,15 +1080,15 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
 <section id="faq">
   <div class="wrap">
     <div class="tag">plain answers</div>
-    <h2>Not just memory. A <em>Work Model</em>.</h2>
+    <h2>Not a context bucket. A <em>Work Model</em>.</h2>
     <p class="body">Everything in this category stores <b>something</b>. The real question is whether it stores
     what was <b>said</b> — or what actually <b>worked</b>. Read top to bottom: each answer raises the next.</p>
-    <div class="ledger" style="max-width:760px;margin-top:22px" aria-label="The real difference between memory tools and a Work Model, as a top-to-bottom progression. Is this just memory? No — memory keeps what was said; a Work Model keeps what worked, and a step only counts once reality answers, while a self-graded result counts at a fraction. A vector database? Retrieval is the floor, not the asset; on top sit a commitment, a receipt, your approval gate, the real outcome, and a prediction of the better path before it acts. Does it predict? Yes — it ranks the path most likely to work from everything that worked in your world before, and watches its own error, so when your world shifts it notices. Swap models? Nothing is lost; the reasoning engine is replaceable and the Work Model is yours and stays. Where is my data? On your machine, one program and one file; it reads and drafts freely, but anything that leaves stops at your OK first. Can I trust its learning? It cannot fake it — a self-graded result counts at a weak prior, full credit needs reality, and it checks its own citations and arithmetic before you see them.">
-      <div class="ledger-head"><span><span class="dot"></span>the real difference</span><span>memory vs. Work Model</span></div>
+    <div class="ledger" style="max-width:760px;margin-top:22px" aria-label="The real difference between context buckets and a Work Model, as a top-to-bottom progression. Is this just recall? No — a context bucket keeps what was said; a Work Model keeps what worked, and a step only counts once reality answers, while a self-graded result counts at a fraction. A vector database? Retrieval is the floor, not the asset; on top sit a commitment, a receipt, your approval gate, the real outcome, and a prediction of the better path before it acts. Does it predict? Yes — it ranks the path most likely to work from everything that worked in your world before, and watches its own error, so when your world shifts it notices. Swap models? Nothing is lost; the reasoning engine is replaceable and the Work Model is yours and stays. Where is my data? On your machine, one program and one file; it reads and drafts freely, but anything that leaves stops at your OK first. Can I trust its learning? It cannot fake it — a self-graded result counts at a weak prior, full credit needs reality, and it checks its own citations and arithmetic before you see them.">
+      <div class="ledger-head"><span><span class="dot"></span>the real difference</span><span>recall vs. Work Model</span></div>
       <div class="row">
         <span class="t" style="visibility:hidden">.</span>
-        <span class="verb">just memory?</span>
-        <span class="what"><b>No.</b> Memory keeps what was <em>said</em>. A Work Model keeps what <em>worked</em> — a step only counts once reality answers: a reply that lands, a test that passes, a paid invoice. What it grades itself counts at a fraction.</span>
+        <span class="verb">just recall?</span>
+        <span class="what"><b>No.</b> A context bucket keeps what was <em>said</em>. A Work Model keeps what <em>worked</em> — a step only counts once reality answers: a reply that lands, a test that passes, a paid invoice. What it grades itself counts at a fraction.</span>
         <span class="stamp ok">REALITY-GRADED</span>
       </div>
       <div class="row">
@@ -1100,7 +1100,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
       <div class="row">
         <span class="t" style="visibility:hidden">.</span>
         <span class="verb">does it predict?</span>
-        <span class="what"><b>Yes</b> — the part memory can't do. It ranks the path most likely to work from everything that worked in your world before, then watches its own error. When your world shifts, it notices.</span>
+        <span class="what"><b>Yes</b> — the part recall can't do. It ranks the path most likely to work from everything that worked in your world before, then watches its own error. When your world shifts, it notices.</span>
         <span class="stamp ok">PREDICTS</span>
       </div>
       <div class="row">
@@ -1122,7 +1122,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
         <span class="stamp ok">EARNED</span>
       </div>
     </div>
-    <p class="tagline">None of this is a bigger memory. It's a different asset — the <em>judgment your work earns</em>, scored by reality and owned by you.</p>
+    <p class="tagline">None of this is a bigger context bucket. It's a different asset — the <em>judgment your work earns</em>, scored by reality and owned by you.</p>
   </div>
 </section>
 
@@ -1303,6 +1303,13 @@ function ph(ev,props){try{if(window.posthog&&typeof window.posthog.capture==='fu
    is unavailable so the stitch degrades to a plain no-op). Links the web person to the
    installer's first run without any PII leaving the device. */
 var install_ref='';try{if(window.crypto&&window.crypto.getRandomValues){var _ir=new Uint8Array(6);window.crypto.getRandomValues(_ir);for(var _i=0;_i<_ir.length;_i++){install_ref+=('0'+_ir[_i].toString(16)).slice(-2);}}}catch(_e){install_ref='';}
+var source_props={landing:'home'};try{
+  var _qs=new URLSearchParams(window.location.search||'');
+  ['utm_source','utm_medium','utm_campaign','utm_content','ref','rsub','thread','entry'].forEach(function(k){
+    var v=_qs.get(k);if(v){source_props[k]=String(v).slice(0,96);}
+  });
+  if(!source_props.utm_source&&/reddit/i.test(document.referrer||'')){source_props.utm_source='reddit';source_props.ref='reddit_referrer';}
+}catch(_e){}
 if(typeof PH_KEY==='string'&&PH_KEY!==''){try{
 !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init Ce Ss Ig capture Ai calculateEventProperties Es register register_once register_for_session unregister unregister_for_session Ws getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ds Fs createPersonProfile Ls Ps opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Os debug I As getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
 /* replay sampled 100% — drop to 20% if traffic 10x (free cap 5k/mo) */
@@ -1310,7 +1317,9 @@ posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'ide
 /* tier-2 identity stitch: make the web person's distinct_id == install_ref so the
    installer's first run (which carries the same nonce) merges into THIS person. */
 if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_ref);}
-}catch(_e){}}
+if(window.posthog&&typeof posthog.register_for_session==='function'){posthog.register_for_session(source_props);}
+if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph('reddit_entry_viewed',source_props);}
+	}catch(_e){}}
 </script>
 
 <script>
@@ -1403,11 +1412,11 @@ if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_r
         function done(){btn.classList.add('done');var o=btn.textContent;btn.textContent='copied ✓';
           setTimeout(function(){btn.classList.remove('done');btn.textContent=o;},1600);}
         if(kind==='agent_prompt'){
-          ph('install_agent_prompt_copied',{placement:placement,os_guess:osGuess,install_ref:install_ref});
-          ph('install_command_copied',{method:'agent_prompt',os:osGuess,placement:placement,install_ref:install_ref});
+          ph('install_agent_prompt_copied',Object.assign({placement:placement,os_guess:osGuess,install_ref:install_ref},source_props));
+          ph('install_command_copied',Object.assign({method:'agent_prompt',os:osGuess,placement:placement,install_ref:install_ref},source_props));
         }else{
-          ph('manual_install_command_copied',{placement:placement,os:os,install_ref:install_ref});
-          ph('install_command_copied',{method:'manual_command',os:os,placement:placement,install_ref:install_ref});
+          ph('manual_install_command_copied',Object.assign({placement:placement,os:os,install_ref:install_ref},source_props));
+          ph('install_command_copied',Object.assign({method:'manual_command',os:os,placement:placement,install_ref:install_ref},source_props));
         }
         if(navigator.clipboard&&navigator.clipboard.writeText){
           navigator.clipboard.writeText(txt).then(done).catch(function(){fallbackCopy(txt);done();});

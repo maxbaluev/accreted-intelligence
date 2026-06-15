@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14110b">
+<title>The context window is not your project manager - AccInt</title>
+<meta name="description" content="AccInt is a local Work Model for agent work: open promises, evidence packets, approval gates, outcomes, and reusable paths for Claude Code, Codex, Cursor, and OpenCode.">
+<meta property="og:title" content="The context window is not your project manager">
+<meta property="og:description" content="AccInt gives agents accountable work state: what is open, what changed, what passed, and what is allowed next.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://accint.xyz/reddit/">
+<meta property="og:image" content="https://accint.xyz/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://accint.xyz/og.png">
+<link rel="canonical" href="https://accint.xyz/reddit/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314110b'/%3E%3Crect x='6' y='12.5' width='7' height='7' fill='%23ff6a00'/%3E%3Crect x='16' y='13' width='10' height='2.4' fill='%23ece7db' opacity='.85'/%3E%3Crect x='16' y='17.7' width='6.5' height='2.4' fill='%23ece7db' opacity='.45'/%3E%3C/svg%3E">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#14110b;
+  --bg2:#181410;
+  --bg3:#201a13;
+  --ink:#ece7db;
+  --dim:#b0a795;
+  --faint:#8a8171;
+  --line:#31291f;
+  --rule:#514533;
+  --orange:#ff6a00;
+  --ok:#9db5d2;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-underline-offset:3px}
+a:hover{color:var(--orange)}
+::selection{background:var(--orange);color:#14110b}
+.wrap{width:min(1120px,100%);margin:0 auto;padding:0 26px}
+.top{position:sticky;top:0;z-index:10;background:rgba(20,17,11,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topin{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 26px}
+.brand{font-family:var(--mono);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-decoration:none}
+.brand span{color:var(--orange)}
+.nav{display:flex;align-items:center;gap:18px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.nav a{text-decoration:none}
+.nav .cta{background:var(--orange);color:#14110b;font-weight:800;padding:8px 12px}
+.hero{position:relative;border-bottom:1px solid var(--line);padding:78px 0 70px}
+.hero:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(236,231,219,.035) 0 1px,transparent 1px 5px)}
+.grid{position:relative;display:grid;grid-template-columns:1.02fr .98fr;gap:50px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+h1{margin-top:22px;font-family:var(--serif);font-weight:600;font-size:clamp(37px,6vw,68px);line-height:.98;letter-spacing:-.01em;text-wrap:balance}
+h1 em{font-style:italic;text-decoration:underline;text-decoration-color:var(--orange);text-decoration-thickness:3px;text-underline-offset:7px}
+.lede{margin-top:24px;max-width:650px;color:var(--dim);font-size:clamp(17px,2vw,20px);line-height:1.55}
+.lede b{color:var(--ink)}
+.proofline{margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);background:var(--bg2)}
+.proofline div{padding:14px 15px;border-right:1px solid var(--line);min-width:0}
+.proofline div:last-child{border-right:0}
+.proofline b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--orange)}
+.proofline span{display:block;margin-top:6px;color:var(--dim);font-size:13px}
+.install{border:1px solid var(--rule);background:var(--bg2);box-shadow:0 24px 80px rgba(0,0,0,.22)}
+.install-head{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+.install-head b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--orange)}
+.install-head span{display:block;margin-top:8px;color:var(--dim);font-size:14px}
+.tabs{display:flex;padding:14px 14px 0;gap:0}
+.tab{border:1px solid var(--line);background:var(--bg3);color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--orange);border-color:var(--orange);color:#14110b;font-weight:800}
+.panel{padding:14px}
+.panel[hidden]{display:none}
+.cmd{display:flex;border:1px solid var(--rule);background:#100d08}
+.cmd code{flex:1 1 auto;min-width:0;padding:14px 14px;font-family:var(--mono);font-size:12px;line-height:1.65;color:var(--ink);overflow-wrap:anywhere;word-break:break-word}
+.cmd:not(.one) code{display:block;max-height:286px;overflow:auto}
+.cmd.one code{white-space:nowrap;overflow-x:auto}
+.cmd.one code:before{content:"$ ";color:var(--orange)}
+.cmd.one.win code:before{content:"PS> "}
+.copy{flex:0 0 auto;border:0;border-left:1px solid var(--line);background:var(--orange);color:#14110b;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:0 18px;cursor:pointer}
+.copy:hover{background:var(--ink)}
+.copy.done{background:var(--ok)}
+.agent-foot{margin-top:12px;color:var(--faint);font-family:var(--mono);font-size:12px;line-height:1.55}
+.agent-foot b{color:var(--dim)}
+section{padding:72px 0;border-bottom:1px solid var(--line)}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange)}
+h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-weight:600;line-height:1.05;letter-spacing:-.01em;text-wrap:balance}
+.body{margin-top:18px;color:var(--dim);max-width:760px;font-size:18px}
+.cards{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--bg2);padding:20px;min-height:180px}
+.card b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ok)}
+.card h3{margin-top:14px;font-size:19px;line-height:1.22}
+.card p{margin-top:10px;color:var(--dim);font-size:14px}
+.ledger{margin-top:30px;border:1px solid var(--rule);background:var(--bg2)}
+.ledger-head{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding:12px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.rows{list-style:none}
+.row{display:grid;grid-template-columns:104px 1fr 118px;gap:16px;align-items:start;padding:15px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px}
+.row:last-child{border-bottom:0}
+.verb{color:var(--orange);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.what{color:var(--dim)}
+.what b{color:var(--ink);font-weight:700}
+.stamp{justify-self:end;color:#14110b;background:var(--ok);padding:3px 7px;font-size:10px;font-weight:800;letter-spacing:.08em}
+.stamp.hold{background:var(--orange)}
+.channel{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.channel .card{min-height:0}
+.footer{padding:34px 0;color:var(--faint);font-family:var(--mono);font-size:12px}
+.footerin{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:900px){
+  .grid,.cards,.channel{grid-template-columns:1fr}
+  .hero{padding-top:58px}
+}
+@media(max-width:560px){
+  .wrap,.topin{width:min(100%,390px);margin-left:0;margin-right:auto;padding-left:18px;padding-right:18px}
+  .topin{align-items:flex-start}
+  .nav{gap:12px;flex-wrap:wrap;justify-content:flex-end}
+  .nav a:not(.cta){display:none}
+  .proofline{grid-template-columns:1fr}
+  .proofline div{border-right:0;border-bottom:1px solid var(--line)}
+  .proofline div:last-child{border-bottom:0}
+  .cmd{display:flex;flex-direction:column-reverse}
+  .copy{width:100%;min-height:42px;border-left:0;border-bottom:1px solid var(--line)}
+  .cmd.one code{white-space:normal;overflow-x:visible}
+  .row{grid-template-columns:1fr;gap:8px}
+  .stamp{justify-self:start}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="topin">
+    <a class="brand" href="/">acc<span>[ ]</span>int</a>
+    <nav class="nav" aria-label="Page links">
+      <a href="#why">Why it works</a>
+      <a href="#flow">Flow</a>
+      <a href="#install" class="cta">Install</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap grid">
+      <div>
+        <div class="eyebrow">For agent builders coming from Reddit</div>
+        <h1>The context window is not your <em>project manager</em>.</h1>
+        <p class="lede">Claude Code, Codex, Cursor, and OpenCode can write real code. The hard part is keeping the work accountable: <b>what is open, what changed, what passed, what failed, and what is allowed next</b>.</p>
+        <div class="proofline" aria-label="AccInt Work Model primitives">
+          <div><b>Open promises</b><span>blocked, active, stale, and done are explicit states.</span></div>
+          <div><b>Evidence packets</b><span>"Done" needs checks, receipts, and what was not tested.</span></div>
+          <div><b>Outcome credit</b><span>Only reality teaches the next run what to trust.</span></div>
+        </div>
+      </div>
+
+      <div class="install" id="install" data-placement="reddit_hero" aria-label="Install AccInt">
+        <div class="install-head">
+          <b>Install the local Work Model</b>
+          <span>Paste this into the agent you already use. It will run the installer and wire itself in.</span>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Install method">
+          <button class="tab" role="tab" data-panel="agent" aria-selected="true" aria-controls="panel-agent">Agent paste</button>
+          <button class="tab" role="tab" data-panel="manual" aria-selected="false" tabindex="-1" aria-controls="panel-manual">Manual</button>
+        </div>
+        <div class="panel" id="panel-agent" data-panel="agent">
+          <div class="cmd">
+            <code id="agent-prompt">Install AccInt for yourself - a local Work Model for agent work. I want it to track open promises, evidence, checks, outcomes, and what actually worked across my projects so Claude Code, Codex, Cursor, or OpenCode start with accountable work state instead of a context dump. Run the installer for my OS - macOS/Linux: curl -fsSL https://accint.xyz/install | sh; Windows PowerShell: irm https://accint.xyz/install.ps1 | iex - then run `acc hosts-sync` to wire yourself onto it, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks before anything leaves my machine.</code>
+            <button class="copy" data-target="agent-prompt" data-kind="agent_prompt" aria-label="Copy agent install prompt">copy</button>
+          </div>
+          <p class="agent-foot">Best for <b>Claude Code, Codex, Cursor, OpenCode</b>. One paste, then the agent runs the setup.</p>
+        </div>
+        <div class="panel" id="panel-manual" data-panel="manual" hidden>
+          <div class="cmd one" data-os="nix">
+            <code id="cmd-nix">curl -fsSL https://accint.xyz/install | sh</code>
+            <button class="copy" data-target="cmd-nix" data-kind="manual_command" aria-label="Copy macOS/Linux command">copy</button>
+          </div>
+          <p class="agent-foot">Windows PowerShell: <button class="copy" data-target="cmd-win" data-kind="manual_command" aria-label="Copy Windows command">copy</button></p>
+          <div class="cmd one win" data-os="win" style="margin-top:10px">
+            <code id="cmd-win">irm https://accint.xyz/install.ps1 | iex</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="wrap">
+      <div class="tag">Why this is different</div>
+      <h2>Your agent needs accountable work state, not a bigger pile of context.</h2>
+      <p class="body">Reddit threads about coding agents keep circling the same problem: the model can produce code, but the human still has to manage the work. AccInt makes that management layer explicit and local.</p>
+      <div class="cards">
+        <article class="card">
+          <b>Babysitting</b>
+          <h3>The tired-manager-with-git-diff problem.</h3>
+          <p>Small task, run checks, inspect diff, pull it back on scope, repeat. AccInt turns that loop into a ledger the agent can operate against.</p>
+        </article>
+        <article class="card">
+          <b>Premature done</b>
+          <h3>"Done" is a state transition.</h3>
+          <p>The agent can propose completion. The Work Model waits for evidence: files changed, checks run, what was not tested, what could still break.</p>
+        </article>
+        <article class="card">
+          <b>Repeated mistakes</b>
+          <h3>Worked once is not a universal rule.</h3>
+          <p>Fixes only become trusted when reality confirms them in context. Stale or self-claimed lessons stay weak.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="flow">
+    <div class="wrap">
+      <div class="tag">The flow</div>
+      <h2>Agent work becomes a loop you can inspect.</h2>
+      <div class="ledger" role="img" aria-label="AccInt work loop: promise, act, prove, settle, carry forward">
+        <div class="ledger-head"><span>Work Model loop</span><span>local / receipted / owner-gated</span></div>
+        <ul class="rows">
+          <li class="row"><span class="verb">promise</span><span class="what"><b>Record the task state</b>: open, blocked, stale, done, and the next concrete action.</span><span class="stamp">OPEN</span></li>
+          <li class="row"><span class="verb">act</span><span class="what"><b>Run the work</b> through the agent you already use, with real commands and receipts.</span><span class="stamp hold">HELD</span></li>
+          <li class="row"><span class="verb">prove</span><span class="what"><b>Attach evidence</b>: checks, files changed, owner approval, external reply, or a failed gate.</span><span class="stamp">EVIDENCE</span></li>
+          <li class="row"><span class="verb">settle</span><span class="what"><b>Let reality grade it</b>. Passing tests and real outcomes count more than the agent's own confidence.</span><span class="stamp">CREDIT</span></li>
+          <li class="row"><span class="verb">carry</span><span class="what"><b>Start the next run ahead</b> with the accountable state that actually earned trust.</span><span class="stamp">NEXT</span></li>
+        </ul>
+      </div>
+      <div class="channel">
+        <article class="card">
+          <b>Runs locally</b>
+          <h3>No account, no API key, no cloud control plane.</h3>
+          <p>One binary and one local substrate. External actions are held for your OK.</p>
+        </article>
+        <article class="card">
+          <b>Fits current tools</b>
+          <h3>Keep Claude Code, Codex, Cursor, or OpenCode.</h3>
+          <p>AccInt sits underneath the agents already doing your work.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footerin">
+    <span>Accreted Intelligence / Work Model for agent work</span>
+    <span><a href="/">main site</a> / <a href="https://github.com/maxbaluev/accreted-intelligence">GitHub</a> / <a href="https://github.com/maxbaluev/accreted-intelligence/issues/new">report a bug</a></span>
+  </div>
+</footer>
+
+<script>
+var PH_KEY='phc_A5xgn9QqiSCKXivifKGEBPrpSZDwvFyxm5op974q3ekC';
+var PH_HOST='https://us.i.posthog.com';
+function ph(ev,props){try{if(window.posthog&&typeof window.posthog.capture==='function'){window.posthog.capture(ev,props||{});}}catch(_e){}}
+var install_ref='';try{if(window.crypto&&window.crypto.getRandomValues){var _ir=new Uint8Array(6);window.crypto.getRandomValues(_ir);for(var _i=0;_i<_ir.length;_i++){install_ref+=('0'+_ir[_i].toString(16)).slice(-2);}}}catch(_e){install_ref='';}
+var source_props={landing:'reddit',utm_source:'reddit',utm_medium:'organic',utm_campaign:'work_model'};
+try{
+  var qs=new URLSearchParams(window.location.search||'');
+  ['utm_source','utm_medium','utm_campaign','utm_content','ref','rsub','thread','entry'].forEach(function(k){
+    var v=qs.get(k);if(v){source_props[k]=String(v).slice(0,96);}
+  });
+  if(!source_props.ref&&/reddit/i.test(document.referrer||'')){source_props.ref='reddit_referrer';}
+}catch(_e){}
+if(PH_KEY){try{
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register_for_session identify".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-05-30',person_profiles:'identified_only',session_recording:{maskAllInputs:true,maskTextSelector:null,recordCanvas:false},capture_exceptions:true});
+if(install_ref&&typeof posthog.identify==='function'){posthog.identify(install_ref);}
+if(typeof posthog.register_for_session==='function'){posthog.register_for_session(source_props);}
+ph('reddit_landing_viewed',Object.assign({install_ref:install_ref},source_props));
+}catch(_e){}}
+(function(){
+  function fallbackCopy(t){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(_e){}}
+  function withInstallRef(txt,kind,os){
+    if(!install_ref){return txt;}
+    if(kind==='agent_prompt'){
+      return txt
+        .replace('curl -fsSL https://accint.xyz/install | sh','curl -fsSL https://accint.xyz/install | ACC_INSTALL_REF='+install_ref+' sh')
+        .replace('irm https://accint.xyz/install.ps1 | iex',"$env:ACC_INSTALL_REF='"+install_ref+"'; irm https://accint.xyz/install.ps1 | iex");
+    }
+    if(os==='win'){return "$env:ACC_INSTALL_REF='"+install_ref+"'; "+txt;}
+    return txt.replace('| sh','| ACC_INSTALL_REF='+install_ref+' sh');
+  }
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var panels=[].slice.call(document.querySelectorAll('.panel'));
+  function showPanel(name){
+    tabs.forEach(function(t){var on=t.dataset.panel===name;t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;});
+    panels.forEach(function(p){p.hidden=p.dataset.panel!==name;});
+    ph('reddit_install_method_selected',Object.assign({method:name,install_ref:install_ref},source_props));
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){showPanel(t.dataset.panel);});});
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var code=document.getElementById(btn.dataset.target);
+      var txt=code?code.textContent:'';
+      var kind=btn.getAttribute('data-kind')||'manual_command';
+      var os=(btn.closest('.cmd')&&btn.closest('.cmd').getAttribute('data-os'))||(/Win/i.test(navigator.platform||navigator.userAgent||'')?'win':'nix');
+      txt=withInstallRef(txt,kind,os);
+      function done(){btn.classList.add('done');var old=btn.textContent;btn.textContent='copied';setTimeout(function(){btn.classList.remove('done');btn.textContent=old;},1500);}
+      ph(kind==='agent_prompt'?'reddit_agent_prompt_copied':'reddit_manual_install_copied',Object.assign({method:kind,os:os,install_ref:install_ref},source_props));
+      ph('install_command_copied',Object.assign({method:kind,os:os,placement:'reddit',install_ref:install_ref},source_props));
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(function(){fallbackCopy(txt);done();});}
+      else{fallbackCopy(txt);done();}
+    });
+  });
+})();
+</script>
+</body>
+</html>
