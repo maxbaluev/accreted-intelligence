@@ -8,12 +8,12 @@ phases; resume is structural (each phase checks its own postcondition first -- n
 file). Drives the WINDOWS tier ladder from probed host facts (nvidia-smi free VRAM, OS
 build, PROCESSOR_ARCHITECTURE, total RAM), so the embedder lane is chosen, not guessed.
 
-WINDOWS TIER LADDER (full bf16 only -- AWQ/triton has NO windows wheels, never selected):
-  NVIDIA, free VRAM >= 10GB  -> ColQwen3-8B full bf16 on cuda (torch-cuda resolves natively)
-  NVIDIA, free VRAM >=  5GB  -> ColQwen3-4B full bf16 on cuda
-  RAM >= 24GB                -> ColQwen3-8B full bf16 on cpu (slow, multimodal)
-  RAM >= 12GB                -> ColQwen3-4B full bf16 on cpu
-  RAM >=  2GB                -> LateOn text-only on cpu (last resort)
+WINDOWS TIER LADDER (full bf16 only -- AWQ/triton has NO windows wheels, never selected;
+mirrors src/selector.rs select_model_for_os windows branch so phase 0 and `acc pin` AGREE):
+  NVIDIA, free VRAM >= 20GB  -> ColQwen3-8B full bf16 on cuda (torch-cuda resolves natively)
+  NVIDIA, free VRAM >= 12GB  -> ColQwen3-4B full bf16 on cuda
+  no usable GPU, RAM >= 2GB  -> LateOn text-only on cpu (light ~0.6GB default; multimodal needs
+                               a cuda GPU, or force ACC_TIER=8b-full/4b-full to run it on cpu)
   below                      -> the CONTAINER tier path (docs/INSTALL_CONTAINER.md)
   DISK FLOOR (every rung): expected model download (static sizes mirrored from
   encoders/prefetch.py) + 2048MB headroom must fit the free disk at the HF cache
@@ -57,7 +57,8 @@ Windows-specific reality this installer owns:
     connect 127.0.0.1:<port> and authenticate with the token. This installer writes
     run\endpoint.json declaring that contract (engine_lane: pending|live).
   - sandbox: no bwrap on windows -- exec runtimes run under acc's built-in deadline.
-  - browser: Camoufox windows lane not yet ported -- ACC_NO_BROWSER semantics by default.
+  - browser: Camoufox host-side lane -- browser venv under %APPDATA%\acc\browser,
+    endpoint via the same TCP-loopback + token local-IPC contract as the Rust client.
   - sqlite: rusqlite uses the bundled amalgamation on windows (Cargo.toml target block)
     -- no system sqlite dev package needed.
 
@@ -123,6 +124,11 @@ $EmbTokenFile   = Join-Path $RunDir 'embedder.token'
 $EndpointConfig = Join-Path $RunDir 'endpoint.json'
 $EmbLogOut      = Join-Path $RunDir 'embedder.log'
 $EmbLogErr      = Join-Path $RunDir 'embedder.err.log'
+$BrowserHome    = if ($env:ACC_BROWSER_HOME) { $env:ACC_BROWSER_HOME } else { Join-Path $ConfigHome 'browser' }
+$BrowserVenv    = Join-Path $BrowserHome 'venv'
+$BrowserScripts = Join-Path $BrowserVenv 'Scripts'
+$BrowserPython  = Join-Path $BrowserScripts 'python.exe'
+$BrowserProfiles = Join-Path $BrowserHome 'profiles'
 
 $EncoderScript  = Join-Path (Join-Path $Repo 'encoders') 'li_encode.py'   # the ONE windows lane (PEP508 markers resolve torch per platform)
 
@@ -168,6 +174,19 @@ function Act([string]$Desc, [scriptblock]$Action) {
   catch { Warn ($Desc + ' failed: ' + $_.Exception.Message); return $false }
 }
 
+function Install-WingetPackage([string]$Id, [string]$Label, [string[]]$ExtraArgs = @()) {
+  if (-not (Have 'winget')) { return $false }
+  return (Act ("install $Label via winget ($Id)") {
+    $args = @(
+      'install', '--id', $Id, '--exact', '--source', 'winget',
+      '--silent', '--accept-package-agreements', '--accept-source-agreements'
+    )
+    if ($ExtraArgs.Count -gt 0) { $args += $ExtraArgs }
+    $r = Invoke-Native 'winget' $args
+    if (-not $r.ok) { throw "winget install $Id failed" }
+  })
+}
+
 # Run a native command quietly; never throws; returns @{ ok; out }.
 function Invoke-Native([string]$Exe, [string[]]$Argv) {
   $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
@@ -196,8 +215,9 @@ function Invoke-NativeChatter([string]$Exe, [string[]]$Argv) {
 # runs identically in dry-run and real mode. Guarded so a cross-platform dry-run works.
 # =========================================================================================
 # Selector floors (MB) -- the WINDOWS ladder (full bf16 lanes only; never AWQ/triton).
-$CUDA_8B_VRAM = 10000; $CUDA_4B_VRAM = 5000
-$CPU_8B_RAM   = 24000; $CPU_4B_RAM   = 12000
+# MIRROR src/selector.rs WIN_FULL_{8B,4B}_MIN_VRAM_MB so phase 0 and `acc pin` AGREE (they
+# disagreed before: phase 0 used 10/5GB and prefetched an 8B the Rust pin would never select).
+$CUDA_8B_VRAM = 20000; $CUDA_4B_VRAM = 12000
 $LATEON_RAM   = 2000
 
 # DISK FLOOR (MB) -- model weights land in the HF cache; the pick's expected download
@@ -329,19 +349,15 @@ function Select-Tier {
     $script:Tier = '4b-full'; $script:ModelId = 'TomoroAI/tomoro-colqwen3-embed-4b'; $script:Device = 'cuda'
     $script:TierReason = "GPU ${vram}MB free >= ${CUDA_4B_VRAM} (< ${CUDA_8B_VRAM} for 8B) -> ColQwen3-4B full bf16 on cuda"; return
   }
-  # 3-4: full bf16 on cpu -- slow but multimodal.
-  if ($ram -ge $CPU_8B_RAM) {
-    $script:Tier = '8b-full'; $script:ModelId = 'TomoroAI/tomoro-colqwen3-embed-8b'; $script:Device = 'cpu'
-    $script:TierReason = "no fitting GPU (free VRAM ${vram}MB), RAM ${ram}MB >= ${CPU_8B_RAM} -> ColQwen3-8B full bf16 on cpu (slow, multimodal)"; return
-  }
-  if ($ram -ge $CPU_4B_RAM) {
-    $script:Tier = '4b-full'; $script:ModelId = 'TomoroAI/tomoro-colqwen3-embed-4b'; $script:Device = 'cpu'
-    $script:TierReason = "no fitting GPU (free VRAM ${vram}MB), RAM ${ram}MB >= ${CPU_4B_RAM} -> ColQwen3-4B full bf16 on cpu (slow, multimodal)"; return
-  }
-  # 5: LateOn -- text-only last resort; keeps every host functional natively.
+  # 3: LateOn -- the light text-only DEFAULT for any windows host with NO usable GPU. Windows has
+  # no AWQ/triton lane AND no fresh cpu-ColQwen lane in the selector, so a no-GPU pick is LateOn
+  # (matches src/selector.rs select_model_for_os windows branch + the cross-OS new-user default:
+  # a fast ~0.6GB first run, not a multi-GB ColQwen-on-cpu grind). Multimodal needs a cuda GPU,
+  # or ACC_TIER=8b-full/4b-full to force ColQwen on cpu; a pinned cuda model still degrades to cpu
+  # (recoverable) at runtime via the daemon-start device re-validation.
   if ($ram -ge $LATEON_RAM) {
     $script:Tier = 'lateon'; $script:ModelId = 'lightonai/LateOn'; $script:Device = 'cpu'
-    $script:TierReason = "no ColQwen3 tier fits (RAM ${ram}MB, free VRAM ${vram}MB) -> LateOn (text-only last resort) on cpu"; return
+    $script:TierReason = "no usable GPU (free VRAM ${vram}MB) -> LateOn (light text-only default; multimodal needs a cuda GPU or ACC_TIER) on cpu"; return
   }
   # 6: nothing viable natively -> the container tier path.
   $script:Tier = 'container'; $script:ModelId = ''; $script:Device = ''
@@ -469,12 +485,24 @@ if (Have 'python') {
 } else {
   Emit-Phase 'prereq_python' 'ok' 'no system python -- fine on windows: uv provisions the encoder env interpreter (phase 4); installer JSON is native PowerShell'
 }
-# git -- needed for clone/update flows and cargo git deps; warn + instruct, never auto-install.
+# git -- needed for clone/update flows, source fallback, and POSIX hook-script shells.
 if (Have 'git') {
   $gv = ''; $r = Invoke-Native 'git' @('--version'); if ($r.ok -and $r.out) { $gv = (('' + ($r.out | Select-Object -First 1)) -split '\s+')[-1] }
   Emit-Phase 'prereq_git' 'ok' ("git present ($gv)")
 } else {
-  Emit-Phase 'prereq_git' 'skipped' 'git not found -- repo updates and the POSIX hook scripts (Git Bash) need it' 'install Git for Windows: winget install Git.Git (https://git-scm.com/download/win)'
+  $gitOk = $false
+  if ($script:OnWindows) {
+    $gitOk = Install-WingetPackage 'Git.Git' 'Git for Windows'
+    foreach ($d in @((Join-Path $env:ProgramFiles 'Git\cmd'), (Join-Path $env:ProgramFiles 'Git\bin'), (Join-Path ${env:ProgramFiles(x86)} 'Git\cmd'))) {
+      if ($d -and (Test-Path $d)) { $env:Path = $d + [IO.Path]::PathSeparator + $env:Path }
+    }
+  }
+  if ($gitOk) {
+    $st = 'ok'; if ($DryRun) { $st = 'would' }
+    Emit-Phase 'prereq_git' $st 'Git for Windows installed via winget (clone/update/source fallback available)' 'phase 2: system deps'
+  } else {
+    Emit-Phase 'prereq_git' 'skipped' 'git not found and winget is unavailable or failed -- repo updates/source fallback may be limited' 'install Git for Windows: winget install Git.Git (https://git-scm.com/download/win)'
+  }
 }
 
 # =========================================================================================
@@ -483,8 +511,7 @@ if (Have 'git') {
 # on windows via Cargo.toml's [target.'cfg(windows)'.dependencies] block).
 # =========================================================================================
 Step 'phase 2 -- system deps (MSVC linker + sandbox)'
-# VS Build Tools / link.exe -- cargo's MSVC target needs it. Warn + instruct, do NOT
-# auto-install (multi-GB Visual Studio component; owner consent belongs to that install).
+# VS Build Tools / link.exe -- cargo's MSVC target needs it for source fallback.
 function Test-MsvcLinker {
   if (Have 'link.exe') { return $true }
   $pf86 = ${env:ProgramFiles(x86)}
@@ -504,7 +531,16 @@ if ($HasMsvc) {
 } elseif (-not $script:OnWindows) {
   Emit-Phase 'sysdeps_msvc' 'skipped' 'non-windows dry-run host -- MSVC probe not applicable here'
 } else {
-  Emit-Phase 'sysdeps_msvc' 'skipped' 'link.exe NOT found -- cargo build will fail without VS Build Tools (C++ workload); not auto-installed (multi-GB, needs your consent)' 'winget install Microsoft.VisualStudio.2022.BuildTools --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" (or https://visualstudio.microsoft.com/visual-cpp-build-tools/), then re-run .\install.ps1'
+  $msvcOk = Install-WingetPackage 'Microsoft.VisualStudio.2022.BuildTools' 'VS Build Tools (VC toolchain)' @(
+    '--override',
+    '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait --norestart'
+  )
+  if ($msvcOk) {
+    $st = 'ok'; if ($DryRun) { $st = 'would' }
+    Emit-Phase 'sysdeps_msvc' $st 'VS Build Tools installed via winget (VC toolchain for cargo source fallback)' 'phase 3: binary'
+  } else {
+    Emit-Phase 'sysdeps_msvc' 'skipped' 'link.exe NOT found and winget is unavailable or failed -- prebuilt install can still work, source fallback needs VS Build Tools' 'winget install Microsoft.VisualStudio.2022.BuildTools --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait --norestart" (or https://visualstudio.microsoft.com/visual-cpp-build-tools/), then re-run .\install.ps1'
+  }
 }
 # sandbox -- no bwrap on windows; mirror of install.sh's macOS branch, stated honestly.
 Emit-Phase 'sysdeps_sandbox' 'skipped' "windows: no bwrap -- exec runtimes run under acc's built-in deadline only (sandbox windows lane pending). sqlite: bundled in the windows build, no system package needed"
@@ -643,7 +679,14 @@ function Invoke-PrebuiltFetch {
       return $false
     }
     $null = New-Item -ItemType Directory -Path $UserBinDir -Force
-    Move-Item -Path $exe -Destination (Join-Path $UserBinDir 'acc.exe') -Force
+    $accExe = Join-Path $UserBinDir 'acc.exe'
+    Move-Item -Path $exe -Destination $accExe -Force
+    # FREE Windows trust (no paid code-signing cert): Invoke-WebRequest stamps the Mark-of-the-Web
+    # (Zone.Identifier ADS) on downloads, which makes Defender/SmartScreen scan-gate the file.
+    # Unblock-File strips it so the CLI runs without a SmartScreen prompt. Integrity is already
+    # covered by the sha256 verify above (a tampered acc.exe is REFUSED). Proper code-signing
+    # (Azure Trusted Signing ~$10/mo, or an EV cert) is only needed for direct .exe / GUI launches.
+    Unblock-File -Path $accExe -ErrorAction SilentlyContinue
     # hash -r equivalent: re-prepend the bin dir on this session's PATH so Get-Command
     # re-resolves acc fresh (PowerShell has no command hash table to flush).
     $env:Path = $UserBinDir + [IO.Path]::PathSeparator + $env:Path
@@ -728,9 +771,14 @@ if ($IdMatch) {
 # resolve/download cost ONCE, before the daemon's first encode. Idempotent (uv caches).
 # =========================================================================================
 Step 'phase 4 -- encoder env (uv sync of the tier script deps)'
-if (-not (Test-Path $EncoderScript)) {
-  Emit-Phase 'encoder_env' 'skipped' ("no encoder script for tier=$script:Tier (missing $EncoderScript)") 'tier mis-selected -- check phase 0'
-} else {
+# Resolve the encoder-env-warm path. A DEV checkout ships encoders\li_encode.py on disk ->
+# `uv sync --script <file>`. A binary-only RELEASE install ships no encoders\ dir -> the encoder
+# scripts are embedded in the binary and reachable as `acc warm-encoder <model>` (probe with
+# --help), which materializes the tier's encoder and `uv sync --script`s it with VISIBLE uv
+# progress and WITHOUT loading the model. Either path resolves+caches the (multi-GB)
+# torch/transformers/awq/flash-attn env once, before the daemon's first encode. Mirrors install.sh
+# phase 4 and the phase-6 prefetch binary fallback.
+if (Test-Path $EncoderScript) {
   $synced = Act ("uv sync --script li_encode.py (resolve+cache the $script:Tier encoder deps; PEP508 markers pick the windows torch lane)") {
     $r = Invoke-Native 'uv' @('sync', '--script', $EncoderScript)
     if (-not $r.ok) { throw 'uv sync --script reported an issue' }
@@ -740,6 +788,31 @@ if (-not (Test-Path $EncoderScript)) {
     Emit-Phase 'encoder_env' $st ("encoder env ready for $script:Tier (li_encode.py deps resolved/cached)") 'phase 5: model pin'
   } else {
     Emit-Phase 'encoder_env' 'skipped' 'uv sync --script reported an issue (deps resolve lazily on first encode)' ("re-run; or check: uv sync --script $EncoderScript")
+  }
+} else {
+  $accHasWarm = $false
+  if ($script:ModelId) { try { & $Acc warm-encoder --help *> $null; $accHasWarm = ($LASTEXITCODE -eq 0) } catch { $accHasWarm = $false } }
+  if ($accHasWarm) {
+    # Binary-only release install: on-disk encoders\ absent but the binary carries the embedded
+    # encoder scripts. Warm the env via the binary so the wheel download is VISIBLE here instead
+    # of hidden inside the first embedder start.
+    if ($DryRun) {
+      Say ("WOULD: acc warm-encoder $script:ModelId (uv sync --script the tier's embedded encoder env, live progress, no model load)")
+      Emit-Phase 'encoder_env' 'would' ("warm the encoder env for $script:Tier via acc warm-encoder $script:ModelId (torch/transformers/... -- several GB, one time)") 'phase 5: model pin'
+    } else {
+      Say ("resolving the encoder env (torch/transformers/... -- several GB, one time)...")
+      $warmOk = $false
+      $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+      try { & $Acc warm-encoder $script:ModelId; $warmOk = ($LASTEXITCODE -eq 0) } catch { $warmOk = $false }
+      finally { $ErrorActionPreference = $prev }
+      if ($warmOk) {
+        Emit-Phase 'encoder_env' 'ok' ("encoder env ready for $script:Tier (acc warm-encoder $script:ModelId -- torch/transformers/... resolved/cached)") 'phase 5: model pin'
+      } else {
+        Emit-Phase 'encoder_env' 'skipped' 'acc warm-encoder reported an issue (deps resolve lazily on first encode)' 're-run; or let the daemon resolve the env lazily on first start'
+      }
+    }
+  } else {
+    Emit-Phase 'encoder_env' 'skipped' ("no encoder env to warm for tier=$script:Tier (on-disk $EncoderScript absent and the binary has no warm-encoder subcommand, or no model pinned)") 'tier mis-selected -- check phase 0'
   }
 }
 
@@ -780,8 +853,20 @@ Step 'phase 6 -- model prefetch (weights into the HF cache, visible progress)'
 $PrefetchScript = Join-Path (Join-Path $Repo 'encoders') 'prefetch.py'
 $ExpMb = Get-ExpectedModelMb $script:Tier
 $NeedMb = $ExpMb + $DISK_HEADROOM_MB
-if ((-not $script:ModelId) -or (-not (Test-Path $PrefetchScript))) {
-  Emit-Phase 'model_prefetch' 'skipped' ("no model to prefetch for tier=$script:Tier (or missing $PrefetchScript)") 'phase 7: substrate'
+# Resolve the prefetch command. Dev checkouts ship encoders\prefetch.py -> run it via uv.
+# A binary-only RELEASE install ships no encoders\ dir -> the script is embedded in the binary
+# and reachable as `acc prefetch` (probe with --help). Either way the weights download with
+# huggingface_hub's live progress. No command -> the prefetch is skipped (daemon downloads lazily).
+$PrefetchExe = $null; $PrefetchLead = @(); $PrefetchDisplay = $null
+if (Test-Path $PrefetchScript) {
+  $PrefetchExe = 'uv'; $PrefetchLead = @('run', $PrefetchScript); $PrefetchDisplay = 'uv run encoders\prefetch.py'
+} else {
+  $accHasPrefetch = $false
+  try { & $Acc prefetch --help *> $null; $accHasPrefetch = ($LASTEXITCODE -eq 0) } catch { $accHasPrefetch = $false }
+  if ($accHasPrefetch) { $PrefetchExe = $Acc; $PrefetchLead = @('prefetch'); $PrefetchDisplay = 'acc prefetch' }
+}
+if ((-not $script:ModelId) -or (-not $PrefetchExe)) {
+  Emit-Phase 'model_prefetch' 'skipped' ("no model to prefetch for tier=$script:Tier (or no prefetch path: on-disk $PrefetchScript absent and the binary has no prefetch subcommand)") 'phase 7: substrate'
 } elseif ($DryRun) {
   # Dry-run honesty: expected size (static, NO network) + the free-disk verdict only.
   if ($script:DiskFreeMb -gt 0) {
@@ -791,7 +876,7 @@ if ((-not $script:ModelId) -or (-not (Test-Path $PrefetchScript))) {
   } else {
     Say ("disk verdict: free disk unknown at $($script:HfCache) (PSDrive probe failed) -- floor not applied")
   }
-  Say ("WOULD: uv run encoders\prefetch.py $script:ModelId (snapshot_download: resume + cache reuse, live progress on stderr; ~$(MbToGb $ExpMb)GB expected -- static approximation, no network in dry-run)")
+  Say ("WOULD: $PrefetchDisplay $script:ModelId (snapshot_download: resume + cache reuse, live progress on stderr; ~$(MbToGb $ExpMb)GB expected -- static approximation, no network in dry-run)")
   Emit-Phase 'model_prefetch' 'would' ("prefetch $script:ModelId (~$(MbToGb $ExpMb)GB) into the HF cache with live progress") 'phase 7: substrate'
 } elseif (-not (Have 'uv')) {
   Emit-Phase 'model_prefetch' 'skipped' 'uv not on PATH -- prefetch unavailable' 're-run, or let the daemon download lazily on first start'
@@ -801,7 +886,7 @@ if ((-not $script:ModelId) -or (-not (Test-Path $PrefetchScript))) {
   $prefetchOk = $false; $prefetchOut = $null
   $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
   try {
-    $prefetchOut = & uv run $PrefetchScript $script:ModelId
+    $prefetchOut = & $PrefetchExe @PrefetchLead $script:ModelId
     $prefetchOk = ($LASTEXITCODE -eq 0)
   } catch { $prefetchOk = $false }
   finally { $ErrorActionPreference = $prev }
@@ -937,24 +1022,68 @@ if (Test-EmbedderWarm) {
 }
 
 # =========================================================================================
-# PHASE 10 -- browser capability. HONEST SKIP: the Camoufox browser-daemon windows lane is
-# not yet ported -- ACC_NO_BROWSER semantics apply by default on native windows for now.
+# PHASE 10 -- browser capability (Camoufox, host-side). Optional only when ACC_NO_BROWSER=1.
+# Mirrors install.sh's browser accelerator, with native Windows virtualenv paths. The binary
+# owns broker.py restore + daemon convergence at point of use; the installer provisions the
+# Python env and fetches the Camoufox browser so first browser use is ready.
 # =========================================================================================
 Step 'phase 10 -- browser capability (Camoufox)'
+function Get-BrowserCamoufox {
+  foreach ($name in @('camoufox.exe', 'camoufox.cmd', 'camoufox')) {
+    $p = Join-Path $BrowserScripts $name
+    if (Test-Path $p) { return $p }
+  }
+  return (Join-Path $BrowserScripts 'camoufox.exe')
+}
+function Test-BrowserVenvReady {
+  return ((Test-Path $BrowserPython) -and (Test-Path (Get-BrowserCamoufox)))
+}
 if ($NoBrowser) {
   Emit-Phase 'browser' 'skipped' 'ACC_NO_BROWSER=1 -- browser capability skipped'
+} elseif (Test-BrowserVenvReady) {
+  Emit-Phase 'browser' 'ok' ("browser venv already provisioned at $BrowserVenv")
+} elseif ($DryRun) {
+  Emit-Phase 'browser' 'would' ("create browser venv at $BrowserVenv; install camoufox+playwright; fetch Camoufox") 'phase 11: seed'
+} elseif (-not (Have 'uv')) {
+  Emit-Phase 'browser' 'failed' 'uv not on PATH -- cannot provision the Camoufox browser env' 're-run phase 1 or install uv from https://astral.sh/uv'
 } else {
-  Emit-Phase 'browser' 'skipped' 'browser daemon windows lane not yet ported -- ACC_NO_BROWSER semantics by default on native windows for now (the Camoufox host-side lane lands with the engine port)'
+  $browserOk = $true
+  $browserOk = $browserOk -and (Act 'create browser dirs' {
+    foreach ($d in @($BrowserHome, $BrowserProfiles)) {
+      if (-not (Test-Path $d)) { $null = New-Item -ItemType Directory -Path $d -Force }
+    }
+  })
+  if (-not (Test-Path $BrowserPython)) {
+    $browserOk = $browserOk -and (Act ("create browser venv at $BrowserVenv") {
+      $r = Invoke-NativeChatter 'uv' @('venv', $BrowserVenv)
+      if (-not $r) { throw 'uv venv reported an issue' }
+    })
+  }
+  $browserOk = $browserOk -and (Act 'install camoufox + playwright into the browser venv' {
+    $r = Invoke-NativeChatter 'uv' @('pip', 'install', '--python', $BrowserPython, '-q', 'camoufox', 'playwright')
+    if (-not $r) { throw 'uv pip install camoufox playwright reported an issue' }
+  })
+  $browserOk = $browserOk -and (Act 'fetch Camoufox browser (idempotent)' {
+    $cf = Get-BrowserCamoufox
+    $r = Invoke-NativeChatter $cf @('fetch')
+    if (-not $r) { throw 'camoufox fetch reported an issue' }
+  })
+  if ($browserOk -and (Test-BrowserVenvReady)) {
+    Emit-Phase 'browser' 'ok' ("Camoufox browser ready at $BrowserHome (daemon + runtime:browser seeded in phase 11)") 'phase 11: seed'
+  } else {
+    Emit-Phase 'browser' 'failed' 'Camoufox browser provisioning did not complete' ("re-run .\install.ps1; or: uv pip install --python $BrowserPython camoufox playwright; $(Get-BrowserCamoufox) fetch")
+  }
 }
 
 # =========================================================================================
 # PHASE 11 -- seed core runtimes (waits for the embedder to warm -- seeding encodes with
-# the REAL embedder). Browser convergence is skipped on windows (phase 10); the embedder
+# the REAL embedder). Browser convergence (`acc browser start`) runs once the embedder is
+# warm, restoring broker.py, starting the broker, and seeding runtime:browser. The embedder
 # warm-wait mirrors install.sh's 600s loop over the tcp-loopback+token round-trip.
 # =========================================================================================
 Step 'phase 11 -- seed core runtimes (waits for the embedder)'
 if ($DryRun) {
-  Emit-Phase 'seed' 'would' 'wait for the embedder to warm (browser convergence skipped on windows -- lane pending)' 'phase 12: wiring'
+  Emit-Phase 'seed' 'would' 'wait for the embedder to warm, then converge the Camoufox browser daemon + seed runtime:browser' 'phase 12: wiring'
 } elseif (-not $BinaryAvailable) {
   Emit-Phase 'seed' 'skipped' ("seeding requires the acc binary + warm embedder -- $EnginePendingNote") 'after the port lands: re-run .\install.ps1'
 } else {
@@ -967,7 +1096,16 @@ if ($DryRun) {
   }
   if ($warm) {
     if ($i -gt 0) { Say ("embedder ready after ~${i}s") }
-    Emit-Phase 'seed' 'ok' 'embedder warm (browser skipped -- windows lane pending)' 'phase 12: wiring'
+    if (-not $NoBrowser) {
+      $r = Invoke-Native $Acc @('--db', $DbPath, 'browser', 'start')
+      if ($r.ok) {
+        Emit-Phase 'seed' 'ok' 'converged Camoufox browser daemon + seeded runtime:browser' 'phase 12: wiring'
+      } else {
+        Emit-Phase 'seed' 'failed' 'browser convergence reported an issue after embedder warm' ("check the broker log, then run: acc --db $DbPath browser start")
+      }
+    } else {
+      Emit-Phase 'seed' 'ok' 'embedder warm (browser skipped)' 'phase 12: wiring'
+    }
   } else {
     Emit-Phase 'seed' 'skipped' 'embedder did not warm within 10min (the windows embedder lane may still be pending -- check the log)' ("later: re-run .\install.ps1 (log: $EmbLogOut)")
   }
@@ -1099,23 +1237,71 @@ if (-not $BinaryAvailable) {
 } elseif ($DryRun) {
   $r = Invoke-Native $Acc @('hosts-sync', '--dry-run')
   foreach ($line in @($r.out)) { $l = ('' + $line).Trim(); if ($l) { Say $l } }
-  Emit-Phase 'hosts_sync' 'would' 'converge installed coding agents (preview above -- add-only; nothing written in dry-run)' 'phase 15: verify'
+  Emit-Phase 'hosts_sync' 'would' 'converge installed coding agents (preview above -- add-only; nothing written in dry-run)' 'phase 15: telemetry'
 } else {
   $r = Invoke-Native $Acc @('hosts-sync')
   foreach ($line in @($r.out)) { $l = ('' + $line).Trim(); if ($l) { Say $l } }
   if ($r.ok) {
-    Emit-Phase 'hosts_sync' 'ok' 'installed coding agents converged (per-host lines above; re-run acc hosts-sync after installing a new agent)' 'phase 15: verify'
+    Emit-Phase 'hosts_sync' 'ok' 'installed coding agents converged (per-host lines above; re-run acc hosts-sync after installing a new agent)' 'phase 15: telemetry'
   } else {
     Emit-Phase 'hosts_sync' 'skipped' 'acc hosts-sync reported an issue (fail-soft -- host wiring never blocks an install)' 'acc hosts-sync'
   }
 }
 
 # =========================================================================================
-# PHASE 15 -- verify: `acc doctor` (the end-to-end self-check). In -Json mode the final
+# PHASE 15 -- telemetry (anonymous usage events, ON by default). Mirror of install.sh phase
+# 15 / parity with the POSIX installer. The PostHog token is the project's WRITE-ONLY
+# ingestion key -- public-safe by design (it can only append events, never read). Events are
+# NAMES ONLY -- never owner data, prompts, files, or memory. On by default so the maintainer
+# can see what breaks for real users; opt out any time with `acc telemetry off`, or set
+# ACC_NO_TELEMETRY=1 before install to never enable it. Fail-soft: a CLI error never fails
+# the install. Needs the built binary -- without it (windows engine port pending) we skip
+# with an honest note.
+#
+# KEY SOURCE: parsed at runtime from the SAME `TELEMETRY_KEY=` line in install.sh next to this
+# script ($PSScriptRoot) -- ONE canonical home for the key (install.sh) so the two installers
+# can never drift to different keys, and the lone secret-shaped token lives in exactly one file.
+# =========================================================================================
+$TelemetryKey = ''
+try {
+  $InstallSh = Join-Path $PSScriptRoot 'install.sh'
+  if (Test-Path $InstallSh) {
+    $m = Select-String -Path $InstallSh -Pattern 'TELEMETRY_KEY="([^"]+)"' | Select-Object -First 1
+    if ($m) { $TelemetryKey = $m.Matches[0].Groups[1].Value }
+  }
+} catch { $TelemetryKey = '' }
+
+Step 'phase 15 -- telemetry (anonymous usage events, on by default)'
+if ($DryRun) {
+  Emit-Phase 'telemetry' 'would' 'enable anonymous usage telemetry by default (event names only -- never your data, prompts, files, or memory; opt-out: acc telemetry off)' 'phase 16: verify'
+} elseif ($env:ACC_NO_TELEMETRY -eq '1') {
+  Emit-Phase 'telemetry' 'skipped' 'ACC_NO_TELEMETRY=1 -- telemetry stays off' 'enable later: acc telemetry on --key <your key> --host us'
+} elseif (-not $TelemetryKey) {
+  Emit-Phase 'telemetry' 'skipped' 'could not read the telemetry key from install.sh (non-fatal)' 'enable later: acc telemetry on --key <your key> --host us'
+} elseif ($BinaryAvailable) {
+  try {
+    & $Acc telemetry on --key $TelemetryKey --host us *> $null
+    if ($LASTEXITCODE -eq 0) {
+      # One real event: `telemetry status` runs the app_opened instrumentation, queued through
+      # the normal pipeline (no custom capture path here).
+      & $Acc telemetry status *> $null
+      Emit-Phase 'telemetry' 'ok' 'anonymous usage telemetry ON (event names only -- never your data, prompts, files, or memory). opt out: acc telemetry off' 'phase 16: verify'
+    } else {
+      Emit-Phase 'telemetry' 'skipped' 'could not enable telemetry (non-fatal)' 'enable later: acc telemetry on --key <your key> --host us'
+    }
+  } catch {
+    Emit-Phase 'telemetry' 'skipped' 'could not enable telemetry (non-fatal)' 'enable later: acc telemetry on --key <your key> --host us'
+  }
+} else {
+  Emit-Phase 'telemetry' 'skipped' "telemetry requires the acc binary ($EnginePendingNote)" 'enable later: acc telemetry on'
+}
+
+# =========================================================================================
+# PHASE 16 -- verify: `acc doctor` (the end-to-end self-check). In -Json mode the final
 # stream line is the verdict + the `acc doctor --json` handoff for Claude-as-installer.
 # ENGINE HONESTY: without the built binary there is NO doctor -- reported, never faked.
 # =========================================================================================
-Step 'phase 15 -- verify (acc doctor)'
+Step 'phase 16 -- verify (acc doctor)'
 if ($DryRun) {
   Emit-Phase 'verify' 'would' ("run: acc --db $DbPath doctor (proves binary/substrate/embedder/model_pin/sandbox/mcp/hooks/brain)") ("acc --db $DbPath doctor --json")
 } elseif (-not $BinaryAvailable) {

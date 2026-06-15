@@ -5,7 +5,7 @@
 # ladder from probed host facts (the same signals src/selector.rs uses: nvidia-smi VRAM,
 # uname OS/arch, total RAM), so the embedder lane is chosen, not guessed.
 #
-# AUTO-INSTALLS every dependency (Rust, uv, sandbox + browser system libs), installs
+# AUTO-INSTALLS every dependency (Rust, uv, python3, sandbox + browser system libs), installs
 # `acc` (phase 3 fetches the sha256-VERIFIED prebuilt release binary first — no rustup
 # needed when a release is reachable — and falls back to a source build otherwise),
 # materializes the encoder env, pins the host-selected model, PREFETCHES the model
@@ -77,7 +77,6 @@ ENCODER_SCRIPT_FULL="$REPO/encoders/li_encode.py"           # LateOn / full-bf16
 ENCODER_SCRIPT_AWQ="$REPO/encoders/li_encode_colqwen.py"    # AWQ lanes (linux x86_64)
 BROWSER_HOME="${ACC_BROWSER_HOME:-$HOME/.local/share/acc/browser}"
 BROWSER_VENV="$BROWSER_HOME/venv"
-BROWSER_SOCK="${ACC_BROWSER_SOCK:-/tmp/acc-browser.sock}"
 
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -94,14 +93,31 @@ step() { [ "$JSON" = "1" ] && printf '\n\033[1m▸ %s\033[0m\n' "$*" >&2 || prin
 
 # json_phase NAME STATUS DETAIL NEXT — emit one machine-readable phase line (JSON mode only).
 # STATUS ∈ ok|failed|skipped|would. DETAIL/NEXT are free text (newlines/quotes escaped).
+json_str() {
+  # Bootstrap-safe: phase 1 may need to install python3, so JSON output cannot depend on
+  # python3 already existing. awk is part of the POSIX base lane this shell installer needs.
+  printf '%s' "$1" | awk '
+    BEGIN { printf "\"" }
+    {
+      gsub(/\\/,"\\\\")
+      gsub(/"/,"\\\"")
+      gsub(/\t/,"\\t")
+      gsub(/\r/,"\\r")
+      if (NR > 1) printf "\\n"
+      printf "%s", $0
+    }
+    END { printf "\"" }
+  '
+}
 json_phase() {
   [ "$JSON" = "1" ] || return 0
   local name="$1" status="$2" detail="$3" next="${4:-}"
-  python3 - "$name" "$status" "$detail" "$next" <<'PY'
-import json, sys
-name, status, detail, nxt = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-print(json.dumps({"phase": name, "status": status, "detail": detail, "next": nxt or None}))
-PY
+  local jname jstatus jdetail jnext
+  jname="$(json_str "$name")"
+  jstatus="$(json_str "$status")"
+  jdetail="$(json_str "$detail")"
+  if [ -n "$next" ]; then jnext="$(json_str "$next")"; else jnext="null"; fi
+  printf '{"phase":%s,"status":%s,"detail":%s,"next":%s}\n' "$jname" "$jstatus" "$jdetail" "$jnext"
 }
 
 # phase_result NAME STATUS DETAIL [NEXT] — single funnel: pretty line (human) OR json line.
@@ -133,7 +149,11 @@ act() {
 # ── sudo wrapper ──────────────────────────────────────────────────────────────────────
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
-  if have sudo && [ "${ACC_NONINTERACTIVE:-0}" != "1" ]; then SUDO="sudo"; fi
+  # Only use interactive sudo when stdin is a real TTY. A piped `curl … | sh` install has no TTY,
+  # so sudo would block forever on a password prompt nobody can answer (it leaked
+  # `[sudo] password for <user>:` into a brand-new user's run). No TTY → leave SUDO empty → the
+  # sudo step fails fast and prints its actionable "run: sudo … " guidance instead of hanging.
+  if have sudo && [ "${ACC_NONINTERACTIVE:-0}" != "1" ] && [ -t 0 ]; then SUDO="sudo"; fi
 fi
 maybe_sudo() {
   if [ "$DRY_RUN" = "1" ]; then say "WOULD (sudo): $*"; return 0; fi
@@ -244,7 +264,7 @@ select_tier() {
   vram="$(probe_vram_free_mb)"; ram="$(read_total_ram_mb)"
   [ "$vram" -gt 0 ] && gpu=1
   local awq=0; [ "$OS" = "Linux" ] && [ "$ARCH" = "x86_64" ] && awq=1
-  local mps=0; [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" -o "$ARCH" = "aarch64" ] && mps=1
+  local mps=0; [ "$OS" = "Darwin" ] && { [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; } && mps=1
 
   PROBE_GPU="$gpu"; PROBE_VRAM="$vram"; PROBE_RAM="$ram"; PROBE_AWQ="$awq"; PROBE_MPS="$mps"
 
@@ -274,14 +294,18 @@ select_tier() {
     TIER=4b-awq; MODEL_ID=TomoroAI/tomoro-ai-colqwen3-embed-4b-awq; DEVICE=cuda; ENCODER_SCRIPT="$ENCODER_SCRIPT_AWQ"
     TIER_REASON="GPU ${vram}MB free ≥ ${AWQ_4B_VRAM} (< ${AWQ_8B_VRAM} for 8B) → ColQwen3-4B AWQ on cuda"; return
   fi
-  # 3–4: AWQ on cpu — linux x86_64 without usable cuda; slow but multimodal.
-  if [ "$awq" = 1 ] && [ "$ram" -ge "$AWQ_8B_CPU_RAM" ]; then
+  # 3–4: AWQ on cpu — ONLY when a cuda GPU is PRESENT but its free VRAM is under the tier floor
+  # (degraded; the device recovers to cuda when VRAM frees). A host with NO GPU at all falls
+  # through to LateOn (rung 9) — a light, fast first run, NOT a multi-GB ColQwen-on-cpu grind
+  # (the new-user cross-OS default; multimodal-on-cpu stays one ACC_TIER=8b-cpu/4b-cpu away).
+  # Mirrors src/selector.rs select_model_for_os so phase 0 and `acc pin` agree.
+  if [ "$gpu" = 1 ] && [ "$awq" = 1 ] && [ "$ram" -ge "$AWQ_8B_CPU_RAM" ]; then
     TIER=8b-cpu; MODEL_ID=TomoroAI/tomoro-ai-colqwen3-embed-8b-awq; DEVICE=cpu; ENCODER_SCRIPT="$ENCODER_SCRIPT_AWQ"
-    TIER_REASON="no fitting GPU (free VRAM ${vram}MB), RAM ${ram}MB ≥ ${AWQ_8B_CPU_RAM} → ColQwen3-8B AWQ on cpu (slow, multimodal)"; return
+    TIER_REASON="cuda present but free VRAM ${vram}MB under its tier floor, RAM ${ram}MB ≥ ${AWQ_8B_CPU_RAM} → ColQwen3-8B AWQ on cpu (degraded; recovers to cuda when VRAM frees)"; return
   fi
-  if [ "$awq" = 1 ] && [ "$ram" -ge "$AWQ_4B_CPU_RAM" ]; then
+  if [ "$gpu" = 1 ] && [ "$awq" = 1 ] && [ "$ram" -ge "$AWQ_4B_CPU_RAM" ]; then
     TIER=4b-cpu; MODEL_ID=TomoroAI/tomoro-ai-colqwen3-embed-4b-awq; DEVICE=cpu; ENCODER_SCRIPT="$ENCODER_SCRIPT_AWQ"
-    TIER_REASON="no fitting GPU (free VRAM ${vram}MB), RAM ${ram}MB ≥ ${AWQ_4B_CPU_RAM} → ColQwen3-4B AWQ on cpu (slow, multimodal)"; return
+    TIER_REASON="cuda present but free VRAM ${vram}MB under its tier floor, RAM ${ram}MB ≥ ${AWQ_4B_CPU_RAM} → ColQwen3-4B AWQ on cpu (degraded; recovers to cuda when VRAM frees)"; return
   fi
   # 5–6: full bf16 on mps — Apple Silicon (no AWQ wheels; plain-transformers full lane).
   if [ "$mps" = 1 ] && [ "$ram" -ge "$FULL_8B_RAM" ]; then
@@ -292,20 +316,25 @@ select_tier() {
     TIER=4b-full; MODEL_ID=TomoroAI/tomoro-colqwen3-embed-4b; DEVICE=mps; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
     TIER_REASON="Apple Silicon, unified memory ${ram}MB ≥ ${FULL_4B_RAM} → ColQwen3-4B full bf16 on mps"; return
   fi
-  # 7–8: full bf16 on cpu — the remaining non-AWQ hosts (linux aarch64, Intel mac).
-  if [ "$awq" = 0 ] && [ "$ram" -ge "$FULL_8B_RAM" ]; then
+  # 7–8: full bf16 on cpu — ONLY when a GPU is PRESENT on a non-AWQ platform but under its VRAM
+  # floor (degraded; keeps the ColQwen model). A host with NO GPU falls through to LateOn — the
+  # light cross-OS default, never a multi-GB full-bf16 download grinding on cpu by default.
+  if [ "$gpu" = 1 ] && [ "$awq" = 0 ] && [ "$ram" -ge "$FULL_8B_RAM" ]; then
     TIER=8b-full; MODEL_ID=TomoroAI/tomoro-colqwen3-embed-8b; DEVICE=cpu; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
-    TIER_REASON="no AWQ lane on this platform, RAM ${ram}MB ≥ ${FULL_8B_RAM} → ColQwen3-8B full bf16 on cpu"; return
+    TIER_REASON="GPU present but no AWQ lane / under VRAM floor, RAM ${ram}MB ≥ ${FULL_8B_RAM} → ColQwen3-8B full bf16 on cpu (degraded)"; return
   fi
-  if [ "$awq" = 0 ] && [ "$ram" -ge "$FULL_4B_RAM" ]; then
+  if [ "$gpu" = 1 ] && [ "$awq" = 0 ] && [ "$ram" -ge "$FULL_4B_RAM" ]; then
     TIER=4b-full; MODEL_ID=TomoroAI/tomoro-colqwen3-embed-4b; DEVICE=cpu; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
-    TIER_REASON="no AWQ lane on this platform, RAM ${ram}MB ≥ ${FULL_4B_RAM} → ColQwen3-4B full bf16 on cpu"; return
+    TIER_REASON="GPU present but no AWQ lane / under VRAM floor, RAM ${ram}MB ≥ ${FULL_4B_RAM} → ColQwen3-4B full bf16 on cpu (degraded)"; return
   fi
-  # 9: LateOn — text-only last resort; keeps every host functional natively.
+  # 9: LateOn — the light text-only tier, and now the DEFAULT for any host with NO usable
+  # accelerator (no cuda GPU, no mps): a new user's first run is fast + small (~0.6GB) on ANY OS
+  # instead of a multi-GB ColQwen-on-cpu grind. Multimodal is auto-preferred when a cuda/mps
+  # accelerator is present and stays one ACC_TIER=… away on cpu.
   if [ "$ram" -ge 2000 ]; then
     TIER=lateon; MODEL_ID=lightonai/LateOn; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
     DEVICE="$([ "$mps" = 1 ] && [ "$ram" -ge "$FULL_4B_RAM" ] && echo mps || echo cpu)"
-    TIER_REASON="no ColQwen3 tier fits (RAM ${ram}MB, free VRAM ${vram}MB) → LateOn (text-only last resort) on $DEVICE"; return
+    TIER_REASON="no accelerator (cuda/mps) present (RAM ${ram}MB, free VRAM ${vram}MB) → LateOn (light text-only default; multimodal via a GPU or ACC_TIER) on $DEVICE"; return
   fi
   # 10: nothing viable natively → the container tier path.
   TIER=container; MODEL_ID=""; DEVICE=""; ENCODER_SCRIPT=""
@@ -419,11 +448,25 @@ else
   fi
 fi
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-# python3 (used by the encoder, the warm-probe, and the .mcp.json writer)
+# python3 (used by the encoder, warm-probes, JSON helpers after phase 1, and .mcp.json writer)
 if have python3; then
   phase_result "prereq_python" "ok" "python3 present ($(python3 --version 2>/dev/null | cut -d' ' -f2))"
 else
-  phase_result "prereq_python" "failed" "python3 missing" "install python3 via your package manager (or use the container)"; exit 1
+  case "$PKG" in
+    pacman|brew) PY_PKG=python ;;
+    *)           PY_PKG=python3 ;;
+  esac
+  if act "install $PY_PKG (provides python3 for installer helpers + encoder runtime)" pkg_install "$PY_PKG"; then
+    if [ "$DRY_RUN" = "1" ]; then
+      phase_result "prereq_python" "would" "python3 installed" "phase 2: system deps"
+    elif have python3; then
+      phase_result "prereq_python" "ok" "python3 installed ($(python3 --version 2>/dev/null | cut -d' ' -f2))" "phase 2: system deps"
+    else
+      phase_result "prereq_python" "failed" "python3 install completed but python3 is still not on PATH" "add python3 to PATH, then re-run ./install.sh"; exit 1
+    fi
+  else
+    phase_result "prereq_python" "failed" "python3 install failed" "install python3 via your OS package manager (or use the container)"; exit 1
+  fi
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
@@ -526,9 +569,11 @@ fi
 # sha256sums.txt, where <version> = the pushed tag (vX.Y.Z) on tag-push releases.
 PREBUILT_TARGET=""
 case "$OS/$ARCH" in
-  Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-musl" ;;
-  Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-musl" ;;
+  Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-musl" ;;   # static musl — runs on ANY linux (no glibc floor)
+  Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-musl" ;; # static musl — runs on ANY linux (no glibc floor)
   Darwin/arm64|Darwin/aarch64) PREBUILT_TARGET="aarch64-apple-darwin" ;;
+  # Intel Mac (Darwin/x86_64): no prebuilt — the release defers the 10x-billed Intel macos-13
+  # runner for now, so PREBUILT_TARGET stays empty and the fetch below source-builds (no 404).
 esac
 RELEASE_BASE="https://github.com/maxbaluev/accreted-intelligence/releases"
 ARTIFACT="acc-v${SRC_VER}-${PREBUILT_TARGET}.tar.gz"
@@ -590,6 +635,12 @@ prebuilt_fetch() {
   esac
   mkdir -p "$BIN_DIR" || { rm -rf "$tmp"; warn "cannot create $BIN_DIR — building from source"; return 1; }
   mv -f "$tmp/acc" "$BIN_DIR/acc" || { rm -rf "$tmp"; warn "cannot install to $BIN_DIR — building from source"; return 1; }
+  # FREE macOS trust (no paid Apple Developer cert): a curl-fetched binary normally carries NO
+  # com.apple.quarantine xattr (Gatekeeper only quarantines browser/DMG downloads), so it runs
+  # unblocked. Strip it DEFENSIVELY anyway in case a wrapper added it — `xattr` is idempotent and
+  # fail-soft. (Apple Silicon binaries are auto ad-hoc-signed by the toolchain, which is all arm64
+  # needs to EXECUTE.) Integrity is already covered: the sha256 verify above REFUSES a tampered binary.
+  [ "$OS" = "Darwin" ] && xattr -dr com.apple.quarantine "$BIN_DIR/acc" 2>/dev/null || true
   rm -rf "$tmp"
   hash -r 2>/dev/null || true
   PREBUILT_ID="$newid"; PREBUILT_SRC="$src"
@@ -703,9 +754,14 @@ fi
 # encode, so the model load isn't also resolving the env. Idempotent (uv caches the env).
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 4 — encoder env (uv sync of the tier's script deps)"
-if [ -z "$ENCODER_SCRIPT" ] || [ ! -f "$ENCODER_SCRIPT" ]; then
-  phase_result "encoder_env" "skipped" "no encoder script for tier=$TIER (or missing $ENCODER_SCRIPT)" "tier mis-selected — check phase 0"
-else
+# Resolve the encoder-env-warm command. A DEV checkout ships encoders/li_encode*.py on disk →
+# `uv sync --script <file>`. A binary-only RELEASE install ships no encoders/ dir → the encoder
+# scripts are embedded in the binary and reachable as `acc warm-encoder <model>` (probe with
+# --help), which materializes the tier's encoder and `uv sync --script`s it with VISIBLE uv
+# progress and WITHOUT loading the model. Either path resolves+caches the (multi-GB)
+# torch/transformers/awq/flash-attn env once, BEFORE the daemon's first encode, so the model
+# load isn't also hiding the wheel download. No model / no path → skipped (deps resolve lazily).
+if [ -n "$ENCODER_SCRIPT" ] && [ -f "$ENCODER_SCRIPT" ]; then
   if act "uv sync --script $(basename "$ENCODER_SCRIPT") (resolve+cache the $TIER encoder deps)" \
        uv sync --script "$ENCODER_SCRIPT" >/dev/null 2>&1; then
     phase_result "encoder_env" "$([ "$DRY_RUN" = 1 ] && echo would || echo ok)" \
@@ -713,6 +769,24 @@ else
   else
     phase_result "encoder_env" "skipped" "uv sync --script reported an issue (deps resolve lazily on first encode)" "re-run; or check: uv sync --script $ENCODER_SCRIPT"
   fi
+elif [ -n "$MODEL_ID" ] && "$ACC_BIN" warm-encoder --help >/dev/null 2>&1; then
+  # Binary-only release install: on-disk encoders/ absent but the binary carries the embedded
+  # encoder scripts. Warm the env via the binary so the wheel download is VISIBLE here instead
+  # of hidden inside the first embedder start (mirror of the phase-6 prefetch binary fallback).
+  if [ "$DRY_RUN" = "1" ]; then
+    say "WOULD: acc warm-encoder $MODEL_ID (uv sync --script the tier's embedded encoder env, live progress, no model load)"
+    phase_result "encoder_env" "would" "warm the encoder env for $TIER via acc warm-encoder $MODEL_ID (torch/transformers/... — several GB, one time)" "phase 5: model pin"
+  else
+    say "resolving the encoder env (torch/transformers/... — several GB, one time)…"
+    if act "acc warm-encoder $MODEL_ID (resolve+cache the $TIER encoder env, visible progress, no model load)" \
+         "$ACC_BIN" warm-encoder "$MODEL_ID"; then
+      phase_result "encoder_env" "ok" "encoder env ready for $TIER (acc warm-encoder $MODEL_ID — torch/transformers/... resolved/cached)" "phase 5: model pin"
+    else
+      phase_result "encoder_env" "skipped" "acc warm-encoder reported an issue (deps resolve lazily on first encode)" "re-run; or let the daemon resolve the env lazily on first start"
+    fi
+  fi
+else
+  phase_result "encoder_env" "skipped" "no encoder env to warm for tier=$TIER (on-disk $ENCODER_SCRIPT absent and the binary has no warm-encoder subcommand, or no model pinned)" "tier mis-selected — check phase 0"
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
@@ -733,7 +807,18 @@ if [ "$UPDATE_MODE" = "1" ] && [ "$PIN_UNCHANGED" = "1" ]; then
   phase_result "model_pin" "ok" "pin unchanged ($PIN_CURRENT) — left as-is (update mode re-pins only on a changed selection)" "phase 6: model prefetch"
 elif [ "$DRY_RUN" = "1" ]; then
   phase_result "model_pin" "would" "pin $MODEL_ID on $DEVICE → $PIN_PATH" "phase 6: model prefetch"
-elif act "acc pin (records the host-selected model/device)" "$ACC_BIN" pin >/dev/null 2>&1; then
+elif {
+       # FORCED-TIER PIN (the ACC_TIER-ignored bug): bare `acc pin` bootstraps from a fresh
+       # host probe, and with an existing pin it only PRINTS status (never rewrites). When the
+       # owner forced ACC_TIER, write the pin EXPLICITLY (`acc pin <model> <device>` always
+       # writes) so phase 0's forced lane is the lane actually pinned — even in update mode,
+       # even if a stale auto-probed pin disagrees. Non-forced installs keep the host-probe pin.
+       if [ "$TIER_FORCED" = "1" ]; then
+         act "acc pin $MODEL_ID $DEVICE (explicit — owner forced ACC_TIER=$TIER, always writes)" "$ACC_BIN" pin "$MODEL_ID" "$DEVICE" >/dev/null 2>&1
+       else
+         act "acc pin (records the host-selected model/device)" "$ACC_BIN" pin >/dev/null 2>&1
+       fi
+     }; then
   PINNED="$([ -r "$PIN_PATH" ] && python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("model_id","?"),"on",d.get("device","?"))' "$PIN_PATH" 2>/dev/null || echo "$MODEL_ID on $DEVICE")"
   phase_result "model_pin" "ok" "pinned $PINNED → $PIN_PATH" "phase 6: model prefetch"
 else
@@ -751,8 +836,20 @@ step "phase 6 — model prefetch (weights into the HF cache, visible progress)"
 PREFETCH_SCRIPT="$REPO/encoders/prefetch.py"
 EXP_MB="$(expected_model_mb "$TIER")"
 NEED_MB=$((EXP_MB + DISK_HEADROOM_MB))
-if [ -z "$MODEL_ID" ] || [ ! -f "$PREFETCH_SCRIPT" ]; then
-  phase_result "model_prefetch" "skipped" "no model to prefetch for tier=$TIER (or missing $PREFETCH_SCRIPT)" "phase 7: substrate"
+# Resolve the prefetch command. Dev checkouts ship encoders/prefetch.py → run it via uv.
+# A binary-only RELEASE install ships no encoders/ dir → the script is embedded in the binary
+# and reachable as `acc prefetch` (probe with --help). Either way the weights download with
+# huggingface_hub's live progress. No command → the prefetch is skipped (daemon downloads lazily).
+PREFETCH_CMD=()
+if [ -f "$PREFETCH_SCRIPT" ]; then
+  PREFETCH_CMD=(uv run "$PREFETCH_SCRIPT")
+  PREFETCH_DISPLAY="uv run encoders/prefetch.py"
+elif "$ACC_BIN" prefetch --help >/dev/null 2>&1; then
+  PREFETCH_CMD=("$ACC_BIN" prefetch)
+  PREFETCH_DISPLAY="acc prefetch"
+fi
+if [ -z "$MODEL_ID" ] || [ "${#PREFETCH_CMD[@]}" -eq 0 ]; then
+  phase_result "model_prefetch" "skipped" "no model to prefetch for tier=$TIER (or no prefetch path: on-disk $PREFETCH_SCRIPT absent and the binary has no prefetch subcommand)" "phase 7: substrate"
 elif [ "$UPDATE_MODE" = "1" ] && [ "$PIN_UNCHANGED" = "1" ]; then
   # Update mode + unchanged pin: the weights were already fetched by the original install;
   # skip the prefetch walk entirely (the daemon still downloads lazily if anything is missing).
@@ -765,12 +862,12 @@ elif [ "$DRY_RUN" = "1" ]; then
   else
     say "disk verdict: free disk unknown at $HF_CACHE (df unreachable) — floor not applied"
   fi
-  say "WOULD: uv run encoders/prefetch.py $MODEL_ID (snapshot_download: resume + cache reuse, live progress on stderr; ~$(mb_to_gb "$EXP_MB")GB expected — static approximation, no network in dry-run)"
+  say "WOULD: $PREFETCH_DISPLAY $MODEL_ID (snapshot_download: resume + cache reuse, live progress on stderr; ~$(mb_to_gb "$EXP_MB")GB expected — static approximation, no network in dry-run)"
   phase_result "model_prefetch" "would" "prefetch $MODEL_ID (~$(mb_to_gb "$EXP_MB")GB) into the HF cache with live progress" "phase 7: substrate"
 else
   say "prefetching $MODEL_ID (~$(mb_to_gb "$EXP_MB")GB expected; resume + cache reuse — a cache hit is instant)…"
   # stdout (the final JSON line) is captured; stderr (live progress) streams through.
-  if PREFETCH_JSON="$(uv run "$PREFETCH_SCRIPT" "$MODEL_ID")"; then
+  if PREFETCH_JSON="$("${PREFETCH_CMD[@]}" "$MODEL_ID")"; then
     PREFETCH_NOTE="$(printf '%s\n' "$PREFETCH_JSON" | tail -n1 | python3 -c 'import json,sys
 d = json.loads(sys.stdin.read() or "{}")
 print("%.1fGB cached at %s" % (d.get("cached_bytes", 0) / 1e9, d.get("path", "?")))' 2>/dev/null || echo "cached (size unreadable)")"
@@ -785,6 +882,16 @@ fi
 # write; we touch it via `acc status` (read-only path also opens/creates the file).
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 7 — substrate init"
+# WSL FOREIGN-FS HAZARD (the Windows+WSL new-user landmine): a substrate on a Windows-drive mount
+# (9p in WSL2 / drvfs in WSL1, i.e. under /mnt/c) breaks SQLite's WAL + flock locking →
+# 'database is locked' / corruption. Warn (non-fatal) and name the fix; a native Linux fs is silent.
+if grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
+  DB_FSTYPE="$(df -PT "$(dirname "$DB")" 2>/dev/null | awk 'NR==2{print $2}')"
+  case "$DB_FSTYPE" in
+    9p|drvfs|drv_fs)
+      warn "substrate $DB is on a Windows drive mounted in WSL (fstype $DB_FSTYPE) — SQLite locking is UNRELIABLE there (database-is-locked / corruption). Keep it on the WSL Linux filesystem: re-run as ./install.sh \$HOME/.local/share/acc/acc.db, or install off /mnt/*." ;;
+  esac
+fi
 if [ "$DRY_RUN" = "1" ] && [ -f "$DB" ]; then
   phase_result "substrate" "would" "validate the existing substrate at $DB opens with this binary" "phase 8: embedder daemon"
 elif [ -f "$DB" ]; then
@@ -854,7 +961,7 @@ else
       || warn "could not auto-install browser system libs — if the browser fails, run: sudo $BROWSER_VENV/bin/playwright install-deps firefox"
   fi
   act "fetch Camoufox browser (idempotent)" "$BROWSER_VENV/bin/camoufox" fetch >/dev/null 2>&1 \
-    && phase_result "browser" "ok" "Camoufox browser ready (daemon + runtime:browser seeded in phase 10)" "phase 10: seed" \
+    && phase_result "browser" "ok" "Camoufox browser installed — runtime:browser seeds in phase 10 once the embedder is warm" "phase 10: seed" \
     || phase_result "browser" "skipped" "camoufox fetch reported an issue" "re-run; or: $BROWSER_VENV/bin/camoufox fetch"
 fi
 
@@ -885,7 +992,19 @@ except Exception:
       say "[embedder] daemon process exited — see /tmp/acc-embedder.log"
       break
     fi
-    [ $((i % 10)) -eq 0 ] && [ "$i" -gt 0 ] && say "[embedder wait ${i}s/600s] not ready yet — model may still be downloading/warming (log: /tmp/acc-embedder.log)"
+    [ $((i % 10)) -eq 0 ] && [ "$i" -gt 0 ] && say "[embedder wait ${i}s/600s] model loading into memory/VRAM (weights were pre-fetched in phase 6; first load takes a moment) (log: /tmp/acc-embedder.log)"
+    # PERMANENT-FAILURE SCAN (install-side never-silent invariant, cf. solved:e60ca6342725ecf0):
+    # the daemon is a SUPERVISOR that respawns a crash-looping worker, so the pid check above
+    # never fires on a hard ImportError / bad-model load — the worker dies, the daemon lives, and
+    # the loop burns the full 600s printing "still downloading". Scan the embedder log for a
+    # TERMINAL signature (none of these are transient-download messages) and bail NOW with the
+    # real error, routed through the emb_died branch (which prints the actionable fix).
+    if [ "$i" -ge 3 ] && [ -f /tmp/acc-embedder.log ] \
+       && grep -Eq 'ImportError|cannot import name|WARMUP FAILED|refusing further respawn|serve failed' /tmp/acc-embedder.log 2>/dev/null; then
+      emb_died=1
+      say "[embedder] hard failure detected in /tmp/acc-embedder.log — not waiting out the 10-min clock"
+      break
+    fi
     sleep 1
   done
   if [ "$warm" = "1" ]; then
@@ -1000,14 +1119,14 @@ fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
 # PHASE 12 — claude plugin (the DISTRIBUTION artifact). Validates the versioned plugin
-# folder's manifests (plugins/claude/) with python3 json.load and prints how to use the
+# folder's manifests (claude-plugin/) with python3 json.load and prints how to use the
 # plugin in OTHER projects. This phase deliberately does NOT rewire this repo's own
 # .claude/settings.json — the repo keeps direct hook wiring; the plugin folder exists so
 # other projects can consume the same eight-event lifecycle + the two MCP verbs. Pure
 # read (idempotent, fail-soft): a broken manifest warns and the install continues.
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 12 — claude plugin manifests (distribution artifact)"
-PLUGIN_DIR="$REPO/plugins/claude"
+PLUGIN_DIR="$REPO/claude-plugin"
 PLUGIN_BAD=""
 for m in .claude-plugin/plugin.json hooks/hooks.json .mcp.json; do
   if [ ! -f "$PLUGIN_DIR/$m" ]; then
@@ -1017,12 +1136,12 @@ for m in .claude-plugin/plugin.json hooks/hooks.json .mcp.json; do
   fi
 done
 if [ -n "$PLUGIN_BAD" ]; then
-  phase_result "claude_plugin" "failed" "plugins/claude/ manifest check:$PLUGIN_BAD" "fix the manifest(s) under plugins/claude/ — fail-soft, install continues (this repo's .claude/settings.json is untouched either way)"
+  phase_result "claude_plugin" "failed" "claude-plugin/ manifest check:$PLUGIN_BAD" "fix the manifest(s) under claude-plugin/ — fail-soft, install continues (this repo's .claude/settings.json is untouched either way)"
 else
   say "this repo keeps DIRECT hook wiring in .claude/settings.json — nothing here is rewired; the plugin folder is the distribution artifact for OTHER projects"
   say "use it elsewhere:   claude --plugin-dir $PLUGIN_DIR"
   say "or copy the skills: cp -r $PLUGIN_DIR/skills/* <project>/.claude/skills/"
-  phase_result "claude_plugin" "ok" "plugins/claude/ manifests valid (plugin.json · hooks/hooks.json · .mcp.json) — distribution artifact only; this repo's own wiring untouched" "phase 13: hosts-sync"
+  phase_result "claude_plugin" "ok" "claude-plugin/ manifests valid (plugin.json · hooks/hooks.json · .mcp.json) — distribution artifact only; this repo's own wiring untouched" "phase 13: hosts-sync"
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
@@ -1100,57 +1219,29 @@ else
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
-# PHASE 15 — telemetry consent (OPT-IN, default No). Interactive TTYs get ONE question;
-# no TTY / piped / ACC_NONINTERACTIVE=1 skips silently and telemetry stays OFF. The key
-# below is the project's write-only PostHog token — public-safe by design (it can only
-# append events, never read). Events are names only — never owner data, prompts, or
-# files. Fail-soft: a prompt or CLI error never fails the install.
+# PHASE 15 — telemetry (anonymous usage events, ON by default). The key below is the project's
+# WRITE-ONLY PostHog token — public-safe by design (it can only append events, never read).
+# Events are NAMES ONLY — never owner data, prompts, files, or memory. On by default so the
+# maintainer can see what breaks for real users; opt out any time with `acc telemetry off`, or
+# set ACC_NO_TELEMETRY=1 before install to never enable it. Fail-soft: a CLI error never fails
+# the install.
 # ════════════════════════════════════════════════════════════════════════════════════════
 TELEMETRY_KEY="phc_A5xgn9QqiSCKXivifKGEBPrpSZDwvFyxm5op974q3ekC"
 TELEMETRY_LATER="enable later: acc telemetry on --key <your key> --host us (works with any PostHog project)"
+TELEMETRY_OPTOUT="opt out any time: acc telemetry off  (or set ACC_NO_TELEMETRY=1 before install)"
 
-# telemetry_consent_prompt — ask once on stdin (default No), enact the answer. Separated
-# from the TTY guard so the y/n branches are testable with piped input + a stubbed acc.
-telemetry_consent_prompt() {
-  local ans=""
-  # The question goes to stderr in JSON mode so the phase stream stays machine-readable.
-  if [ "$JSON" = "1" ]; then
-    printf '  share anonymous usage events with the maintainer? (event names only — never your data, prompts, or files) [y/N] ' >&2
-  else
-    printf '  share anonymous usage events with the maintainer? (event names only — never your data, prompts, or files) [y/N] '
-  fi
-  read -r ans || ans=""
-  case "$ans" in
-    y|Y|yes|YES|Yes)
-      if "$ACC_BIN" telemetry on --key "$TELEMETRY_KEY" --host us >/dev/null 2>&1; then
-        # One real event: `telemetry status` runs the app_opened instrumentation, which
-        # queues it through the normal pipeline — no custom capture path here.
-        "$ACC_BIN" telemetry status >/dev/null 2>&1 || true
-        phase_result "telemetry" "ok" "telemetry enabled (anonymous event names only) — disable any time: acc telemetry off"
-      else
-        phase_result "telemetry" "skipped" "acc telemetry on failed — telemetry stays off" "$TELEMETRY_LATER"
-      fi
-      ;;
-    *)
-      phase_result "telemetry" "skipped" "telemetry stays off (default)" "$TELEMETRY_LATER"
-      ;;
-  esac
-}
-
-step "phase 15 — telemetry consent (opt-in, default No)"
-# install_ref — the anonymous web↔install correlation token (random nonce from the landing
-# page; no PII, content-free). Persist it BEFORE the consent prompt and on EVERY path
-# (interactive, non-interactive, no-TTY) — it costs nothing and lets a later opt-in merge
-# this install into the same anonymous web person. Fail-soft: never aborts the installer.
-if [ "$DRY_RUN" != "1" ] && [ -n "${ACC_INSTALL_REF:-}" ]; then
-  { mkdir -p "$HOME/.config/accint" && printf '%s' "$ACC_INSTALL_REF" > "$HOME/.config/accint/install_ref" && chmod 600 "$HOME/.config/accint/install_ref"; } || true
-fi
+step "phase 15 — telemetry (anonymous usage events, on by default)"
 if [ "$DRY_RUN" = "1" ]; then
-  phase_result "telemetry" "would" "ask for opt-in anonymous telemetry on an interactive TTY (event names only; default No; no TTY → skip, stays off)"
-elif [ ! -t 0 ] || [ "${ACC_NONINTERACTIVE:-0}" = "1" ]; then
-  phase_result "telemetry" "skipped" "non-interactive — telemetry stays off (default)" "$TELEMETRY_LATER"
+  phase_result "telemetry" "would" "enable anonymous usage telemetry by default (event names only — never your data, prompts, files, or memory; opt-out: acc telemetry off)"
+elif [ "${ACC_NO_TELEMETRY:-0}" = "1" ]; then
+  phase_result "telemetry" "skipped" "ACC_NO_TELEMETRY=1 — telemetry stays off" "$TELEMETRY_LATER"
+elif "$ACC_BIN" telemetry on --key "$TELEMETRY_KEY" --host us >/dev/null 2>&1; then
+  # One real event: `telemetry status` runs the app_opened instrumentation, queued through the
+  # normal pipeline (no custom capture path here).
+  "$ACC_BIN" telemetry status >/dev/null 2>&1 || true
+  phase_result "telemetry" "ok" "anonymous usage telemetry ON (event names only — never your data, prompts, files, or memory). $TELEMETRY_OPTOUT"
 else
-  telemetry_consent_prompt || phase_result "telemetry" "skipped" "consent prompt errored — telemetry stays off (fail-soft)" "$TELEMETRY_LATER"
+  phase_result "telemetry" "skipped" "could not enable telemetry (non-fatal) — $TELEMETRY_LATER"
 fi
 
 # ── final verdict ─────────────────────────────────────────────────────────────────────
@@ -1177,19 +1268,46 @@ if [ "$DRY_RUN" = "1" ]; then
 fi
 if [ "$UPDATE_MODE" = "1" ]; then
   ok "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?} — memory at $DB untouched (schema migrates automatically on first open)"
+  printf '\nClaude Code: if it is open, reload MCP to pick up the new binary.\n'
+elif [ "${warm:-0}" != "1" ]; then
+  # DEGRADED honesty: the memory engine (embedder) never warmed, so retrieve/ingest CANNOT work
+  # yet — do NOT claim "complete" or print happy-path try-these that would just fail. Lead with
+  # the ONE manual step the user must take next. (install is stage 0 of onboarding — name the
+  # next action explicitly whenever manual recovery is required.)
+  warn "acc installed, but the memory engine (embedder) did NOT come up — retrieval + ingest won't work yet."
+  cat <<DEGRADED
+
+Fix this FIRST (then acc is fully live):
+  1. See why it failed:   tail -n 30 /tmp/acc-embedder.log
+  2. Start the embedder:  acc embedder            (first run downloads the model — several GB, minutes)
+  3. Re-check health:     acc --db $DB doctor     (expect: embedder OK, verdict OK)
+  4. Still stuck?         acc report              (builds a SANITIZED report — no memory, no secrets, just
+                          structural health — and prints a pre-filled GitHub issue link to file at
+                          github.com/maxbaluev/accreted-intelligence/issues)
+
+Once the embedder is warm, open Claude Code in this directory and just say what you want done in
+plain words — it will show what is set up and learn how you work from real tasks.
+DEGRADED
 else
-  ok "acc install complete."
-fi
-cat <<TRY
+  ok "acc install complete — memory engine warm, all systems live."
+  cat <<TRY
 
 Try these now:
   1. Check health:        acc --db $DB doctor
   2. Create one memory:   acc --db $DB ingest hello "acc is installed and memory retrieval works"
   3. Retrieve it:         acc --db $DB retrieve "memory retrieval"
 
-Claude Code: open this directory — .mcp.json exposes the two verbs (acc_retrieve + acc_act).
-If Claude Code is already open, reload MCP.
+Next — the real workflow: open Claude Code in THIS directory and just say what you want done in
+plain words ("research X", "draft an email to Y"). On first open it shows what is set up and starts
+learning how you work; nothing leaves your machine without your OK. (.mcp.json exposes the two
+verbs acc_retrieve + acc_act; if Claude Code is already open, reload MCP.)
+
+To use acc in your OWN project, run these in that project's directory:
+  acc hosts-sync --project .     # wires acc into Claude Code there (.mcp.json) + Cursor/Codex
+  acc hooks-wire                 # adds acc's Claude Code lifecycle hooks (briefing + grounding + Stop guard)
+Codex and opencode are already wired globally — they work in every directory.
 TRY
+fi
 
 # PATH-PERSIST ADVISORY (prebuilt lane): the binary lands in ~/.local/bin and this run exported
 # it onto PATH, but only for THIS installer process — a NEW terminal that has ~/.local/bin missing
