@@ -100,6 +100,14 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
 .stamp.hold{background:var(--orange)}
 .channel{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .channel .card{min-height:0}
+.community{border:1px solid var(--rule);background:var(--bg2);margin-top:30px;display:grid;grid-template-columns:1.2fr .8fr;gap:0}
+.community-main{padding:22px}
+.community-main h3{font-size:22px;line-height:1.18;margin-top:10px}
+.community-main p{margin-top:10px;color:var(--dim);font-size:15px}
+.community-actions{border-left:1px solid var(--line);padding:22px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.community-link{display:block;text-align:center;text-decoration:none;background:var(--orange);color:#14110b;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:12px 14px}
+.community-link:hover{background:var(--ink);color:#14110b}
+.community-note{color:var(--faint);font-family:var(--mono);font-size:11px;line-height:1.55}
 .footer{padding:34px 0;color:var(--faint);font-family:var(--mono);font-size:12px}
 .footerin{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media(max-width:900px){
@@ -119,6 +127,8 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
   .cmd.one code{white-space:normal;overflow-x:visible}
   .row{grid-template-columns:1fr;gap:8px}
   .stamp{justify-self:start}
+  .community{grid-template-columns:1fr}
+  .community-actions{border-left:0;border-top:1px solid var(--line)}
 }
 </style>
 </head>
@@ -129,6 +139,7 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
     <nav class="nav" aria-label="Page links">
       <a href="#why">Why it works</a>
       <a href="#flow">Flow</a>
+      <a href="#community">Community</a>
       <a href="#install" class="cta">Install</a>
     </nav>
   </div>
@@ -229,6 +240,17 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
           <p>AccInt sits underneath the agents already doing your work.</p>
         </article>
       </div>
+      <div class="community" id="community">
+        <div class="community-main">
+          <div class="tag">Reddit community</div>
+          <h3>Bring real agent-work friction, not generic AI hype.</h3>
+          <p>We opened r/AccretedIntelligence as a public workbench for Work Models, work packets, open promises, evidence packets, approval gates, and outcome credit. The useful posts are concrete: install friction, teardown notes, failure reports, and operator workflows.</p>
+        </div>
+        <div class="community-actions">
+          <a class="community-link" data-track="reddit_community_clicked" href="https://www.reddit.com/r/AccretedIntelligence/?utm_source=accint&utm_medium=reddit_landing&utm_campaign=work_model" target="_blank" rel="noopener">Join r/AccretedIntelligence</a>
+          <p class="community-note">If your agent looked productive but increased your review load, that is the kind of report that helps.</p>
+        </div>
+      </div>
     </div>
   </section>
 </main>
@@ -236,7 +258,7 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
 <footer class="footer">
   <div class="wrap footerin">
     <span>Accreted Intelligence / Work Model for agent work</span>
-    <span><a href="/">main site</a> / <a href="https://github.com/maxbaluev/accreted-intelligence">GitHub</a> / <a href="https://github.com/maxbaluev/accreted-intelligence/issues/new">report a bug</a></span>
+    <span><a href="/">main site</a> / <a data-track="reddit_community_clicked" href="https://www.reddit.com/r/AccretedIntelligence/?utm_source=accint&utm_medium=reddit_landing&utm_campaign=work_model_footer" target="_blank" rel="noopener">Reddit community</a> / <a href="https://github.com/maxbaluev/accreted-intelligence">GitHub</a> / <a href="https://github.com/maxbaluev/accreted-intelligence/issues/new">report a bug</a></span>
   </div>
 </footer>
 
@@ -280,6 +302,15 @@ ph('reddit_landing_viewed',Object.assign({install_ref:install_ref},source_props)
     ph('reddit_install_method_selected',Object.assign({method:name,install_ref:install_ref},source_props));
   }
   tabs.forEach(function(t){t.addEventListener('click',function(){showPanel(t.dataset.panel);});});
+  [].slice.call(document.querySelectorAll('[data-track="reddit_community_clicked"]')).forEach(function(a){
+    a.addEventListener('click',function(){
+      ph('reddit_community_clicked',Object.assign({
+        destination:'r/AccretedIntelligence',
+        placement:(a.closest('.footer')?'footer':'community_section'),
+        install_ref:install_ref
+      },source_props));
+    });
+  });
   [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
     btn.addEventListener('click',function(){
       var code=document.getElementById(btn.dataset.target);
