@@ -4,7 +4,7 @@ A skimmable map of the system. The thesis lives in [whitepaper.md](whitepaper.md
 
 ## What acc is
 
-acc is a Recursive Language Model (RLM) over a late-interaction scored-token memory, implemented as a single Rust crate. A reasoner talks to one persistent substrate through two verbs, retrieve and act. The substrate learns from real outcomes: it moves the score of the individual units of memory that actually aligned with the work. The intelligence lives in the scored state rather than in the model, and the model is a replaceable processor. acc is a working single-host research kernel. It tries to stay honest about what is proven by reality, what is self-graded, and what is still aspirational.
+acc is a Recursive Language Model (RLM) over a late-interaction scored-token memory, implemented as a single Rust crate. A reasoner talks to one persistent substrate through two verbs, retrieve and act. The substrate learns from real outcomes: it moves the score of the individual units of memory that actually aligned with the work, and it *predicts* the path most likely to work next from a transitions ledger over past appraisals. The intelligence lives in the scored state rather than in the model, and the model is a replaceable processor. acc is a working single-host research kernel. It tries to stay honest about what is proven by reality, what is self-graded, and what is still aspirational.
 
 ## The two verbs
 
@@ -42,6 +42,10 @@ $$\Delta \;\propto\; \text{surprise} \cdot \text{provenance weight}$$
 
 The system cannot compound from its own belief. (The exact surprise function, the provenance weights, the bound, and the calibration coefficients are intentionally omitted as proprietary.)
 
+## Prediction (transitions ledger / JEPA)
+
+Retrieval answers *what is relevant*; it does not, on its own, say *what to do next*. acc adds a forward model over the same scored state. Every loop step is logged to a **transitions ledger** as a transition in an appraisal space — a typed read of the situation (coverage, holes, how the last action landed) paired with the action taken and the outcome. To pick the next action, acc does **k-nearest-neighbor retrieval in that appraisal space** and ranks the actions that improved things from similar past situations — energy descent over predicted outcomes. The predictor watches its own error: when realized outcomes diverge from expected ones (a cadence stops landing, a reliable client goes quiet), the surprise both moves credit (above) and flags that the model of this situation has drifted. This is the JEPA bet (LeCun 2022) — predict the next state in a representation space and learn from prediction error — applied to *work* rather than perception. The predictor is wired and running; its lift over a retrieval-only baseline is young (measured as a delta, not yet isolated by a controlled experiment). (The appraisal features, the distance metric, the neighborhood size, and the energy function are proprietary.)
+
 ## Recursion as the primitive (RLM)
 
 acc is an instance of the Recursive Language Model idea. The model is a step inside a recursive program over an external store, not a single long-context forward pass. `acc_act(solve)` re-enters the loop on a sub-goal, and the tree of solves is the decomposition. Long context is avoided two ways: by MaxSim late interaction (the model never holds the substrate in its window) and by an in-sandbox loop where `exec` code maps the whole memory programmatically.
@@ -77,6 +81,7 @@ Many terminals share what compounds: the substrate, the warm encoder daemon, and
 | RLM recursion (`solve` re-enters the loop) | Dependable runtime *replay* (partial) |
 | Sandboxed, scored runtimes | Reality-gated / idempotent side-effecting execution |
 | Structural enforcement of the four links | Scaling MaxSim memory well past a single host |
+| Transitions-ledger predictor (k-NN energy descent), wired and running | Predictor lift over retrieval-only (measured delta, not isolated) |
 | Owner-authority floor; weak self-graded prior | Hardening the reachable-network / send boundary |
 
 The mechanisms in the left column are running today. The right column is honest open work. The largest claims (substrate lift, scale, replay) are not yet validated by controlled experiment. This is the live system rather than a demo, and the measured readout runs at [accint.xyz](https://accint.xyz).

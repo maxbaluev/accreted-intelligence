@@ -8,7 +8,7 @@
 
 Large models perform impressive tasks, then forget how they did it. Each session starts near zero. What worked, what failed, and what should be avoided is rarely retained in a form that can *govern* the next decision. The result is intelligence that is generated and discarded rather than intelligence that compounds.
 
-This paper presents **accreted intelligence**: an architecture that moves learning out of model weights and into *scored external state*. Per-token memory, reusable runtimes, owner facts, warnings, commitments, and outcomes persist across sessions, models, and upgrades. The system improves by acting, observing real results, assigning credit to the specific units of memory that aligned with the work, and updating their scores, while the model remains a replaceable processor rather than the locus of intelligence. **acc** is a working kernel for this thesis on a single host. The interface is two verbs over one memory. The discipline that makes it compound is that credit defaults to a weak prior and only reality earns full weight.
+This paper presents **accreted intelligence**: an architecture that moves learning out of model weights and into *scored external state*. Per-token memory, reusable runtimes, owner facts, warnings, commitments, and outcomes persist across sessions, models, and upgrades. The system improves by *predicting* the path most likely to work from what worked before, acting, observing real results, assigning credit to the specific units of memory that aligned with the work, and updating their scores, while the model remains a replaceable processor rather than the locus of intelligence. **acc** is a working kernel for this thesis on a single host. The interface is two verbs over one memory. The discipline that makes it compound is that credit defaults to a weak prior and only reality earns full weight.
 
 ## 1. The problem — intelligence that doesn't compound
 
@@ -28,8 +28,9 @@ Most AI systems invert this: the model is treated as the intelligence and state 
 
 1. **State comes first.** The scored state determines what the system knows, what it avoids, and what it tries next — not the model's momentary disposition.
 2. **Reality does the scoring.** Memory rises or falls on observed outcomes, not on what a designer guessed would matter, and not on the system's own confidence. Credit defaults to a weak prior unless reality validated it (§4).
-3. **The processor is replaceable.** Intelligence lives in the substrate, so the reasoning model can be swapped without losing what was learned (§5).
-4. **Failure is scored knowledge.** Bad outcomes debit the units that aligned and stay retrievable as warnings, rather than being discarded or averaged away. A system that forgets its mistakes becomes overconfident fast.
+3. **Judgment predicts, not just recalls.** The substrate does not only return what is relevant; it ranks the action most likely to improve things next and watches its own prediction error, so a shift in the world is noticed rather than averaged away (§5).
+4. **The processor is replaceable.** Intelligence lives in the substrate, so the reasoning model can be swapped without losing what was learned (§6).
+5. **Failure is scored knowledge.** Bad outcomes debit the units that aligned and stay retrievable as warnings, rather than being discarded or averaged away. A system that forgets its mistakes becomes overconfident fast.
 
 This matters because reasoning is getting cheaper while judgment is not. If models become interchangeable, the scarce asset is the tested state they work against. The architecture treats reasoning as the renewable input and judgment as the compounding asset.
 
@@ -95,7 +96,19 @@ The discipline that makes the whole loop trustworthy is this **provenance gate**
 
 The Beta posterior (Thompson 1933) is load-bearing precisely because it separates *how often* a unit's alignments led to good outcomes from *how much evidence* backs that estimate: a unit that aligned well 8 of 10 times should outrank one that aligned well 1 of 1, even though both look strong at a glance. The posterior is enforced and measured at the per-unit level; the exact parameterization of $g$ over it is omitted.
 
-## 5. Processor independence
+## 5. Prediction — the transitions ledger
+
+Recall returns what was seen; it cannot, on its own, say *what to do next*. A substrate that only retrieves is reactive — it surfaces relevant memory and stops. accreted intelligence adds a forward model on top of the same scored state, so the system proposes the better path *before* it acts rather than only crediting it afterward.
+
+The mechanism is a **transitions ledger**: every step the loop takes is recorded as a transition in an appraisal space — a typed read of the current situation (what is covered, what is missing, how the last action landed) paired with the action taken and the outcome that followed. To choose the next action, the system does **k-nearest-neighbor retrieval in that appraisal space**: it finds past situations that look like the present one and ranks the actions that improved things from there. This is energy-descent over predicted outcomes — pick the move whose neighbors most reduced the gap between where the work is and where it needs to be. Retrieval (§3) answers *what is relevant*; the transitions ledger answers *what tends to work from a state like this*.
+
+The forward model is **self-monitoring**. Each prediction carries an expected outcome, and the realized outcome is compared against it. When the error is small, the world is behaving as the ledger expects and little changes. When the error is large — a cadence that used to land stops landing, a client who always paid goes quiet — the surprise is exactly the signal §4 uses to move scores hardest, and it is also the signal that the predictor's model of *this* situation has drifted. A world model that does not watch its own error silently rots; this one treats rising error as information.
+
+This is the same bet as **predictive world models in the JEPA line** (LeCun 2022): learn to predict the next state in a representation space rather than reconstruct raw observations, and use prediction error as the learning signal. acc applies it to *work* rather than perception — the "observations" are appraisals of a job in progress, and the "actions" are loop steps (retrieve, solve, register, act, hold for consent). The claim here is bounded and honest: the transitions ledger and the k-NN energy-descent predictor are wired and running, but their lift over a retrieval-only baseline is **young — measured as a delta, not yet proven by a controlled counterfactual** (§7). *(The exact appraisal features, the distance metric, the neighborhood size, and the energy function are proprietary.)*
+
+What this buys, in one line: the system does not merely remember what worked — it predicts the path most likely to work in a situation it has not seen verbatim, and notices when that prediction stops holding.
+
+## 6. Processor independence
 
 A property acc demonstrates concretely: intelligence is not bound to any one reasoning engine. The scored substrate is read and extended by two different model families through one interface today, and neither owns the judgment. It lives in the state. The reasoning processor is swappable, and demonstrably swapped.
 
@@ -103,7 +116,7 @@ The claim is bounded, on purpose. Processor independence is real *at the interfa
 
 Processor independence does not imply topology independence either. Multi-agent decomposition can degrade performance on sequential reasoning versus a single capable agent (Kim et al. 2025). acc's recursion is single-reasoner-first: one reasoner tightly bound to the substrate, recursing on sub-goals, delegating to an isolated worker only for implementation. Adding processors adds coordination cost, not judgment.
 
-## 6. Boundaries & frontier
+## 7. Boundaries & frontier
 
 What acc is and isn't, stated plainly:
 
@@ -115,6 +128,7 @@ What acc is and isn't, stated plainly:
 The honest open frontier:
 
 - **Proving substrate-on vs. off lift.** The single most important missing experiment: a counterfactual harness running the same tasks with the scored substrate enabled and disabled, measuring the delta. The mechanisms exist and the hypothesis is falsifiable; the controlled measurement does not yet.
+- **Predictor lift over retrieval-only.** The transitions ledger (§5) is wired and running, but whether k-NN energy-descent over appraisals beats a retrieval-only baseline — and by how much, on which task shapes — is measured as a delta, not yet isolated by a controlled experiment.
 - **Credit assignment under concurrent work.** When many isolated workers and two reasoners act in parallel against one substrate, attributing an outcome to the right memory is harder than in a serial loop.
 - **Dependable runtime replay.** Turning a successful trace into a runtime that replays *reliably*, not just stored, without re-reasoning each time.
 - **Reality-gated, idempotent execution.** Ensuring side-effecting runtimes are safe to retry, and that a re-run does not double-act on the world.
@@ -122,7 +136,7 @@ The honest open frontier:
 
 A system that compounds judgment must invest as heavily in governance, credit honesty, and boundary enforcement as in scoring and accumulation. The substrate must be governed as carefully as the intelligence is grown.
 
-## 7. Conclusion — the bet
+## 8. Conclusion — the bet
 
 An intelligence that resets every session can be useful, but it cannot compound. It keeps paying to rediscover what it should already know.
 
@@ -150,6 +164,9 @@ acc demonstrates a *working kernel* for accreted intelligence on a single host. 
 - Russo, D. et al. (2018). "A Tutorial on Thompson Sampling." *Foundations and Trends in Machine Learning*, 11(1). [arXiv:1707.02038](https://arxiv.org/abs/1707.02038)
 - Friston, K. (2010). "The free-energy principle: a unified brain theory?" *Nature Reviews Neuroscience*, 11. [Nature](https://www.nature.com/articles/nrn2787)
 - Parr, T., Pezzulo, G. & Friston, K. (2022). *Active Inference: The Free Energy Principle in Mind, Brain, and Behavior*. MIT Press. [MIT Press](https://mitpress.mit.edu/9780262045353/active-inference/)
+
+**Predictive world models**
+- LeCun, Y. (2022). "A Path Towards Autonomous Machine Intelligence." *OpenReview*. [openreview:BZ5a1r-kVsf](https://openreview.net/forum?id=BZ5a1r-kVsf)
 
 **Externalized intelligence & compound systems**
 - Clark, A. & Chalmers, D. (1998). "The Extended Mind." *Analysis*, 58(1). [Oxford Academic](https://academic.oup.com/analysis/article-lookup/doi/10.1093/analys/58.1.7)

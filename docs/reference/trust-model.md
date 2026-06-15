@@ -36,6 +36,12 @@ Owner authority is required before anything that **sends, publishes, deploys, tr
 - Telemetry is off by default and requires your own key.
 - No license here claims any right to your substrate. It is yours.
 
+## Swap the model, keep the company veteran
+
+The reasoning engine is replaceable; the judgment it earned in your world is not. What `acc` learned lives in the **Work Model** — the scored substrate — and a replaceable reasoner reads it through the same two verbs. The same local Work Model already runs under two different reasoning engines today. Change the generalist model (Claude → Codex → a local model) and the scored judgment reads straight into the next one: swap the model, keep the company veteran.
+
+The claim is bounded and honest. Processor independence is real *at the interface* — the two verbs, the schema, and the bindings are model-agnostic. It is **not** total model neutrality: the **encoder is part of the substrate's identity** — one substrate is pinned to one late-interaction encoder, and changing that pin requires a full re-encode. So the *reasoning* processor is a free variable you own and can replace; the *encoder* and the operating contract are fixed. Your judgment is the asset; the model on top is rented and swappable.
+
 ## Credit honesty
 
 Closing a commitment defaults to `self_graded` — a deliberately weak prior — so the system cannot compound from its own confidence. Full weight requires reality: the owner confirmed, the world replied, a test passed, a sandboxed run exited clean. Belief never counts as reality.
