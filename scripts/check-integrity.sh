@@ -18,6 +18,14 @@ for host in claude codex cursor opencode; do
 done
 if [ -f "plugins/claude/.claude-plugin/plugin.json" ]; then note "claude plugin manifest: ok"; else note "claude plugin manifest: MISSING"; fail=1; fi
 
+echo "== attribution flow (web copy -> installer ref) =="
+if command -v node >/dev/null 2>&1; then
+  if node scripts/check-attribution-flow.js; then note "web attribution flow: ok"; else fail=1; fi
+else
+  note "node: MISSING (required for attribution-flow verifier)"
+  fail=1
+fi
+
 echo "== no stale brand / no personal contact =="
 if grep -rIn 'acc4' --include='*.md' --include='*.sh' --include='*.ps1' --include='*.json' --exclude=check-integrity.sh --exclude-dir=.git --exclude-dir=.worktrees . | grep -v 'CHANGELOG.md'; then
   note "FOUND stale 'acc4' references above"; fail=1
