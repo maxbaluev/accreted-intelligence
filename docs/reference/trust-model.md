@@ -8,7 +8,7 @@ This is the repo's *you own it* page: what runs on your machine, what stays priv
 
 ## What's open — Apache-2.0
 
-The integration glue is [Apache-2.0](../../LICENSE-APACHE-2.0.txt) and developed in the open, because it is exactly what runs on your machine when you install:
+The tracked public repository contents are [Apache-2.0](../../LICENSE) and developed in the open. That includes the integration glue, because it is exactly what runs on your machine when you install:
 
 - the installers — `install.sh`, `install.ps1`, `bootstrap/`
 - the host plugins — `plugins/**`, including the Claude Code reference host at `plugins/claude/`

@@ -6,14 +6,17 @@ closed.
 
 ## Open glue — Apache License 2.0
 
-The **integration glue** is licensed under [Apache-2.0](LICENSE-APACHE-2.0.txt). You may
+The tracked public repository contents are licensed under [Apache-2.0](LICENSE). You may
 read, audit, fork, modify, and redistribute it. Contributions are welcome (see
 [CONTRIBUTING.md](CONTRIBUTING.md)). This covers:
 
 - the installers: `install.sh`, `install.ps1`, `bootstrap/`
 - the coding-agent plugins: `plugins/**` (including `plugins/claude/**`, the reference host)
+- the public docs, packaging scripts, and community/issue templates
 
 Auditing these is encouraged — they are exactly what touches your system at install time.
+`LICENSE-APACHE-2.0.txt` is kept as the explicit Apache license text for older links; the
+standard root `LICENSE` is the same text so GitHub can detect the public repo license.
 
 ## Proprietary binary — EULA
 

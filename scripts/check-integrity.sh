@@ -18,6 +18,23 @@ for host in claude codex cursor opencode; do
 done
 if [ -f "plugins/claude/.claude-plugin/plugin.json" ]; then note "claude plugin manifest: ok"; else note "claude plugin manifest: MISSING"; fail=1; fi
 
+echo "== licensing boundary =="
+for f in LICENSE LICENSE-APACHE-2.0.txt LICENSING.md EULA.md; do
+  if [ -f "$f" ]; then note "$f: present"; else note "$f: MISSING"; fail=1; fi
+done
+if grep -q 'Apache License' LICENSE && cmp -s LICENSE LICENSE-APACHE-2.0.txt; then
+  note "Apache license text: standard root LICENSE matches legacy license file"
+else
+  note "Apache license text: root LICENSE missing or diverges from LICENSE-APACHE-2.0.txt"
+  fail=1
+fi
+if grep -qi 'proprietary binary' LICENSING.md && grep -q 'EULA.md' LICENSING.md; then
+  note "proprietary binary split: documented"
+else
+  note "proprietary binary split: missing from LICENSING.md"
+  fail=1
+fi
+
 echo "== attribution flow (web copy -> installer ref) =="
 if command -v node >/dev/null 2>&1; then
   if node scripts/check-attribution-flow.js; then note "web attribution flow: ok"; else fail=1; fi

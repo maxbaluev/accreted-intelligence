@@ -18,7 +18,7 @@ time, while the engine's scoring/calibration internals stay private.
 - **MCP Registry packaging:** `server.json`, `mcpb/**`, `registry/**`, and the packaging scripts that turn public GitHub Release binaries into MCPB assets
 - **Public docs:** `README.md`, `docs/**` — the three-layer tree: concept/glossary/quickstart/first-session (Layer 1–2), `docs/reference/whitepaper.md`, `docs/reference/architecture-overview.md`, `docs/reference/trust-model.md` (principles public, numeric constants proprietary), `CHANGELOG.md`
 - **Releases:** prebuilt multi-OS binaries, MCPB bundles, and `sha256sums.txt` (via GitHub Releases)
-- **Community infra:** `.github/ISSUE_TEMPLATE/**`, `.github/SECURITY.md`, `CONTRIBUTING.md`, `LICENSE-APACHE-2.0.txt`, `EULA.md`, `LICENSING.md`, this manifest
+- **Community infra:** `.github/ISSUE_TEMPLATE/**`, `.github/SECURITY.md`, `CONTRIBUTING.md`, `LICENSE`, `LICENSE-APACHE-2.0.txt`, `EULA.md`, `LICENSING.md`, this manifest
 
 ## PRIVATE — stays in `accint` (the moat)
 

@@ -1,7 +1,7 @@
 # Accreted Intelligence
 
 [![Stars](https://img.shields.io/github/stars/maxbaluev/accreted-intelligence?style=flat&logo=github&color=f5c518)](https://github.com/maxbaluev/accreted-intelligence/stargazers)
-[![License](https://img.shields.io/badge/license-Apache--2.0%20(glue)-blue)](LICENSE-APACHE-2.0.txt)
+[![License](https://img.shields.io/badge/license-Apache--2.0%20(repo%20glue)-blue)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-server-1f6feb)](https://modelcontextprotocol.io)
 [![Works with](https://img.shields.io/badge/works%20with-Claude%20Code%20·%20OpenCode%20·%20Codex%20·%20Cursor-7c3aed)](#install)
 [![Platform](https://img.shields.io/badge/platform-Linux%20·%20macOS%20·%20Windows-555)](#install)
@@ -216,7 +216,7 @@ The live wedge is concrete: a single-host Work Model, scored by real outcomes to
 
 ## The primitives, in the open
 
-The engine is private: the late-interaction memory, the appraisal and prediction layers, and the credit math. That's the moat, and it stays closed. The integration glue (`install.sh`, `install.ps1`, `bootstrap/`, `plugins/`) is **Apache-2.0** and developed in the open. The prebuilt binary ships under a draft [EULA](EULA.md). See **[LICENSING.md](LICENSING.md)** for the full split.
+The engine is private: the late-interaction memory, the appraisal and prediction layers, and the credit math. That's the moat, and it stays closed. The tracked public repository contents — especially the integration glue (`install.sh`, `install.ps1`, `bootstrap/`, `plugins/`) — are **Apache-2.0** and developed in the open. The prebuilt binary ships under a draft [EULA](EULA.md). See **[LICENSING.md](LICENSING.md)** for the full split.
 
 The building blocks are public too, each shippable on its own:
 
