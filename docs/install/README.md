@@ -8,9 +8,15 @@
 
 | Your situation | Path | Doc |
 |---|---|---|
-| macOS / Linux you control | the one-liner installer | [self-serve.md](self-serve.md) |
-| You'd rather be walked through it (Claude Code) | conversational install | [with-claude.md](with-claude.md) |
+| You'd rather be walked through it (any agent — Claude Code, Codex, Cursor, OpenCode) | paste one prompt into your agent | [with-agent.md](with-agent.md) |
+| macOS / Linux you control | the one manual line | [self-serve.md](self-serve.md) |
 | Windows, locked-down, no-root, or "must just work" | container (runs anywhere Docker does) | [container.md](container.md) |
+
+The universal path is the simplest: paste **one prompt** into whatever agent you already
+use and it installs acc *with* you, pausing for your consent at the boundary and verifying
+the result against a machine-readable contract — see [with-agent.md](with-agent.md). The
+prompt is the same one on [accint.xyz](https://accint.xyz); the other two paths are the
+same install underneath, by hand.
 
 ## The one-liner (self-serve)
 
@@ -24,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-It fetches the source and hands off to the installer for your OS. The installer probes your hardware, picks the embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires Claude Code's `.mcp.json`. **First run may download the embedder model (several GB) and take minutes** — the installer reports the wait honestly and never pretends your hardware is bigger than it is. Full detail: [self-serve.md](self-serve.md).
+It fetches the source and hands off to the installer for your OS. The installer probes your hardware, picks the embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. **First run may download the embedder model (several GB) and take minutes** — the installer reports the wait honestly and never pretends your hardware is bigger than it is. Full detail: [self-serve.md](self-serve.md).
 
 ## The OS / tier ladder (honest native-vs-container)
 

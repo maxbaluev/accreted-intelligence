@@ -18,7 +18,7 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-The installer probes your hardware, picks an embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires Claude Code's `.mcp.json`. First run may download the embedder model (several GB) and take minutes — the installer reports the wait honestly. Locked-down or no-root box? Use the [container](install/container.md). Want Claude to drive the install and verify it for you? See [install/with-claude.md](install/with-claude.md).
+The installer probes your hardware, picks an embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. First run may download the embedder model (several GB) and take minutes — the installer reports the wait honestly. Locked-down or no-root box? Use the [container](install/container.md). Want your agent (Claude Code, Codex, Cursor, OpenCode) to drive the install and verify it for you? Paste one prompt — see [install/with-agent.md](install/with-agent.md).
 
 ## 2. Confirm health
 

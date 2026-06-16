@@ -1,6 +1,6 @@
 # Self-serve install — the plain installer path
 
-You run the one-liner yourself, on a box you control. This is the same install the [conversational path](with-claude.md) drives — just without Claude narrating each step.
+You run the one-liner yourself, on a box you control. This is the same install the [conversational path](with-agent.md) drives — just without your agent narrating each step.
 
 > **Early access.** The public `bootstrap/install` currently hits a source gate and does not yet produce a working binary for an outside reader — it is the path that opens once you have an invite. Join the list at [accint.xyz/#access](https://accint.xyz/#access). Never read the one-liner as "installs today."
 

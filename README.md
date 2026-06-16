@@ -64,9 +64,9 @@ Windows (PowerShell 5.1+):
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-The installer probes your hardware, picks the embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires Claude Code's `.mcp.json`. The first run may download the embedder model (several GB) and take minutes. The installer reports the wait honestly and never pretends your hardware is bigger than it is.
+The installer probes your hardware, picks the embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. The first run may download the embedder model (several GB) and take minutes. The installer reports the wait honestly and never pretends your hardware is bigger than it is.
 
-> **Prefer to be walked through it?** If you use Claude Code, just ask it. Paste a link to this repo and say *"install acc for my OS, then run `acc doctor --json` and walk me through it."* Claude installs with you, explaining each step, pausing for consent at the boundary, and verifying against a machine-readable contract instead of guessing. See **[docs/install/with-claude.md](docs/install/with-claude.md)**.
+> **Prefer to be walked through it?** Paste **one prompt** into whatever agent you already use — Claude Code, Codex, Cursor, or OpenCode — and it installs acc *with* you, explaining each step, pausing for consent at the boundary, and verifying against a machine-readable contract instead of guessing. The prompt is the same one on [accint.xyz](https://accint.xyz). See **[docs/install/with-agent.md](docs/install/with-agent.md)**.
 
 ---
 

@@ -1,48 +1,56 @@
-# Install acc by pasting a link into Claude
+# Install acc by pasting one prompt into your agent
 
-This is the **conversational install path**: you give Claude (Claude Code) a link to
-this repo, and Claude installs acc *with* you — explaining each step, asking before
-anything irreversible, running the installer, and then **verifying the result against a
-machine-readable contract** (`acc doctor --json`) instead of guessing. No manual JSON
-pasting, no "did it work?" — Claude reads the doctor report and tells you the truth.
+This is the **conversational install path**: you paste one prompt into your coding agent —
+**Claude Code, Codex, Cursor, or OpenCode** — and the agent installs acc *with* you,
+explaining each step, asking before anything irreversible, running the installer, and then
+**verifying the result against a machine-readable contract** (`acc doctor --json`) instead
+of guessing. No manual JSON pasting, no "did it work?" — the agent reads the doctor report
+and tells you the truth.
 
 If you would rather run it yourself, the README's `./install.sh` and the
 [container path](container.md) are the same install underneath. This doc is for
-when you want Claude to drive.
+when you want your agent to drive.
 
 ## The one paste
 
-Open Claude Code in an empty directory and paste a single line:
+Open your agent in an empty directory and paste this single prompt — the same one on
+[accint.xyz](https://accint.xyz):
 
 ```
-Install acc from https://github.com/<owner>/<repo> — clone it, run the installer for my
-OS, then run `acc doctor --json` and walk me through the result.
+Install AccInt for yourself — a local Work Model that learns what actually worked across
+my projects (scored by my real results) and predicts the better path, so you get genuinely
+better at my work over time. Run the installer for my OS — macOS/Linux:
+curl -fsSL https://accint.xyz/install | sh · Windows PowerShell:
+irm https://accint.xyz/install.ps1 | iex — then run `acc hosts-sync` to wire yourself onto
+it, and tell me when `acc retrieve` works. It's local: no account, no API key, and it asks
+before anything leaves my machine.
 ```
 
-That's the whole trigger. Everything below is the **contract** Claude follows once you
-send it — written so you know exactly what Claude will (and will not) do on your machine.
+That's the whole trigger — it works in any agent. Everything below is the **contract** the
+agent follows once you send it — written so you know exactly what the agent will (and will
+not) do on your machine.
 
-## The installer ↔ Claude contract
+## The installer ↔ agent contract
 
-When you paste that line, Claude is expected to do these steps, in order, **pausing for
-your consent at the boundary** (the clone/install/daemon steps touch your machine):
+When you paste that prompt, the agent is expected to do these steps, in order, **pausing
+for your consent at the boundary** (the install/daemon steps touch your machine):
 
-1. **Explain before touching anything.** Claude states what acc is (a local memory +
+1. **Explain before touching anything.** The agent states what acc is (a local memory +
    tool loop), what the installer will change (Rust toolchain, `uv`, a sandbox lib, a
    warm embedder daemon, a project-local `.mcp.json`), and roughly how long it takes —
    then asks for your go-ahead. **First run may download the embedder model (several GB)
-   and take minutes**; Claude tells you that up front, not after you're waiting.
+   and take minutes**; the agent tells you that up front, not after you're waiting.
 
-2. **Scoped consent, then the one-liner.** With your "go", Claude's first move is handing
-   you (or running) the bootstrap one-liner for your host. It fetches the source and hands
-   off to the same installer underneath — zero install logic of its own:
+2. **Scoped consent, then the one-liner.** With your "go", the agent's first move is the
+   bootstrap one-liner for your host. It fetches the source and hands off to the same
+   installer underneath — zero install logic of its own:
 
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh
+   curl -fsSL https://accint.xyz/install | sh
    ```
 
    ```powershell
-   irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+   irm https://accint.xyz/install.ps1 | iex
    ```
 
    The install lane that one-liner lands in is picked for your host:
@@ -51,7 +59,7 @@ your consent at the boundary** (the clone/install/daemon steps touch your machin
      3-model ladder, below), auto-installs deps, builds `acc`, materializes the encoder
      env, pins the host-selected model, starts the warm daemon, writes `.mcp.json`, and
      seeds the core runtimes. Idempotent — each phase checks its own postcondition first,
-     so re-running is safe and resumes from where it left off. Claude drives it with
+     so re-running is safe and resumes from where it left off. The agent drives it with
      `./install.sh --json` (one machine-readable line per phase — see the installer
      contract below) so it can react phase-by-phase rather than parsing prose.
    - **Windows** → the native `install.ps1`, the same deterministic phase-machine in
@@ -68,17 +76,17 @@ your consent at the boundary** (the clone/install/daemon steps touch your machin
      this case itself**: on a host where no native tier fits, `./install.sh` prints the
      container path as a terminal verdict instead of installing a broken native lane.
 
-   Claude does **not** silently `sudo`, install global packages, or modify your shell
+   The agent does **not** silently `sudo`, install global packages, or modify your shell
    profile beyond what the installer itself does — and it names those side effects before
-   running. Before any real install, Claude can run `./install.sh --dry-run` (walks every
-   phase, mutates nothing, reports what *would* happen and which tier it would pick) as a
-   no-side-effect preview.
+   running. Before any real install, the agent can run `./install.sh --dry-run` (walks
+   every phase, mutates nothing, reports what *would* happen and which tier it would pick)
+   as a no-side-effect preview.
 
 ### The installer's `--json` contract (`acc.install.v1`)
 
 `./install.sh --json` emits **one JSON object per phase** on stdout (all human chatter
-goes to stderr), so Claude can drive the install programmatically and react to each phase
-as it completes. Each line is:
+goes to stderr), so the agent can drive the install programmatically and react to each
+phase as it completes. Each line is:
 
 ```json
 { "phase": "binary", "status": "ok", "detail": "acc v0.0.1 …", "next": "phase 4: encoder env" }
@@ -133,7 +141,7 @@ OS/arch, total RAM):
 Override the auto-pick with `ACC_TIER=<8b-awq|4b-awq|8b-cpu|4b-cpu|8b-full|4b-full|lateon|container>`.
 
 3. **Verify against `acc doctor --json` — the verification contract.** This is the
-   load-bearing step. Instead of trusting install output, Claude runs:
+   load-bearing step. Instead of trusting install output, the agent runs:
 
    ```bash
    acc doctor --json
@@ -168,16 +176,16 @@ Override the auto-pick with `ACC_TIER=<8b-awq|4b-awq|8b-cpu|4b-cpu|8b-full|4b-fu
    | `embedder` | the warm daemon answers a real encode round-trip | `acc embedder` (first run downloads the model — minutes) |
    | `model_pin` | the encoder's vector dim matches the substrate's | re-pin / re-ingest under one model (never mix embedders) |
    | `sandbox` | `bwrap` is available so `act exec` runs isolated | install bubblewrap, or use the container ([here](container.md)) |
-   | `mcp` | `.mcp.json` registers the `acc` server for Claude Code | re-run `./install.sh` (writes the wiring) |
+   | `mcp` | `.mcp.json` registers the `acc` server for your agent | re-run `./install.sh` (writes the wiring) |
    | `hooks` | the three four-link hooks are present under `.claude/hooks/` | re-run `./install.sh` to restore them |
    | `brain/session` | the continuation-frame lane is live — the interactive session is the reasoner | — (always ok; no credential, ever — see the no-credential note below) |
 
-   **How Claude reads the verdict:**
+   **How the agent reads the verdict:**
    - `status: "ok"` overall → every layer healthy; proceed to the first useful turn.
-   - `status: "warn"` → degraded but usable for what it covers. Claude reads each
+   - `status: "warn"` → degraded but usable for what it covers. The agent reads each
      `warn` check's `detail` + `fix` and tells you which capabilities are affected (e.g.
      a `warn` on `embedder` means retrieval isn't ready *yet*).
-   - `status: "fail"` → a layer is broken; Claude surfaces the failing check's `fix`
+   - `status: "fail"` → a layer is broken; the agent surfaces the failing check's `fix`
      and works it with you before calling the install done.
 
    `acc doctor` (no `--json`) prints the same report as a human-readable ✓/⚠/✗ list
@@ -185,17 +193,17 @@ Override the auto-pick with `ACC_TIER=<8b-awq|4b-awq|8b-cpu|4b-cpu|8b-full|4b-fu
    only when everything is `ok`/`skip`; any `warn` or `fail` is non-zero, so the
    installer treats "embedder still warming" as not-yet-done.
 
-4. **Interpret and fix conversationally.** Claude doesn't dump the JSON at you — it
+4. **Interpret and fix conversationally.** The agent doesn't dump the JSON at you — it
    translates: which layers are green, which need a moment (the model is still
    downloading), which need a decision from you (install bubblewrap vs. switch to the
    container). It re-runs `acc doctor` after a fix to confirm the layer flipped to `ok`.
 
-5. **Optional, consent-gated grounding.** Once doctor is green, Claude *offers* to seed a
-   little starter context — a memory or two about you / your project so the first
+5. **Optional, consent-gated grounding.** Once doctor is green, the agent *offers* to seed
+   a little starter context — a memory or two about you / your project so the first
    retrieval has something real to find. This is **opt-in**: nothing about you is stored
    unless you say yes, and it stays in your local `acc.db`.
 
-6. **First useful turn.** With the substrate live, Claude shows the loop working end to
+6. **First useful turn.** With the substrate live, the agent shows the loop working end to
    end — usually a tiny `acc_retrieve` then a real task — so your first interaction
    produces something, not just a green checklist.
 
@@ -204,13 +212,13 @@ Override the auto-pick with `ACC_TIER=<8b-awq|4b-awq|8b-cpu|4b-cpu|8b-full|4b-fu
 acc needs **no API key and no login at all** — not for memory, and not for the brain.
 `acc_retrieve` and the scored-token substrate are entirely local, and the brain is the
 **interactive session itself**: when memory can't answer, `acc_act(solve)` returns a
-continuation frame that the attached session (Claude Code) deliberates over and submits
+continuation frame that the attached session (your agent) deliberates over and submits
 back via the reserved `continue` runtime. There is no external LLM lane — no credential,
 OAuth, or API key, ever.
 
 Headless runs (no interactive session attached) are reflex-only: work that needs
 deliberation checkpoints `waiting:brain` as a persisted frame and is drained at the next
-interactive session — open Claude Code or run `acc frames` to see the queue. That
+interactive session — open your agent or run `acc frames` to see the queue. That
 checkpoint is the design, not a fault.
 
 ## Honest consent & privacy
@@ -223,16 +231,16 @@ checkpoint is the design, not a fault.
 - **No secrets to hold.** acc keeps no credential at all — there is no brain token, no
   OAuth store, no API key. The reasoning step is the interactive session itself, so there
   is nothing to leak, log, or store in the substrate.
-- **Consent at the boundary.** Claude installs with your go-ahead, asks before the
+- **Consent at the boundary.** The agent installs with your go-ahead, asks before the
   optional grounding step, and never sends/publishes/deploys anything during install. The
   install path touches only your machine.
 - **The brain is never your consent.** A brain suggestion is a prediction, not your
-  approval — Claude keeps "what acc knows" separate from "what you said".
+  approval — the agent keeps "what acc knows" separate from "what you said".
 
 ## Failure → fix, straight from `acc doctor`
 
-Every failure has a fix line *in the doctor report itself* — Claude reads it and acts on
-it. The common ones:
+Every failure has a fix line *in the doctor report itself* — the agent reads it and acts
+on it. The common ones:
 
 - **`sandbox` warn — "no sandbox available" (`bwrap` missing).** `act exec` refuses to
   run unsandboxed by design. Fix: install bubblewrap (`apt install bubblewrap` on Linux),
@@ -249,7 +257,7 @@ it. The common ones:
 - **`model_pin` warn — encoder dim ≠ substrate dim.** The daemon's model differs from the
   substrate's. Re-pin or re-ingest under one model.
 - **`mcp` warn — no/incomplete `.mcp.json`.** Re-run `./install.sh` (it writes the
-  project-local wiring), then reload MCP in Claude Code so the two verbs appear.
+  project-local wiring), then reload MCP in your agent so the two verbs appear.
 - **`hooks` warn — a hook is missing.** Re-run `./install.sh` to restore
   `.claude/hooks/*` (these bind the four-link discipline).
 - **`brain/session`.** Always `ok` — the interactive session is the reasoner, nothing to
@@ -272,17 +280,17 @@ lane (and cross-modal sight via `acc_retrieve` with an `image` input) is opt-in.
 
 ## The two machine-readable contracts (install → verify)
 
-Claude drives the whole install on **two** machine-readable streams, end to end:
+The agent drives the whole install on **two** machine-readable streams, end to end:
 
 1. **`./install.sh --json`** (schema `acc.install.v1`, above) — the deterministic
    phase-machine. The `probe_tier` phase carries the explicit tier-selector recommendation
    (which of the 3 models, on which device, and why), so the lane choice is itself a
-   machine-readable line rather than Claude's host inspection. Each phase's `status` +
-   `next` tell Claude exactly what to do.
+   machine-readable line rather than the agent's host inspection. Each phase's `status` +
+   `next` tell the agent exactly what to do.
 2. **`acc doctor --json`** (schema `acc.doctor.v1`, above) — the verification contract
    the installer's final `verdict` line hands off to.
 
 Together they are the full install-then-verify contract — no prose parsing, no "did it
 work?" guessing. `./install.sh --dry-run --json` previews the same phase stream (every
-phase `status: "would"`) with zero side effects, so Claude can show you the plan and the
-selected tier before touching your machine.
+phase `status: "would"`) with zero side effects, so the agent can show you the plan and
+the selected tier before touching your machine.
