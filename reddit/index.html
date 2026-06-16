@@ -314,13 +314,38 @@ var PH_KEY='phc_A5xgn9QqiSCKXivifKGEBPrpSZDwvFyxm5op974q3ekC';
 var PH_HOST='https://us.i.posthog.com';
 function ph(ev,props){try{if(window.posthog&&typeof window.posthog.capture==='function'){window.posthog.capture(ev,props||{});}}catch(_e){}}
 var install_ref='';try{if(window.crypto&&window.crypto.getRandomValues){var _ir=new Uint8Array(6);window.crypto.getRandomValues(_ir);for(var _i=0;_i<_ir.length;_i++){install_ref+=('0'+_ir[_i].toString(16)).slice(-2);}}}catch(_e){install_ref='';}
+function referrerSourceProps(raw){
+  var props={};try{
+    if(!raw){return props;}
+    var u=new URL(raw),h=(u.hostname||'').toLowerCase().replace(/^www\./,'');
+    if(!h||h==='accint.xyz'||h==='localhost'){return props;}
+    var source=h;
+    if(/(^|\.)github\.com$/.test(h)){source='github';}
+    else if(/(^|\.)reddit\.com$/.test(h)){source='reddit';}
+    else if(h==='news.ycombinator.com'){source='hacker_news';}
+    else if(/(^|\.)twitter\.com$/.test(h)||/(^|\.)x\.com$/.test(h)){source='x';}
+    else if(/(^|\.)linkedin\.com$/.test(h)){source='linkedin';}
+    else if(/(^|\.)google\./.test(h)){source='google';}
+    else if(/(^|\.)bing\.com$/.test(h)){source='bing';}
+    props.ref_host=h.slice(0,96);
+    props.ref_source=source.replace(/[^a-z0-9_.-]/g,'').slice(0,64)||'referral';
+  }catch(_e){}
+  return props;
+}
 var source_props={landing:'reddit',utm_source:'reddit',utm_medium:'organic',utm_campaign:'work_model'};
 try{
   var qs=new URLSearchParams(window.location.search||'');
   ['utm_source','utm_medium','utm_campaign','utm_content','ref','rsub','thread','entry'].forEach(function(k){
     var v=qs.get(k);if(v){source_props[k]=String(v).slice(0,96);}
   });
-  if(!source_props.ref&&/reddit/i.test(document.referrer||'')){source_props.ref='reddit_referrer';}
+  var rp=referrerSourceProps(document.referrer||'');
+  if(rp.ref_host){
+    source_props.ref_host=rp.ref_host;
+    source_props.ref_source=rp.ref_source;
+    if(!source_props.utm_source){source_props.utm_source=rp.ref_source;}
+    if(!source_props.utm_medium){source_props.utm_medium='referral';}
+    if(!source_props.ref&&rp.ref_source==='reddit'){source_props.ref='reddit_referrer';}
+  }
 }catch(_e){}
 if(PH_KEY){try{
 !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register_for_session identify".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);

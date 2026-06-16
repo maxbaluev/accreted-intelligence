@@ -56,6 +56,24 @@ function helperFrom(html) {
   return new Function("install_ref", `return (${src});`)(REF);
 }
 
+function referrerHelperFrom(html) {
+  const src = extractFunction(html, "referrerSourceProps");
+  return new Function(`return (${src});`)();
+}
+
+function assertEqual(actual, expected, context) {
+  if (actual !== expected) {
+    die(`${context}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
+}
+
+function assertReferrerSource(file, html, referrer, expected) {
+  const props = referrerHelperFrom(html)(referrer);
+  Object.entries(expected).forEach(([key, value]) => {
+    assertEqual(props[key], value, `${file}: ${referrer} ${key}`);
+  });
+}
+
 function assertInlineScriptsParse(file, html) {
   const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map((m) => m[1]);
   scripts.forEach((script, i) => {
@@ -71,6 +89,7 @@ function assertPageIdentity(file, html) {
   assertIncludes(html, "posthog.identify(install_ref)", `${file}: page identity`);
   assertIncludes(html, "register_for_session", `${file}: session properties`);
   assertIncludes(html, "install_ref", `${file}: install_ref`);
+  assertIncludes(html, "referrerSourceProps(document.referrer||'')", `${file}: referrer source`);
 }
 
 function assertAgentPrompt(file, html, id) {
@@ -93,6 +112,18 @@ function checkHome() {
   const html = read(file);
   assertInlineScriptsParse(file, html);
   assertPageIdentity(file, html);
+  assertReferrerSource(file, html, "https://github.com/maxbaluev/accreted-intelligence", {
+    ref_host: "github.com",
+    ref_source: "github",
+  });
+  assertReferrerSource(file, html, "https://www.reddit.com/r/ClaudeAI/comments/example", {
+    ref_host: "reddit.com",
+    ref_source: "reddit",
+  });
+  assertReferrerSource(file, html, "https://accint.xyz/docs/", {
+    ref_host: undefined,
+    ref_source: undefined,
+  });
   assertIncludes(html, "install_agent_prompt_copied", `${file}: prompt-copy event`);
   assertAgentPrompt(file, html, "agent-prompt");
   assertAgentPrompt(file, html, "agent-prompt2");
@@ -107,6 +138,14 @@ function checkReddit() {
   const html = read(file);
   assertInlineScriptsParse(file, html);
   assertPageIdentity(file, html);
+  assertReferrerSource(file, html, "https://github.com/maxbaluev/accreted-intelligence", {
+    ref_host: "github.com",
+    ref_source: "github",
+  });
+  assertReferrerSource(file, html, "https://news.ycombinator.com/item?id=1", {
+    ref_host: "news.ycombinator.com",
+    ref_source: "hacker_news",
+  });
   assertIncludes(html, "reddit_agent_prompt_copied", `${file}: prompt-copy event`);
   assertAgentPrompt(file, html, "agent-prompt");
   assertManualCommand(file, html, "cmd-nix", "nix");

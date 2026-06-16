@@ -11,7 +11,7 @@ The attribution chain is intentionally narrow:
 
 | Stage | Event / artifact | Identity | Properties |
 |---|---|---|---|
-| Web page view | page script on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref` session property plus `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry` when present |
+| Web page view | page script on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref` session property plus `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
 | Copy install text | `install_command_copied` | same generated `install_ref` | `method` (`agent_prompt` or `manual_command`), `os`, `placement`, `install_ref`, source props |
 | Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local only; not sent by the installer |
 | App telemetry | `first_run`, `daily_rollup`, lifecycle events | `distinct_id = telemetry_install_ref` when present, otherwise random device UUID | `first_run.has_install_ref`, `os`, `agent`, `project_lang`; no raw prompt/file/memory data |
@@ -21,6 +21,10 @@ so web copy events and app first-run events can join without adding raw refs to
 every event payload. Keep this boundary: raw installer refs are not normal event
 properties. `scripts/check-attribution-flow.js` guards the web side, and
 private telemetry tests guard the app side.
+
+For organic inbound links without explicit campaign parameters, the page records
+only a coarse referrer source and host such as `github` / `github.com`. It does
+not record the full inbound URL or path.
 
 PostHog mechanics this relies on:
 
@@ -75,6 +79,8 @@ SELECT
         properties.rsub IS NOT NULL AND properties.rsub != '', properties.rsub,
         properties.ref IS NOT NULL AND properties.ref != '', properties.ref,
         properties.utm_source IS NOT NULL AND properties.utm_source != '', properties.utm_source,
+        properties.ref_source IS NOT NULL AND properties.ref_source != '', properties.ref_source,
+        properties.ref_host IS NOT NULL AND properties.ref_host != '', properties.ref_host,
         properties.placement IS NOT NULL AND properties.placement != '', properties.placement,
         'unknown'
     ) AS surface,
@@ -149,6 +155,8 @@ copies AS (
         any(properties.utm_source) AS utm_source,
         any(properties.utm_campaign) AS utm_campaign,
         any(properties.ref) AS ref,
+        any(properties.ref_source) AS ref_source,
+        any(properties.ref_host) AS ref_host,
         any(properties.rsub) AS rsub
     FROM events
     WHERE event = 'install_command_copied'
@@ -171,6 +179,8 @@ SELECT
         c.rsub IS NOT NULL AND c.rsub != '', c.rsub,
         c.ref IS NOT NULL AND c.ref != '', c.ref,
         c.utm_source IS NOT NULL AND c.utm_source != '', c.utm_source,
+        c.ref_source IS NOT NULL AND c.ref_source != '', c.ref_source,
+        c.ref_host IS NOT NULL AND c.ref_host != '', c.ref_host,
         c.placement IS NOT NULL AND c.placement != '', c.placement,
         'unknown'
     ) AS surface,
