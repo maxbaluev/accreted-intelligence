@@ -75,6 +75,22 @@ export const AccPlugin: Plugin = async (input) => {
 
   const dirFor = (sessionID: string): string => dirs.get(sessionID) ?? projectDir
 
+  /** A turn-end / Stop hook now emits its human text wrapped in the Claude-Code Stop
+   * envelope — `{"hookSpecificOutput":{"hookEventName":"Stop","additionalContext":"<text>"}}`
+   * on a coach stop, empty on a clean stop. Unwrap `additionalContext` so the chat shows
+   * the verdict text, not raw JSON. NEVER throws: any parse error or schema drift (non-JSON
+   * stdout, missing field, wrong type) falls back to the raw string — the host is never hurt
+   * and any future stdout shape still surfaces. */
+  const unwrapHookText = (out: string): string => {
+    try {
+      const j = JSON.parse(out)
+      const a = j?.hookSpecificOutput?.additionalContext
+      return typeof a === "string" && a.length > 0 ? a : out
+    } catch {
+      return out
+    }
+  }
+
   /** Spawn `acc hook <event> --host generic`, envelope on stdin. Resolves the hook's
    * stdout; NEVER rejects — any fault (missing binary, timeout, spawn error) → "". */
   const hook = (event: string, envelope: Envelope, timeoutMs: number = HOOK_TIMEOUT_MS): Promise<string> =>
@@ -149,7 +165,8 @@ export const AccPlugin: Plugin = async (input) => {
                 agent_id: sid,
               })
             } else {
-              const verdict = await hook("turn-end", { session_id: sid, cwd: dirFor(sid) })
+              const raw = await hook("turn-end", { session_id: sid, cwd: dirFor(sid) })
+              const verdict = unwrapHookText(raw)
               if (verdict.trim().length > 0) pendingVerdict.set(sid, verdict.trim())
             }
             break

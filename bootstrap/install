@@ -73,8 +73,8 @@ if [ ! -f "$DEST/Cargo.toml" ]; then
   # Same prebuilt-target table as install.sh phase 3 (acc-v<ver>-<target>.tar.gz).
   PREBUILT_TARGET=""
   case "$OS/$ARCH" in
-    Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-musl" ;;
-    Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-musl" ;;
+    Linux/x86_64)                PREBUILT_TARGET="x86_64-unknown-linux-musl" ;;   # static musl — runs on ANY linux (no glibc floor)
+    Linux/aarch64|Linux/arm64)   PREBUILT_TARGET="aarch64-unknown-linux-musl" ;; # static musl — runs on ANY linux (no glibc floor)
     Darwin/arm64|Darwin/aarch64) PREBUILT_TARGET="aarch64-apple-darwin" ;;
   esac
   if [ -z "$PREBUILT_TARGET" ]; then
@@ -89,6 +89,15 @@ if [ ! -f "$DEST/Cargo.toml" ]; then
   echo "acc bootstrap: no engine source in $DEST (public release repo) — handing off for the prebuilt $PREBUILT_TARGET binary (install.sh resolves the latest release tag, fetches + sha256-verifies)"
 fi
 
+# install.sh is `#!/usr/bin/env bash` and uses bash arrays + $'...' escapes -- it CANNOT run
+# under a busybox/dash-only shell. This bootstrap is plain `#!/bin/sh`, so a `| sh` pipe on a
+# bash-less host (some containers, minimal Alpine) would otherwise fail mid-parse on the first
+# array with a cryptic error. Check for bash FIRST and fail with the exact fix.
+if ! command -v bash >/dev/null 2>&1; then
+  echo "acc bootstrap: bash not found -- the installer (install.sh) requires bash (it uses bash arrays). Install it first (alpine: apk add bash; debian/ubuntu: apt install bash; fedora: dnf install bash), then re-run." >&2
+  exit 1
+fi
+
 echo "acc bootstrap: handing off to $DEST/install.sh"
 cd "$DEST"
-exec ./install.sh "$@"
+exec bash ./install.sh "$@"

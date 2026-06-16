@@ -80,7 +80,7 @@ while the work keeps running and usually LANDS server-side. The client cannot
 tell landed-slow from dead.
 
 **Fix: set the server deadline BELOW your host's client timeout** (the snippet
-sets acc's deadline to 45s and OpenCode's client timeout to 60s), so slow
+sets acc's stall window to 45s and OpenCode's client timeout to 300s), so slow
 calls return an honest checkpoint payload the model can act on instead of an
 opaque client error.
 
