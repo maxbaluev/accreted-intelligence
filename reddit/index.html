@@ -110,8 +110,8 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
 .community-link.alt{background:transparent;color:var(--ink);border:1px solid var(--rule)}
 .community-link.alt:hover{background:var(--ink);border-color:var(--ink);color:#14110b}
 .community-note{color:var(--faint);font-family:var(--mono);font-size:11px;line-height:1.55}
-.post-prompts{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.post-prompt{display:block;text-decoration:none;border:1px solid var(--line);background:#120f0a;padding:15px;min-height:138px}
+.post-prompts{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}
+.post-prompt{display:block;text-decoration:none;border:1px solid var(--line);background:#120f0a;padding:15px;min-height:142px}
 .post-prompt:hover{border-color:var(--orange);background:var(--bg3);color:var(--ink)}
 .post-prompt b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--orange)}
 .post-prompt span{display:block;margin-top:8px;color:var(--ink);font-size:14px;font-weight:700;line-height:1.25}
@@ -258,8 +258,18 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
         <div class="community-main">
           <div class="tag">Reddit community</div>
           <h3>Bring real agent-work friction, not generic AI hype.</h3>
-          <p>We opened r/AccretedIntelligence as a public workbench for Work Models, work packets, open promises, evidence packets, approval gates, and outcome credit. The useful posts are concrete: install friction, teardown notes, failure reports, and operator workflows.</p>
+          <p>We opened r/AccretedIntelligence as a public workbench for Work Models, work packets, open promises, evidence packets, approval gates, and outcome credit. The useful posts are concrete: root-cause packets, commitment boundaries, install friction, teardown notes, and operator workflows.</p>
           <div class="post-prompts" aria-label="Useful first posts">
+            <a class="post-prompt" data-track="reddit_template_clicked" data-template="root_cause_packet" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Root-cause%20packet%3A%20where%20did%20the%20agent%27s%20work%20stop%20matching%20reality%3F&selftext=Task%20and%20agent%3A%0A%0AOriginal%20promise%3A%0A%0AFirst%20step%20where%20expected%20state%20diverged%20from%20observed%20state%3A%0A%0ATool%20call%20or%20artifact%20involved%3A%0A%0AEvidence%20that%20proved%20the%20divergence%3A%0A%0AWhat%20should%20the%20Work%20Model%20capture%20next%20time%3A" target="_blank" rel="noopener">
+              <b>Template</b>
+              <span>Root-cause packet</span>
+              <small>For failures where the transcript looked fine but reality diverged.</small>
+            </a>
+            <a class="post-prompt" data-track="reddit_template_clicked" data-template="commitment_boundary" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Commitment%20boundary%3A%20what%20can%20the%20agent%20do%20without%20a%20human%20click%3F&selftext=Agent%20action%3A%0A%0ACounterparty%20or%20system%20touched%3A%0A%0AAuthority%20source%3A%0A%0AMax%20scope%20%2F%20amount%20%2F%20deadline%3A%0A%0AEvidence%20required%20before%20execution%3A%0A%0AReceipt%20required%20after%20execution%3A%0A%0AWhat%20stays%20owner-gated%3A" target="_blank" rel="noopener">
+              <b>Template</b>
+              <span>Commitment boundary</span>
+              <small>For deciding what can be automatic and what must stay gated.</small>
+            </a>
             <a class="post-prompt" data-track="reddit_template_clicked" data-template="failure_report" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Failure%20report%3A%20agent%20said%20done%20but%20evidence%20was%20missing&selftext=Tool%20and%20task%3A%0A%0AWhat%20the%20agent%20claimed%3A%0A%0AWhat%20the%20repo%20or%20system%20actually%20showed%3A%0A%0AWhat%20evidence%20would%20have%20made%20this%20trustworthy%3A%0A%0AWhat%20I%20want%20a%20Work%20Model%20to%20track%20next%20time%3A" target="_blank" rel="noopener">
               <b>Template</b>
               <span>Failure report</span>
@@ -279,8 +289,8 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
         </div>
         <div class="community-actions">
           <a class="community-link" data-track="reddit_community_clicked" href="https://www.reddit.com/r/AccretedIntelligence/?utm_source=accint&utm_medium=reddit_landing&utm_campaign=work_model" target="_blank" rel="noopener">Join r/AccretedIntelligence</a>
-          <a class="community-link alt" data-track="reddit_template_clicked" data-template="workflow_teardown_side" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Workflow%20teardown%3A%20where%20does%20my%20agent%20work%20break%20first%3F&selftext=Agent%20workflow%3A%0A%0AWhere%20I%20still%20have%20to%20babysit%3A%0A%0AWhat%20state%20gets%20lost%20between%20runs%3A%0A%0AWhat%20should%20be%20owner-gated%20before%20anything%20leaves%20the%20machine%3A%0A%0AWhat%20would%20count%20as%20evidence%20that%20the%20work%20is%20actually%20done%3A" target="_blank" rel="noopener">Post a teardown</a>
-          <p class="community-note">If your agent looked productive but increased your review load, that is the kind of report that helps. Keep links out unless they are necessary evidence.</p>
+          <a class="community-link alt" data-track="reddit_template_clicked" data-template="root_cause_side" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Root-cause%20packet%3A%20where%20did%20the%20agent%27s%20work%20stop%20matching%20reality%3F&selftext=Task%20and%20agent%3A%0A%0AOriginal%20promise%3A%0A%0AFirst%20step%20where%20expected%20state%20diverged%20from%20observed%20state%3A%0A%0ATool%20call%20or%20artifact%20involved%3A%0A%0AEvidence%20that%20proved%20the%20divergence%3A%0A%0AWhat%20should%20the%20Work%20Model%20capture%20next%20time%3A" target="_blank" rel="noopener">Post a root-cause packet</a>
+          <p class="community-note">If your agent looked productive but increased your review load, that is exactly the kind of report that helps. Keep links out unless they are necessary evidence.</p>
         </div>
       </div>
     </div>
