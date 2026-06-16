@@ -33,7 +33,7 @@ Owner authority is required before anything that **sends, publishes, deploys, tr
 
 - The substrate (`acc.db`) is a plain file on your disk, owned by you. Retrieval, scoring, and the sandbox all run on your machine.
 - There is **no cloud control plane in the loop** and **no API key to leak** — not for memory, and not for the reasoner. The reasoner is the interactive session itself; when memory can't answer, `acc` hands the attached agent a frame to deliberate over. There is no external LLM lane, ever.
-- Telemetry is off by default and requires your own key.
+- Anonymous event-name telemetry is enabled by the public installer so the maintainer can see real install failures and usage health. It never sends prompts, files, memory, or Work Model data; set `ACC_NO_TELEMETRY=1` before install or run `acc telemetry off` later to opt out.
 - No license here claims any right to your substrate. It is yours.
 
 ## Swap the model, keep the company veteran

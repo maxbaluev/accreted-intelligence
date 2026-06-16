@@ -56,7 +56,8 @@ for your consent at the boundary** (the install/daemon steps touch your machine)
    The install lane that one-liner lands in is picked for your host:
    - **Linux x86_64 / aarch64 / macOS** → the native `./install.sh`. It is a
      **deterministic phase-machine**: it probes your host, selects the embedder tier (the
-     3-model ladder, below), auto-installs deps, builds `acc`, materializes the encoder
+     3-model ladder, below), auto-installs deps, installs `acc` from the verified release
+     binary when available, materializes the encoder
      env, pins the host-selected model, starts the warm daemon, writes `.mcp.json`, and
      seeds the core runtimes. Idempotent — each phase checks its own postcondition first,
      so re-running is safe and resumes from where it left off. The agent drives it with
@@ -68,13 +69,11 @@ for your consent at the boundary** (the install/daemon steps touch your machine)
      handoff. The engine is Windows-native (zero `std::os::unix` outside the platform
      boundary; daemon IPC = TCP loopback + owner token); the container below remains
      the fallback for locked-down hosts.
-   - **A locked-down/no-root box, or "it must just work"** → the **Tier-C
-     container** (`scripts/acc-docker.sh`), a reproducible Linux image that runs
-     anywhere Docker runs, with your substrate on an owner-owned mounted volume. Full
-     details and the GPU/CPU-floor tradeoff live in
-     [the container path](container.md). The native installer **detects
-     this case itself**: on a host where no native tier fits, `./install.sh` prints the
-     container path as a terminal verdict instead of installing a broken native lane.
+   - **A locked-down/no-root box, or a container-only host** → the **container
+     portability path**. Full details and the GPU/CPU-floor tradeoff live in
+     [the container path](container.md). It now installs the public release binary;
+     Docker-host smoke is still required before treating it as a registry image.
+     Prefer the native installer when the host allows it.
 
    The agent does **not** silently `sudo`, install global packages, or modify your shell
    profile beyond what the installer itself does — and it names those side effects before
@@ -103,6 +102,7 @@ phase as it completes. Each line is:
 
 | phase id | does |
 |---|---|
+| `install_attribution` | optionally writes `ACC_INSTALL_REF` to a local receipt; it is not sent by the installer |
 | `probe_tier` | probes host (VRAM/RAM/OS/arch) + selects the embedder tier (the ladder below). On a container-only host this is the terminal verdict. |
 | `prereq_rust` / `prereq_uv` / `prereq_python` | ensures the toolchain (cargo, uv, python3) — idempotent |
 | `sysdeps_sandbox` | bubblewrap (Linux sandbox) + a C linker |
@@ -114,6 +114,7 @@ phase as it completes. Each line is:
 | `browser` | optional Camoufox host-side browser env (`ACC_NO_BROWSER=1` to skip) |
 | `seed` | waits for the embedder, then converges the browser daemon + seeds `runtime:browser` |
 | `mcp_wiring` | writes/merges the project-local `.mcp.json` (idempotent) |
+| `telemetry` | enables anonymous event-name telemetry unless `ACC_NO_TELEMETRY=1` is set |
 | `verify` | runs `acc doctor` |
 | `verdict` | final line — overall outcome + the `acc doctor --json` handoff (the verification contract below) |
 
@@ -271,7 +272,7 @@ on it. The common ones:
 | Linux x86_64 with a GPU you control | native `./install.sh` | full multimodal ColQwen lane, no container overhead |
 | Linux x86_64/aarch64 or macOS, root-ish | native `./install.sh` | functional; embedder on cpu/mps |
 | Windows | native `install.ps1` | same phase-machine in PowerShell; the **container** ([here](container.md)) is the fallback for locked-down hosts |
-| Locked-down / no-root / "must just work" | **container** ([here](container.md)) | the image carries its deps; CPU floor works with no GPU |
+| Locked-down / no-root / container-only host | **container** ([here](container.md)) | binary-release portability path; Docker-host smoke pending |
 
 The container defaults to the universal CPU floor (LateOn, text-only); the GPU/ColQwen
 lane (and cross-modal sight via `acc_retrieve` with an `image` input) is opt-in. See

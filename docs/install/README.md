@@ -2,7 +2,7 @@
 
 `acc` installs as one binary plus one local daemon. Three honest paths, by how much control you have over the box.
 
-> **Early access.** There is no public binary yet — these paths install a working binary once you have an invite. Join the list at [accint.xyz/#access](https://accint.xyz/#access).
+> **Public binary available.** The native paths download a public release binary when one exists for your OS/architecture, verify it by SHA-256, and then wire the local Work Model. No invite is required for the public release path.
 
 ## Pick your path
 
@@ -10,7 +10,8 @@
 |---|---|---|
 | You'd rather be walked through it (any agent — Claude Code, Codex, Cursor, OpenCode) | paste one prompt into your agent | [with-agent.md](with-agent.md) |
 | macOS / Linux you control | the one manual line | [self-serve.md](self-serve.md) |
-| Windows, locked-down, no-root, or "must just work" | container (runs anywhere Docker does) | [container.md](container.md) |
+| Windows you control | PowerShell installer | [self-serve.md](self-serve.md) |
+| Locked-down, no-root, or container-only hosts | container portability path | [container.md](container.md) |
 
 The universal path is the simplest: paste **one prompt** into whatever agent you already
 use and it installs acc *with* you, pausing for your consent at the boundary and verifying
@@ -30,7 +31,12 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-It fetches the source and hands off to the installer for your OS. The installer probes your hardware, picks the embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. **First run may download the embedder model (several GB) and take minutes** — the installer reports the wait honestly and never pretends your hardware is bigger than it is. Full detail: [self-serve.md](self-serve.md).
+For install attribution from a directory listing or PR, set
+`ACC_INSTALL_REF=<surface>` on the installer process. The installer writes the
+label to a local receipt only; it does not send the ref anywhere by itself. See
+[self-serve.md](self-serve.md) for exact shell and PowerShell examples.
+
+It fetches the public installer and hands off to the installer for your OS. The installer probes your hardware, picks the embedder tier it can honestly run, downloads and verifies the release binary when available, starts a warm local daemon, and wires your agent's `.mcp.json`. **First run may download the embedder model (several GB) and take minutes** — the installer reports the wait honestly and never pretends your hardware is bigger than it is. Full detail: [self-serve.md](self-serve.md).
 
 ## The OS / tier ladder (honest native-vs-container)
 
@@ -42,7 +48,7 @@ It fetches the source and hands off to the installer for your OS. The installer 
 | **Windows** | native via `install.ps1` | engine windows-clean; [container](container.md) as fallback |
 | **Locked-down / no-root** | use the container | image carries its deps; CPU floor works with no GPU |
 
-The native path is preferred on a Linux box you control (it gives the full multimodal lane natively). The [container](container.md) is the pragmatic cross-OS answer — one image, one pinned toolchain, the same sandbox and encoder env everywhere.
+The native path is preferred on a Linux box you control (it gives the full multimodal lane natively). The [container](container.md) is the pragmatic cross-OS answer for Docker-first hosts; it now installs the public release binary, with Docker-host smoke still tracked before registry promotion.
 
 ## After install
 

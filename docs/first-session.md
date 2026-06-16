@@ -2,7 +2,7 @@
 
 The literal commands and the receipt lines, nothing else. For *why* each step matters, read [concept.md](concept.md) — this page does not re-explain the loop.
 
-> Early access: there is no public binary yet, so these commands run once you have an invite and the installer has built `acc`. Join the list at [accint.xyz/#access](https://accint.xyz/#access). To install, see [install/README.md](install/README.md).
+> Install first: the public release installer downloads a verified prebuilt `acc` binary on supported platforms. To install, see [install/README.md](install/README.md).
 
 ## 1. Check health and your next step
 

@@ -2,7 +2,7 @@
 
 You run the one-liner yourself, on a box you control. This is the same install the [conversational path](with-agent.md) drives — just without your agent narrating each step.
 
-> **Early access.** The public `bootstrap/install` currently hits a source gate and does not yet produce a working binary for an outside reader — it is the path that opens once you have an invite. Join the list at [accint.xyz/#access](https://accint.xyz/#access). Never read the one-liner as "installs today."
+> **Public release path.** The public `bootstrap/install` clones the open installer/glue repo, then `install.sh` downloads and SHA-256 verifies the latest matching prebuilt `acc` binary. A source build is only the fallback for development checkouts that contain engine source.
 
 ## The one line
 
@@ -16,17 +16,36 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
+Optional local attribution for docs, directory listings, or PR links:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-awesome-list sh
+```
+
+```powershell
+$env:ACC_INSTALL_REF = 'gh-awesome-list'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+```
+
+`ACC_INSTALL_REF` is written only to a local receipt at
+`install-attribution.env` under the acc data directory. The installer does not
+send that ref anywhere by itself.
+
 Prefer to read before you run? The installer is Apache-2.0 and auditable — `bootstrap/install`, `bootstrap/install.ps1`, and `install.sh` / `install.ps1` are exactly what touches your system. Read them, then run.
 
 ## What it does, in order
 
 1. **Probes your hardware** and picks the embedder tier it can honestly run (cuda / mps / cpu). It never pretends your machine is bigger than it is.
-2. **Builds `acc`** (a pure-Rust binary) and places it on your PATH.
+2. **Installs `acc`** by fetching a verified prebuilt release binary when available, then places it on your PATH. Development checkouts with engine source can still build from source.
 3. **Starts a warm local embedder daemon** so retrieval is fast from the first call.
 4. **Wires Claude Code** — adds `acc` to `.mcp.json` (add-only; your existing config is never rewritten).
 5. **Runs `acc hosts-sync`** to wire any other installed agents (OpenCode, Codex, Cursor) — add-only and idempotent. See [../hosts/README.md](../hosts/README.md).
 
 **First run may download the embedder model (several GB) and take minutes.** The installer reports the wait honestly.
+
+The public installer enables anonymous event-name telemetry by default so the
+maintainer can see real install failures and usage health. It never sends your
+prompts, files, memory, or Work Model data. Set `ACC_NO_TELEMETRY=1` before
+install, or run `acc telemetry off` after install, to opt out.
 
 ## Verify it worked
 
@@ -39,7 +58,7 @@ $ acc doctor --json     # machine-readable health contract
 
 ## If native doesn't fit
 
-Windows, locked-down, no-root, or "must just work"? Use the [container](container.md) — it runs anywhere Docker does, substrate on a volume you own.
+Windows? Use the PowerShell one-liner above. Locked-down, no-root, or container-only host? See the [container](container.md) portability path; it uses the public release binary and documents the remaining Docker-host smoke before registry promotion.
 
 ---
 

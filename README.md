@@ -64,7 +64,7 @@ Windows (PowerShell 5.1+):
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-The installer probes your hardware, picks the embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. The first run may download the embedder model (several GB) and take minutes. The installer reports the wait honestly and never pretends your hardware is bigger than it is.
+The installer probes your hardware, picks the embedder tier it can honestly run, downloads and verifies the matching release binary when available, starts a warm local daemon, and wires your agent's `.mcp.json`. The first run may download the embedder model (several GB) and take minutes. The installer reports the wait honestly and never pretends your hardware is bigger than it is.
 
 > **Prefer to be walked through it?** Paste **one prompt** into whatever agent you already use — Claude Code, Codex, Cursor, or OpenCode — and it installs acc *with* you, explaining each step, pausing for consent at the boundary, and verifying against a machine-readable contract instead of guessing. The prompt is the same one on [accint.xyz](https://accint.xyz). See **[docs/install/with-agent.md](docs/install/with-agent.md)**.
 
@@ -110,7 +110,7 @@ Read the depth:
 
 `acc` runs on a computer you control: one small program and one data file (a pure-Rust binary and a SQLite file). There is no cloud control plane in the loop and no API key to leak, neither for memory nor for the reasoner. The reasoner is the interactive session itself; when memory can't answer, `acc` hands the attached agent a frame to deliberate over. There is no external LLM lane, ever.
 
-- **Your data stays put.** The substrate (`acc.db`) is a plain file on your disk, owned by you. Retrieval, scoring, prediction, and the sandbox all run on your machine. Telemetry is off by default and requires your own key.
+- **Your data stays put.** The substrate (`acc.db`) is a plain file on your disk, owned by you. Retrieval, scoring, prediction, and the sandbox all run on your machine. Anonymous event-name telemetry is enabled by the public installer so real install failures are visible; it never sends prompts, files, memory, or Work Model data, and you can skip it with `ACC_NO_TELEMETRY=1` or turn it off later with `acc telemetry off`.
 - **Swap the model, keep the company veteran.** What `acc` learned lives in the Work Model, so a replaceable reasoner reads it through the same two verbs. Two reasoning engines have been driven against one substrate. Change the generalist model and the judgment it earned in your world stays — the encoder and the operating contract are part of the substrate's identity, so one substrate is pinned to one encoder.
 - **Consent at the boundary.** Owner authority is required before anything that sends, publishes, deploys, transfers, deletes important data, or uses your credentials. The gate is hard rather than advisory. A held decision is named and timestamped, and nothing leaves without it.
 
@@ -187,7 +187,7 @@ Keep your agent. Keep your computer. `acc` works underneath the AI tools you alr
 - **macOS:** functional (no `bwrap`; embedder on mps or cpu)
 - **Linux aarch64:** functional (embedder on cpu)
 - **Windows:** native via `install.ps1` (engine windows-clean; container as fallback)
-- **Locked-down / no-root / "must just work":** the **[container](docs/install/container.md)** runs anywhere Docker does, substrate on a volume you own.
+- **Locked-down / no-root / container-only hosts:** the **[container](docs/install/container.md)** portability path uses the public release binary; Docker-host smoke is still required before promoting it as a registry image.
 
 ---
 
@@ -208,7 +208,7 @@ What's running today, what's young, and what's open:
 | **Running today** | MaxSim retrieval + per-unit scored memory · reality-gated bounded credit · two reasoners over one substrate · recursive `solve` · sandboxed scored runtimes · structural four-link enforcement · the owner-authority floor · the weak self-graded prior |
 | **Young but wired** | the transition ledger + k-NN energy-descent predictor · dependable runtime replay · cost-compression instrumentation · model-swap resilience as a measured delta |
 | **Known open** | substrate-on-vs-off lift (no counterfactual harness yet) · scaling MaxSim past a single host · hardening the reachable-network / send boundary |
-| **Not started** | a public binary release · the team and collective Work-Model stages above |
+| **Not started** | the team and collective Work-Model stages above |
 
 The live wedge is concrete: a single-host Work Model, scored by real outcomes today, with the readout above as the running proof. Several coding-agent terminals, one local Work Model, one owner, and approval before external action. The broader product is a learning substrate for any agent-run job, and the proof starts where agents already do real work.
 

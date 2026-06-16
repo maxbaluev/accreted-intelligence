@@ -65,6 +65,6 @@ On a machine you control. One small program and one data file, sitting underneat
 
 ## Honest bounds
 
-`acc` is early access and a working single-host kernel — a running system, not a finished platform. The universal claim above is proven by *shape* — the architecture genuinely is identical across jobs — but not yet by scale. We say what's young, with evidence. The depth, with the math and the proven-vs-open line, is in [reference/whitepaper.md](reference/whitepaper.md).
+`acc` is an early release and a working single-host kernel — a running system, not a finished platform. The universal claim above is proven by *shape* — the architecture genuinely is identical across jobs — but not yet by scale. We say what's young, with evidence. The depth, with the math and the proven-vs-open line, is in [reference/whitepaper.md](reference/whitepaper.md).
 
 Ready to run it? → [first-session.md](first-session.md). See it live → [accint.xyz](https://accint.xyz).

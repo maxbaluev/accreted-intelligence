@@ -1,0 +1,10 @@
+.git
+.acc-data
+.acc-models
+.worktrees
+target
+dist
+node_modules
+__pycache__
+*.pyc
+*.log

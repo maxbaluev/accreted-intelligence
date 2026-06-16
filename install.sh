@@ -59,6 +59,7 @@
 #        ACC_NONINTERACTIVE=1 never prompt; skip sudo steps, just warn
 #        ACC_TIER=<lane>    force the embedder lane (skip the host probe's pick)
 #        ACC_INSTALL=source skip the phase-3 prebuilt-release fetch; always build from source
+#        ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
 #        ACC_BROWSER_HOME / ACC_BROWSER_SOCK   browser env overrides
 #
 # Windows: native installs use install.ps1 (the same phase-machine in PowerShell). This
@@ -509,6 +510,41 @@ step "phase 0 — probe host + select embedder tier"
 say "Accreted Intelligence (AccInt) — acc is an H-JEPA Work Model + tool loop for Claude Code: predict the better path, retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes."
 say "host: $OS/$ARCH · substrate: $DB"
 [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ] || warn "untested OS '$OS' — proceeding best-effort (Windows: use install.ps1; container as fallback)"
+
+# ── phase 0a — local install attribution receipt ─────────────────────────────────────
+# ACC_INSTALL_REF is an explicit, caller-supplied attribution label for install URLs used
+# from docs, directory listings, PRs, or ads. The public installer records it LOCALLY only;
+# it does not send a network event here. Telemetry, when enabled below, remains event-name
+# only and is governed by ACC_NO_TELEMETRY / `acc telemetry off`.
+sanitize_install_ref() {
+  printf '%s' "$1" | LC_ALL=C tr -cd 'A-Za-z0-9._:/?&=+,-' | cut -c1-160
+}
+INSTALL_REF_RAW="${ACC_INSTALL_REF:-}"
+INSTALL_REF=""
+[ -n "$INSTALL_REF_RAW" ] && INSTALL_REF="$(sanitize_install_ref "$INSTALL_REF_RAW")"
+INSTALL_ATTR_PATH="$CANON_DATA_DIR/install-attribution.env"
+write_install_attribution() {
+  mkdir -p "$CANON_DATA_DIR" || return 1
+  {
+    printf 'ref=%s\n' "$INSTALL_REF"
+    date -u '+captured_at_utc=%Y-%m-%dT%H:%M:%SZ'
+    printf 'source=ACC_INSTALL_REF\n'
+    printf 'note=local install attribution receipt; not sent by installer\n'
+  } > "$INSTALL_ATTR_PATH"
+}
+
+step "phase 0a — install attribution (local receipt)"
+if [ -z "$INSTALL_REF_RAW" ]; then
+  phase_result "install_attribution" "skipped" "ACC_INSTALL_REF not set — no install attribution receipt written" "optional: ACC_INSTALL_REF=gh-surface ./install.sh"
+elif [ -z "$INSTALL_REF" ]; then
+  phase_result "install_attribution" "skipped" "ACC_INSTALL_REF had no supported label characters after sanitization — no receipt written" "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
+elif [ "$DRY_RUN" = "1" ]; then
+  phase_result "install_attribution" "would" "write local install attribution ref '$INSTALL_REF' to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
+elif write_install_attribution; then
+  phase_result "install_attribution" "ok" "wrote local install attribution ref '$INSTALL_REF' to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
+else
+  phase_result "install_attribution" "skipped" "could not write local install attribution receipt at $INSTALL_ATTR_PATH" "install continues; attribution is optional"
+fi
 
 # ── update-mode detection ───────────────────────────────────────────────────────────
 # An EXISTING install (an acc binary on PATH and/or an existing substrate at $DB) flips

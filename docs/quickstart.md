@@ -2,14 +2,14 @@
 
 The practitioner's path: install, run the loop, read what it wrote. For the *why* behind each step, read [concept.md](concept.md); for the bare command list, [first-session.md](first-session.md). This page is the expanded walkthrough.
 
-> **Early access.** There is no public binary yet — the one-liner below installs a working binary only once you have an invite. Join the list at [accint.xyz/#access](https://accint.xyz/#access). We say what's proven and what's young.
+> **Public binary available.** The one-liner below fetches the public release installer, which downloads a signed-by-hash prebuilt `acc` binary for supported platforms and falls back only where a source checkout is available. We still say what's proven and what's young.
 
 ## 1. Install
 
 Pick your path from [install/README.md](install/README.md). The common cases:
 
 ```bash
-# macOS / Linux — fetches source, hands off to the installer for your OS
+# macOS / Linux — fetches the public installer and selected release binary
 curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh
 ```
 
@@ -18,7 +18,17 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-The installer probes your hardware, picks an embedder tier it can honestly run, builds `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. First run may download the embedder model (several GB) and take minutes — the installer reports the wait honestly. Locked-down or no-root box? Use the [container](install/container.md). Want your agent (Claude Code, Codex, Cursor, OpenCode) to drive the install and verify it for you? Paste one prompt — see [install/with-agent.md](install/with-agent.md).
+For attribution from a directory listing or PR, put `ACC_INSTALL_REF=<surface>`
+on the installer process, for example:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-awesome-list sh
+```
+
+The installer writes that label to a local receipt only; it does not send the
+ref anywhere by itself.
+
+The installer probes your hardware, picks an embedder tier it can honestly run, installs `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. First run may download the embedder model (several GB) and take minutes — the installer reports the wait honestly. Locked-down or no-root box? The [container](install/container.md) page tracks that portability path separately. Want your agent (Claude Code, Codex, Cursor, OpenCode) to drive the install and verify it for you? Paste one prompt — see [install/with-agent.md](install/with-agent.md).
 
 ## 2. Confirm health
 

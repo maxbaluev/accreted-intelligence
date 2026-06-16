@@ -1,0 +1,56 @@
+name: Docker container smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      acc_version:
+        description: "Acc release tag/version to install into the image"
+        required: true
+        default: "v0.1.5"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Static checks
+        run: |
+          bash -n install.sh scripts/acc-docker.sh scripts/docker-entrypoint.sh
+          shellcheck bootstrap/install scripts/acc-docker.sh scripts/docker-entrypoint.sh
+          bash scripts/check-integrity.sh
+
+      - name: Build image from release binary
+        run: docker build --build-arg ACC_VERSION="${ACC_VERSION}" -t acc:smoke .
+        env:
+          ACC_VERSION: ${{ inputs.acc_version }}
+
+      - name: Verify binary in image
+        run: docker run --rm --entrypoint acc acc:smoke --version
+
+      - name: Smoke helper status path
+        run: scripts/acc-docker.sh status
+        env:
+          ACC_IMAGE: acc:smoke
+          ACC_NO_BUILD: "1"
+          ACC_NO_EMBEDDER: "1"
+          ACC_DATA_DIR: ${{ runner.temp }}/acc-data
+          ACC_MODELS_DIR: ${{ runner.temp }}/acc-models
+
+      - name: Smoke detached exec wiring
+        run: |
+          trap 'scripts/acc-docker.sh stop >/dev/null 2>&1 || true' EXIT
+          scripts/acc-docker.sh start
+          docker exec -i acc acc --db /data/acc.db status
+        env:
+          ACC_IMAGE: acc:smoke
+          ACC_NO_BUILD: "1"
+          ACC_NO_EMBEDDER: "1"
+          ACC_DATA_DIR: ${{ runner.temp }}/acc-data
+          ACC_MODELS_DIR: ${{ runner.temp }}/acc-models
