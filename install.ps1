@@ -16,7 +16,7 @@ mirrors src/selector.rs select_model_for_os windows branch so phase 0 and `acc p
                                runs on the GPU instead of a 10-100x slower cpu encode)
   no usable GPU, RAM >= 2GB  -> LateOn text-only on cpu (light ~0.6GB default; multimodal needs
                                a cuda GPU, or force ACC_TIER=8b-full/4b-full to run it on cpu)
-  below                      -> the CONTAINER tier path (docs/INSTALL_CONTAINER.md)
+  below                      -> the CONTAINER tier path (docs/install/container.md)
   DISK FLOOR (every rung): expected model download (static sizes mirrored from
   encoders/prefetch.py) + 2048MB headroom must fit the free disk at the HF cache
   (HF_HOME, default %USERPROFILE%\.cache\huggingface; probed via PSDrive), else the
@@ -412,7 +412,7 @@ function Select-Tier {
   }
   # 6: nothing viable natively -> the container tier path.
   $script:Tier = 'container'; $script:ModelId = ''; $script:Device = ''
-  $script:TierReason = "no native tier viable (RAM ${ram}MB) -> use the CONTAINER tier (docs/INSTALL_CONTAINER.md)"
+  $script:TierReason = "no native tier viable (RAM ${ram}MB) -> use the CONTAINER tier (docs/install/container.md)"
 }
 
 # Apply-DiskFloor -- the tier ladder's DISK leg (mirror of install.sh apply_disk_floor):
@@ -465,10 +465,10 @@ Apply-DiskFloor
 Say ("probe: gpu=$script:ProbeGpu vram_free=$($script:ProbeVram)MB ram=$($script:ProbeRam)MB arch=$Arch disk_free=$($script:DiskFreeMb)MB (hf cache: $($script:HfCache)) (windows ladder: full bf16 only, never AWQ/triton)")
 if ($script:Tier -eq 'container') {
   # Container is a TERMINAL verdict -- no native lane fits, the native phases don't apply.
-  Emit-Phase 'probe_tier' 'ok' ("$script:TierReason -> tier=container") 'no native lane fits -- follow docs/INSTALL_CONTAINER.md (Docker image carries deps + CPU floor)'
+  Emit-Phase 'probe_tier' 'ok' ("$script:TierReason -> tier=container") 'no native lane fits -- follow docs/install/container.md (Docker image carries deps + CPU floor)'
   Warn 'No native embedder tier fits this host. The container tier is the portability floor.'
-  Warn '-> docs/INSTALL_CONTAINER.md  (scripts/acc-docker.sh)'
-  if ($Json) { Emit-Phase 'verdict' 'skipped' ("native install not viable; container tier required ($script:TierReason)") 'docs/INSTALL_CONTAINER.md - scripts/acc-docker.sh' }
+  Warn '-> docs/install/container.md  (scripts/acc-docker.sh)'
+  if ($Json) { Emit-Phase 'verdict' 'skipped' ("native install not viable; container tier required ($script:TierReason)") 'docs/install/container.md - scripts/acc-docker.sh' }
   exit 0
 }
 Emit-Phase 'probe_tier' 'ok' ("tier=$script:Tier model=$script:ModelId device=$script:Device - $script:TierReason") 'phase 1: prereqs (rust/uv/git)'
@@ -1147,7 +1147,7 @@ if (Test-EmbedderWarm) {
       }
       $det = "embedder daemon exited within 2s -- a real start failure (model load / CUDA-driver / import error), not a pending lane. Log: $EmbLogErr"
       if ($errTail) { $det = "$det -- last: $errTail" }
-      Emit-Phase 'embedder_daemon' 'failed' $det ("read the error above + $EmbLogErr, fix the cause, then: acc embedder  (or use the container: docs/INSTALL_CONTAINER.md)")
+      Emit-Phase 'embedder_daemon' 'failed' $det ("read the error above + $EmbLogErr, fix the cause, then: acc embedder  (or use the container: docs/install/container.md)")
     }
   } else {
     Emit-Phase 'embedder_daemon' 'skipped' 'could not start the embedder daemon' ("manually: acc embedder (log: $EmbLogOut)")
@@ -1296,9 +1296,9 @@ if ($DryRun) {
       }
     }
     if ($embDied) {
-      Emit-Phase 'seed' 'failed' ("embedder daemon/worker crashed before warming (see the log tail above + $EmbLogErr -- likely model-load / CUDA-driver / import error)") ("fix the error above, then: acc embedder  ;  acc --db $DbPath browser start  (or use the container: docs/INSTALL_CONTAINER.md)")
+      Emit-Phase 'seed' 'failed' ("embedder daemon/worker crashed before warming (see the log tail above + $EmbLogErr -- likely model-load / CUDA-driver / import error)") ("fix the error above, then: acc embedder  ;  acc --db $DbPath browser start  (or use the container: docs/install/container.md)")
     } else {
-      Emit-Phase 'seed' 'failed' ("embedder did not warm within 10min (see the log tail above + $EmbLogOut) -- a real stall, not a pending lane") ("inspect the log; once it loads run: acc --db $DbPath browser start  (or use the container: docs/INSTALL_CONTAINER.md)")
+      Emit-Phase 'seed' 'failed' ("embedder did not warm within 10min (see the log tail above + $EmbLogOut) -- a real stall, not a pending lane") ("inspect the log; once it loads run: acc --db $DbPath browser start  (or use the container: docs/install/container.md)")
     }
   }
 }

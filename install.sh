@@ -33,7 +33,7 @@
 #     time (8b→4b→lateon) with the honest 'disk floor: need ~XGB, have ~YGB' reason
 #     in TIER_REASON — same honesty as the VRAM floors.
 #   nothing viable natively (Windows / no-root / locked-down) → the CONTAINER tier path
-#     (docs/INSTALL_CONTAINER.md). Override the lane with ACC_TIER=<8b-awq|4b-awq|8b-cpu|
+#     (docs/install/container.md). Override the lane with ACC_TIER=<8b-awq|4b-awq|8b-cpu|
 #     4b-cpu|8b-full|4b-full|lateon|container>.
 #
 # UPDATE PATH: re-running on an EXISTING install (acc on PATH and/or a substrate at the
@@ -417,7 +417,7 @@ select_tier() {
   fi
   # 10: nothing viable natively → the container tier path.
   TIER=container; MODEL_ID=""; DEVICE=""; ENCODER_SCRIPT=""
-  TIER_REASON="no native tier viable (RAM ${ram}MB, OS $OS/$ARCH) → use the CONTAINER tier (docs/INSTALL_CONTAINER.md)"
+  TIER_REASON="no native tier viable (RAM ${ram}MB, OS $OS/$ARCH) → use the CONTAINER tier (docs/install/container.md)"
 }
 
 # apply_disk_floor — the tier ladder's DISK leg: the pick's expected download + 2048MB
@@ -491,10 +491,10 @@ if [ "$TIER" = "container" ]; then
   # Container is a TERMINAL verdict — no native lane fits this host, so the native phases
   # don't apply. Report the container path as the verdict and stop, in BOTH dry-run and real
   # mode (dry-run's "what would happen" on a container-only host IS "use the container").
-  phase_result "probe_tier" "ok" "$TIER_REASON → tier=container" "no native lane fits — follow docs/INSTALL_CONTAINER.md (Docker image carries deps + CPU floor)"
+  phase_result "probe_tier" "ok" "$TIER_REASON → tier=container" "no native lane fits — follow docs/install/container.md (Docker image carries deps + CPU floor)"
   warn "No native embedder tier fits this host. The container tier is the portability floor."
-  warn "→ docs/INSTALL_CONTAINER.md  (scripts/acc-docker.sh)"
-  [ "$JSON" = "1" ] && json_phase "verdict" "skipped" "native install not viable; container tier required ($TIER_REASON)" "docs/INSTALL_CONTAINER.md  ·  scripts/acc-docker.sh"
+  warn "→ docs/install/container.md  (scripts/acc-docker.sh)"
+  [ "$JSON" = "1" ] && json_phase "verdict" "skipped" "native install not viable; container tier required ($TIER_REASON)" "docs/install/container.md  ·  scripts/acc-docker.sh"
   exit 0
 fi
 phase_result "probe_tier" "ok" "tier=$TIER model=$MODEL_ID device=$DEVICE · $TIER_REASON" "phase 1: prereqs (rust/uv/python)"
@@ -575,7 +575,7 @@ if [ "$OS" = "Linux" ]; then
   esac
   [ -n "$SQLITE_DEV" ] && { [ -f /usr/include/sqlite3.h ] || act "install $SQLITE_DEV (system sqlite for rusqlite)" pkg_install "$SQLITE_DEV" || true; }
 else
-  warn "macOS: no bwrap — exec runtimes REFUSE to run unsandboxed (acc returns an error, never runs unsandboxed code); retrieve/solve/outcome still work. For sandboxed exec on macOS, use the container (docs/INSTALL_CONTAINER.md)."
+  warn "macOS: no bwrap — exec runtimes REFUSE to run unsandboxed (acc returns an error, never runs unsandboxed code); retrieve/solve/outcome still work. For sandboxed exec on macOS, use the container (docs/install/container.md)."
   phase_result "sysdeps_sandbox" "skipped" "macOS: no bwrap — exec runtimes refuse unsandboxed code (retrieve/solve/outcome still work); use the container for sandboxed exec. Camoufox still keeps the browser host-side."
   if ! have cc; then
     act "install Xcode CLT (C linker)" xcode-select --install || true
@@ -1230,14 +1230,14 @@ fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
 # PHASE 12 — claude plugin (the DISTRIBUTION artifact). Validates the versioned plugin
-# folder's manifests (claude-plugin/) with python3 json.load and prints how to use the
+# folder's manifests (plugins/claude/) with python3 json.load and prints how to use the
 # plugin in OTHER projects. This phase deliberately does NOT rewire this repo's own
 # .claude/settings.json — the repo keeps direct hook wiring; the plugin folder exists so
 # other projects can consume the same eight-event lifecycle + the two MCP verbs. Pure
 # read (idempotent, fail-soft): a broken manifest warns and the install continues.
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 12 — claude plugin manifests (distribution artifact)"
-PLUGIN_DIR="$REPO/claude-plugin"
+PLUGIN_DIR="$REPO/plugins/claude"
 PLUGIN_BAD=""
 for m in .claude-plugin/plugin.json hooks/hooks.json .mcp.json; do
   if [ ! -f "$PLUGIN_DIR/$m" ]; then
@@ -1247,12 +1247,12 @@ for m in .claude-plugin/plugin.json hooks/hooks.json .mcp.json; do
   fi
 done
 if [ -n "$PLUGIN_BAD" ]; then
-  phase_result "claude_plugin" "failed" "claude-plugin/ manifest check:$PLUGIN_BAD" "fix the manifest(s) under claude-plugin/ — fail-soft, install continues (this repo's .claude/settings.json is untouched either way)"
+  phase_result "claude_plugin" "failed" "plugins/claude/ manifest check:$PLUGIN_BAD" "fix the manifest(s) under plugins/claude/ — fail-soft, install continues (this repo's .claude/settings.json is untouched either way)"
 else
   say "this repo keeps DIRECT hook wiring in .claude/settings.json — nothing here is rewired; the plugin folder is the distribution artifact for OTHER projects"
   say "use it elsewhere:   claude --plugin-dir $PLUGIN_DIR"
   say "or copy the skills: cp -r $PLUGIN_DIR/skills/* <project>/.claude/skills/"
-  phase_result "claude_plugin" "ok" "claude-plugin/ manifests valid (plugin.json · hooks/hooks.json · .mcp.json) — distribution artifact only; this repo's own wiring untouched" "phase 13: hosts-sync"
+  phase_result "claude_plugin" "ok" "plugins/claude/ manifests valid (plugin.json · hooks/hooks.json · .mcp.json) — distribution artifact only; this repo's own wiring untouched" "phase 13: hosts-sync"
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
