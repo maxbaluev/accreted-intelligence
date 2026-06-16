@@ -20,4 +20,4 @@ The three layers, by depth:
 - **How-to** (you decided to try) — [quickstart.md](quickstart.md), [first-session.md](first-session.md), [install/](install/), [hosts/README.md](hosts/README.md).
 - **Reference** (researcher / integrator / auditor; the math lives here) — [reference/whitepaper.md](reference/whitepaper.md), [reference/architecture-overview.md](reference/architecture-overview.md), [reference/trust-model.md](reference/trust-model.md), [registry/mcp-registry.md](registry/mcp-registry.md).
 
-Maintainer references: [PUBLIC_REPO_MANIFEST.md](PUBLIC_REPO_MANIFEST.md), [RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md), [ops/attribution-dashboard.md](ops/attribution-dashboard.md).
+Maintainer references: [PUBLIC_REPO_MANIFEST.md](PUBLIC_REPO_MANIFEST.md), [RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md), [ops/attribution-dashboard.md](ops/attribution-dashboard.md), [ops/directory-listing.md](ops/directory-listing.md).
