@@ -66,6 +66,34 @@ All notable changes to acc are recorded here. The format follows
   depth line and doctor grounding ladder now report binding parity when the
   hooks.json is present, advisory when only `notify` is.
 
+## [0.1.5] — 2026-06-16
+
+### Added
+
+- **Work that compounds — for real.** Browser flows and code changes now build
+  on themselves: when you do something similar to before, acc reuses the
+  *verified* approach instead of starting over. Identity is decided by meaning
+  (late-interaction MaxSim), not brittle string-matching — so "message Rinat"
+  and "reply Harkirat" reinforce one capability instead of fragmenting into
+  dead ones.
+- **Code compounding.** Every verified, merged change becomes a reusable,
+  scored pattern future work retrieves as a hint (never a blind replay).
+
+### Changed
+
+- **Chat-is-authority.** The cryptographic grant layer is gone — authority is
+  held when you're in an interactive session and asked in plain chat at the
+  consent boundary. Simpler, no keys.
+- **Smarter browser profiles** — inferred from the site/service automatically.
+
+### Fixed
+
+- **Fail-closed grounding.** If the memory can't be reached (busy embedder), acc
+  now says "grounding faulted — retry" instead of confidently answering from
+  generic priors.
+- **Stop-hook loop** that could burn tokens by re-blocking itself — closed.
+- Diagnostics no longer misread correctly-idle loops as broken.
+
 ## [0.1.2] — 2026-06-15
 
 New-user install / update / download hardening, from a real fresh-machine install log
