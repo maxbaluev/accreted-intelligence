@@ -413,7 +413,16 @@ select_tier() {
   if [ "$ram" -ge 2000 ]; then
     TIER=lateon; MODEL_ID=lightonai/LateOn; ENCODER_SCRIPT="$ENCODER_SCRIPT_FULL"
     DEVICE="$([ "$mps" = 1 ] && [ "$ram" -ge "$FULL_4B_RAM" ] && echo mps || echo cpu)"
-    TIER_REASON="no accelerator (cuda/mps) present (RAM ${ram}MB, free VRAM ${vram}MB) → LateOn (light text-only default; multimodal via a GPU or ACC_TIER) on $DEVICE"; return
+    # MPS is an accelerator — only say "no accelerator" when truly none. On Apple Silicon under
+    # the multimodal RAM floor, name the MPS + the floor (mirrors src/selector.rs rung 9).
+    if [ "$mps" != 1 ]; then
+      TIER_REASON="no accelerator (cuda/mps) present (RAM ${ram}MB, free VRAM ${vram}MB) → LateOn (light text-only default; multimodal via a GPU or ACC_TIER) on $DEVICE"
+    elif [ "$DEVICE" = cpu ]; then
+      TIER_REASON="Apple Silicon GPU (MPS) present but RAM ${ram}MB < ${FULL_4B_RAM}MB multimodal floor → LateOn (light text-only default; multimodal via a GPU or ACC_TIER) on $DEVICE"
+    else
+      TIER_REASON="Apple Silicon GPU (MPS) present (RAM ${ram}MB) → LateOn (light text-only default; multimodal via a GPU or ACC_TIER) on $DEVICE"
+    fi
+    return
   fi
   # 10: nothing viable natively → the container tier path.
   TIER=container; MODEL_ID=""; DEVICE=""; ENCODER_SCRIPT=""
@@ -840,36 +849,32 @@ fi
 # encode, so the model load isn't also resolving the env. Idempotent (uv caches the env).
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 4 — encoder env (uv sync of the tier's script deps)"
-# Resolve the encoder-env-warm command. A DEV checkout ships encoders/li_encode*.py on disk →
-# `uv sync --script <file>`. A binary-only RELEASE install ships no encoders/ dir → the encoder
-# scripts are embedded in the binary and reachable as `acc warm-encoder <model>` (probe with
-# --help), which materializes the tier's encoder and `uv sync --script`s it with VISIBLE uv
-# progress and WITHOUT loading the model. Either path resolves+caches the (multi-GB)
-# torch/transformers/awq/flash-attn env once, BEFORE the daemon's first encode, so the model
-# load isn't also hiding the wheel download. No model / no path → skipped (deps resolve lazily).
-if [ -n "$ENCODER_SCRIPT" ] && [ -f "$ENCODER_SCRIPT" ]; then
+# Resolve the encoder-env-warm command. Prefer the binary's model-aware warm path whenever it
+# exists: it chooses the embedded script by model id, points CUDA lanes at the PyTorch cu128
+# wheel index, and verifies `torch.cuda.is_available()` before the install can pin cuda. The
+# direct `uv sync --script <file>` path remains only as a fallback for older binaries.
+if [ -n "$MODEL_ID" ] && "$ACC_BIN" warm-encoder --help >/dev/null 2>&1; then
+  # Binary path (source checkout or release install): the wheel download is VISIBLE here instead
+  # of hidden inside the first embedder start (mirror of the phase-6 prefetch binary fallback).
+  if [ "$DRY_RUN" = "1" ]; then
+    say "WOULD: acc warm-encoder $MODEL_ID $DEVICE (uv sync --script the tier's embedded encoder env, live progress, no model load)"
+    phase_result "encoder_env" "would" "warm the encoder env for $TIER via acc warm-encoder $MODEL_ID $DEVICE (torch/transformers/... — several GB, one time)" "phase 5: model pin"
+  else
+    say "resolving the encoder env (torch/transformers/... — several GB, one time)…"
+    if act "acc warm-encoder $MODEL_ID $DEVICE (resolve+cache the $TIER encoder env, verify cuda torch when needed)" \
+         "$ACC_BIN" warm-encoder "$MODEL_ID" "$DEVICE"; then
+      phase_result "encoder_env" "ok" "encoder env ready for $TIER (acc warm-encoder $MODEL_ID $DEVICE — torch/transformers/... resolved/cached)" "phase 5: model pin"
+    else
+      phase_result "encoder_env" "skipped" "acc warm-encoder reported an issue (deps resolve lazily on first encode; cuda lanes will be re-validated at daemon start)" "re-run; or let the daemon resolve the env lazily on first start"
+    fi
+  fi
+elif [ -n "$ENCODER_SCRIPT" ] && [ -f "$ENCODER_SCRIPT" ]; then
   if act "uv sync --script $(basename "$ENCODER_SCRIPT") (resolve+cache the $TIER encoder deps)" \
        uv sync --script "$ENCODER_SCRIPT" >/dev/null 2>&1; then
     phase_result "encoder_env" "$([ "$DRY_RUN" = 1 ] && echo would || echo ok)" \
       "encoder env ready for $TIER ($(basename "$ENCODER_SCRIPT") deps resolved/cached)" "phase 5: model pin"
   else
     phase_result "encoder_env" "skipped" "uv sync --script reported an issue (deps resolve lazily on first encode)" "re-run; or check: uv sync --script $ENCODER_SCRIPT"
-  fi
-elif [ -n "$MODEL_ID" ] && "$ACC_BIN" warm-encoder --help >/dev/null 2>&1; then
-  # Binary-only release install: on-disk encoders/ absent but the binary carries the embedded
-  # encoder scripts. Warm the env via the binary so the wheel download is VISIBLE here instead
-  # of hidden inside the first embedder start (mirror of the phase-6 prefetch binary fallback).
-  if [ "$DRY_RUN" = "1" ]; then
-    say "WOULD: acc warm-encoder $MODEL_ID (uv sync --script the tier's embedded encoder env, live progress, no model load)"
-    phase_result "encoder_env" "would" "warm the encoder env for $TIER via acc warm-encoder $MODEL_ID (torch/transformers/... — several GB, one time)" "phase 5: model pin"
-  else
-    say "resolving the encoder env (torch/transformers/... — several GB, one time)…"
-    if act "acc warm-encoder $MODEL_ID (resolve+cache the $TIER encoder env, visible progress, no model load)" \
-         "$ACC_BIN" warm-encoder "$MODEL_ID"; then
-      phase_result "encoder_env" "ok" "encoder env ready for $TIER (acc warm-encoder $MODEL_ID — torch/transformers/... resolved/cached)" "phase 5: model pin"
-    else
-      phase_result "encoder_env" "skipped" "acc warm-encoder reported an issue (deps resolve lazily on first encode)" "re-run; or let the daemon resolve the env lazily on first start"
-    fi
   fi
 else
   phase_result "encoder_env" "skipped" "no encoder env to warm for tier=$TIER (on-disk $ENCODER_SCRIPT absent and the binary has no warm-encoder subcommand, or no model pinned)" "tier mis-selected — check phase 0"

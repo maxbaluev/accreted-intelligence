@@ -10,7 +10,7 @@ build, PROCESSOR_ARCHITECTURE, total RAM), so the embedder lane is chosen, not g
 
 WINDOWS TIER LADDER (full bf16 only -- AWQ/triton has NO windows wheels, never selected;
 mirrors src/selector.rs select_model_for_os windows branch so phase 0 and `acc pin` AGREE):
-  NVIDIA, free VRAM >= 20GB  -> ColQwen3-8B full bf16 on cuda (torch-cuda resolves natively)
+  NVIDIA, free VRAM >= 20GB  -> ColQwen3-8B full bf16 on cuda (warm-encoder verifies CUDA torch)
   NVIDIA, free VRAM >= 12GB  -> ColQwen3-4B full bf16 on cuda
   NVIDIA, free VRAM >= 2GB   -> LateOn text-only ON cuda (small ~0.6GB model fits a ~4GB GPU --
                                runs on the GPU instead of a 10-100x slower cpu encode)
@@ -151,7 +151,7 @@ $BrowserScripts = Join-Path $BrowserVenv 'Scripts'
 $BrowserPython  = Join-Path $BrowserScripts 'python.exe'
 $BrowserProfiles = Join-Path $BrowserHome 'profiles'
 
-$EncoderScript  = Join-Path (Join-Path $Repo 'encoders') 'li_encode.py'   # the ONE windows lane (PEP508 markers resolve torch per platform)
+$EncoderScript  = Join-Path (Join-Path $Repo 'encoders') 'li_encode.py'   # legacy direct-uv fallback; warm-encoder chooses the model script
 
 # RepoIsClone -- is $Repo the HIDDEN bootstrap clone ($env:LOCALAPPDATA\acc\src, the dir the
 # one-liner clones into and runs from), rather than a project the user opens? The bootstrap
@@ -384,7 +384,7 @@ function Select-Tier {
     if ($forced) { $script:TierForced = $true; $script:TierReason = "forced via ACC_TIER=$forced"; return }
   }
 
-  # 1-2: full bf16 on cuda -- NVIDIA present; torch-cuda resolves natively on windows.
+  # 1-2: full bf16 on cuda -- NVIDIA present; phase 4 verifies the CUDA torch wheel.
   if (($gpu -eq 1) -and ($vram -ge $CUDA_8B_VRAM)) {
     $script:Tier = '8b-full'; $script:ModelId = 'TomoroAI/tomoro-colqwen3-embed-8b'; $script:Device = 'cuda'
     $script:TierReason = "GPU ${vram}MB free >= ${CUDA_8B_VRAM} -> ColQwen3-8B full bf16 on cuda (best multimodal; AWQ/triton has no windows wheels)"; return
@@ -888,55 +888,46 @@ if ($DryRun) {
 }
 
 # =========================================================================================
-# PHASE 4 -- encoder env: materialize the tier's Python deps with `uv sync --script`
-# (PEP-723 inline deps; PEP508 markers resolve torch/torch-cuda natively per platform --
-# the SAME encoders/li_encode.py lane install.sh uses for full/LateOn tiers). Pays the
-# resolve/download cost ONCE, before the daemon's first encode. Idempotent (uv caches).
+# PHASE 4 -- encoder env: materialize the tier's Python deps with `acc warm-encoder`
+# where available. CUDA lanes point uv at the PyTorch cu128 wheel index and verify
+# torch.cuda.is_available() before the install can pin cuda. Pays the resolve/download
+# cost ONCE, before the daemon's first encode. Idempotent (uv caches).
 # =========================================================================================
 Step 'phase 4 -- encoder env (uv sync of the tier script deps)'
-# Resolve the encoder-env-warm path. A DEV checkout ships encoders\li_encode.py on disk ->
-# `uv sync --script <file>`. A binary-only RELEASE install ships no encoders\ dir -> the encoder
-# scripts are embedded in the binary and reachable as `acc warm-encoder <model>` (probe with
-# --help), which materializes the tier's encoder and `uv sync --script`s it with VISIBLE uv
-# progress and WITHOUT loading the model. Either path resolves+caches the (multi-GB)
-# torch/transformers/awq/flash-attn env once, before the daemon's first encode. Mirrors install.sh
-# phase 4 and the phase-6 prefetch binary fallback.
-if (Test-Path $EncoderScript) {
-  $synced = Act ("uv sync --script li_encode.py (resolve+cache the $script:Tier encoder deps; PEP508 markers pick the windows torch lane)") {
+# Resolve the encoder-env-warm path. Prefer the binary's model-aware warm path whenever it
+# exists (source checkout or release install); direct `uv sync --script` is only the older-binary
+# fallback and does not validate CUDA torch.
+$accHasWarm = $false
+if ($script:ModelId) { try { & $Acc warm-encoder --help *> $null; $accHasWarm = ($LASTEXITCODE -eq 0) } catch { $accHasWarm = $false } }
+if ($accHasWarm) {
+  if ($DryRun) {
+    Say ("WOULD: acc warm-encoder $script:ModelId $script:Device (uv sync --script the tier's embedded encoder env, live progress, no model load)")
+    Emit-Phase 'encoder_env' 'would' ("warm the encoder env for $script:Tier via acc warm-encoder $script:ModelId $script:Device (torch/transformers/... -- several GB, one time)") 'phase 5: model pin'
+  } else {
+    Say ("resolving the encoder env (torch/transformers/... -- several GB, one time)...")
+    $warmOk = $false
+    $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try { & $Acc warm-encoder $script:ModelId $script:Device; $warmOk = ($LASTEXITCODE -eq 0) } catch { $warmOk = $false }
+    finally { $ErrorActionPreference = $prev }
+    if ($warmOk) {
+      Emit-Phase 'encoder_env' 'ok' ("encoder env ready for $script:Tier (acc warm-encoder $script:ModelId $script:Device -- torch/transformers/... resolved/cached)") 'phase 5: model pin'
+    } else {
+      Emit-Phase 'encoder_env' 'skipped' 'acc warm-encoder reported an issue (deps resolve lazily on first encode; cuda lanes will be re-validated at daemon start)' 're-run; or let the daemon resolve the env lazily on first start'
+    }
+  }
+} elseif (Test-Path $EncoderScript) {
+  $synced = Act ("uv sync --script li_encode.py (legacy fallback; resolve+cache the $script:Tier encoder deps)") {
     $r = Invoke-Native 'uv' @('sync', '--script', $EncoderScript)
     if (-not $r.ok) { throw 'uv sync --script reported an issue' }
   }
   if ($synced) {
     $st = 'ok'; if ($DryRun) { $st = 'would' }
-    Emit-Phase 'encoder_env' $st ("encoder env ready for $script:Tier (li_encode.py deps resolved/cached)") 'phase 5: model pin'
+    Emit-Phase 'encoder_env' $st ("encoder env ready for $script:Tier (legacy li_encode.py deps resolved/cached)") 'phase 5: model pin'
   } else {
     Emit-Phase 'encoder_env' 'skipped' 'uv sync --script reported an issue (deps resolve lazily on first encode)' ("re-run; or check: uv sync --script $EncoderScript")
   }
 } else {
-  $accHasWarm = $false
-  if ($script:ModelId) { try { & $Acc warm-encoder --help *> $null; $accHasWarm = ($LASTEXITCODE -eq 0) } catch { $accHasWarm = $false } }
-  if ($accHasWarm) {
-    # Binary-only release install: on-disk encoders\ absent but the binary carries the embedded
-    # encoder scripts. Warm the env via the binary so the wheel download is VISIBLE here instead
-    # of hidden inside the first embedder start.
-    if ($DryRun) {
-      Say ("WOULD: acc warm-encoder $script:ModelId (uv sync --script the tier's embedded encoder env, live progress, no model load)")
-      Emit-Phase 'encoder_env' 'would' ("warm the encoder env for $script:Tier via acc warm-encoder $script:ModelId (torch/transformers/... -- several GB, one time)") 'phase 5: model pin'
-    } else {
-      Say ("resolving the encoder env (torch/transformers/... -- several GB, one time)...")
-      $warmOk = $false
-      $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-      try { & $Acc warm-encoder $script:ModelId; $warmOk = ($LASTEXITCODE -eq 0) } catch { $warmOk = $false }
-      finally { $ErrorActionPreference = $prev }
-      if ($warmOk) {
-        Emit-Phase 'encoder_env' 'ok' ("encoder env ready for $script:Tier (acc warm-encoder $script:ModelId -- torch/transformers/... resolved/cached)") 'phase 5: model pin'
-      } else {
-        Emit-Phase 'encoder_env' 'skipped' 'acc warm-encoder reported an issue (deps resolve lazily on first encode)' 're-run; or let the daemon resolve the env lazily on first start'
-      }
-    }
-  } else {
-    Emit-Phase 'encoder_env' 'skipped' ("no encoder env to warm for tier=$script:Tier (on-disk $EncoderScript absent and the binary has no warm-encoder subcommand, or no model pinned)") 'tier mis-selected -- check phase 0'
-  }
+  Emit-Phase 'encoder_env' 'skipped' ("no encoder env to warm for tier=$script:Tier (on-disk $EncoderScript absent and the binary has no warm-encoder subcommand, or no model pinned)") 'tier mis-selected -- check phase 0'
 }
 
 # =========================================================================================
