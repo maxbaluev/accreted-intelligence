@@ -29,6 +29,8 @@ $env:ACC_INSTALL_REF = 'gh-awesome-list'; irm https://raw.githubusercontent.com/
 `ACC_INSTALL_REF` is written only to a local receipt at
 `install-attribution.env` under the acc data directory. The installer does not
 send that ref anywhere by itself.
+Maintainers can measure the ref chain with the
+[attribution dashboard runbook](../ops/attribution-dashboard.md).
 
 Prefer to read before you run? The installer is Apache-2.0 and auditable — `bootstrap/install`, `bootstrap/install.ps1`, and `install.sh` / `install.ps1` are exactly what touches your system. Read them, then run.
 

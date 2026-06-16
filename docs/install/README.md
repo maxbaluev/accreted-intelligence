@@ -35,6 +35,8 @@ For install attribution from a directory listing or PR, set
 `ACC_INSTALL_REF=<surface>` on the installer process. The installer writes the
 label to a local receipt only; it does not send the ref anywhere by itself. See
 [self-serve.md](self-serve.md) for exact shell and PowerShell examples.
+Maintainers can measure the ref chain with the
+[attribution dashboard runbook](../ops/attribution-dashboard.md).
 
 It fetches the public installer and hands off to the installer for your OS. The installer probes your hardware, picks the embedder tier it can honestly run, downloads and verifies the release binary when available, starts a warm local daemon, and wires your agent's `.mcp.json`. **First run may download the embedder model (several GB) and take minutes** — the installer reports the wait honestly and never pretends your hardware is bigger than it is. Full detail: [self-serve.md](self-serve.md).
 
