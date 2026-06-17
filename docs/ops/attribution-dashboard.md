@@ -83,7 +83,7 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the live dashboard exists and a controlled install has been run, read the
-aggregate funnel:
+aggregate funnel and visitor-share loop:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -95,7 +95,9 @@ ACC_APPROVE_POSTHOG_QUERY=1 \
 
 Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` to
 verify one controlled browser-copy install. This uses the documented PostHog
-Query API for small aggregate HogQL readouts; it is not an event export path.
+Query API for small aggregate HogQL readouts, including `share_link_copied`
+counts and `visitor-share` referred visitor/install conversion; it is not an
+event export path.
 
 ### 1. Copy to first run funnel
 

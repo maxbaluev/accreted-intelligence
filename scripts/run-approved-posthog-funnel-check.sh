@@ -4,10 +4,10 @@
 # Default mode is dry-run: validate the local dashboard spec and print the exact
 # approved command. Approved mode runs small aggregate HogQL queries through the
 # documented PostHog Query API so launch channels can be ranked by attributed
-# visitor-to-copy-to-first-run conversion and activation, not copy clicks. It
-# does not export raw events,
-# mutate PostHog, post, comment, submit, pay, or use account identity beyond the
-# supplied PostHog API key.
+# visitor-to-copy-to-first-run conversion, share-loop propagation, and
+# activation, not copy clicks. It does not export raw events, mutate PostHog,
+# post, comment, submit, pay, or use account identity beyond the supplied
+# PostHog API key.
 set -euo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
@@ -93,11 +93,12 @@ Approved mode runs aggregate HogQL via:
   POST $posthog_host/api/projects/<project-id>/query/
 
 Readouts:
-  1. landing views, copy events, attributed first runs, first retrieves, daily rollups
+  1. landing views, share events, copy events, attributed first runs, first retrieves, daily rollups
   2. landing-to-copy-to-first-run conversion by surface
   3. copy-to-attributed-first-run conversion by surface and method
-  4. activation after attributed first run
-  5. optional controlled distinct_id event presence
+  4. visitor share loop
+  5. activation after attributed first run
+  6. optional controlled distinct_id event presence
 EOF
 
 if [ "${ACC_APPROVE_POSTHOG_QUERY:-0}" != "1" ]; then
@@ -171,6 +172,8 @@ summary_sql = f"""
 SELECT
     countIf(event = 'landing_viewed') AS landing_events,
     uniqExactIf(distinct_id, event = 'landing_viewed') AS landing_people,
+    countIf(event = 'share_link_copied') AS share_events,
+    uniqExactIf(distinct_id, event = 'share_link_copied') AS sharers,
     countIf(event = 'install_command_copied') AS copy_events,
     uniqExactIf(distinct_id, event = 'install_command_copied') AS copied_people,
     uniqExactIf(distinct_id, event = 'first_run' AND properties.has_install_ref = 'true') AS attributed_first_runs,
@@ -178,7 +181,7 @@ SELECT
     uniqExactIf(distinct_id, event = 'daily_rollup') AS daily_rollups
 FROM events
 WHERE {window}
-  AND event IN ('landing_viewed', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+  AND event IN ('landing_viewed', 'share_link_copied', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
 """.strip()
 
 traffic_sql = f"""
@@ -300,6 +303,68 @@ ORDER BY first_runs DESC, copied_people DESC
 LIMIT 25
 """.strip()
 
+share_loop_sql = f"""
+WITH
+shares AS (
+    SELECT
+        'visitor-share' AS surface,
+        uniqExact(distinct_id) AS sharers,
+        count() AS share_events
+    FROM events
+    WHERE event = 'share_link_copied'
+      AND properties.surface = 'visitor-share'
+      AND {window}
+),
+landings AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS landed_at
+    FROM events
+    WHERE event = 'landing_viewed'
+      AND properties.ref = 'visitor-share'
+      AND properties.utm_source = 'share'
+      AND {window}
+    GROUP BY distinct_id
+),
+copies AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS copied_at
+    FROM events
+    WHERE event = 'install_command_copied'
+      AND {window}
+    GROUP BY distinct_id
+),
+first_runs AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS first_run_at
+    FROM events
+    WHERE event = 'first_run'
+      AND properties.has_install_ref = 'true'
+      AND {window}
+    GROUP BY distinct_id
+)
+SELECT
+    s.surface AS surface,
+    s.sharers AS sharers,
+    s.share_events AS share_events,
+    uniqExact(l.distinct_id) AS referred_visitors,
+    uniqExact(c.distinct_id) AS referred_copied_people,
+    uniqExact(f.distinct_id) AS referred_first_runs,
+    if(s.share_events = 0, 0, round(1.0 * referred_visitors / s.share_events, 2)) AS visitors_per_share,
+    if(referred_visitors = 0, 0, round(100.0 * referred_first_runs / referred_visitors, 1)) AS referred_visit_to_run_pct
+FROM shares s
+LEFT JOIN landings l ON 1 = 1
+LEFT JOIN copies c ON c.distinct_id = l.distinct_id
+    AND c.copied_at >= l.landed_at
+    AND c.copied_at < l.landed_at + interval 7 day
+LEFT JOIN first_runs f ON f.distinct_id = l.distinct_id
+    AND f.first_run_at >= l.landed_at
+    AND f.first_run_at < l.landed_at + interval 7 day
+GROUP BY s.surface, s.sharers, s.share_events
+""".strip()
+
 activation_sql = f"""
 WITH
 first_runs AS (
@@ -337,6 +402,7 @@ queries = [
     ("summary", summary_sql),
     ("traffic to first run by surface", traffic_sql),
     ("surface conversion", surface_sql),
+    ("visitor share loop", share_loop_sql),
     ("activation", activation_sql),
 ]
 if controlled_id:
@@ -350,7 +416,7 @@ SELECT
 FROM events
 WHERE {window}
   AND distinct_id = '{safe_controlled}'
-  AND event IN ('landing_viewed', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+  AND event IN ('landing_viewed', 'share_link_clicked', 'share_link_copied', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
 GROUP BY event
 ORDER BY first_seen ASC
 LIMIT 10

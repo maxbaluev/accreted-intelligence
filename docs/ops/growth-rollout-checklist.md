@@ -336,7 +336,7 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the dashboard is created and a controlled live install is run, query the
-aggregate funnel readout:
+aggregate funnel and visitor-share-loop readout:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \

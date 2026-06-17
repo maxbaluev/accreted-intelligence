@@ -91,6 +91,14 @@ echo "== PostHog dashboard spec =="
 if command -v node >/dev/null 2>&1; then
   if node scripts/prepare-posthog-dashboard.js --check; then note "PostHog dashboard spec: ok"; else fail=1; fi
   if node scripts/prepare-posthog-dashboard.js --ui-packet >/dev/null; then note "PostHog UI packet: ok"; else fail=1; fi
+  funnel_dry_run=$(scripts/run-approved-posthog-funnel-check.sh 2>/dev/null)
+  if grep -q "event = 'share_link_copied'" scripts/run-approved-posthog-funnel-check.sh &&
+    printf '%s\n' "$funnel_dry_run" | grep -q "visitor share loop"; then
+    note "PostHog funnel share-loop readout: ok"
+  else
+    note "PostHog funnel share-loop readout: FAIL"
+    fail=1
+  fi
 else
   note "node: MISSING (required for PostHog dashboard verifier)"
   fail=1
