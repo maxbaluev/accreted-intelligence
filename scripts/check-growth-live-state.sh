@@ -2,8 +2,9 @@
 # Read-only audit of the public growth surfaces.
 #
 # This script checks external state that can legitimately lag the local growth
-# bundle: GitHub metadata, live site attribution markers, GitHub Release MCPB
-# assets, registry alignment, Glama listing visibility, and the punkpeye PR.
+# bundle: GitHub metadata, live site attribution markers, llms.txt discovery,
+# GitHub Release MCPB assets, registry alignment, Glama listing visibility, and
+# the punkpeye PR.
 # It never pushes, uploads, dispatches workflows, publishes registry metadata,
 # posts comments, submits PRs, or creates dashboard/listing state.
 set -uo pipefail
@@ -324,6 +325,20 @@ if command -v curl >/dev/null 2>&1 && command -v node >/dev/null 2>&1; then
   fi
 else
   skip "curl and node are required for live prompt-copy/share attribution verification"
+fi
+
+section "live LLM/agent discovery"
+if command -v curl >/dev/null 2>&1; then
+  live_llms_output="$(bash scripts/check-live-llms-discovery.sh "$site_url" 2>&1)"
+  live_llms_status=$?
+  printf '%s\n' "$live_llms_output" | sed 's/^/    /'
+  if [ "$live_llms_status" -eq 0 ]; then
+    ok "live site serves the llms.txt discovery surface"
+  else
+    hold "live site does not yet serve the llms.txt discovery surface"
+  fi
+else
+  skip "curl is required for live llms.txt discovery verification"
 fi
 
 section "GitHub Release MCPB assets"

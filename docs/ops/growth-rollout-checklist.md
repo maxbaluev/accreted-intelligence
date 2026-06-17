@@ -228,7 +228,11 @@ curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
 curl -fsSL https://accint.xyz/reddit/ | grep -F 'data-share-surface="reddit-share"'
 curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "share_link_copied"
+curl -fsSL https://accint.xyz/llms.txt | grep -F "ACC_INSTALL_REF=llms-txt"
+curl -fsSL https://accint.xyz/robots.txt | grep -F "LLMs: https://accint.xyz/llms.txt"
+curl -fsSL https://accint.xyz/sitemap.xml | grep -F "<loc>https://accint.xyz/llms.txt</loc>"
 scripts/check-live-attribution-flow.sh https://accint.xyz
+scripts/check-live-llms-discovery.sh https://accint.xyz
 ```
 
 `scripts/check-live-attribution-flow.sh` downloads served home/Reddit HTML into
@@ -251,7 +255,8 @@ gh run list --workflow live-site-attribution.yml \
 ```
 
 That workflow runs the live prompt-copy attribution verifier from a GitHub-hosted
-runner, then prints the advisory full live growth audit. Keep
+runner, verifies the deployed `llms.txt` discovery surface, then prints the
+advisory full live growth audit. Keep
 `strict_live_state=false` while Glama/punkpeye are still expected holds.
 
 Also run a browser copy check if possible: copy the hero agent prompt and confirm
@@ -451,6 +456,8 @@ Hold instead of continuing when:
 - the public working tree is dirty after push
 - GitHub license detection remains null for OSS-first target lists
 - the live site does not serve copied `ACC_INSTALL_REF` text
+- the live site does not advertise or serve `llms.txt` from home, Reddit,
+  `robots.txt`, and `sitemap.xml`
 - the private release binary does not contain the attribution bridge
 - controlled install cannot produce a matching web copy and `first_run`
   `distinct_id`

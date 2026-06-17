@@ -48,3 +48,8 @@ jobs:
         env:
           ACC_LIVE_SITE_URL: ${{ inputs.site_url }}
         run: scripts/check-live-attribution-flow.sh "$ACC_LIVE_SITE_URL"
+
+      - name: Verify live LLM discovery file
+        env:
+          ACC_LIVE_SITE_URL: ${{ inputs.site_url }}
+        run: scripts/check-live-llms-discovery.sh "$ACC_LIVE_SITE_URL"

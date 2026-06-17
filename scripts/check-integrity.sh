@@ -21,6 +21,7 @@ for f in \
   scripts/check-install-surface.sh \
   scripts/check-mcpb-promotion-packet.sh \
   scripts/check-live-attribution-flow.sh \
+  scripts/check-live-llms-discovery.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/prepare-punkpeye-glama-followup.sh \
   scripts/check-release-alignment.sh \
@@ -207,13 +208,17 @@ echo "== live growth workflow guard =="
 live_workflow=".github/workflows/live-site-attribution.yml"
 if [ -f "$live_workflow" ] &&
   grep -q 'scripts/check-live-attribution-flow.sh' "$live_workflow" &&
+  grep -q 'scripts/check-live-llms-discovery.sh' "$live_workflow" &&
   grep -q 'scripts/check-growth-live-state.sh' "$live_workflow" &&
+  grep -q 'scripts/check-live-llms-discovery.sh' scripts/check-growth-live-state.sh &&
   grep -q 'data-share-surface=\\"visitor-share\\"' scripts/check-growth-live-state.sh &&
   grep -q 'data-share-surface=\\"reddit-share\\"' scripts/check-growth-live-state.sh &&
-  grep -q 'share_link_copied' scripts/check-growth-live-state.sh; then
-  note "live site attribution workflow: ok"
+  grep -q 'share_link_copied' scripts/check-growth-live-state.sh &&
+  grep -q 'ACC_INSTALL_REF=llms-txt' scripts/check-live-llms-discovery.sh &&
+  grep -q 'LLMs:' scripts/check-live-llms-discovery.sh; then
+  note "live site attribution/discovery workflow: ok"
 else
-  note "live site attribution workflow: MISSING"
+  note "live site attribution/discovery workflow: MISSING"
   fail=1
 fi
 

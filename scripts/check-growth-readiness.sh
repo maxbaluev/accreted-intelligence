@@ -68,6 +68,7 @@ for f in \
   scripts/check-directory-pr-state.sh \
   scripts/check-growth-live-state.sh \
   scripts/check-live-attribution-flow.sh \
+  scripts/check-live-llms-discovery.sh \
   scripts/check-growth-surfaces.js \
   scripts/check-install-surface.sh \
   scripts/check-mcpb-promotion-packet.sh \
