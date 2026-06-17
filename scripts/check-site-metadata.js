@@ -10,6 +10,8 @@ const path = require("path");
 const SITE = "https://accint.xyz";
 const OG_IMAGE = `${SITE}/og.png`;
 const OG_IMAGE_PATH = "og.png";
+const LLMS_URL = `${SITE}/llms.txt`;
+const LLMS_PATH = "llms.txt";
 const REQUIRED_PAGES = [
   {
     file: "index.html",
@@ -99,6 +101,11 @@ function checkPage(page) {
   }
 
   assertEquals(linkHref(html, "canonical"), page.canonical, `${page.file}: canonical`);
+  assertIncludes(
+    html,
+    `<link rel="alternate" type="text/plain" href="${LLMS_URL}" title="llms.txt">`,
+    `${page.file}: llms.txt alternate`
+  );
   assertEquals(tagValue(html, "property", "og:url"), page.canonical, `${page.file}: og:url`);
   assertEquals(tagValue(html, "property", "og:type"), "website", `${page.file}: og:type`);
   assertEquals(tagValue(html, "property", "og:image"), OG_IMAGE, `${page.file}: og:image`);
@@ -123,6 +130,7 @@ function checkRobotsAndSitemap() {
   const robots = read("robots.txt");
   assertIncludes(robots, "User-agent: *", "robots.txt");
   assertIncludes(robots, "Allow: /", "robots.txt");
+  assertIncludes(robots, `LLMs: ${LLMS_URL}`, "robots.txt");
   assertIncludes(robots, `${SITE}/sitemap.xml`, "robots.txt");
 
   const sitemap = read("sitemap.xml");
@@ -130,6 +138,21 @@ function checkRobotsAndSitemap() {
   for (const page of REQUIRED_PAGES) {
     assertIncludes(sitemap, `<loc>${page.canonical}</loc>`, `sitemap.xml: ${page.canonical}`);
   }
+  assertIncludes(sitemap, `<loc>${LLMS_URL}</loc>`, `sitemap.xml: ${LLMS_URL}`);
+}
+
+function checkLlmsTxt() {
+  const text = read(LLMS_PATH);
+  assertIncludes(text, "# AccInt", `${LLMS_PATH}: title`);
+  assertIncludes(text, "local-first Work Model", `${LLMS_PATH}: positioning`);
+  assertIncludes(text, "Claude Code, Codex, Cursor, and OpenCode", `${LLMS_PATH}: host fit`);
+  assertIncludes(text, "ACC_INSTALL_REF=llms-txt", `${LLMS_PATH}: POSIX attribution`);
+  assertIncludes(text, "$env:ACC_INSTALL_REF='llms-txt'", `${LLMS_PATH}: PowerShell attribution`);
+  assertIncludes(text, "ref=llms-txt&utm_source=llm&utm_campaign=discovery", `${LLMS_PATH}: source attribution`);
+  assertIncludes(text, "Public Apache-2.0 installer, docs, plugins, and registry glue", `${LLMS_PATH}: source boundary`);
+  assertIncludes(text, "Proprietary local engine binary", `${LLMS_PATH}: private engine boundary`);
+  assertIncludes(text, "Telemetry excludes prompts, files, memory, and Work Model data", `${LLMS_PATH}: telemetry boundary`);
+  assertIncludes(text, "owner approval", `${LLMS_PATH}: authority boundary`);
 }
 
 for (const page of REQUIRED_PAGES) {
@@ -140,5 +163,6 @@ const size = pngSize(OG_IMAGE_PATH);
 assertEquals(size.width, 1200, `${OG_IMAGE_PATH}: width`);
 assertEquals(size.height, 630, `${OG_IMAGE_PATH}: height`);
 checkRobotsAndSitemap();
+checkLlmsTxt();
 
 console.log("SITE METADATA: PASS");

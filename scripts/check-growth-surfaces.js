@@ -7,6 +7,7 @@ const path = require("path");
 const MANIFEST_PATH = path.join("docs", "ops", "growth-surfaces.json");
 const SOCIAL_KIT_PATH = path.join("docs", "ops", "social-launch-kit.md");
 const README_PATH = "README.md";
+const LLMS_PATH = "llms.txt";
 const PAGE_PATHS = ["index.html", path.join("reddit", "index.html")];
 const DOCS_ATTRIBUTION_PATHS = [
   path.join("docs", "README.md"),
@@ -141,7 +142,7 @@ function validateManifest(manifest) {
       die(`${MANIFEST_PATH}: duplicate surface id ${surface.id}`);
     }
     seen.add(surface.id);
-    if (!["social_launch", "directory", "owned_site", "owned_docs", "owned_share"].includes(surface.kind)) {
+    if (!["social_launch", "directory", "owned_site", "owned_docs", "owned_share", "owned_llms"].includes(surface.kind)) {
       die(`${MANIFEST_PATH}: ${surface.id}: invalid kind ${JSON.stringify(surface.kind)}`);
     }
     if (!manifest.base_urls[surface.landing]) {
@@ -259,6 +260,26 @@ function validateOwnedShareSurfaces(manifest) {
   }
 }
 
+function validateOwnedLlmsSurfaces(manifest) {
+  const llmsSurfaces = manifest.surfaces.filter((item) => item.kind === "owned_llms");
+  if (!llmsSurfaces.length) {
+    die(`${MANIFEST_PATH}: missing owned_llms surface`);
+  }
+  const text = read(LLMS_PATH);
+  for (const surface of llmsSurfaces) {
+    const source = sourceQuery(surface);
+    assertIncludes(text, landingUrl(manifest, surface), `${LLMS_PATH}: attributed landing URL for ${surface.id}`);
+    assertIncludes(text, `ACC_INSTALL_REF=${surface.id}`, `${LLMS_PATH}: POSIX ref for ${surface.id}`);
+    assertIncludes(text, `ACC_INSTALL_SOURCE='${source}'`, `${LLMS_PATH}: POSIX source for ${surface.id}`);
+    assertIncludes(text, `$env:ACC_INSTALL_REF='${surface.id}'`, `${LLMS_PATH}: PowerShell ref for ${surface.id}`);
+    assertIncludes(text, `$env:ACC_INSTALL_SOURCE='${source}'`, `${LLMS_PATH}: PowerShell source for ${surface.id}`);
+  }
+  assertIncludes(text, "Public Apache-2.0 installer, docs, plugins, and registry glue", `${LLMS_PATH}: source boundary`);
+  assertIncludes(text, "Proprietary local engine binary", `${LLMS_PATH}: private engine boundary`);
+  assertIncludes(text, "Telemetry excludes prompts, files, memory, and Work Model data", `${LLMS_PATH}: telemetry boundary`);
+  assertIncludes(text, "owner approval", `${LLMS_PATH}: approval boundary`);
+}
+
 function printSurfaces(manifest) {
   for (const surface of manifest.surfaces) {
     console.log(`${surface.id} (${surface.label || surface.kind})`);
@@ -289,4 +310,5 @@ validateSocialKit(manifest);
 validateOwnedSurfaces(manifest);
 validateOwnedDocsSurfaces(manifest);
 validateOwnedShareSurfaces(manifest);
+validateOwnedLlmsSurfaces(manifest);
 console.log("GROWTH SURFACES: PASS");

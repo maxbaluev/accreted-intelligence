@@ -20,6 +20,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - read-only live growth state auditor
 - live prompt-copy attribution verifier
 - static share/SEO metadata verifier
+- LLM/agent discovery file
 - MCPB promotion packet verifier
 - official registry discovery docs/follow-up packet
 - materialized PostHog dashboard spec
@@ -103,8 +104,9 @@ Expected state:
   stays aligned with the raw POSIX bootstrap and preserves attribution env
   handoff
 - `node scripts/check-site-metadata.js` passes and proves canonical URLs,
-  Open Graph/Twitter tags, the 1200x630 `og.png`, `robots.txt`, and
-  `sitemap.xml` are ready for launch previews and indexing
+  Open Graph/Twitter tags, the 1200x630 `og.png`, `robots.txt`, `llms.txt`,
+  and `sitemap.xml` are ready for launch previews, indexing, and agent
+  discovery
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
@@ -157,6 +159,7 @@ Expected state:
 - `docs/ops/directory-listing.md` exists
 - `docs/ops/growth-report.md` exists
 - `docs/ops/growth-surfaces.json` exists
+- `llms.txt` exists
 - no private `src/**`, `Cargo.toml`, `Cargo.lock`, private tests, or substrate
   data appear in `git diff origin/main..HEAD --name-only`
 

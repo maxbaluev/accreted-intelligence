@@ -1,0 +1,67 @@
+# AccInt (Accreted Intelligence)
+
+> AccInt is a local-first Work Model for AI and coding agents. It helps Claude Code, Codex, Cursor, and OpenCode keep accountable work state: commitments, actions, approvals, outcomes, failures, and reusable paths scored by real results.
+
+## Use When
+
+- The user already runs coding agents and wants their work to compound instead of disappearing after each session.
+- The task needs local memory with outcome credit, not just chat history or a vector database.
+- External actions must stay owner-gated: posts, comments, payments, deletes, submissions, deploys, and credentialed account actions require explicit owner approval.
+- The user wants a local substrate they control, with no cloud memory account and no API key required for memory or reasoning.
+
+## Install
+
+Agent-guided install page:
+
+- https://accint.xyz/?ref=llms-txt&utm_source=llm&utm_campaign=discovery
+- https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/install/with-agent.md
+
+Attributed macOS/Linux install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=llms-txt ACC_INSTALL_SOURCE='ref=llms-txt&utm_source=llm&utm_campaign=discovery' sh
+```
+
+Attributed Windows PowerShell install:
+
+```powershell
+$env:ACC_INSTALL_REF='llms-txt'; $env:ACC_INSTALL_SOURCE='ref=llms-txt&utm_source=llm&utm_campaign=discovery'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+```
+
+After install, run:
+
+```bash
+acc hosts-sync
+acc retrieve "what should I do next?"
+```
+
+## What It Is
+
+- A local Work Model under agent work, not a cloud assistant.
+- Two verbs over one scored substrate: `acc_retrieve` for memory lookup and `acc_act` for action, recursion, approved execution, and outcome credit.
+- Reality-scored memory: passing tests, owner approval, real replies, and grounded runtime output count more than self-graded claims.
+- Reusable runtimes: when a path works, it can be saved and scored like memory so repeated work can replay instead of re-reasoning.
+- Host integrations for Claude Code, Codex, Cursor, and OpenCode.
+
+## Trust Boundary
+
+- Public Apache-2.0 installer, docs, plugins, and registry glue.
+- Proprietary local engine binary; private engine source.
+- The Work Model and memory stay local on the user's machine.
+- Opt-out anonymous telemetry is limited to event names and coarse source refs.
+- Telemetry excludes prompts, files, memory, and Work Model data.
+- Anything that would post, comment, submit, pay, delete, deploy, transfer, or use account identity must stop for owner approval.
+
+## Key Links
+
+- Live overview: https://accint.xyz/?ref=llms-txt&utm_source=llm&utm_campaign=discovery
+- Reddit-specific overview: https://accint.xyz/reddit/?ref=llms-txt&utm_source=llm&utm_campaign=discovery
+- GitHub repository: https://github.com/maxbaluev/accreted-intelligence
+- Quickstart: https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/quickstart.md
+- Trust model: https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/trust-model.md
+- Architecture overview: https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/architecture-overview.md
+- Whitepaper: https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/whitepaper.md
+
+## Positioning
+
+Memory recalls context. Observability shows traces. Automation runs playbooks. AccInt closes the loop: commitment, action, approval, outcome, reusable path, and prediction of the better next path from what actually worked before.

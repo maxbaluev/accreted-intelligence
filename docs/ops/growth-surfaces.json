@@ -30,6 +30,17 @@
       }
     },
     {
+      "id": "llms-txt",
+      "kind": "owned_llms",
+      "label": "LLM/agent discovery file",
+      "landing": "home",
+      "source": {
+        "ref": "llms-txt",
+        "utm_source": "llm",
+        "utm_campaign": "discovery"
+      }
+    },
+    {
       "id": "visitor-share",
       "kind": "owned_share",
       "label": "Visitor share link",

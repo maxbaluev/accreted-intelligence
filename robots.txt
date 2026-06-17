@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+LLMs: https://accint.xyz/llms.txt
 Sitemap: https://accint.xyz/sitemap.xml

@@ -58,6 +58,7 @@ for f in \
   docs/ops/growth-surfaces.json \
   docs/ops/posthog-dashboard.json \
   docs/ops/social-launch-kit.md \
+  llms.txt \
   robots.txt \
   sitemap.xml \
   .github/workflows/live-site-attribution.yml \
