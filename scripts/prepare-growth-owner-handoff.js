@@ -123,6 +123,11 @@ function collectValidationFailures(brief, queue) {
   if (rollout && queue.top_decision && commandBlock(rollout.command) !== commandBlock(queue.top_decision.command)) {
     failures.push("approval brief stage 1 command does not match decision queue top command");
   }
+  for (const item of queue.critical_path || []) {
+    if (Number(item.rank) >= 3 && !commandBlock(item.command)) {
+      failures.push(`decision queue item ${item.rank} is missing its next command`);
+    }
+  }
   return failures;
 }
 
@@ -206,7 +211,11 @@ function buildHandoff(tag) {
         rank: item.rank,
         action: item.action,
         status: item.status,
+        owner_decision: item.owner_decision || "",
         guard: item.guard,
+        command: commandBlock(item.command),
+        unlocks: item.unlocks || [],
+        why: item.why || "",
       })),
     known_holds: queue.known_holds || brief.known_holds || [],
     forbidden_without_approval: queue.forbidden_without_approval || brief.forbidden_without_approval || [],
@@ -320,6 +329,20 @@ function printMarkdown(handoff) {
   console.log();
   for (const lane of handoff.later_owner_lanes) {
     console.log(`- ${lane.rank}. ${lane.action} — \`${lane.status}\` (${lane.guard})`);
+    if (lane.owner_decision) {
+      console.log(`  Owner decision: ${lane.owner_decision}`);
+    }
+    if (lane.why) {
+      console.log(`  Why: ${lane.why}`);
+    }
+    if (lane.unlocks.length) {
+      console.log(`  Unlocks: ${lane.unlocks.join("; ")}`);
+    }
+    console.log();
+    console.log("```bash");
+    console.log(lane.command);
+    console.log("```");
+    console.log();
   }
   console.log();
   console.log("## Known Holds");
