@@ -41,6 +41,17 @@
       }
     },
     {
+      "id": "reddit-share",
+      "kind": "owned_share",
+      "label": "Reddit landing share link",
+      "landing": "reddit",
+      "source": {
+        "ref": "reddit-share",
+        "utm_source": "share",
+        "utm_campaign": "organic"
+      }
+    },
+    {
       "id": "hn-show",
       "kind": "social_launch",
       "label": "Show HN",

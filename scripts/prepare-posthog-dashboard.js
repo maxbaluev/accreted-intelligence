@@ -134,8 +134,10 @@ function validate() {
   ]);
   validateSql(bySlug.get("visitor_share_loop"), [
     "event = 'share_link_copied'",
-    "properties.surface = 'visitor-share'",
-    "properties.ref = 'visitor-share'",
+    "properties.surface IS NOT NULL",
+    "properties.utm_source = 'share'",
+    "GROUP BY distinct_id, surface",
+    "l.surface = s.surface",
     "referred_visitors",
     "visitors_per_share",
     "referred_visit_to_run_pct",

@@ -299,7 +299,10 @@ if command -v curl >/dev/null 2>&1; then
     "ACC_INSTALL_REF" \
     "ACC_INSTALL_SOURCE" \
     "posthog.identify(install_ref)" \
-    "reddit_agent_prompt_copied"
+    "reddit_agent_prompt_copied" \
+    "data-share-surface=\"reddit-share\"" \
+    "share_link_clicked" \
+    "share_link_copied"
 else
   section "live site attribution markers"
   skip "curl not found; cannot read live site"

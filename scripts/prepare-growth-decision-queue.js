@@ -259,7 +259,7 @@ function buildQueue(brief, tag) {
       unlocks: [
         "surface-ranked attributed first runs",
         "direct gh-* directory/listing install ref ranking",
-        "visitor-share propagation evidence",
+        "owned share propagation evidence",
         "activation evidence for deciding which channels deserve follow-up",
       ],
       why: "The funnel, direct-ref, and share-loop readouts distinguish real growth from copy clicks before scaling promotion.",

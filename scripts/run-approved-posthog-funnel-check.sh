@@ -97,7 +97,7 @@ Readouts:
   2. landing-to-copy-to-first-run conversion by surface
   3. copy-to-attributed-first-run conversion by surface and method
   4. direct install refs by source, including gh-* directory/listing refs
-  5. visitor share loop
+  5. owned share loop
   6. activation after attributed first run
   7. optional controlled distinct_id event presence
 EOF
@@ -332,24 +332,28 @@ share_loop_sql = f"""
 WITH
 shares AS (
     SELECT
-        'visitor-share' AS surface,
+        properties.surface AS surface,
         uniqExact(distinct_id) AS sharers,
         count() AS share_events
     FROM events
     WHERE event = 'share_link_copied'
-      AND properties.surface = 'visitor-share'
+      AND properties.surface IS NOT NULL
+      AND properties.surface != ''
       AND {window}
+    GROUP BY surface
 ),
 landings AS (
     SELECT
         distinct_id,
-        min(timestamp) AS landed_at
+        min(timestamp) AS landed_at,
+        properties.ref AS surface
     FROM events
     WHERE event = 'landing_viewed'
-      AND properties.ref = 'visitor-share'
       AND properties.utm_source = 'share'
+      AND properties.ref IS NOT NULL
+      AND properties.ref != ''
       AND {window}
-    GROUP BY distinct_id
+    GROUP BY distinct_id, surface
 ),
 copies AS (
     SELECT
@@ -380,7 +384,7 @@ SELECT
     if(s.share_events = 0, 0, round(1.0 * referred_visitors / s.share_events, 2)) AS visitors_per_share,
     if(referred_visitors = 0, 0, round(100.0 * referred_first_runs / referred_visitors, 1)) AS referred_visit_to_run_pct
 FROM shares s
-LEFT JOIN landings l ON 1 = 1
+LEFT JOIN landings l ON l.surface = s.surface
 LEFT JOIN copies c ON c.distinct_id = l.distinct_id
     AND c.copied_at >= l.landed_at
     AND c.copied_at < l.landed_at + interval 7 day
@@ -428,7 +432,7 @@ queries = [
     ("traffic to first run by surface", traffic_sql),
     ("surface conversion", surface_sql),
     ("direct install refs by source", direct_refs_sql),
-    ("visitor share loop", share_loop_sql),
+    ("owned share loop", share_loop_sql),
     ("activation", activation_sql),
 ]
 if controlled_id:

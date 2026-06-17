@@ -95,7 +95,7 @@ if command -v node >/dev/null 2>&1; then
   if grep -q "event = 'share_link_copied'" scripts/run-approved-posthog-funnel-check.sh &&
     grep -q "direct install refs by source" scripts/run-approved-posthog-funnel-check.sh &&
     printf '%s\n' "$funnel_dry_run" | grep -q "direct install refs by source" &&
-    printf '%s\n' "$funnel_dry_run" | grep -q "visitor share loop"; then
+    printf '%s\n' "$funnel_dry_run" | grep -q "owned share loop"; then
     note "PostHog funnel/direct-ref/share-loop readout: ok"
   else
     note "PostHog funnel/direct-ref/share-loop readout: FAIL"
@@ -208,6 +208,7 @@ if [ -f "$live_workflow" ] &&
   grep -q 'scripts/check-live-attribution-flow.sh' "$live_workflow" &&
   grep -q 'scripts/check-growth-live-state.sh' "$live_workflow" &&
   grep -q 'data-share-surface=\\"visitor-share\\"' scripts/check-growth-live-state.sh &&
+  grep -q 'data-share-surface=\\"reddit-share\\"' scripts/check-growth-live-state.sh &&
   grep -q 'share_link_copied' scripts/check-growth-live-state.sh; then
   note "live site attribution workflow: ok"
 else

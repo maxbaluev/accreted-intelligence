@@ -222,14 +222,16 @@ curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
 curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
+curl -fsSL https://accint.xyz/reddit/ | grep -F 'data-share-surface="reddit-share"'
 curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
+curl -fsSL https://accint.xyz/reddit/ | grep -F "share_link_copied"
 scripts/check-live-attribution-flow.sh https://accint.xyz
 ```
 
 `scripts/check-live-attribution-flow.sh` downloads served home/Reddit HTML into
 a temp directory and reuses the static attribution verifier, proving live prompt
 copies carry `ACC_INSTALL_REF`, `ACC_INSTALL_SOURCE`, and the source-only
-fallback, and proving the home page serves the tracked `visitor-share` URL.
+fallback, and proving the home and Reddit pages serve tracked owned-share URLs.
 
 If the local network path cannot fetch the custom domain, run the hosted
 read-only verifier after the workflow file is pushed:
@@ -314,11 +316,11 @@ Minimum tiles:
 3. landing to copy to first run by surface
 4. attributed first runs
 5. copy to attributed first run by surface
-6. visitor share loop
+6. owned share loop
 7. activation after install
 
 Do not rank acquisition surfaces from copy events alone. Rank from visitor to
-copy to attributed first run, then activation; use the visitor share loop to
+copy to attributed first run, then activation; use the owned share loop to
 detect whether owned referrals are compounding instead of only being clicked.
 
 After explicit owner approval, the shell and setup tile can be created through
@@ -342,7 +344,7 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the dashboard is created and a controlled live install is run, query the
-aggregate funnel, direct install refs, and visitor-share-loop readout:
+aggregate funnel, direct install refs, and owned-share-loop readout:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \

@@ -111,7 +111,7 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
 .community-main h3{font-size:22px;line-height:1.18;margin-top:10px}
 .community-main p{margin-top:10px;color:var(--dim);font-size:15px}
 .community-actions{border-left:1px solid var(--line);padding:22px;display:flex;flex-direction:column;justify-content:center;gap:12px}
-.community-link{display:block;text-align:center;text-decoration:none;background:var(--orange);color:#14110b;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:12px 14px}
+.community-link{display:block;width:100%;text-align:center;text-decoration:none;background:var(--orange);color:#14110b;border:0;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:12px 14px;cursor:pointer}
 .community-link:hover{background:var(--ink);color:#14110b}
 .community-link.alt{background:transparent;color:var(--ink);border:1px solid var(--rule)}
 .community-link.alt:hover{background:var(--ink);border-color:var(--ink);color:#14110b}
@@ -296,6 +296,7 @@ h2{margin-top:14px;font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-
         <div class="community-actions">
           <a class="community-link" data-track="reddit_community_clicked" href="https://www.reddit.com/r/AccretedIntelligence/?utm_source=accint&utm_medium=reddit_landing&utm_campaign=work_model" target="_blank" rel="noopener">Join r/AccretedIntelligence</a>
           <a class="community-link alt" data-track="reddit_template_clicked" data-template="root_cause_side" href="https://www.reddit.com/r/AccretedIntelligence/submit?title=Root-cause%20packet%3A%20where%20did%20the%20agent%27s%20work%20stop%20matching%20reality%3F&selftext=Task%20and%20agent%3A%0A%0AOriginal%20promise%3A%0A%0AFirst%20step%20where%20expected%20state%20diverged%20from%20observed%20state%3A%0A%0ATool%20call%20or%20artifact%20involved%3A%0A%0AEvidence%20that%20proved%20the%20divergence%3A%0A%0AWhat%20should%20the%20Work%20Model%20capture%20next%20time%3A" target="_blank" rel="noopener">Post a root-cause packet</a>
+          <button class="community-link alt share-link" type="button" data-share-surface="reddit-share" data-share-url="https://accint.xyz/reddit/?ref=reddit-share&amp;utm_source=share&amp;utm_campaign=organic" aria-label="Copy AccInt Reddit share link">Share this page</button>
           <p class="community-note">If your agent looked productive but increased your review load, that is exactly the kind of report that helps. Keep links out unless they are necessary evidence.</p>
         </div>
       </div>
@@ -413,6 +414,32 @@ ph('reddit_landing_viewed',Object.assign({install_ref:install_ref},source_props)
   [].slice.call(document.querySelectorAll('[data-track="mobile_install_clicked"]')).forEach(function(a){
     a.addEventListener('click',function(){
       ph('reddit_mobile_install_clicked',Object.assign({install_ref:install_ref},source_props));
+    });
+  });
+  [].slice.call(document.querySelectorAll('.share-link')).forEach(function(btn){
+    var original=btn.textContent;
+    function done(label){
+      btn.textContent=label;
+      setTimeout(function(){btn.textContent=original;},1500);
+    }
+    btn.addEventListener('click',function(){
+      var url=btn.getAttribute('data-share-url')||window.location.href;
+      var surface=btn.getAttribute('data-share-surface')||'reddit-share';
+      var props=Object.assign({surface:surface,install_ref:install_ref},source_props);
+      ph('share_link_clicked',props);
+      function copied(mode){
+        ph('share_link_copied',Object.assign({mode:mode},props));
+        done(mode==='native_share'?'shared':'copied');
+      }
+      if(navigator.share){
+        navigator.share({title:'AccInt for agent work',text:'AccInt gives coding agents accountable work state that stays local.',url:url})
+          .then(function(){copied('native_share');})
+          .catch(function(err){if(!err||err.name!=='AbortError'){ph('share_link_failed',Object.assign({mode:'native_share'},props));}});
+      }else if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(function(){copied('clipboard');}).catch(function(){fallbackCopy(url);copied('fallback_copy');});
+      }else{
+        fallbackCopy(url);copied('fallback_copy');
+      }
     });
   });
   [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){

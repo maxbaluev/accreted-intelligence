@@ -13,7 +13,7 @@ The attribution chain is intentionally narrow:
 |---|---|---|---|
 | Web page view | `landing_viewed` on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref`, `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
 | Copy install text | `install_command_copied` | same generated `install_ref` | `method` (`agent_prompt` or `manual_command`), `os`, `placement`, `install_ref`, source props |
-| Share AccInt link | `share_link_clicked`, `share_link_copied` | same generated `install_ref` | `surface=visitor-share`, `mode` for copied/shared completion, source props; no raw inbound referrer URL |
+| Share AccInt link | `share_link_clicked`, `share_link_copied` | same generated `install_ref` | `surface` such as `visitor-share` or `reddit-share`, `mode` for copied/shared completion, source props; no raw inbound referrer URL |
 | Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local `ref` plus optional `source_ref` from copied `ACC_INSTALL_SOURCE`; not sent by the installer |
 | App telemetry | `first_run`, `daily_rollup`, lifecycle events | `distinct_id = telemetry_install_ref` when present, otherwise random device UUID | `first_run.has_install_ref`, `os`, `agent`, `project_lang`; no raw prompt/file/memory data |
 
@@ -83,7 +83,7 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the live dashboard exists and a controlled install has been run, read the
-aggregate funnel, direct install refs, and visitor-share loop:
+aggregate funnel, direct install refs, and owned share loop:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -96,7 +96,7 @@ ACC_APPROVE_POSTHOG_QUERY=1 \
 Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` to
 verify one controlled browser-copy install. This uses the documented PostHog
 Query API for small aggregate HogQL readouts, including `share_link_copied`
-counts, direct `gh-*` directory install refs, and `visitor-share` referred
+counts, direct `gh-*` directory install refs, and owned-share referred
 visitor/install conversion; it is not an event export path.
 
 ### 1. Copy to first run funnel
@@ -359,7 +359,7 @@ Expected use:
 - If `copied_people` is high and `first_runs` is low, fix installer trust,
   prompt wording, or first-run reliability before adding more traffic.
 
-### 7. Visitor share loop
+### 7. Owned share loop
 
 Type: SQL insight, table.
 
@@ -367,24 +367,28 @@ Type: SQL insight, table.
 WITH
 shares AS (
     SELECT
-        'visitor-share' AS surface,
+        properties.surface AS surface,
         uniqExact(distinct_id) AS sharers,
         count() AS share_events
     FROM events
     WHERE event = 'share_link_copied'
-      AND properties.surface = 'visitor-share'
+      AND properties.surface IS NOT NULL
+      AND properties.surface != ''
       AND {filters}
+    GROUP BY surface
 ),
 landings AS (
     SELECT
         distinct_id,
-        min(timestamp) AS landed_at
+        min(timestamp) AS landed_at,
+        properties.ref AS surface
     FROM events
     WHERE event = 'landing_viewed'
-      AND properties.ref = 'visitor-share'
       AND properties.utm_source = 'share'
+      AND properties.ref IS NOT NULL
+      AND properties.ref != ''
       AND {filters}
-    GROUP BY distinct_id
+    GROUP BY distinct_id, surface
 ),
 copies AS (
     SELECT
@@ -415,7 +419,7 @@ SELECT
     if(s.share_events = 0, 0, round(1.0 * referred_visitors / s.share_events, 2)) AS visitors_per_share,
     if(referred_visitors = 0, 0, round(100.0 * referred_first_runs / referred_visitors, 1)) AS referred_visit_to_run_pct
 FROM shares s
-LEFT JOIN landings l ON 1 = 1
+LEFT JOIN landings l ON l.surface = s.surface
 LEFT JOIN copies c ON c.distinct_id = l.distinct_id
     AND c.copied_at >= l.landed_at
     AND c.copied_at < l.landed_at + interval 7 day
@@ -428,8 +432,8 @@ GROUP BY s.surface, s.sharers, s.share_events
 Expected use:
 
 - This is the organic loop tile: it shows whether visitors are copying/sharing
-  the owned share URL and whether the resulting `visitor-share` traffic reaches
-  install copy and first run.
+  owned share URLs and whether the resulting share traffic reaches install copy
+  and first run, broken out by share surface.
 - `visitors_per_share` below 1 means the share CTA is not propagating yet; high
   referred visitors with low `referred_visit_to_run_pct` means the shared
   landing traffic needs stronger trust or channel fit before scaling it.

@@ -2,7 +2,7 @@
 # Verify the deployed web -> installer/share attribution stitch without mutating anything.
 #
 # The static verifier already proves prompt copies carry ACC_INSTALL_REF and
-# ACC_INSTALL_SOURCE and the home page carries the visitor-share URL in the
+# ACC_INSTALL_SOURCE and the home/Reddit pages carry owned-share URLs in the
 # checked-out HTML. This wrapper downloads the live pages into a temporary tree,
 # then runs the same verifier against that served HTML so post-deploy checks
 # catch stale pages, CDN lag, or partial deploys.
@@ -23,7 +23,7 @@ Examples:
 
 This is read-only. It downloads the live home and Reddit pages into a temporary
 directory and reuses scripts/check-attribution-flow.js against that HTML,
-including the visitor-share surface on the home page.
+including the owned-share surfaces on the home and Reddit pages.
 EOF
 }
 

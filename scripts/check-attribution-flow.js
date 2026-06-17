@@ -195,6 +195,9 @@ function checkReddit() {
     ref_source: "hacker_news",
   });
   assertIncludes(html, "reddit_agent_prompt_copied", `${file}: prompt-copy event`);
+  assertIncludes(html, "share_link_clicked", `${file}: reddit share click event`);
+  assertIncludes(html, "share_link_copied", `${file}: reddit share copied event`);
+  assertIncludes(html, "data-share-url=\"https://accint.xyz/reddit/?ref=reddit-share&amp;utm_source=share&amp;utm_campaign=organic\"", `${file}: reddit share URL`);
   assertAgentPrompt(file, html, "agent-prompt");
   assertPromptTrustBoundary(file, html, "agent-prompt");
   assertSourceOnlyAgentPrompt(file, html, "agent-prompt");

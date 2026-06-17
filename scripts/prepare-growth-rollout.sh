@@ -291,7 +291,9 @@ Run these only after explicit owner approval for the named external action.
    curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
    curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
+   curl -fsSL https://accint.xyz/reddit/ | grep -F 'data-share-surface="reddit-share"'
    curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
+   curl -fsSL https://accint.xyz/reddit/ | grep -F "share_link_copied"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
 
@@ -370,7 +372,7 @@ Run these only after explicit owner approval for the named external action.
    the generated UI packet in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 
-13. Read the PostHog growth funnel, direct install refs, and visitor-share loop after the dashboard and controlled install:
+13. Read the PostHog growth funnel, direct install refs, and owned share loop after the dashboard and controlled install:
 
    scripts/run-approved-posthog-funnel-check.sh
    POSTHOG_HOST=https://us.posthog.com \\
