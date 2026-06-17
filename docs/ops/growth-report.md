@@ -58,7 +58,11 @@ Last receipt refresh: 2026-06-17.
 - BuilderStudio invitation from `wundercorp/awesome-mcp#7` was followed up by
   email on June 17 after a read-only site check confirmed built-in MCP support.
   The `/apps` route redirected to auth requesting `phone` scope, so no account
-  path was used.
+  path was used. WunderCorp Support replied on June 17 that they would look into
+  AccInt, asked for documentation references and MCP integration notes, and
+  mentioned a Certified Partner route involving KYC through Stripe. A docs/MCP
+  notes reply was sent back to `support@wundercorp.co`; hold the Certified
+  Partner/KYC/Stripe path unless the owner explicitly approves it.
 - WithAI Tools has a live AccInt listing at
   `https://www.withaitools.com/tools/accreted-intelligence`, but the generated
   copy still misclassifies AccInt as a sales/prospecting tool with freemium
@@ -95,7 +99,7 @@ Last receipt refresh: 2026-06-17.
 | 2026-06-17 | punkpeye PR badge follow-up | `https://github.com/punkpeye/awesome-mcp-servers/pull/8091` | Owned branch pushed at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91` | Glama badge row added; no PR comment posted; PR remains open with clean merge state. |
 | 2026-06-17 | Reddit LocalLLaMA | `https://www.reddit.com/r/LocalLLaMA/submit/` | No published URL | Attempted, but not confirmed published after Rule 4 warning; no social receipt row. |
 | 2026-06-17 | All AI Tool Hub | `https://allaitoolhub.com/tool/accint` | Approval email from `allaitoolhub@gmail.com` to `maxbaluev@outlook.com`; public listing verified in browser | Listed under Coding & Dev as a free tool with AccInt description, tags, rating, and visit CTA. |
-| 2026-06-17 | BuilderStudio / WunderCorp follow-up | `support@wundercorp.co` | Sent `AccInt x BuilderStudio MCP integration` from Outlook after the maintainer invitation on `wundercorp/awesome-mcp#7` | Targeted integration email included AccInt site, GitHub, official MCP Registry link, and `acc mcp` config; no public follow-up comment posted. |
+| 2026-06-17 | BuilderStudio / WunderCorp follow-up | `support@wundercorp.co` | Initial `AccInt x BuilderStudio MCP integration` email sent from Outlook after the maintainer invitation on `wundercorp/awesome-mcp#7`; Sent Items later verified a docs/MCP notes reply after WunderCorp Support answered | Reply provided AccInt site, GitHub, install guide, quickstart, trust model, architecture overview, Official MCP Registry name, `llms.txt`, and `acc mcp` integration notes; explicitly held the Certified Partner/KYC/Stripe path; no public follow-up comment posted. |
 | 2026-06-17 | WithAI Tools correction | `https://www.withaitools.com/tools/accreted-intelligence` | Sent `Correction request for AccInt listing` to `team@mail.withaitools.com` from Outlook; Sent Items verified at 9:46 PM | Public page still misclassified AccInt as sales/prospecting with freemium pricing and sales-outreach use cases; requested developer/AI-agent memory/MCP copy instead. |
 | 2026-06-17 | LLMs.txt Directory | `https://llmtxt.app/submit` | Submitted `https://accint.xyz` after verifying `https://accint.xyz/llms.txt` loaded in browser | Page returned `Website Submitted Successfully` with 24-48 hour review and email-confirmation copy; pending public listing verification. |
 | 2026-06-15 | mcpservers.org | `https://mcpservers.org/servers/maxbaluev/accreted-intelligence` | Submission approval email plus public browser verification | Published as `AccInt MCP Server` with GitHub/documentation links and AccInt long-form description. |
@@ -121,7 +125,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 | 2 | appcypher/wong2/TensorBlock alternatives via TensorBlock/awesome-mcp-servers | MCP directory | merged | https://github.com/TensorBlock/awesome-mcp-servers/pull/721 | 2026-06-15T21:49:38Z | Listing win; monitor only. |
 | 3 | mcpHQ/awesome-mcp-servers | MCP directory | merged | https://github.com/mcpHQ/awesome-mcp-servers/pull/2 | 2026-06-15T19:43:45Z | Listing win; monitor only. |
 | 4 | DhanushNehru/awesome-mcp-servers | MCP directory | merged | https://github.com/DhanushNehru/awesome-mcp-servers/pull/33 | 2026-06-15T11:18:19Z | Listing win; monitor only. |
-| 5 | wundercorp/awesome-mcp | MCP directory | merged | https://github.com/wundercorp/awesome-mcp/pull/7 | 2026-06-16T18:23:52Z | Listing win; BuilderStudio integration invite followed by targeted support email, no further public bump. |
+| 5 | wundercorp/awesome-mcp | MCP directory | merged | https://github.com/wundercorp/awesome-mcp/pull/7 | 2026-06-16T18:23:52Z | Listing win; BuilderStudio integration invite followed by support email and docs/MCP notes reply; no further public bump. |
 | 6 | TsinghuaC3I/Awesome-Memory-for-Agents | Agent memory | merged | https://github.com/TsinghuaC3I/Awesome-Memory-for-Agents/pull/21 | 2026-06-16T02:48:45Z | Listing win; monitor only. |
 | 7 | aristoapp/awesome-second-brain | Memory/watchlist | merged | https://github.com/aristoapp/awesome-second-brain/pull/23 | 2026-06-16T12:30:56Z | Listing win; monitor only. |
 | 8 | sickn33/antigravity-awesome-skills | Skills directory | merged | https://github.com/sickn33/antigravity-awesome-skills/pull/687 | 2026-06-15T17:29:39Z | Skill listing win; monitor only. |
