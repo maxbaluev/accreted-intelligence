@@ -57,8 +57,9 @@ Last receipt refresh: 2026-06-17.
   or a paid placement.
 - De-dupe any further directory submission against the local queue before
   submitting or sending email; All AI Tool Hub, Launchpadly, MCP.Directory,
-  MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and Websites, and AI Tool Claw
-  already have recorded submission/email outcomes or held blockers.
+  mcpservers.org, MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and Websites,
+  and AI Tool Claw already have recorded submission/email outcomes or held
+  blockers.
 - Do not reply to directory/listing PRs merely to bump visibility. Use generated
   notes only when a maintainer asks for clarification, a listing needs registry
   proof, or the owner approves a specific reply.
@@ -74,6 +75,8 @@ Last receipt refresh: 2026-06-17.
 | 2026-06-17 | punkpeye PR badge follow-up | `https://github.com/punkpeye/awesome-mcp-servers/pull/8091` | Owned branch pushed at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91` | Glama badge row added; no PR comment posted; PR remains open with clean merge state. |
 | 2026-06-17 | Reddit LocalLLaMA | `https://www.reddit.com/r/LocalLLaMA/submit/` | No published URL | Attempted, but not confirmed published after Rule 4 warning; no social receipt row. |
 | 2026-06-17 | All AI Tool Hub | `https://allaitoolhub.com/tool/accint` | Approval email from `allaitoolhub@gmail.com` to `maxbaluev@outlook.com`; public listing verified in browser | Listed under Coding & Dev as a free tool with AccInt description, tags, rating, and visit CTA. |
+| 2026-06-15 | mcpservers.org | `https://mcpservers.org/servers/maxbaluev/accreted-intelligence` | Submission approval email plus public browser verification | Published as `AccInt MCP Server` with GitHub/documentation links and AccInt long-form description. |
+| 2026-06-15 | MCP.so | `https://mcp.so/server/accint` | Public browser verification after Google OAuth submission | Published as `AccInt` by `@maxbaluev`, with tags, website/repository links, and `acc mcp` server config. |
 | 2026-06-15 | MCP.Directory | `https://mcp.directory/submit` | GitHub repository URL, short description, and `maxbaluev@outlook.com` submitted from the directory queue | Page confirmed `Server Submitted`; read-only June 17 browser check did not find AccInt on `/?q=accint` or `/search?q=accint`, so treat as pending/unverified and do not resubmit without a fresh listing check. |
 
 ## Tracked directory/listing PRs
