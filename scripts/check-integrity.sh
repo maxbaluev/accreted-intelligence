@@ -203,7 +203,9 @@ echo "== live growth workflow guard =="
 live_workflow=".github/workflows/live-site-attribution.yml"
 if [ -f "$live_workflow" ] &&
   grep -q 'scripts/check-live-attribution-flow.sh' "$live_workflow" &&
-  grep -q 'scripts/check-growth-live-state.sh' "$live_workflow"; then
+  grep -q 'scripts/check-growth-live-state.sh' "$live_workflow" &&
+  grep -q 'data-share-surface=\\"visitor-share\\"' scripts/check-growth-live-state.sh &&
+  grep -q 'share_link_copied' scripts/check-growth-live-state.sh; then
   note "live site attribution workflow: ok"
 else
   note "live site attribution workflow: MISSING"

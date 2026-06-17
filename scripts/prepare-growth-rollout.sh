@@ -290,6 +290,8 @@ Run these only after explicit owner approval for the named external action.
    curl -fsSI https://accint.xyz/reddit/
    curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
+   curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
+   curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
 

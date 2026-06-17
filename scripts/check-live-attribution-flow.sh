@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Verify the deployed web -> installer attribution stitch without mutating anything.
+# Verify the deployed web -> installer/share attribution stitch without mutating anything.
 #
 # The static verifier already proves prompt copies carry ACC_INSTALL_REF and
-# ACC_INSTALL_SOURCE in the checked-out HTML. This wrapper downloads the live
-# pages into a temporary tree, then runs the same verifier against that served
-# HTML so post-deploy checks catch stale pages, CDN lag, or partial deploys.
+# ACC_INSTALL_SOURCE and the home page carries the visitor-share URL in the
+# checked-out HTML. This wrapper downloads the live pages into a temporary tree,
+# then runs the same verifier against that served HTML so post-deploy checks
+# catch stale pages, CDN lag, or partial deploys.
 set -euo pipefail
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -21,7 +22,8 @@ Examples:
   ACC_LIVE_SITE_URL=https://preview.example.com scripts/check-live-attribution-flow.sh
 
 This is read-only. It downloads the live home and Reddit pages into a temporary
-directory and reuses scripts/check-attribution-flow.js against that HTML.
+directory and reuses scripts/check-attribution-flow.js against that HTML,
+including the visitor-share surface on the home page.
 EOF
 }
 

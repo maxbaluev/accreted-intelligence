@@ -196,9 +196,9 @@ check_live_page() {
   done
 
   if [ "$missing" -eq 0 ]; then
-    ok "$label serves attribution copy markers"
+    ok "$label serves attribution/share markers"
   else
-    hold "$label does not yet serve all attribution copy markers"
+    hold "$label does not yet serve all attribution/share markers"
   fi
 }
 
@@ -289,7 +289,10 @@ if command -v curl >/dev/null 2>&1; then
     "ACC_INSTALL_REF" \
     "ACC_INSTALL_SOURCE" \
     "posthog.identify(install_ref)" \
-    "install_agent_prompt_copied"
+    "install_agent_prompt_copied" \
+    "data-share-surface=\"visitor-share\"" \
+    "share_link_clicked" \
+    "share_link_copied"
   check_live_page \
     "reddit page" \
     "$site_url/reddit/" \
@@ -306,18 +309,18 @@ if [ "$site_transport_needs_diagnostic" -eq 1 ]; then
   diagnose_site_transport
 fi
 
-section "live prompt-copy attribution flow"
+section "live prompt-copy/share attribution flow"
 if command -v curl >/dev/null 2>&1 && command -v node >/dev/null 2>&1; then
   live_flow_output="$(bash scripts/check-live-attribution-flow.sh "$site_url" 2>&1)"
   live_flow_status=$?
   printf '%s\n' "$live_flow_output" | sed 's/^/    /'
   if [ "$live_flow_status" -eq 0 ]; then
-    ok "live served HTML passes the prompt-copy attribution verifier"
+    ok "live served HTML passes the prompt-copy/share attribution verifier"
   else
-    hold "live served HTML does not yet pass the prompt-copy attribution verifier"
+    hold "live served HTML does not yet pass the prompt-copy/share attribution verifier"
   fi
 else
-  skip "curl and node are required for live prompt-copy attribution verification"
+  skip "curl and node are required for live prompt-copy/share attribution verification"
 fi
 
 section "GitHub Release MCPB assets"

@@ -217,13 +217,15 @@ curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
+curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
+curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
 scripts/check-live-attribution-flow.sh https://accint.xyz
 ```
 
 `scripts/check-live-attribution-flow.sh` downloads served home/Reddit HTML into
 a temp directory and reuses the static attribution verifier, proving live prompt
 copies carry `ACC_INSTALL_REF`, `ACC_INSTALL_SOURCE`, and the source-only
-fallback.
+fallback, and proving the home page serves the tracked `visitor-share` URL.
 
 If the local network path cannot fetch the custom domain, run the hosted
 read-only verifier after the workflow file is pushed:
