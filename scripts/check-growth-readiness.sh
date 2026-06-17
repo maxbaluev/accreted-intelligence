@@ -56,6 +56,7 @@ for f in \
   docs/ops/growth-rollout-checklist.md \
   scripts/check-attribution-flow.js \
   scripts/check-mcpb-release-assets.sh \
+  scripts/check-release-alignment.sh \
   scripts/check-integrity.sh; do
   if [ -f "$f" ]; then
     note "$f: present"

@@ -91,6 +91,7 @@ For a new release, regenerate it from the generated multi-package file:
 ```bash
 scripts/check-mcpb-release-assets.sh v0.1.5 dist/server.mcpb-all.json
 cp dist/server.mcpb-all.json server.json
+scripts/check-release-alignment.sh v0.1.5 server.json
 ```
 
 The official registry validates every package entry in `packages[]`. Keeping all
@@ -122,6 +123,10 @@ steps:
     run: |
       version="$(python3 -c 'import json; print(json.load(open("server.json"))["version"])')"
       bash scripts/check-mcpb-release-assets.sh "v${version}" server.json
+  - name: Verify latest release alignment
+    env:
+      GH_TOKEN: ${{ github.token }}
+    run: bash scripts/check-release-alignment.sh
   - name: Install mcp-publisher
     run: |
       curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
@@ -133,4 +138,5 @@ steps:
 
 Keep this workflow on manual dispatch until the release pipeline attaches MCPB
 assets and updates `server.json` with real `fileSha256` values for each release.
-The workflow verifies those assets before it authenticates or publishes.
+The workflow verifies those assets and latest-release alignment before it
+authenticates or publishes.

@@ -15,6 +15,7 @@ for f in \
   scripts/acc-docker.sh \
   scripts/check-growth-readiness.sh \
   scripts/check-mcpb-release-assets.sh \
+  scripts/check-release-alignment.sh \
   scripts/docker-entrypoint.sh \
   scripts/package-mcpb.sh; do
   if [ -f "$f" ]; then
@@ -59,6 +60,12 @@ if grep -q 'scripts/check-mcpb-release-assets.sh "v${version}" server.json' .git
   note "publish workflow release-asset guard: ok"
 else
   note "publish workflow release-asset guard: MISSING"
+  fail=1
+fi
+if grep -q 'bash scripts/check-release-alignment.sh' .github/workflows/publish-mcp.yml; then
+  note "publish workflow latest-release guard: ok"
+else
+  note "publish workflow latest-release guard: MISSING"
   fail=1
 fi
 

@@ -40,10 +40,11 @@ source).
    generated `dist/acc-mcp-*.mcpb` + `.sha256` files to the same release. Run
    `scripts/check-mcpb-release-assets.sh vX.Y.Z dist/server.mcpb-all.json`;
    only after it passes, copy `dist/server.mcpb-all.json` to `server.json`,
-   commit it, and use `docs/registry/mcp-registry.md` for the official MCP
-   Registry `mcp-publisher` steps. The tracked `publish-mcp-registry` workflow
-   is manual, re-runs the asset check before publishing, and uses GitHub OIDC,
-   so no maintainer token needs to be stored.
+   then run `scripts/check-release-alignment.sh vX.Y.Z server.json`, commit it,
+   and use `docs/registry/mcp-registry.md` for the official MCP Registry
+   `mcp-publisher` steps. The tracked `publish-mcp-registry` workflow is manual,
+   re-runs the asset and latest-release alignment checks before publishing, and
+   uses GitHub OIDC, so no maintainer token needs to be stored.
 6. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
    from `index.html` + `CNAME` at repo root; confirm the deep-doc links resolve on
    the published default branch.
