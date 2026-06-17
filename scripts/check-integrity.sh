@@ -104,6 +104,12 @@ if command -v node >/dev/null 2>&1; then
     note "directory surface refs: FAIL"
     fail=1
   fi
+  if printf '%s\n' '| 1 | example/list | 1 | Memory | https://github.com/example/list/pull/1 | ok |' | node scripts/prepare-directory-followup-kit.js --check - >/dev/null; then
+    note "directory follow-up kit: ok"
+  else
+    note "directory follow-up kit: FAIL"
+    fail=1
+  fi
 else
   note "node: MISSING (required for growth/directory surface verifiers)"
   fail=1

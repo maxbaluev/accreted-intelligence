@@ -71,6 +71,7 @@ for f in \
   scripts/check-registry-discovery-docs.js \
   scripts/check-release-alignment.sh \
   scripts/check-social-launch-kit.js \
+  scripts/prepare-directory-followup-kit.js \
   scripts/prepare-directory-surface-refs.js \
   scripts/prepare-growth-rollout.sh \
   scripts/prepare-posthog-dashboard.js \

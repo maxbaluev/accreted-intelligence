@@ -20,6 +20,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - read-only live growth state auditor
 - live prompt-copy attribution verifier
 - MCPB promotion packet verifier
+- official registry discovery docs/follow-up packet
 - materialized PostHog dashboard spec
 - approval-gated PostHog dashboard shell helper
 - approval-gated PostHog growth funnel readout helper
@@ -56,6 +57,7 @@ scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
 node scripts/check-growth-surfaces.js --check
 node scripts/prepare-directory-surface-refs.js --check path/to/report.md
+node scripts/prepare-directory-followup-kit.js --check path/to/report.md
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -109,6 +111,9 @@ Expected state:
 - `node scripts/prepare-directory-surface-refs.js --check path/to/report.md`
   passes for the tracked directory/list PR table when a growth report is
   available
+- `node scripts/prepare-directory-followup-kit.js --check path/to/report.md`
+  passes for the tracked directory/list PR table and prepares owner-reviewable
+  maintainer-note drafts without posting
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
@@ -319,7 +324,10 @@ After public push and site verification:
    `scripts/check-directory-pr-state.sh path/to/report.md`.
 6. Generate directory attribution refs without posting:
    `node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md`.
-7. Do not retry lists that rejected the private-engine boundary unless the
+7. Prepare owner-reviewable registry/source-boundary follow-up notes without
+   posting:
+   `node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md`.
+8. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
 ## Social launch lane

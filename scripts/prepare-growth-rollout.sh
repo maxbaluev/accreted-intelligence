@@ -31,6 +31,7 @@ Default mode is local and read-only:
   - builds and verifies the local MCPB promotion packet without uploading
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
+  - optionally prepares owner-reviewable directory/list follow-up notes when ACC_GROWTH_REPORT is set
   - prints the approval-gated push + hosted live-site verifier command
   - prints the approval-gated controlled live install receipt verifier command
   - prints the approval-gated PostHog dashboard shell creation command
@@ -81,10 +82,12 @@ if [ -n "$growth_report" ]; then
   report_record_line="   Record published URLs and refs in: $growth_report"
   directory_pr_command="   scripts/check-directory-pr-state.sh \"$growth_report\""
   directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown \"$growth_report\""
+  directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown \"$growth_report\""
 else
   report_record_line="   Record published URLs and refs in the growth report."
   directory_pr_command="   scripts/check-directory-pr-state.sh path/to/report.md"
   directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md"
+  directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md"
 fi
 
 echo "== local growth readiness =="
@@ -177,6 +180,16 @@ elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else
   echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to prepare directory attribution refs"
+fi
+
+echo
+echo "== directory follow-up kit pre-live proof =="
+if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
+  node scripts/prepare-directory-followup-kit.js --check "$growth_report"
+elif [ -n "$growth_report" ]; then
+  printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
+else
+  echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to prepare directory follow-up notes"
 fi
 
 echo
@@ -340,6 +353,7 @@ $report_record_line
 
 $directory_pr_command
 $directory_refs_command
+$directory_followup_command
 
 16. punkpeye Glama badge follow-up after a real Glama listing exists:
 

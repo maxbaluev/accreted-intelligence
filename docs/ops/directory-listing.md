@@ -172,6 +172,30 @@ and attention items. It is advisory by default; set
 `ACC_DIRECTORY_PR_STRICT=1` only when a nonzero exit on attention items is
 useful.
 
+## Owner-reviewed follow-up kit
+
+When the official registry/MCPB proof or install attribution should be included
+in a maintainer reply, generate a local review packet first:
+
+```bash
+node scripts/prepare-directory-followup-kit.js --check path/to/report.md
+node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md
+```
+
+The kit reads local Markdown or stdin only. It does not query GitHub, post
+comments, submit forms, push branches, or edit PRs. For each tracked PR it
+prints:
+
+- the stable `gh-...` attribution ref and landing URL
+- the current Official MCP Registry endpoint derived from `server.json`
+- MCPB package count/version context
+- the Apache-2.0 public glue / proprietary local engine boundary
+- a maintainer-note draft that can be reviewed before any owner-approved reply
+
+Use the output only when a maintainer asks for clarification, a listing needs a
+registry/discovery link, or the owner explicitly approves a follow-up for that
+exact target. Do not reply merely to bump visibility.
+
 ## Surface attribution refs
 
 When a report or PR table contains GitHub PR URLs, generate stable per-directory
