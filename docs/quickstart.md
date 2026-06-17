@@ -33,6 +33,17 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 The installer writes those labels to a local receipt only; it does not send the
 ref or source anywhere by itself.
 
+For installs that start from these GitHub docs, preserve the docs attribution
+receipt:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=github-docs ACC_INSTALL_SOURCE='ref=github-docs&utm_source=github&utm_campaign=docs' sh
+```
+
+```powershell
+$env:ACC_INSTALL_REF='github-docs'; $env:ACC_INSTALL_SOURCE='ref=github-docs&utm_source=github&utm_campaign=docs'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+```
+
 The installer probes your hardware, picks an embedder tier it can honestly run, installs `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. First run may download the embedder model (several GB) and take minutes — the installer reports the wait honestly. Locked-down or no-root box? The [container](install/container.md) page tracks that portability path separately. Want your agent (Claude Code, Codex, Cursor, OpenCode) to drive the install and verify it for you? Paste one prompt — see [install/with-agent.md](install/with-agent.md).
 
 ## 2. Confirm health

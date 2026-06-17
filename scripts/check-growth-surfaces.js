@@ -24,6 +24,11 @@ const DOCS_ATTRIBUTION_PATHS = [
   path.join("docs", "reference", "trust-model.md"),
   path.join("docs", "reference", "whitepaper.md"),
 ];
+const DOCS_INSTALL_SNIPPET_PATHS = [
+  path.join("docs", "quickstart.md"),
+  path.join("docs", "install", "README.md"),
+  path.join("docs", "install", "self-serve.md"),
+];
 const SOURCE_KEYS = [
   "ref",
   "utm_source",
@@ -240,13 +245,14 @@ function validateOwnedDocsSurfaces(manifest) {
     for (const file of DOCS_ATTRIBUTION_PATHS) {
       assertIncludes(read(file), url, `${file}: attributed docs landing URL for ${surface.id}`);
     }
-    const installHub = path.join("docs", "install", "README.md");
-    const installHubText = read(installHub);
     const source = sourceQuery(surface);
-    assertIncludes(installHubText, `ACC_INSTALL_REF=${surface.id}`, `${installHub}: POSIX ref for ${surface.id}`);
-    assertIncludes(installHubText, `ACC_INSTALL_SOURCE='${source}'`, `${installHub}: POSIX source for ${surface.id}`);
-    assertIncludes(installHubText, `$env:ACC_INSTALL_REF='${surface.id}'`, `${installHub}: PowerShell ref for ${surface.id}`);
-    assertIncludes(installHubText, `$env:ACC_INSTALL_SOURCE='${source}'`, `${installHub}: PowerShell source for ${surface.id}`);
+    for (const file of DOCS_INSTALL_SNIPPET_PATHS) {
+      const text = read(file);
+      assertIncludes(text, `ACC_INSTALL_REF=${surface.id}`, `${file}: POSIX ref for ${surface.id}`);
+      assertIncludes(text, `ACC_INSTALL_SOURCE='${source}'`, `${file}: POSIX source for ${surface.id}`);
+      assertIncludes(text, `$env:ACC_INSTALL_REF='${surface.id}'`, `${file}: PowerShell ref for ${surface.id}`);
+      assertIncludes(text, `$env:ACC_INSTALL_SOURCE='${source}'`, `${file}: PowerShell source for ${surface.id}`);
+    }
   }
   for (const file of markdownFiles("docs")) {
     const bareSiteLinks = read(file).match(/\]\(https:\/\/accint\.xyz\/?\)/g) || [];

@@ -26,6 +26,17 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 $env:ACC_INSTALL_REF = 'gh-awesome-list'; $env:ACC_INSTALL_SOURCE = 'ref=gh-awesome-list'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
+If this install starts from the GitHub docs, use the docs ref so the local
+receipt can be grouped with other docs-sourced installs:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=github-docs ACC_INSTALL_SOURCE='ref=github-docs&utm_source=github&utm_campaign=docs' sh
+```
+
+```powershell
+$env:ACC_INSTALL_REF='github-docs'; $env:ACC_INSTALL_SOURCE='ref=github-docs&utm_source=github&utm_campaign=docs'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+```
+
 `ACC_INSTALL_REF` and optional `ACC_INSTALL_SOURCE` are written only to a local
 receipt at `install-attribution.env` under the acc data directory. The installer
 does not send that ref or source anywhere by itself. Web prompt copies set both:
