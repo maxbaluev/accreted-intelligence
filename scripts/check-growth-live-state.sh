@@ -290,6 +290,9 @@ if command -v curl >/dev/null 2>&1; then
     "ACC_INSTALL_REF" \
     "ACC_INSTALL_SOURCE" \
     "posthog.identify(install_ref)" \
+    "https://it.accint.xyz" \
+    "ui_host:PH_UI_HOST" \
+    "PH_DEFAULTS" \
     "install_agent_prompt_copied" \
     "data-share-surface=\"visitor-share\"" \
     "share_link_clicked" \
@@ -300,6 +303,9 @@ if command -v curl >/dev/null 2>&1; then
     "ACC_INSTALL_REF" \
     "ACC_INSTALL_SOURCE" \
     "posthog.identify(install_ref)" \
+    "https://it.accint.xyz" \
+    "ui_host:PH_UI_HOST" \
+    "PH_DEFAULTS" \
     "reddit_agent_prompt_copied" \
     "data-share-surface=\"reddit-share\"" \
     "share_link_clicked" \

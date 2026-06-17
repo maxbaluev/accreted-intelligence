@@ -31,6 +31,12 @@ function assertIncludes(text, needle, context) {
   }
 }
 
+function assertMatches(text, re, context) {
+  if (!re.test(text)) {
+    die(`${context}: missing ${re}`);
+  }
+}
+
 function extractCode(html, id) {
   const re = new RegExp(`<code id="${id}">([\\s\\S]*?)<\\/code>`);
   const match = html.match(re);
@@ -96,6 +102,10 @@ function assertInlineScriptsParse(file, html) {
 }
 
 function assertPageIdentity(file, html) {
+  assertMatches(html, /var\s+PH_HOST\s*=\s*'https:\/\/it\.accint\.xyz'/, `${file}: PostHog proxy host`);
+  assertMatches(html, /var\s+PH_UI_HOST\s*=\s*'https:\/\/us\.posthog\.com'/, `${file}: PostHog UI host`);
+  assertMatches(html, /var\s+PH_DEFAULTS\s*=\s*'2026-05-30'/, `${file}: PostHog defaults date`);
+  assertIncludes(html, "ui_host:PH_UI_HOST", `${file}: PostHog proxy UI routing`);
   assertIncludes(html, "posthog.identify(install_ref)", `${file}: page identity`);
   assertIncludes(html, "register_for_session", `${file}: session properties`);
   assertIncludes(html, "ph('landing_viewed'", `${file}: landing event`);
