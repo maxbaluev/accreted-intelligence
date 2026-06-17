@@ -15,6 +15,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - web prompt-copy `ACC_INSTALL_SOURCE` source/ref stitching
 - attribution regression tests
 - controlled install attribution receipt verifier
+- materialized PostHog dashboard spec
 - attribution dashboard/runbook docs
 - organic referrer classification
 - dry-run rollout approval packet
@@ -32,6 +33,7 @@ These checks are local and safe:
 scripts/prepare-growth-rollout.sh
 bash scripts/check-growth-readiness.sh
 bash scripts/check-controlled-install-attribution.sh
+node scripts/prepare-posthog-dashboard.js --check
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -48,6 +50,8 @@ Expected state:
 - `scripts/check-growth-readiness.sh` passes
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
+- `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
+  five required attribution dashboard tiles
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
@@ -143,7 +147,13 @@ The controlled install should produce:
 ## PostHog dashboard
 
 Create the dashboard from `docs/ops/attribution-dashboard.md` after the push and
-binary release are live.
+binary release are live. The materialized local spec is
+`docs/ops/posthog-dashboard.json`; validate and print it first:
+
+```bash
+node scripts/prepare-posthog-dashboard.js --check
+node scripts/prepare-posthog-dashboard.js --print
+```
 
 Minimum tiles:
 

@@ -46,6 +46,18 @@ See PostHog docs:
 
 Create a dashboard named `AccInt install attribution`.
 
+The materialized dashboard spec lives at
+[`posthog-dashboard.json`](posthog-dashboard.json). Before creating or changing
+the live PostHog dashboard, run:
+
+```bash
+node scripts/prepare-posthog-dashboard.js --check
+node scripts/prepare-posthog-dashboard.js --print
+```
+
+This is local-only: it validates and prints the dashboard shape without calling
+PostHog or using credentials.
+
 ### 1. Copy to first run funnel
 
 Type: Funnel.
@@ -238,9 +250,10 @@ Before using this dashboard for decisions:
 2. Private telemetry bridge is released in the binary that the public installer
    fetches.
 3. `bash scripts/check-integrity.sh` passes in the public repo.
-4. A controlled install from the live page is run once with a test date range,
+4. `node scripts/prepare-posthog-dashboard.js --check` passes in the public repo.
+5. A controlled install from the live page is run once with a test date range,
    then excluded from public reporting.
-5. Dashboard tiles show the controlled install in both `install_command_copied`
+6. Dashboard tiles show the controlled install in both `install_command_copied`
    and `first_run` with the same `distinct_id`.
 
 Do not rank directories or paid surfaces from copy events alone. Rank them from

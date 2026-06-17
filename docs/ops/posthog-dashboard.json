@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "dashboard": {
+    "name": "AccInt install attribution",
+    "description": "Operator spec for the PostHog dashboard that measures web copy events to attributed first runs and activation without collecting prompts, files, memory, or Work Model data.",
+    "privacy_contract": {
+      "allowed_identity": "install_ref / telemetry_install_ref only",
+      "allowed_source_properties": [
+        "landing",
+        "utm_source",
+        "utm_medium",
+        "utm_campaign",
+        "utm_content",
+        "ref",
+        "rsub",
+        "thread",
+        "entry",
+        "ref_source",
+        "ref_host",
+        "method",
+        "placement",
+        "os",
+        "agent",
+        "project_lang",
+        "has_install_ref"
+      ],
+      "forbidden_payloads": [
+        "raw prompt text",
+        "file contents",
+        "memory contents",
+        "Work Model data",
+        "full inbound referrer URLs"
+      ]
+    },
+    "tiles": [
+      {
+        "slug": "copy_to_first_run_funnel",
+        "title": "Copy to first run funnel",
+        "type": "funnel",
+        "conversion_window_days": 7,
+        "steps": [
+          {
+            "event": "install_command_copied"
+          },
+          {
+            "event": "first_run",
+            "filters": [
+              {
+                "property": "has_install_ref",
+                "operator": "exact",
+                "value": "true"
+              }
+            ]
+          }
+        ],
+        "breakdowns": [
+          "method",
+          "placement"
+        ],
+        "expected_use": "Compares agent-prompt vs manual-command copy conversion and hero vs final placement conversion."
+      },
+      {
+        "slug": "web_copy_source_leaderboard",
+        "title": "Web copy source leaderboard",
+        "type": "sql",
+        "display": "table",
+        "hogql": "SELECT\n    multiIf(\n        properties.utm_campaign IS NOT NULL AND properties.utm_campaign != '', properties.utm_campaign,\n        properties.rsub IS NOT NULL AND properties.rsub != '', properties.rsub,\n        properties.ref IS NOT NULL AND properties.ref != '', properties.ref,\n        properties.utm_source IS NOT NULL AND properties.utm_source != '', properties.utm_source,\n        properties.ref_source IS NOT NULL AND properties.ref_source != '', properties.ref_source,\n        properties.ref_host IS NOT NULL AND properties.ref_host != '', properties.ref_host,\n        properties.placement IS NOT NULL AND properties.placement != '', properties.placement,\n        'unknown'\n    ) AS surface,\n    properties.method AS method,\n    uniqExact(distinct_id) AS copied_people,\n    count() AS copy_events\nFROM events\nWHERE event = 'install_command_copied'\n  AND {filters}\nGROUP BY surface, method\nORDER BY copied_people DESC\nLIMIT 25"
+      },
+      {
+        "slug": "attributed_first_runs",
+        "title": "Attributed first runs",
+        "type": "sql",
+        "display": "number",
+        "hogql": "SELECT\n    uniqExact(distinct_id) AS attributed_first_runs\nFROM events\nWHERE event = 'first_run'\n  AND properties.has_install_ref = 'true'\n  AND {filters}"
+      },
+      {
+        "slug": "copy_to_attributed_first_run_by_surface",
+        "title": "Copy to attributed first run by surface",
+        "type": "sql",
+        "display": "table",
+        "hogql": "WITH\ncopies AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS copied_at,\n        any(properties.method) AS method,\n        any(properties.placement) AS placement,\n        any(properties.utm_source) AS utm_source,\n        any(properties.utm_campaign) AS utm_campaign,\n        any(properties.ref) AS ref,\n        any(properties.ref_source) AS ref_source,\n        any(properties.ref_host) AS ref_host,\n        any(properties.rsub) AS rsub\n    FROM events\n    WHERE event = 'install_command_copied'\n      AND {filters}\n    GROUP BY distinct_id\n),\nfirst_runs AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS first_run_at\n    FROM events\n    WHERE event = 'first_run'\n      AND properties.has_install_ref = 'true'\n      AND {filters}\n    GROUP BY distinct_id\n)\nSELECT\n    multiIf(\n        c.utm_campaign IS NOT NULL AND c.utm_campaign != '', c.utm_campaign,\n        c.rsub IS NOT NULL AND c.rsub != '', c.rsub,\n        c.ref IS NOT NULL AND c.ref != '', c.ref,\n        c.utm_source IS NOT NULL AND c.utm_source != '', c.utm_source,\n        c.ref_source IS NOT NULL AND c.ref_source != '', c.ref_source,\n        c.ref_host IS NOT NULL AND c.ref_host != '', c.ref_host,\n        c.placement IS NOT NULL AND c.placement != '', c.placement,\n        'unknown'\n    ) AS surface,\n    c.method AS method,\n    uniqExact(c.distinct_id) AS copied_people,\n    uniqExact(f.distinct_id) AS first_runs,\n    round(100.0 * first_runs / copied_people, 1) AS conversion_pct\nFROM copies c\nLEFT JOIN first_runs f ON f.distinct_id = c.distinct_id\n    AND f.first_run_at >= c.copied_at\n    AND f.first_run_at < c.copied_at + interval 7 day\nGROUP BY surface, method\nORDER BY first_runs DESC, copied_people DESC\nLIMIT 25"
+      },
+      {
+        "slug": "activation_after_install",
+        "title": "Activation after install",
+        "type": "funnel",
+        "conversion_window_days": 7,
+        "steps": [
+          {
+            "event": "first_run",
+            "filters": [
+              {
+                "property": "has_install_ref",
+                "operator": "exact",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "event": "first_retrieve"
+          },
+          {
+            "event": "daily_rollup"
+          }
+        ],
+        "breakdowns": [
+          "agent",
+          "project_lang"
+        ],
+        "expected_use": "Measures whether attributed installs reach first signal and survive past novelty."
+      }
+    ]
+  }
+}

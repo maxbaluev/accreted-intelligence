@@ -64,6 +64,14 @@ else
   fail=1
 fi
 
+echo "== PostHog dashboard spec =="
+if command -v node >/dev/null 2>&1; then
+  if node scripts/prepare-posthog-dashboard.js --check; then note "PostHog dashboard spec: ok"; else fail=1; fi
+else
+  note "node: MISSING (required for PostHog dashboard verifier)"
+  fail=1
+fi
+
 echo "== MCP registry publish guard =="
 if grep -q 'scripts/check-mcpb-release-assets.sh "v${version}" server.json' .github/workflows/publish-mcp.yml; then
   note "publish workflow release-asset guard: ok"

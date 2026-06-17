@@ -104,6 +104,10 @@ echo "== controlled install attribution pre-live proof =="
 bash scripts/check-controlled-install-attribution.sh
 
 echo
+echo "== PostHog dashboard pre-live proof =="
+node scripts/prepare-posthog-dashboard.js --check
+
+echo
 echo "== registry alignment hold check =="
 if command -v gh >/dev/null 2>&1; then
   if bash scripts/check-release-alignment.sh "$tag" server.json; then
@@ -174,9 +178,15 @@ Run these only after explicit owner approval for the named external action.
      ref=controlled-${tag#v}
      source_ref=ref=controlled-rollout
 
-9. Create the PostHog dashboard from:
+9. Local PostHog dashboard spec proof:
+
+   node scripts/prepare-posthog-dashboard.js --check
+   node scripts/prepare-posthog-dashboard.js --print
+
+10. Create the PostHog dashboard from:
 
    docs/ops/attribution-dashboard.md
+   docs/ops/posthog-dashboard.json
 
 Still hold if Glama has no real AccInt listing, if license detection is null for
 OSS-first lists, if MCPB release alignment fails, or if a target directory needs

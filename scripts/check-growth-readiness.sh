@@ -54,12 +54,14 @@ for f in \
   docs/ops/attribution-dashboard.md \
   docs/ops/directory-listing.md \
   docs/ops/growth-rollout-checklist.md \
+  docs/ops/posthog-dashboard.json \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
   scripts/check-controlled-install-attribution.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/prepare-growth-rollout.sh \
+  scripts/prepare-posthog-dashboard.js \
   scripts/prepare-mcpb-release-assets.sh \
   scripts/check-integrity.sh; do
   if [ -f "$f" ]; then
