@@ -16,7 +16,7 @@ AI agents are powerful but amnesiac: every run burns your tokens on real work, s
 predict the better path  →  act in your accounts, receipted  →  reality settles it  →  the Work Model sharpens
 ```
 
-> **See it live: [accint.xyz](https://accint.xyz).** The commitments ledger settles in real time there, alongside the full story and a measured readout that updates as the system runs. The engine source is private; the binary installs in one line (below) and the building blocks are open. We say what's proven and what's young.
+> **See it live: [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme).** The commitments ledger settles in real time there, alongside the full story and a measured readout that updates as the system runs. The engine source is private; the binary installs in one line (below) and the building blocks are open. We say what's proven and what's young.
 
 ---
 
@@ -56,13 +56,13 @@ Run it again next week and verified steps replay instead of re-reasoning. Most A
 `acc` installs in one line. It runs the installer for your OS, which sets `acc` up on your machine:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=github-readme ACC_INSTALL_SOURCE='ref=github-readme&utm_source=github&utm_campaign=readme' sh
 ```
 
 Windows (PowerShell 5.1+):
 
 ```powershell
-irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+$env:ACC_INSTALL_REF='github-readme'; $env:ACC_INSTALL_SOURCE='ref=github-readme&utm_source=github&utm_campaign=readme'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
 **Official MCP Registry / MCPB:** AccInt is published as
@@ -241,10 +241,10 @@ The building blocks are public too, each shippable on its own:
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** covers what's open, how to add or fix a host adapter, and how to report a problem. Start with `acc doctor`; its output is operational health only, and it's safe to paste.
 - **Found a bug or want a new host wired?** Open an [issue](.github/ISSUE_TEMPLATE/). A good *idea* for the engine is welcome as a feature request, even though engine internals can't be PR'd here.
 - **Security issues:** never file publicly. See **[SECURITY.md](.github/SECURITY.md)** to report privately.
-- **Install:** one line on macOS, Linux, or Windows — see [Install](#install). The live readout runs at **[accint.xyz](https://accint.xyz)**.
+- **Install:** one line on macOS, Linux, or Windows — see [Install](#install). The live readout runs at **[accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme)**. The `ACC_INSTALL_REF` / `ACC_INSTALL_SOURCE` prefix only writes an install-source receipt so README installs can be measured; omit it if you do not want install attribution.
 
 ---
 
-*Already running AI agents? Turn their work into expertise you own.* · See it live: [accint.xyz](https://accint.xyz)
+*Already running AI agents? Turn their work into expertise you own.* · See it live: [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme)
 
-Questions, bugs, or a host you want wired? Open a [GitHub issue](https://github.com/maxbaluev/accreted-intelligence/issues). · [accint.xyz](https://accint.xyz)
+Questions, bugs, or a host you want wired? Open a [GitHub issue](https://github.com/maxbaluev/accreted-intelligence/issues). · [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme)

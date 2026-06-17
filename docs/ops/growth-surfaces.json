@@ -8,6 +8,17 @@
   },
   "surfaces": [
     {
+      "id": "github-readme",
+      "kind": "owned_site",
+      "label": "GitHub README",
+      "landing": "home",
+      "source": {
+        "ref": "github-readme",
+        "utm_source": "github",
+        "utm_campaign": "readme"
+      }
+    },
+    {
       "id": "hn-show",
       "kind": "social_launch",
       "label": "Show HN",

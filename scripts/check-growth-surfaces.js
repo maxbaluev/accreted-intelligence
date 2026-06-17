@@ -6,6 +6,7 @@ const path = require("path");
 
 const MANIFEST_PATH = path.join("docs", "ops", "growth-surfaces.json");
 const SOCIAL_KIT_PATH = path.join("docs", "ops", "social-launch-kit.md");
+const README_PATH = "README.md";
 const PAGE_PATHS = ["index.html", path.join("reddit", "index.html")];
 const SOURCE_KEYS = [
   "ref",
@@ -165,7 +166,26 @@ function validateSocialKit(manifest) {
     assertIncludes(text, landingUrl(manifest, surface), `${SOCIAL_KIT_PATH}: attributed landing URL`);
     assertIncludes(text, `ACC_INSTALL_REF=${surface.id}`, `${SOCIAL_KIT_PATH}: POSIX ref`);
   }
-  assertIncludes(text, powershellSnippet(manifest, manifest.surfaces[0]), `${SOCIAL_KIT_PATH}: PowerShell example`);
+  const firstSocialSurface = manifest.surfaces.find((item) => item.kind === "social_launch");
+  if (!firstSocialSurface) {
+    die(`${MANIFEST_PATH}: missing social_launch surface`);
+  }
+  assertIncludes(text, powershellSnippet(manifest, firstSocialSurface), `${SOCIAL_KIT_PATH}: PowerShell example`);
+}
+
+function validateOwnedSurfaces(manifest) {
+  if (!fs.existsSync(README_PATH)) {
+    die(`missing ${README_PATH}`);
+  }
+  const text = read(README_PATH);
+  for (const surface of manifest.surfaces.filter((item) => item.kind === "owned_site")) {
+    const source = sourceQuery(surface);
+    assertIncludes(text, `ACC_INSTALL_REF=${surface.id}`, `${README_PATH}: POSIX ref for ${surface.id}`);
+    assertIncludes(text, `ACC_INSTALL_SOURCE='${source}'`, `${README_PATH}: POSIX source for ${surface.id}`);
+    assertIncludes(text, `$env:ACC_INSTALL_REF='${surface.id}'`, `${README_PATH}: PowerShell ref for ${surface.id}`);
+    assertIncludes(text, `$env:ACC_INSTALL_SOURCE='${source}'`, `${README_PATH}: PowerShell source for ${surface.id}`);
+    assertIncludes(text, landingUrl(manifest, surface), `${README_PATH}: attributed landing URL for ${surface.id}`);
+  }
 }
 
 function printSurfaces(manifest) {
@@ -195,4 +215,5 @@ if (mode === "--print") {
 }
 validatePages(usedSourceKeys);
 validateSocialKit(manifest);
+validateOwnedSurfaces(manifest);
 console.log("GROWTH SURFACES: PASS");
