@@ -4,7 +4,7 @@ READ ONLY: this report tracks promotion surfaces and owner-review material. It
 does not authorize pushing, posting, commenting, submitting, paying, dispatching
 workflows, using account identity, or bypassing CAPTCHA/security controls.
 
-Last receipt refresh: 2026-06-17T21:47Z.
+Last receipt refresh: 2026-06-17T22:17Z.
 
 ## Current launch state
 
@@ -12,9 +12,10 @@ Last receipt refresh: 2026-06-17T21:47Z.
 - Live site: `https://accint.xyz`
 - Release: `v0.1.6`
 - Official MCP Registry: `io.github.maxbaluev/accint` / `0.1.6`
-- Public clone state at refresh: `main` synced with `origin/main`; the approved
-  public growth rollout itself landed at `21a635e` and later commits record
-  rollout, directory, and handoff receipts.
+- Public clone state at refresh: local `main` has an unpublished owner-held
+  growth bundle ahead of `origin/main`; the approved public growth rollout
+  itself landed at `21a635e` and later commits record rollout, directory, and
+  handoff receipts.
 - Live verification: hosted GitHub Actions verifier run
   `27691022310` passed after GitHub Pages finished building.
 - Controlled live install receipt: `ref=controlled-0.1.6`,
@@ -27,8 +28,10 @@ Last receipt refresh: 2026-06-17T21:47Z.
 
 ## Holds
 
-- Directory PR state audit at refresh: 55 PRs checked, 40 open, 9 merged,
-  6 closed/unmerged, 1 open PR with failing checks, 8 attention items.
+- Directory PR state audit at `2026-06-17T22:17Z`: 55 PRs checked, 40 open,
+  9 merged, 6 closed/unmerged, 1 open PR with failing checks, 8 attention
+  items. This read-only refresh matched the previous counts; no tracked PR row
+  changed.
 - Glama submission was made through Google OAuth with
   `maxbaluev@outlook.com`; the direct listing still verifies in read-only
   browser refresh, but Glama search for `accint` still did not show AccInt at
