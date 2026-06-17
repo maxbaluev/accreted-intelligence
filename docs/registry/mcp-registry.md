@@ -49,7 +49,7 @@ extension/name or in the repository path.
 After the normal release assets exist on GitHub:
 
 ```bash
-scripts/package-mcpb.sh v0.1.5 all
+scripts/prepare-mcpb-release-assets.sh v0.1.5
 ```
 
 This creates:
@@ -69,6 +69,11 @@ dist/server.mcpb-all.json
 
 Attach the `.mcpb` files and their `.sha256` sidecars to the same GitHub
 Release. Do not commit `dist/`; release artifacts belong on GitHub Releases.
+The preparation script is a dry run unless `ACC_UPLOAD_MCPB_ASSETS=1` is set:
+
+```bash
+ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh v0.1.5
+```
 
 After the upload, verify the release and generated metadata before copying the
 metadata into the root:

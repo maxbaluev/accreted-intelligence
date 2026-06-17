@@ -17,7 +17,8 @@ for f in \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/docker-entrypoint.sh \
-  scripts/package-mcpb.sh; do
+  scripts/package-mcpb.sh \
+  scripts/prepare-mcpb-release-assets.sh; do
   if [ -f "$f" ]; then
     if bash -n "$f"; then note "$f: ok"; else note "$f: SYNTAX ERROR"; fail=1; fi
   fi

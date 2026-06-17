@@ -102,10 +102,11 @@ as live:
    `install-attribution.env`.
 2. Confirm the public installer resolves that release tag.
 3. Confirm `sha256sums.txt` contains the expected artifact checksums.
-4. Build MCPB bundles for the release:
-   `scripts/package-mcpb.sh v<tag> all`.
-5. Upload the generated `dist/acc-mcp-v<tag>-*.mcpb` files and `.sha256`
-   sidecars to the same GitHub Release.
+4. Build MCPB bundles and print the release upload command:
+   `scripts/prepare-mcpb-release-assets.sh v<tag>`.
+5. After owner approval, upload the generated `dist/acc-mcp-v<tag>-*.mcpb`
+   files and `.sha256` sidecars to the same GitHub Release:
+   `ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh v<tag>`.
 6. Run
    `scripts/check-mcpb-release-assets.sh v<tag> dist/server.mcpb-all.json`.
 7. Only after that check passes, copy `dist/server.mcpb-all.json` to
