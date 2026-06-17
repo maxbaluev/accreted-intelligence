@@ -102,7 +102,7 @@ phase as it completes. Each line is:
 
 | phase id | does |
 |---|---|
-| `install_attribution` | optionally writes `ACC_INSTALL_REF` to a local receipt; it is not sent by the installer |
+| `install_attribution` | optionally writes `ACC_INSTALL_REF` and coarse `ACC_INSTALL_SOURCE` to a local receipt; neither is sent by the installer |
 | `probe_tier` | probes host (VRAM/RAM/OS/arch) + selects the embedder tier (the ladder below). On a container-only host this is the terminal verdict. |
 | `prereq_rust` / `prereq_uv` / `prereq_python` | ensures the toolchain (cargo, uv, python3) — idempotent |
 | `sysdeps_sandbox` | bubblewrap (Linux sandbox) + a C linker |

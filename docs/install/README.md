@@ -32,9 +32,11 @@ irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/boots
 ```
 
 For install attribution from a directory listing or PR, set
-`ACC_INSTALL_REF=<surface>` on the installer process. The installer writes the
-label to a local receipt only; it does not send the ref anywhere by itself. See
-[self-serve.md](self-serve.md) for exact shell and PowerShell examples.
+`ACC_INSTALL_REF=<surface>` on the installer process. Add
+`ACC_INSTALL_SOURCE='ref=<surface>'` when you want coarse source context in the
+same receipt. The installer writes those labels locally only; it does not send
+the ref or source anywhere by itself. See [self-serve.md](self-serve.md) for
+exact shell and PowerShell examples.
 Maintainers can measure the ref chain with the
 [attribution dashboard runbook](../ops/attribution-dashboard.md).
 

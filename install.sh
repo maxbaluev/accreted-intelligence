@@ -60,6 +60,7 @@
 #        ACC_TIER=<lane>    force the embedder lane (skip the host probe's pick)
 #        ACC_INSTALL=source skip the phase-3 prebuilt-release fetch; always build from source
 #        ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
+#        ACC_INSTALL_SOURCE=<source> optional coarse source/ref context for that receipt
 #        ACC_BROWSER_HOME / ACC_BROWSER_SOCK   browser env overrides
 #
 # Windows: native installs use install.ps1 (the same phase-machine in PowerShell). This
@@ -512,36 +513,48 @@ say "host: $OS/$ARCH · substrate: $DB"
 [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ] || warn "untested OS '$OS' — proceeding best-effort (Windows: use install.ps1; container as fallback)"
 
 # ── phase 0a — local install attribution receipt ─────────────────────────────────────
-# ACC_INSTALL_REF is an explicit, caller-supplied attribution label for install URLs used
-# from docs, directory listings, PRs, or ads. The public installer records it LOCALLY only;
-# it does not send a network event here. Telemetry, when enabled below, remains event-name
-# only and is governed by ACC_NO_TELEMETRY / `acc telemetry off`.
+# ACC_INSTALL_REF is an explicit, caller-supplied attribution nonce/label for install URLs.
+# ACC_INSTALL_SOURCE is optional coarse source context copied from the web page (`ref`,
+# UTM, or referrer category). The public installer records both LOCALLY only; it does not
+# send a network event here. Telemetry, when enabled below, remains event-name only and is
+# governed by ACC_NO_TELEMETRY / `acc telemetry off`.
 sanitize_install_ref() {
   printf '%s' "$1" | LC_ALL=C tr -cd 'A-Za-z0-9._:/?&=+,-' | cut -c1-160
 }
 INSTALL_REF_RAW="${ACC_INSTALL_REF:-}"
+INSTALL_SOURCE_RAW="${ACC_INSTALL_SOURCE:-}"
 INSTALL_REF=""
+INSTALL_SOURCE=""
 [ -n "$INSTALL_REF_RAW" ] && INSTALL_REF="$(sanitize_install_ref "$INSTALL_REF_RAW")"
+[ -n "$INSTALL_SOURCE_RAW" ] && INSTALL_SOURCE="$(sanitize_install_ref "$INSTALL_SOURCE_RAW")"
 INSTALL_ATTR_PATH="$CANON_DATA_DIR/install-attribution.env"
+INSTALL_ATTR_DESC=""
+[ -n "$INSTALL_REF" ] && INSTALL_ATTR_DESC="ref '$INSTALL_REF'"
+[ -n "$INSTALL_SOURCE" ] && INSTALL_ATTR_DESC="${INSTALL_ATTR_DESC:+$INSTALL_ATTR_DESC, }source '$INSTALL_SOURCE'"
 write_install_attribution() {
   mkdir -p "$CANON_DATA_DIR" || return 1
   {
-    printf 'ref=%s\n' "$INSTALL_REF"
+    [ -n "$INSTALL_REF" ] && printf 'ref=%s\n' "$INSTALL_REF"
+    [ -n "$INSTALL_SOURCE" ] && printf 'source_ref=%s\n' "$INSTALL_SOURCE"
     date -u '+captured_at_utc=%Y-%m-%dT%H:%M:%SZ'
-    printf 'source=ACC_INSTALL_REF\n'
+    printf 'source='
+    [ -n "$INSTALL_REF" ] && printf 'ACC_INSTALL_REF'
+    [ -n "$INSTALL_REF" ] && [ -n "$INSTALL_SOURCE" ] && printf '+'
+    [ -n "$INSTALL_SOURCE" ] && printf 'ACC_INSTALL_SOURCE'
+    printf '\n'
     printf 'note=local install attribution receipt; not sent by installer\n'
   } > "$INSTALL_ATTR_PATH"
 }
 
 step "phase 0a — install attribution (local receipt)"
-if [ -z "$INSTALL_REF_RAW" ]; then
-  phase_result "install_attribution" "skipped" "ACC_INSTALL_REF not set — no install attribution receipt written" "optional: ACC_INSTALL_REF=gh-surface ./install.sh"
-elif [ -z "$INSTALL_REF" ]; then
-  phase_result "install_attribution" "skipped" "ACC_INSTALL_REF had no supported label characters after sanitization — no receipt written" "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
+if [ -z "$INSTALL_REF_RAW" ] && [ -z "$INSTALL_SOURCE_RAW" ]; then
+  phase_result "install_attribution" "skipped" "ACC_INSTALL_REF/ACC_INSTALL_SOURCE not set — no install attribution receipt written" "optional: ACC_INSTALL_REF=web-copy ACC_INSTALL_SOURCE='ref=gh-surface' ./install.sh"
+elif [ -z "$INSTALL_REF" ] && [ -z "$INSTALL_SOURCE" ]; then
+  phase_result "install_attribution" "skipped" "install attribution env vars had no supported label characters after sanitization — no receipt written" "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
 elif [ "$DRY_RUN" = "1" ]; then
-  phase_result "install_attribution" "would" "write local install attribution ref '$INSTALL_REF' to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
+  phase_result "install_attribution" "would" "write local install attribution $INSTALL_ATTR_DESC to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
 elif write_install_attribution; then
-  phase_result "install_attribution" "ok" "wrote local install attribution ref '$INSTALL_REF' to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
+  phase_result "install_attribution" "ok" "wrote local install attribution $INSTALL_ATTR_DESC to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
 else
   phase_result "install_attribution" "skipped" "could not write local install attribution receipt at $INSTALL_ATTR_PATH" "install continues; attribution is optional"
 fi

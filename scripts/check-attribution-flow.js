@@ -6,6 +6,16 @@
 const fs = require("fs");
 
 const REF = "abc123def456";
+const SOURCE_PROPS = {
+  ref: "gh-awesome-list",
+  utm_source: "github",
+  utm_campaign: "launch",
+  ref_source: "github",
+  ref_host: "github.com",
+  landing: "home",
+};
+const SOURCE_ENV =
+  "ACC_INSTALL_SOURCE='ref=gh-awesome-list&utm_source=github&utm_campaign=launch&ref_source=github&ref_host=github.com&landing=home'";
 
 function die(message) {
   throw new Error(message);
@@ -51,9 +61,9 @@ function extractFunction(html, name) {
   die(`unterminated function ${name}`);
 }
 
-function helperFrom(html) {
+function helperFrom(html, sourceProps = SOURCE_PROPS, installRef = REF) {
   const src = extractFunction(html, "withInstallRef");
-  return new Function("install_ref", `return (${src});`)(REF);
+  return new Function("install_ref", "source_props", `return (${src});`)(installRef, sourceProps);
 }
 
 function referrerHelperFrom(html) {
@@ -94,16 +104,38 @@ function assertPageIdentity(file, html) {
 
 function assertAgentPrompt(file, html, id) {
   const copied = helperFrom(html)(extractCode(html, id), "agent_prompt", "nix");
-  assertIncludes(copied, `| ACC_INSTALL_REF=${REF} sh`, `${file}#${id}: POSIX prompt copy`);
-  assertIncludes(copied, `$env:ACC_INSTALL_REF='${REF}'; irm`, `${file}#${id}: PowerShell prompt copy`);
+  assertIncludes(copied, `| ACC_INSTALL_REF=${REF} ${SOURCE_ENV} sh`, `${file}#${id}: POSIX prompt copy`);
+  assertIncludes(
+    copied,
+    `$env:ACC_INSTALL_REF='${REF}'; $env:ACC_INSTALL_SOURCE='ref=gh-awesome-list&utm_source=github&utm_campaign=launch&ref_source=github&ref_host=github.com&landing=home'; irm`,
+    `${file}#${id}: PowerShell prompt copy`
+  );
+}
+
+function assertSourceOnlyAgentPrompt(file, html, id) {
+  const copied = helperFrom(html, { ref: "shared-prompt" }, "")(extractCode(html, id), "agent_prompt", "nix");
+  assertIncludes(
+    copied,
+    `| ACC_INSTALL_REF='ref=shared-prompt' ACC_INSTALL_SOURCE='ref=shared-prompt' sh`,
+    `${file}#${id}: source-only POSIX prompt copy`
+  );
+  assertIncludes(
+    copied,
+    `$env:ACC_INSTALL_REF='ref=shared-prompt'; $env:ACC_INSTALL_SOURCE='ref=shared-prompt'; irm`,
+    `${file}#${id}: source-only PowerShell prompt copy`
+  );
 }
 
 function assertManualCommand(file, html, id, os) {
   const copied = helperFrom(html)(extractCode(html, id), "manual_command", os);
   if (os === "win") {
-    assertIncludes(copied, `$env:ACC_INSTALL_REF='${REF}'; irm`, `${file}#${id}: manual Windows copy`);
+    assertIncludes(
+      copied,
+      `$env:ACC_INSTALL_REF='${REF}'; $env:ACC_INSTALL_SOURCE='ref=gh-awesome-list&utm_source=github&utm_campaign=launch&ref_source=github&ref_host=github.com&landing=home'; irm`,
+      `${file}#${id}: manual Windows copy`
+    );
   } else {
-    assertIncludes(copied, `| ACC_INSTALL_REF=${REF} sh`, `${file}#${id}: manual POSIX copy`);
+    assertIncludes(copied, `| ACC_INSTALL_REF=${REF} ${SOURCE_ENV} sh`, `${file}#${id}: manual POSIX copy`);
   }
 }
 
@@ -126,6 +158,7 @@ function checkHome() {
   });
   assertIncludes(html, "install_agent_prompt_copied", `${file}: prompt-copy event`);
   assertAgentPrompt(file, html, "agent-prompt");
+  assertSourceOnlyAgentPrompt(file, html, "agent-prompt");
   assertAgentPrompt(file, html, "agent-prompt2");
   assertManualCommand(file, html, "cmd-nix", "nix");
   assertManualCommand(file, html, "cmd-nix2", "nix");
@@ -148,6 +181,7 @@ function checkReddit() {
   });
   assertIncludes(html, "reddit_agent_prompt_copied", `${file}: prompt-copy event`);
   assertAgentPrompt(file, html, "agent-prompt");
+  assertSourceOnlyAgentPrompt(file, html, "agent-prompt");
   assertManualCommand(file, html, "cmd-nix", "nix");
   assertManualCommand(file, html, "cmd-win", "win");
 }

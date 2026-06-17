@@ -13,14 +13,16 @@ The attribution chain is intentionally narrow:
 |---|---|---|---|
 | Web page view | page script on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref` session property plus `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
 | Copy install text | `install_command_copied` | same generated `install_ref` | `method` (`agent_prompt` or `manual_command`), `os`, `placement`, `install_ref`, source props |
-| Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local only; not sent by the installer |
+| Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local `ref` plus optional `source_ref` from copied `ACC_INSTALL_SOURCE`; not sent by the installer |
 | App telemetry | `first_run`, `daily_rollup`, lifecycle events | `distinct_id = telemetry_install_ref` when present, otherwise random device UUID | `first_run.has_install_ref`, `os`, `agent`, `project_lang`; no raw prompt/file/memory data |
 
 The app side uses the sanitized attribution ref as the anonymous `distinct_id`
 so web copy events and app first-run events can join without adding raw refs to
-every event payload. Keep this boundary: raw installer refs are not normal event
-properties. `scripts/check-attribution-flow.js` guards the web side, and
-private telemetry tests guard the app side.
+every event payload. Prompt copies also carry coarse source context in
+`ACC_INSTALL_SOURCE` so a forwarded/pasted prompt can preserve `ref`, UTM, or
+referrer category in the local receipt. Keep this boundary: raw installer refs
+and sources are not normal event properties. `scripts/check-attribution-flow.js`
+guards the web side, and private telemetry tests guard the app side.
 
 For organic inbound links without explicit campaign parameters, the page records
 only a coarse referrer source and host such as `github` / `github.com`. It does

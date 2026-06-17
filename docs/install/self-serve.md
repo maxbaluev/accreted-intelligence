@@ -19,16 +19,18 @@ irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/boots
 Optional local attribution for docs, directory listings, or PR links:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-awesome-list sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-awesome-list ACC_INSTALL_SOURCE='ref=gh-awesome-list' sh
 ```
 
 ```powershell
-$env:ACC_INSTALL_REF = 'gh-awesome-list'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+$env:ACC_INSTALL_REF = 'gh-awesome-list'; $env:ACC_INSTALL_SOURCE = 'ref=gh-awesome-list'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-`ACC_INSTALL_REF` is written only to a local receipt at
-`install-attribution.env` under the acc data directory. The installer does not
-send that ref anywhere by itself.
+`ACC_INSTALL_REF` and optional `ACC_INSTALL_SOURCE` are written only to a local
+receipt at `install-attribution.env` under the acc data directory. The installer
+does not send that ref or source anywhere by itself. Web prompt copies set both:
+a content-free correlation nonce in `ACC_INSTALL_REF`, plus a coarse source
+envelope such as `ref=...` / `utm_source=...` in `ACC_INSTALL_SOURCE`.
 Maintainers can measure the ref chain with the
 [attribution dashboard runbook](../ops/attribution-dashboard.md).
 

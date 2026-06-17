@@ -19,14 +19,15 @@ irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/boots
 ```
 
 For attribution from a directory listing or PR, put `ACC_INSTALL_REF=<surface>`
-on the installer process, for example:
+on the installer process. `ACC_INSTALL_SOURCE='ref=<surface>'` can carry coarse
+source context in the same local receipt:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-awesome-list sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-awesome-list ACC_INSTALL_SOURCE='ref=gh-awesome-list' sh
 ```
 
-The installer writes that label to a local receipt only; it does not send the
-ref anywhere by itself.
+The installer writes those labels to a local receipt only; it does not send the
+ref or source anywhere by itself.
 
 The installer probes your hardware, picks an embedder tier it can honestly run, installs `acc`, starts a warm local daemon, and wires your agent's `.mcp.json`. First run may download the embedder model (several GB) and take minutes — the installer reports the wait honestly. Locked-down or no-root box? The [container](install/container.md) page tracks that portability path separately. Want your agent (Claude Code, Codex, Cursor, OpenCode) to drive the install and verify it for you? Paste one prompt — see [install/with-agent.md](install/with-agent.md).
 

@@ -12,6 +12,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - binary/container install-path fixes
 - installer attribution receipt support
 - web prompt-copy `ACC_INSTALL_REF` stitching
+- web prompt-copy `ACC_INSTALL_SOURCE` source/ref stitching
 - attribution regression tests
 - attribution dashboard/runbook docs
 - organic referrer classification
@@ -85,12 +86,16 @@ curl -fsSI https://accint.xyz/
 curl -fsSI https://accint.xyz/reddit/
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
+curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
+curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
 ```
 
 Also run a browser copy check if possible: copy the hero agent prompt and confirm
-the copied text contains `ACC_INSTALL_REF=<install_ref>` on POSIX and
-`$env:ACC_INSTALL_REF='<install_ref>'` on PowerShell snippets. The page should
-still display clean installer text; the ref belongs only in copied text.
+the copied text contains `ACC_INSTALL_REF=<install_ref>` plus
+`ACC_INSTALL_SOURCE='ref=...'` / `utm_source=...` on POSIX, and matching
+`$env:ACC_INSTALL_REF='<install_ref>'` plus `$env:ACC_INSTALL_SOURCE='...'` on
+PowerShell snippets. The page should still display clean installer text; the
+attribution env belongs only in copied text.
 
 ## Binary/release alignment
 
@@ -118,6 +123,7 @@ as live:
 The controlled install should produce:
 
 - local `install-attribution.env` with the chosen `ref=...`
+- `source_ref=...` in that receipt when `ACC_INSTALL_SOURCE` was copied or set
 - `acc doctor` success
 - `first_run` telemetry with `has_install_ref=true` when telemetry is enabled
 - the same anonymous ref as `distinct_id` in PostHog

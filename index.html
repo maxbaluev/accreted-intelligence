@@ -1346,14 +1346,25 @@ if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph(
     document.execCommand('copy');document.body.removeChild(ta);}catch(_e){}}
   var isWin=/Win/i.test((navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||navigator.userAgent||'');
   function withInstallRef(txt,kind,os){
-    if(!install_ref){return txt;}
+    function sourceValue(v){return String(v||'').replace(/[^A-Za-z0-9._:/?+,-]/g,'').slice(0,64);}
+    function installSource(){
+      var props=(typeof source_props==='object'&&source_props)||{},keys=['ref','utm_source','utm_medium','utm_campaign','utm_content','rsub','thread','entry','ref_source','ref_host','landing'],parts=[];
+      keys.forEach(function(k){var v=sourceValue(props[k]);if(v){parts.push(k+'='+v);}});
+      return parts.join('&').slice(0,160);
+    }
+    var src=installSource(),nix=[],win='';
+    if(install_ref){nix.push('ACC_INSTALL_REF='+install_ref);win+="$env:ACC_INSTALL_REF='"+install_ref+"'; ";}
+    else if(src){nix.push("ACC_INSTALL_REF='"+src+"'");win+="$env:ACC_INSTALL_REF='"+src+"'; ";}
+    if(src){nix.push("ACC_INSTALL_SOURCE='"+src+"'");win+="$env:ACC_INSTALL_SOURCE='"+src+"'; ";}
+    if(!nix.length&&!win){return txt;}
+    var nixEnv=nix.join(' ');
     if(kind==='agent_prompt'){
       return txt
-        .replace(/curl -fsSL (https:\/\/(?:accint\.xyz\/install|raw\.githubusercontent\.com\/maxbaluev\/accreted-intelligence\/main\/bootstrap\/install)) \| sh/g,'curl -fsSL $1 | ACC_INSTALL_REF='+install_ref+' sh')
-        .replace(/irm (https:\/\/(?:accint\.xyz\/install\.ps1|raw\.githubusercontent\.com\/maxbaluev\/accreted-intelligence\/main\/bootstrap\/install\.ps1)) \| iex/g,"$env:ACC_INSTALL_REF='"+install_ref+"'; irm $1 | iex");
+        .replace(/curl -fsSL (https:\/\/(?:accint\.xyz\/install|raw\.githubusercontent\.com\/maxbaluev\/accreted-intelligence\/main\/bootstrap\/install)) \| sh/g,'curl -fsSL $1 | '+nixEnv+' sh')
+        .replace(/irm (https:\/\/(?:accint\.xyz\/install\.ps1|raw\.githubusercontent\.com\/maxbaluev\/accreted-intelligence\/main\/bootstrap\/install\.ps1)) \| iex/g,win+'irm $1 | iex');
     }
-    if(os==='win'){return "$env:ACC_INSTALL_REF='"+install_ref+"'; "+txt;}
-    return txt.replace('| sh','| ACC_INSTALL_REF='+install_ref+' sh');
+    if(os==='win'){return win+txt;}
+    return txt.replace('| sh','| '+nixEnv+' sh');
   }
   [].slice.call(document.querySelectorAll('.install')).forEach(function(box){
     var placement=box.getAttribute('data-placement')||'unknown';
@@ -1389,10 +1400,10 @@ if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph(
             os=(btn.closest('.cmd')&&btn.closest('.cmd').getAttribute('data-os'))||'',
             kind=btn.getAttribute('data-kind')||((btn.closest('.cmd.prose'))?'agent_prompt':'manual_command'),
             osGuess=os||((isWin)?'win':'nix');
-        /* Carry the correlation nonce into the COPIED text only — the displayed command
+        /* Carry attribution into the COPIED text only — the displayed command
            stays unchanged. The env var must scope to the SHELL THAT RUNS THE INSTALLER
            (the process after the pipe), not to curl/irm — so inject per-OS so the installer
-           sees ACC_INSTALL_REF and can persist it (merge into the same anonymous web person). */
+           sees ACC_INSTALL_REF/ACC_INSTALL_SOURCE and can persist the local receipt. */
         txt=withInstallRef(txt,kind,os);
         function done(){btn.classList.add('done');var o=btn.textContent;btn.textContent='copied ✓';
           setTimeout(function(){btn.classList.remove('done');btn.textContent=o;},1600);}

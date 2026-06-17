@@ -109,13 +109,13 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 Attributed POSIX installer for a directory/listing:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-<surface> sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=gh-<surface> ACC_INSTALL_SOURCE='ref=gh-<surface>' sh
 ```
 
 Attributed PowerShell installer:
 
 ```powershell
-$env:ACC_INSTALL_REF = 'gh-<surface>'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+$env:ACC_INSTALL_REF = 'gh-<surface>'; $env:ACC_INSTALL_SOURCE = 'ref=gh-<surface>'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
 Use lowercase ASCII labels for `<surface>`, for example:
@@ -125,9 +125,10 @@ Use lowercase ASCII labels for `<surface>`, for example:
 - `gh-agent-memory`
 - `gh-mcp-registry`
 
-`ACC_INSTALL_REF` writes a local installer receipt. It is not sent by the
-installer itself; app telemetry can later use it as the anonymous `distinct_id`
-only if telemetry is enabled.
+`ACC_INSTALL_REF` writes the local installer receipt ref. `ACC_INSTALL_SOURCE`
+adds coarse source context (`ref=...`, UTM, or referrer category) to the same
+local receipt. Neither value is sent by the installer itself; app telemetry can
+later use the ref as the anonymous `distinct_id` only if telemetry is enabled.
 
 ## Reviewer caveats
 

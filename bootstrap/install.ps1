@@ -11,6 +11,7 @@
 # Env: ACC_REPO         git URL to fetch   (default: https://github.com/maxbaluev/accreted-intelligence.git)
 #      ACC_SRC          checkout directory (default: $env:LOCALAPPDATA\acc\src)
 #      ACC_INSTALL_REF  optional local attribution label passed to install.ps1; written locally, not sent by bootstrap
+#      ACC_INSTALL_SOURCE optional coarse source/ref context passed through with the label
 #
 # PowerShell 5.1+. ASCII-only, like the installer it hands off to. No StrictMode here
 # on purpose: iex invocation has no $MyInvocation path and no $args, and the probes
@@ -25,8 +26,8 @@ $AsFile = -not [string]::IsNullOrEmpty($ScriptPath)
 $RepoUrl = if ($env:ACC_REPO) { $env:ACC_REPO } else { 'https://github.com/maxbaluev/accreted-intelligence.git' }
 $Dest    = if ($env:ACC_SRC)  { $env:ACC_SRC }  else { Join-Path $env:LOCALAPPDATA 'acc\src' }
 
-if ($env:ACC_INSTALL_REF) {
-  Write-Host 'acc bootstrap: install attribution ref set (local receipt only; installer does not send it)'
+if ($env:ACC_INSTALL_REF -or $env:ACC_INSTALL_SOURCE) {
+  Write-Host 'acc bootstrap: install attribution env set (local receipt only; installer does not send it)'
 }
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {

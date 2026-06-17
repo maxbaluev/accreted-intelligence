@@ -38,6 +38,7 @@ ENV KNOBS (mirrors install.sh's Env section):
   ACC_TIER=<lane>       force the embedder lane (skip the host probe's pick)
   ACC_INSTALL=source    skip the phase-3 prebuilt-release fetch; always build from source
   ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
+  ACC_INSTALL_SOURCE=<source> optional coarse source/ref context for that receipt
 
 ENGINE LANE HONESTY: the acc windows engine port is IN FLIGHT. Phase 3 first tries the
 PREBUILT release lane (sha256-verified download of acc.exe -- no VS Build Tools needed
@@ -496,9 +497,10 @@ Say ("host: $OsBuild / $Arch - substrate: $DbPath")
 if (-not $script:OnWindows) { Warn 'non-windows host -- install.ps1 is the native WINDOWS lane; this run is a cross-platform dry-run self-test only (POSIX hosts: ./install.sh)' }
 
 # -- phase 0a -- local install attribution receipt ----------------------------------------
-# ACC_INSTALL_REF is an explicit, caller-supplied attribution label for install URLs used
-# from docs, directory listings, PRs, or ads. The public installer records it LOCALLY only;
-# it does not send a network event here.
+# ACC_INSTALL_REF is an explicit, caller-supplied attribution nonce/label for install URLs.
+# ACC_INSTALL_SOURCE is optional coarse source context copied from the web page (`ref`,
+# UTM, or referrer category). The public installer records both LOCALLY only; it does not
+# send a network event here.
 function Sanitize-InstallRef([string]$Value) {
   if (-not $Value) { return '' }
   $chars = New-Object System.Text.StringBuilder
@@ -512,25 +514,35 @@ function Sanitize-InstallRef([string]$Value) {
 
 Step 'phase 0a -- install attribution (local receipt)'
 $InstallRefRaw = if ($env:ACC_INSTALL_REF) { $env:ACC_INSTALL_REF } else { '' }
+$InstallSourceRaw = if ($env:ACC_INSTALL_SOURCE) { $env:ACC_INSTALL_SOURCE } else { '' }
 $InstallRef = Sanitize-InstallRef $InstallRefRaw
+$InstallSource = Sanitize-InstallRef $InstallSourceRaw
 $InstallAttrPath = Join-Path $ConfigHome 'install-attribution.env'
-if (-not $InstallRefRaw) {
-  Emit-Phase 'install_attribution' 'skipped' 'ACC_INSTALL_REF not set -- no install attribution receipt written' 'optional: $env:ACC_INSTALL_REF="gh-surface"; .\install.ps1'
-} elseif (-not $InstallRef) {
-  Emit-Phase 'install_attribution' 'skipped' 'ACC_INSTALL_REF had no supported label characters after sanitization -- no receipt written' "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
+$InstallAttrDescParts = @()
+if ($InstallRef) { $InstallAttrDescParts += "ref '$InstallRef'" }
+if ($InstallSource) { $InstallAttrDescParts += "source '$InstallSource'" }
+$InstallAttrDesc = $InstallAttrDescParts -join ', '
+if ((-not $InstallRefRaw) -and (-not $InstallSourceRaw)) {
+  Emit-Phase 'install_attribution' 'skipped' 'ACC_INSTALL_REF/ACC_INSTALL_SOURCE not set -- no install attribution receipt written' 'optional: $env:ACC_INSTALL_REF="web-copy"; $env:ACC_INSTALL_SOURCE="ref=gh-surface"; .\install.ps1'
+} elseif ((-not $InstallRef) -and (-not $InstallSource)) {
+  Emit-Phase 'install_attribution' 'skipped' 'install attribution env vars had no supported label characters after sanitization -- no receipt written' "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
 } elseif ($DryRun) {
-  Emit-Phase 'install_attribution' 'would' "write local install attribution ref '$InstallRef' to $InstallAttrPath (not sent by installer)" 'phase 0: probe tier'
+  Emit-Phase 'install_attribution' 'would' "write local install attribution $InstallAttrDesc to $InstallAttrPath (not sent by installer)" 'phase 0: probe tier'
 } else {
   try {
     if (-not (Test-Path $ConfigHome)) { New-Item -ItemType Directory -Force -Path $ConfigHome | Out-Null }
     $now = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
-    @(
-      "ref=$InstallRef",
-      "captured_at_utc=$now",
-      'source=ACC_INSTALL_REF',
-      'note=local install attribution receipt; not sent by installer'
-    ) | Set-Content -LiteralPath $InstallAttrPath -Encoding ASCII
-    Emit-Phase 'install_attribution' 'ok' "wrote local install attribution ref '$InstallRef' to $InstallAttrPath (not sent by installer)" 'phase 0: probe tier'
+    $lines = @()
+    if ($InstallRef) { $lines += "ref=$InstallRef" }
+    if ($InstallSource) { $lines += "source_ref=$InstallSource" }
+    $lines += "captured_at_utc=$now"
+    $sourceFields = @()
+    if ($InstallRef) { $sourceFields += 'ACC_INSTALL_REF' }
+    if ($InstallSource) { $sourceFields += 'ACC_INSTALL_SOURCE' }
+    $lines += ('source=' + ($sourceFields -join '+'))
+    $lines += 'note=local install attribution receipt; not sent by installer'
+    $lines | Set-Content -LiteralPath $InstallAttrPath -Encoding ASCII
+    Emit-Phase 'install_attribution' 'ok' "wrote local install attribution $InstallAttrDesc to $InstallAttrPath (not sent by installer)" 'phase 0: probe tier'
   } catch {
     Emit-Phase 'install_attribution' 'skipped' "could not write local install attribution receipt at $InstallAttrPath" 'install continues; attribution is optional'
   }

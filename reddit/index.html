@@ -357,14 +357,25 @@ ph('reddit_landing_viewed',Object.assign({install_ref:install_ref},source_props)
 (function(){
   function fallbackCopy(t){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(_e){}}
   function withInstallRef(txt,kind,os){
-    if(!install_ref){return txt;}
+    function sourceValue(v){return String(v||'').replace(/[^A-Za-z0-9._:/?+,-]/g,'').slice(0,64);}
+    function installSource(){
+      var props=(typeof source_props==='object'&&source_props)||{},keys=['ref','utm_source','utm_medium','utm_campaign','utm_content','rsub','thread','entry','ref_source','ref_host','landing'],parts=[];
+      keys.forEach(function(k){var v=sourceValue(props[k]);if(v){parts.push(k+'='+v);}});
+      return parts.join('&').slice(0,160);
+    }
+    var src=installSource(),nix=[],win='';
+    if(install_ref){nix.push('ACC_INSTALL_REF='+install_ref);win+="$env:ACC_INSTALL_REF='"+install_ref+"'; ";}
+    else if(src){nix.push("ACC_INSTALL_REF='"+src+"'");win+="$env:ACC_INSTALL_REF='"+src+"'; ";}
+    if(src){nix.push("ACC_INSTALL_SOURCE='"+src+"'");win+="$env:ACC_INSTALL_SOURCE='"+src+"'; ";}
+    if(!nix.length&&!win){return txt;}
+    var nixEnv=nix.join(' ');
     if(kind==='agent_prompt'){
       return txt
-        .replace(/curl -fsSL (https:\/\/accint\.xyz\/install) \| sh/g,'curl -fsSL $1 | ACC_INSTALL_REF='+install_ref+' sh')
-        .replace(/irm (https:\/\/accint\.xyz\/install\.ps1) \| iex/g,"$env:ACC_INSTALL_REF='"+install_ref+"'; irm $1 | iex");
+        .replace(/curl -fsSL (https:\/\/accint\.xyz\/install) \| sh/g,'curl -fsSL $1 | '+nixEnv+' sh')
+        .replace(/irm (https:\/\/accint\.xyz\/install\.ps1) \| iex/g,win+'irm $1 | iex');
     }
-    if(os==='win'){return "$env:ACC_INSTALL_REF='"+install_ref+"'; "+txt;}
-    return txt.replace('| sh','| ACC_INSTALL_REF='+install_ref+' sh');
+    if(os==='win'){return win+txt;}
+    return txt.replace('| sh','| '+nixEnv+' sh');
   }
   var tabs=[].slice.call(document.querySelectorAll('.tab'));
   var panels=[].slice.call(document.querySelectorAll('.panel'));
