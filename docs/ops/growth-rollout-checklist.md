@@ -110,7 +110,8 @@ Expected state:
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
-  seven required attribution dashboard tiles
+  nine required attribution dashboard tiles, including direct `llms-txt`
+  discovery install-ref classification
 - `scripts/run-approved-posthog-dashboard.sh` prints `DRY RUN COMPLETE` unless
   `ACC_APPROVE_POSTHOG_DASHBOARD=1` plus PostHog env vars are set. In approved
   mode it creates only the dashboard shell and a markdown setup tile through
@@ -422,12 +423,15 @@ node scripts/prepare-social-launch-packet.js --markdown
 node scripts/check-growth-surfaces.js --check
 node scripts/check-growth-surfaces.js --print
 scripts/check-live-attribution-flow.sh https://accint.xyz
+scripts/check-live-llms-discovery.sh https://accint.xyz
 ```
 
 Use the attributed landing URLs printed by the growth-surface checker when a
 post links to `accint.xyz` instead of carrying a long installer command. Those
 URLs populate `source_props` on the page, and the deployed copy buttons then add
-the same `ref`/source envelope to copied prompt and installer text.
+the same `ref`/source envelope to copied prompt and installer text. Keep the
+`llms.txt` discovery verifier in this preflight so social launch copy never
+points agents at a stale or unserved discovery file.
 
 ## Docker registry lane
 

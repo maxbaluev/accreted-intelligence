@@ -89,8 +89,8 @@
         "title": "Direct install refs by source",
         "type": "sql",
         "display": "table",
-        "hogql": "SELECT\n    multiIf(\n        match(distinct_id, '^gh-'), 'github-directory-pr',\n        match(distinct_id, '^github-'), 'github-owned-surface',\n        match(distinct_id, '^reddit-'), 'reddit-surface',\n        match(distinct_id, '^(hn|x)-'), 'social-surface',\n        match(distinct_id, '^[0-9a-f]{12}$'), 'web-copy-ref',\n        'other-ref'\n    ) AS ref_class,\n    distinct_id AS install_ref,\n    count() AS first_run_events,\n    min(timestamp) AS first_seen,\n    max(timestamp) AS last_seen\nFROM events\nWHERE event = 'first_run'\n  AND properties.has_install_ref = 'true'\n  AND {filters}\nGROUP BY ref_class, install_ref\nORDER BY first_run_events DESC, last_seen DESC\nLIMIT 50",
-        "expected_use": "Ranks direct installer refs such as gh-* directory/listing snippets that may not have a preceding web-copy event."
+        "hogql": "SELECT\n    multiIf(\n        distinct_id = 'llms-txt', 'llm-discovery',\n        match(distinct_id, '^gh-'), 'github-directory-pr',\n        match(distinct_id, '^github-'), 'github-owned-surface',\n        match(distinct_id, '^reddit-'), 'reddit-surface',\n        match(distinct_id, '^(hn|x)-'), 'social-surface',\n        match(distinct_id, '^[0-9a-f]{12}$'), 'web-copy-ref',\n        'other-ref'\n    ) AS ref_class,\n    distinct_id AS install_ref,\n    count() AS first_run_events,\n    min(timestamp) AS first_seen,\n    max(timestamp) AS last_seen\nFROM events\nWHERE event = 'first_run'\n  AND properties.has_install_ref = 'true'\n  AND {filters}\nGROUP BY ref_class, install_ref\nORDER BY first_run_events DESC, last_seen DESC\nLIMIT 50",
+        "expected_use": "Ranks direct installer refs such as llms-txt discovery and gh-* directory/listing snippets that may not have a preceding web-copy event."
       },
       {
         "slug": "copy_to_attributed_first_run_by_surface",

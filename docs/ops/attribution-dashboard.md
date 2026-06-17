@@ -98,7 +98,7 @@ ACC_APPROVE_POSTHOG_QUERY=1 \
 Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` to
 verify one controlled browser-copy install. This uses the documented PostHog
 Query API for small aggregate HogQL readouts, including `share_link_copied`
-counts, direct `gh-*` directory install refs, owned-share referred
+counts, direct `llms-txt` and `gh-*` install refs, owned-share referred
 visitor/install conversion, and Reddit community action rates; it is not an
 event export path.
 
@@ -263,6 +263,7 @@ Type: SQL insight, table.
 ```sql
 SELECT
     multiIf(
+        distinct_id = 'llms-txt', 'llm-discovery',
         match(distinct_id, '^gh-'), 'github-directory-pr',
         match(distinct_id, '^github-'), 'github-owned-surface',
         match(distinct_id, '^reddit-'), 'reddit-surface',
@@ -291,6 +292,8 @@ Expected use:
 
 - Treat `github-directory-pr` rows as the first signal that directory/listing
   placements are producing installs.
+- Treat `llm-discovery` rows as direct installs from `llms.txt` or an agent that
+  copied the discovery-file installer without a preceding browser copy event.
 - `first_run_events` is intentionally event-count based because stable direct
   refs can be reused by many installs.
 - Use `install_ref` to map back to generated refs from

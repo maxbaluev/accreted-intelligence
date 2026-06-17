@@ -96,7 +96,7 @@ Readouts:
   1. landing views, share events, Reddit community actions, copy events, attributed first-run events, first retrieves, daily rollups
   2. landing-to-copy-to-first-run conversion by surface
   3. copy-to-attributed-first-run conversion by surface and method
-  4. direct install refs by source, including gh-* directory/listing refs
+  4. direct install refs by source, including llms-txt discovery and gh-* directory/listing refs
   5. owned share loop
   6. Reddit community loop
   7. activation after attributed first run
@@ -315,6 +315,7 @@ LIMIT 25
 direct_refs_sql = f"""
 SELECT
     multiIf(
+        distinct_id = 'llms-txt', 'llm-discovery',
         match(distinct_id, '^gh-'), 'github-directory-pr',
         match(distinct_id, '^github-'), 'github-owned-surface',
         match(distinct_id, '^reddit-'), 'reddit-surface',

@@ -121,6 +121,8 @@ function validate() {
   validateSql(bySlug.get("direct_install_refs_by_source"), [
     "event = 'first_run'",
     "properties.has_install_ref = 'true'",
+    "distinct_id = 'llms-txt'",
+    "llm-discovery",
     "match(distinct_id, '^gh-')",
     "distinct_id AS install_ref",
     "first_run_events",

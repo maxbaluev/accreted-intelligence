@@ -94,13 +94,16 @@ if command -v node >/dev/null 2>&1; then
   if node scripts/prepare-posthog-dashboard.js --ui-packet >/dev/null; then note "PostHog UI packet: ok"; else fail=1; fi
   funnel_dry_run=$(scripts/run-approved-posthog-funnel-check.sh 2>/dev/null)
   if grep -q "event = 'share_link_copied'" scripts/run-approved-posthog-funnel-check.sh &&
+    grep -q "llm-discovery" docs/ops/posthog-dashboard.json &&
+    grep -q "distinct_id = 'llms-txt', 'llm-discovery'" scripts/run-approved-posthog-funnel-check.sh &&
     grep -q "direct install refs by source" scripts/run-approved-posthog-funnel-check.sh &&
     printf '%s\n' "$funnel_dry_run" | grep -q "direct install refs by source" &&
+    printf '%s\n' "$funnel_dry_run" | grep -q "llms-txt discovery" &&
     printf '%s\n' "$funnel_dry_run" | grep -q "owned share loop" &&
     printf '%s\n' "$funnel_dry_run" | grep -q "Reddit community loop"; then
-    note "PostHog funnel/direct-ref/share/community-loop readout: ok"
+    note "PostHog funnel/direct-ref/share/community/llms readout: ok"
   else
-    note "PostHog funnel/direct-ref/share/community-loop readout: FAIL"
+    note "PostHog funnel/direct-ref/share/community/llms readout: FAIL"
     fail=1
   fi
 else
