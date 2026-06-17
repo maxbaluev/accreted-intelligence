@@ -27,8 +27,8 @@ Last receipt refresh: 2026-06-17.
 
 ## Holds
 
-- Directory PR state audit at refresh: 55 PRs checked, 41 open, 9 merged,
-  5 closed/unmerged, 1 open PR with failing checks, 7 attention items.
+- Directory PR state audit at refresh: 55 PRs checked, 40 open, 9 merged,
+  6 closed/unmerged, 1 open PR with failing checks, 8 attention items.
 - Glama submission was made through Google OAuth with
   `maxbaluev@outlook.com`; the direct listing and score badge now verify, but
   Glama search for `accint` still did not show AccInt at refresh.
@@ -36,6 +36,13 @@ Last receipt refresh: 2026-06-17.
   branch at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91`, but the upstream PR
   remains open with GitHub merge status `CLEAN`. Wait for maintainer/check
   movement and do not comment merely to bump visibility.
+- `ComposioHQ/awesome-claude-skills#1082` remains open with checks passing, but
+  GitHub reports `BLOCKED` / `REVIEW_REQUIRED`; there are no maintainer comments
+  to answer. Hold unless a maintainer asks for clarification or the owner
+  approves a precise reply.
+- `yzfly/awesome-context-engineering#10` remains open, mergeable, and has no
+  comments or reported checks after the June 17 maintainer-side update. Hold for
+  maintainer signal; do not bump.
 - `nibzard/awesome-agentic-patterns#102` still reports failing checks, but the
   failing GitHub Actions reviewer log is permission-gated upstream
   (`Actor does not have write permissions to the repository`), not a local
@@ -144,7 +151,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 | 9 | Chat2AnyLLM/awesome-repo-configs | Skill repo config | merged | https://github.com/Chat2AnyLLM/awesome-repo-configs/pull/63 | 2026-06-15T14:16:02Z | Listing win; monitor only. |
 | 10 | AI-in-Transportation-Lab/awesome-mcp | MCP directory | open | https://github.com/AI-in-Transportation-Lab/awesome-mcp/pull/22 | 2026-06-15T09:50:41Z | Follow only if asked. |
 | 11 | AIAnytime/Awesome-MCP-Server | MCP directory | open | https://github.com/AIAnytime/Awesome-MCP-Server/pull/43 | 2026-06-15T09:31:26Z | Follow only if asked. |
-| 12 | AlexMili/Awesome-MCP | MCP directory | open | https://github.com/AlexMili/Awesome-MCP/pull/134 | 2026-06-15T09:12:55Z | Follow only if asked. |
+| 12 | AlexMili/Awesome-MCP | MCP directory | closed | https://github.com/AlexMili/Awesome-MCP/pull/134 | 2026-06-17T20:02:03Z | Closed unmerged; do not retry without policy or source-boundary fit changing. |
 | 13 | MobinX/awesome-mcp-list | MCP directory | open | https://github.com/MobinX/awesome-mcp-list/pull/315 | 2026-06-15T06:47:17Z | Follow only if asked. |
 | 14 | YuzeHao2023/Awesome-MCP-Servers | MCP directory | open | https://github.com/YuzeHao2023/Awesome-MCP-Servers/pull/318 | 2026-06-15T12:04:28Z | Follow only if asked. |
 | 15 | mctrinh/awesome-mcp-servers | MCP directory | open | https://github.com/mctrinh/awesome-mcp-servers/pull/68 | 2026-06-15T09:37:13Z | Follow only if asked. |
@@ -153,7 +160,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 | 18 | ravitemer/mcp-registry | MCP registry | open | https://github.com/ravitemer/mcp-registry/pull/31 | 2026-06-15T12:50:37Z | Official registry proof may help if maintainer asks. |
 | 19 | Prat011/awesome-llm-skills | Skills directory | open | https://github.com/Prat011/awesome-llm-skills/pull/150 | 2026-06-15T10:27:23Z | Follow only if asked. |
 | 20 | BehiSecc/awesome-claude-skills | Claude skills | open | https://github.com/BehiSecc/awesome-claude-skills/pull/369 | 2026-06-15T12:33:30Z | Follow only if asked. |
-| 21 | ComposioHQ/awesome-claude-skills | Claude skills | open | https://github.com/ComposioHQ/awesome-claude-skills/pull/1082 | 2026-06-15T14:02:42Z | Review required / merge blocked; follow only with owner-approved clarification. |
+| 21 | ComposioHQ/awesome-claude-skills | Claude skills | open | https://github.com/ComposioHQ/awesome-claude-skills/pull/1082 | 2026-06-15T14:02:42Z | Checks pass; review required / merge blocked; no maintainer comments to answer. Follow only with owner-approved clarification or maintainer request. |
 | 22 | ComposioHQ/awesome-claude-plugins | Claude plugins | open | https://github.com/ComposioHQ/awesome-claude-plugins/pull/301 | 2026-06-15T13:48:51Z | Follow only if asked. |
 | 23 | GetBindu/awesome-claude-code-and-skills | Claude Code | merged | https://github.com/GetBindu/awesome-claude-code-and-skills/pull/68 | 2026-06-17T12:44:59Z | Listing win; monitor only. |
 | 24 | rohitg00/awesome-claude-code-toolkit | Claude Code | open | https://github.com/rohitg00/awesome-claude-code-toolkit/pull/544 | 2026-06-15T07:15:16Z | Follow only if asked. |
@@ -168,7 +175,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 | 33 | XiaomingX/awesome-ai-memory | Agent memory | open | https://github.com/XiaomingX/awesome-ai-memory/pull/9 | 2026-06-15T09:07:03Z | Follow only if asked. |
 | 34 | topoteretes/awesome-ai-memory | Agent memory | open | https://github.com/topoteretes/awesome-ai-memory/pull/41 | 2026-06-15T09:02:24Z | Follow only if asked. |
 | 35 | Meirtz/Awesome-Context-Engineering | Context engineering | open | https://github.com/Meirtz/Awesome-Context-Engineering/pull/75 | 2026-06-15T07:01:05Z | Follow only if asked. |
-| 36 | yzfly/awesome-context-engineering | Context engineering | open | https://github.com/yzfly/awesome-context-engineering/pull/10 | 2026-06-17T04:10:28Z | Recently updated; check before any reply. |
+| 36 | yzfly/awesome-context-engineering | Context engineering | open | https://github.com/yzfly/awesome-context-engineering/pull/10 | 2026-06-17T04:10:28Z | Mergeable; no comments or reported checks after update. Hold for maintainer signal. |
 | 37 | ai-boost/awesome-harness-engineering | Harness engineering | open | https://github.com/ai-boost/awesome-harness-engineering/pull/67 | 2026-06-15T08:40:51Z | Follow only if asked. |
 | 38 | nibzard/awesome-agentic-patterns | Agentic patterns | open | https://github.com/nibzard/awesome-agentic-patterns/pull/102 | 2026-06-15T10:44:08Z | GitHub Actions reviewer fails on upstream write-permission gate; external Vercel/Continue checks are report-only. |
 | 39 | rafska/awesome-local-llm | Local LLM | open | https://github.com/rafska/awesome-local-llm/pull/106 | 2026-06-15T10:34:25Z | Follow only if asked. |
