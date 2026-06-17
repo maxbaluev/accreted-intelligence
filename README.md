@@ -77,6 +77,20 @@ The installer probes your hardware, picks the embedder tier it can honestly run,
 
 > **Prefer to be walked through it?** Paste **one prompt** into whatever agent you already use — Claude Code, Codex, Cursor, or OpenCode — and it installs acc *with* you, explaining each step, pausing for consent at the boundary, and verifying against a machine-readable contract instead of guessing. The prompt is the same one on [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme). See **[docs/install/with-agent.md](docs/install/with-agent.md)**.
 
+Agent-guided install prompt for GitHub readers:
+
+```text
+Install AccInt for yourself - a local Work Model that learns what actually worked across my projects and predicts the better path, so you get better at my work over time. Use the attributed GitHub README installer for my OS:
+
+macOS/Linux:
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=github-readme ACC_INSTALL_SOURCE='ref=github-readme&utm_source=github&utm_campaign=readme' sh
+
+Windows PowerShell:
+$env:ACC_INSTALL_REF='github-readme'; $env:ACC_INSTALL_SOURCE='ref=github-readme&utm_source=github&utm_campaign=readme'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+
+Then run `acc hosts-sync` and tell me when `acc retrieve "what should I do next?"` works. Before running anything, state the trust boundary: public Apache-2.0 installer/docs/plugins/registry glue; proprietary local engine binary with private engine source; local Work Model data stays on my machine; opt-out anonymous telemetry is event names/source refs only, with no prompts, files, memory, or Work Model data. It is local: no account, no API key, and it asks before anything leaves my machine.
+```
+
 ---
 
 ## What the loop looks like
