@@ -89,7 +89,8 @@ Expected state:
 - `scripts/run-approved-growth-rollout.sh v<tag>` prints `DRY RUN COMPLETE`
   unless `ACC_APPROVE_GROWTH_ROLLOUT=1` is set, and its printed external actions
   are limited to `git push` plus the hosted live-site attribution workflow
-  dispatch
+  dispatch. Approved mode retries the workflow dispatch briefly because a
+  just-pushed workflow file can take a moment to become dispatchable on GitHub.
 - `scripts/run-approved-controlled-live-install.sh v<tag>` prints
   `DRY RUN COMPLETE` unless `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1` is set. In
   approved mode it fetches the live POSIX installer, runs only the

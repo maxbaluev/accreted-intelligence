@@ -13,6 +13,8 @@ repo="${ACC_GROWTH_REPO:-maxbaluev/accreted-intelligence}"
 remote="${ACC_GROWTH_REMOTE:-origin}"
 site_url="${ACC_LIVE_SITE_URL:-https://accint.xyz}"
 strict_live_state="${ACC_HOSTED_LIVE_STATE_STRICT:-false}"
+workflow_dispatch_attempts="${ACC_WORKFLOW_DISPATCH_ATTEMPTS:-6}"
+workflow_dispatch_sleep="${ACC_WORKFLOW_DISPATCH_SLEEP:-10}"
 tag="${1:-}"
 
 usage() {
@@ -28,6 +30,8 @@ Owner-approved external action:
 Optional:
   ACC_LIVE_SITE_URL=https://accint.xyz
   ACC_HOSTED_LIVE_STATE_STRICT=false
+  ACC_WORKFLOW_DISPATCH_ATTEMPTS=6
+  ACC_WORKFLOW_DISPATCH_SLEEP=10
   ACC_GROWTH_REPO=maxbaluev/accreted-intelligence
   ACC_GROWTH_REMOTE=origin
 
@@ -58,6 +62,22 @@ case "$tag" in
   v*) : ;;
   *) tag="v$tag" ;;
 esac
+case "$workflow_dispatch_attempts" in
+  ''|*[!0-9]*)
+    printf 'refusing: ACC_WORKFLOW_DISPATCH_ATTEMPTS must be a positive integer\n' >&2
+    exit 2
+    ;;
+esac
+if [ "$workflow_dispatch_attempts" -lt 1 ]; then
+  printf 'refusing: ACC_WORKFLOW_DISPATCH_ATTEMPTS must be at least 1\n' >&2
+  exit 2
+fi
+case "$workflow_dispatch_sleep" in
+  ''|*[!0-9]*)
+    printf 'refusing: ACC_WORKFLOW_DISPATCH_SLEEP must be a non-negative integer number of seconds\n' >&2
+    exit 2
+    ;;
+esac
 
 branch="$(git branch --show-current 2>/dev/null || true)"
 if [ -z "$branch" ]; then
@@ -72,6 +92,8 @@ printf '  remote: %s\n' "$remote"
 printf '  release tag: %s\n' "$tag"
 printf '  site: %s\n' "$site_url"
 printf '  strict hosted live-state: %s\n' "$strict_live_state"
+printf '  workflow dispatch attempts: %s\n' "$workflow_dispatch_attempts"
+printf '  workflow dispatch sleep: %ss\n' "$workflow_dispatch_sleep"
 
 echo
 echo "== local readiness =="
@@ -127,10 +149,23 @@ git push "$remote" "$branch"
 
 echo
 echo "dispatching hosted live-site attribution verifier..."
-gh workflow run live-site-attribution.yml --repo "$repo" \
-  -f "acc_version=$tag" \
-  -f "site_url=$site_url" \
-  -f "strict_live_state=$strict_live_state"
+attempt=1
+while :; do
+  if gh workflow run live-site-attribution.yml --repo "$repo" \
+    -f "acc_version=$tag" \
+    -f "site_url=$site_url" \
+    -f "strict_live_state=$strict_live_state"; then
+    break
+  fi
+  if [ "$attempt" -ge "$workflow_dispatch_attempts" ]; then
+    printf 'hosted verifier dispatch failed after %s attempts\n' "$attempt" >&2
+    exit 1
+  fi
+  printf 'workflow dispatch failed; retrying after %ss (%s/%s)\n' \
+    "$workflow_dispatch_sleep" "$attempt" "$workflow_dispatch_attempts" >&2
+  sleep "$workflow_dispatch_sleep"
+  attempt=$((attempt + 1))
+done
 
 echo
 echo "recent hosted verifier runs:"

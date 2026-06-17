@@ -20,7 +20,9 @@ Last read-only refresh: 2026-06-17.
 ## Holds
 
 - Public growth bundle still requires explicit owner approval before
-  `git push origin main` or hosted verifier dispatch.
+  `git push origin main` or hosted verifier dispatch. The guarded rollout helper
+  retries the hosted verifier dispatch after push if GitHub has not indexed the
+  workflow yet.
 - Directory PR state audit at refresh: 55 PRs checked, 42 open, 8 merged,
   5 closed/unmerged, 1 open PR with failing checks, 7 attention items.
 - The local runner can report `https://accint.xyz` TLS EOF and an HTTP redirect
