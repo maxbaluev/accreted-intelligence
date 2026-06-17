@@ -27,6 +27,7 @@ Default mode is local and read-only:
   - verifies live prompt-copy attribution in the read-only live-state audit
   - verifies the social launch kit
   - verifies growth surface refs and attributed landing URLs
+  - builds and verifies the local MCPB promotion packet without uploading
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
@@ -123,6 +124,10 @@ echo "== PostHog dashboard pre-live proof =="
 node scripts/prepare-posthog-dashboard.js --check
 
 echo
+echo "== MCPB promotion packet pre-live proof =="
+scripts/check-mcpb-promotion-packet.sh "$tag"
+
+echo
 echo "== social launch kit pre-live proof =="
 node scripts/check-social-launch-kit.js --check
 
@@ -182,9 +187,9 @@ Run these only after explicit owner approval for the named external action.
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
 
-3. Prepare MCPB release assets locally:
+3. Build and verify the local MCPB promotion packet:
 
-   scripts/prepare-mcpb-release-assets.sh $tag
+   scripts/check-mcpb-promotion-packet.sh $tag
 
 4. Upload MCPB release assets after owner approval:
 

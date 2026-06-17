@@ -17,6 +17,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - controlled install attribution receipt verifier
 - read-only live growth state auditor
 - live prompt-copy attribution verifier
+- MCPB promotion packet verifier
 - materialized PostHog dashboard spec
 - attribution dashboard/runbook docs
 - social launch kit
@@ -41,6 +42,7 @@ scripts/check-growth-live-state.sh v<tag>
 bash scripts/check-growth-readiness.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
+scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
 node scripts/check-growth-surfaces.js --check
 git status --short --branch
@@ -64,6 +66,9 @@ Expected state:
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
   five required attribution dashboard tiles
+- `scripts/check-mcpb-promotion-packet.sh v<tag>` passes and proves the local
+  MCPB upload bundle, generated registry metadata, and mutation guards before
+  release upload/server metadata advance
 - `node scripts/check-social-launch-kit.js --check` passes and validates
   owner-approved posting copy, attribution refs, and source-boundary wording
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
@@ -147,8 +152,8 @@ as live:
    `install-attribution.env`.
 2. Confirm the public installer resolves that release tag.
 3. Confirm `sha256sums.txt` contains the expected artifact checksums.
-4. Build MCPB bundles and print the release upload command:
-   `scripts/prepare-mcpb-release-assets.sh v<tag>`.
+4. Build and verify the full local MCPB promotion packet:
+   `scripts/check-mcpb-promotion-packet.sh v<tag>`.
 5. After owner approval, upload the generated `dist/acc-mcp-v<tag>-*.mcpb`
    files and `.sha256` sidecars to the same GitHub Release:
    `ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh v<tag>`.
