@@ -10,6 +10,17 @@ note() { printf '  %s\n' "$1"; }
 
 echo "== install scripts: syntax =="
 if bash -n install.sh; then note "install.sh: ok"; else note "install.sh: SYNTAX ERROR"; fail=1; fi
+for f in \
+  bootstrap/install \
+  scripts/acc-docker.sh \
+  scripts/check-growth-readiness.sh \
+  scripts/check-mcpb-release-assets.sh \
+  scripts/docker-entrypoint.sh \
+  scripts/package-mcpb.sh; do
+  if [ -f "$f" ]; then
+    if bash -n "$f"; then note "$f: ok"; else note "$f: SYNTAX ERROR"; fail=1; fi
+  fi
+done
 if [ -f install.ps1 ]; then note "install.ps1: present"; fi
 
 echo "== plugin discovery markers (one protocol, many hosts) =="

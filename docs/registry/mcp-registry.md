@@ -49,22 +49,37 @@ extension/name or in the repository path.
 After the normal release assets exist on GitHub:
 
 ```bash
-scripts/package-mcpb.sh v0.1.1 all
+scripts/package-mcpb.sh v0.1.5 all
 ```
 
 This creates:
 
 ```text
-dist/acc-mcp-v0.1.1-aarch64-apple-darwin.mcpb
-dist/acc-mcp-v0.1.1-aarch64-unknown-linux-musl.mcpb
-dist/acc-mcp-v0.1.1-x86_64-unknown-linux-musl.mcpb
-dist/acc-mcp-v0.1.1-x86_64-pc-windows-msvc.mcpb
+dist/acc-mcp-v0.1.5-aarch64-apple-darwin.mcpb
+dist/acc-mcp-v0.1.5-aarch64-apple-darwin.sha256
+dist/acc-mcp-v0.1.5-aarch64-unknown-linux-musl.mcpb
+dist/acc-mcp-v0.1.5-aarch64-unknown-linux-musl.sha256
+dist/acc-mcp-v0.1.5-x86_64-unknown-linux-musl.mcpb
+dist/acc-mcp-v0.1.5-x86_64-unknown-linux-musl.sha256
+dist/acc-mcp-v0.1.5-x86_64-pc-windows-msvc.mcpb
+dist/acc-mcp-v0.1.5-x86_64-pc-windows-msvc.sha256
 dist/server.<target>.json
 dist/server.mcpb-all.json
 ```
 
 Attach the `.mcpb` files and their `.sha256` sidecars to the same GitHub
 Release. Do not commit `dist/`; release artifacts belong on GitHub Releases.
+
+After the upload, verify the release and generated metadata before copying the
+metadata into the root:
+
+```bash
+scripts/check-mcpb-release-assets.sh v0.1.5 dist/server.mcpb-all.json
+```
+
+The check must pass before `server.json` is advanced to the new version. A
+`server.json` that points at assets which are not attached to the GitHub Release
+will fail registry validation and downstream discovery.
 
 ## Publish
 
@@ -74,6 +89,7 @@ already the publishable metadata file.
 For a new release, regenerate it from the generated multi-package file:
 
 ```bash
+scripts/check-mcpb-release-assets.sh v0.1.5 dist/server.mcpb-all.json
 cp dist/server.mcpb-all.json server.json
 ```
 
