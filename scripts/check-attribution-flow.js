@@ -113,6 +113,16 @@ function assertAgentPrompt(file, html, id) {
   );
 }
 
+function assertPromptTrustBoundary(file, html, id) {
+  const prompt = extractCode(html, id);
+  assertIncludes(prompt, "public Apache-2.0 installer/docs/plugins/registry glue", `${file}#${id}: source boundary`);
+  assertIncludes(prompt, "proprietary local engine binary", `${file}#${id}: binary boundary`);
+  assertIncludes(prompt, "private engine source", `${file}#${id}: source-private boundary`);
+  assertIncludes(prompt, "local Work Model data stays on my machine", `${file}#${id}: local data boundary`);
+  assertIncludes(prompt, "no prompts, files, memory, or Work Model data", `${file}#${id}: telemetry boundary`);
+  assertIncludes(prompt, "asks before anything leaves", `${file}#${id}: owner approval boundary`);
+}
+
 function assertSourceOnlyAgentPrompt(file, html, id) {
   const copied = helperFrom(html, { ref: "shared-prompt" }, "")(extractCode(html, id), "agent_prompt", "nix");
   assertIncludes(
@@ -161,8 +171,10 @@ function checkHome() {
   assertIncludes(html, "share_link_copied", `${file}: visitor share event`);
   assertIncludes(html, "data-share-url=\"https://accint.xyz/?ref=visitor-share&amp;utm_source=share&amp;utm_campaign=organic\"", `${file}: visitor share URL`);
   assertAgentPrompt(file, html, "agent-prompt");
+  assertPromptTrustBoundary(file, html, "agent-prompt");
   assertSourceOnlyAgentPrompt(file, html, "agent-prompt");
   assertAgentPrompt(file, html, "agent-prompt2");
+  assertPromptTrustBoundary(file, html, "agent-prompt2");
   assertManualCommand(file, html, "cmd-nix", "nix");
   assertManualCommand(file, html, "cmd-nix2", "nix");
   assertManualCommand(file, html, "cmd-win", "win");
@@ -184,6 +196,7 @@ function checkReddit() {
   });
   assertIncludes(html, "reddit_agent_prompt_copied", `${file}: prompt-copy event`);
   assertAgentPrompt(file, html, "agent-prompt");
+  assertPromptTrustBoundary(file, html, "agent-prompt");
   assertSourceOnlyAgentPrompt(file, html, "agent-prompt");
   assertManualCommand(file, html, "cmd-nix", "nix");
   assertManualCommand(file, html, "cmd-win", "win");
