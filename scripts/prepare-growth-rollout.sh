@@ -37,6 +37,7 @@ Default mode is local and read-only:
   - ranks tracked directory/list PRs by live reach, state, and blockers
   - prepares directory/list attribution refs from the tracked report
   - prepares owner-reviewable directory/list follow-up notes from the tracked report
+  - prepares the owner-held Glama submission packet for the punkpeye blocker
   - prints the approval-gated push + hosted live-site verifier command
   - prints the approval-gated controlled live install receipt verifier command
   - prints the approval-gated PostHog dashboard shell creation command
@@ -222,6 +223,10 @@ else
 fi
 
 echo
+echo "== Glama submission packet pre-live proof =="
+node scripts/prepare-glama-submission-packet.js --check "$tag"
+
+echo
 echo "== punkpeye Glama follow-up pre-live proof =="
 scripts/prepare-punkpeye-glama-followup.sh
 
@@ -392,6 +397,13 @@ $directory_refs_command
 $directory_followup_command
 
 16. punkpeye Glama badge follow-up after a real Glama listing exists:
+
+   node scripts/prepare-glama-submission-packet.js --markdown $tag
+
+   Owner submits manually at https://glama.ai/mcp/servers using the packet's
+   repository URL, root Dockerfile path, release tag, default MCP command, and
+   expected tools. Do not automate the Glama form, browser session, payment,
+   CAPTCHA, or account identity.
 
    scripts/prepare-punkpeye-glama-followup.sh
    ACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh

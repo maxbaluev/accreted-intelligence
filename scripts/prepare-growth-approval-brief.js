@@ -93,6 +93,7 @@ function runLocalChecks() {
     ["bash", ["scripts/check-controlled-install-attribution.sh"]],
     ["bash", ["scripts/check-install-surface.sh"]],
     ["node", ["scripts/prepare-posthog-dashboard.js", "--check"]],
+    ["node", ["scripts/prepare-glama-submission-packet.js", "--check"]],
   ];
   const results = [];
   for (const [command, args] of checks) {
@@ -170,6 +171,13 @@ function exactActions(tag, branch) {
       external_effects: ["owner manually posts selected HN/X/Reddit copy outside automation"],
       guard: "No automated posting; owner chooses exact target",
     },
+    {
+      stage: "7",
+      name: "Owner-held Glama submission packet for punkpeye blocker",
+      command: `node scripts/prepare-glama-submission-packet.js --markdown ${tag}`,
+      external_effects: ["owner may manually submit the Glama listing in a logged-in browser"],
+      guard: "Packet is read-only; no automated Glama submission or PR badge update",
+    },
   ].map((action) => ({ ...action, branch }));
 }
 
@@ -202,7 +210,7 @@ function buildBrief(tag) {
     ],
     known_holds: [
       "Live custom-domain fetch from this environment can report TLS EOF / snap.pango-cloud.com redirect; use hosted verifier after push.",
-      "Glama listing/badge is still required before punkpeye badge branch update.",
+      "Glama listing/badge is still required before punkpeye badge branch update; use the Glama packet first, then the badge follow-up guard only after the listing is real.",
       "PostHog dashboard/funnel and social posting require explicit owner approval and credentials/manual posting.",
     ],
   };

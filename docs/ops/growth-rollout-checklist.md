@@ -68,6 +68,7 @@ scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md
+node scripts/prepare-glama-submission-packet.js --check v<tag>
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -136,6 +137,8 @@ Expected state:
 - `node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md`
   passes for the tracked directory/list PR table and prepares owner-reviewable
   maintainer-note drafts without posting
+- `node scripts/prepare-glama-submission-packet.js --check v<tag>` passes and
+  prints the Glama submission fields without submitting anything
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
@@ -336,28 +339,32 @@ After public push and site verification:
 
 1. Run the advisory live-state audit:
    `scripts/check-growth-live-state.sh v<tag>`.
-2. Re-check Glama:
+2. Generate the owner-held Glama submission packet:
+   `node scripts/prepare-glama-submission-packet.js --markdown v<tag>`.
+   The owner can use it manually at `https://glama.ai/mcp/servers`; do not
+   automate the form, logged-in browser, payment, CAPTCHA, or account identity.
+3. Re-check Glama:
    - `https://glama.ai/mcp/servers/maxbaluev/accreted-intelligence`
    - `https://glama.ai/mcp/servers?q=accint`
-3. Only if Glama has a real AccInt listing and score badge, update
+4. Only if Glama has a real AccInt listing and score badge, update
    `punkpeye/awesome-mcp-servers#8091` with the badge required by that repo.
    Use the dry-run helper first:
    `scripts/prepare-punkpeye-glama-followup.sh`. After explicit owner approval,
    and only if the helper reports `READY`, run
    `ACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh`.
    The helper updates only the owned fork branch and does not comment on the PR.
-4. Use `docs/ops/directory-listing.md` for future directory/list submissions
+5. Use `docs/ops/directory-listing.md` for future directory/list submissions
    and reviewer replies.
-5. Audit tracked PR state without posting:
+6. Audit tracked PR state without posting:
    `scripts/check-directory-pr-state.sh docs/ops/growth-report.md`.
-6. Generate the directory priority queue without posting:
+7. Generate the directory priority queue without posting:
    `node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md`.
-7. Generate directory attribution refs without posting:
+8. Generate directory attribution refs without posting:
    `node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md`.
-8. Prepare owner-reviewable registry/source-boundary follow-up notes without
+9. Prepare owner-reviewable registry/source-boundary follow-up notes without
    posting:
    `node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md`.
-9. Do not retry lists that rejected the private-engine boundary unless the
+10. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
 ## Social launch lane
