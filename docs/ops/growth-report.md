@@ -12,9 +12,9 @@ Last receipt refresh: 2026-06-17.
 - Live site: `https://accint.xyz`
 - Release: `v0.1.6`
 - Official MCP Registry: `io.github.maxbaluev/accint` / `0.1.6`
-- Public clone state at refresh: `main` synced with `origin/main` at
-  `581c5c6`; the approved public growth rollout itself landed at `21a635e`
-  and the later commits record rollout receipts.
+- Public clone state at refresh: `main` synced with `origin/main`; the approved
+  public growth rollout itself landed at `21a635e` and later commits record
+  rollout, directory, and handoff receipts.
 - Live verification: hosted GitHub Actions verifier run
   `27691022310` passed after GitHub Pages finished building.
 - Controlled live install receipt: `ref=controlled-0.1.6`,
@@ -48,9 +48,13 @@ Last receipt refresh: 2026-06-17.
   social receipt unless a public post URL exists.
 - PostHog dashboard/funnel checks still require valid PostHog credentials before
   live funnel evidence can be read.
+- MCP.Directory already has a recorded June 15 submission receipt, but a
+  read-only June 17 browser check did not find AccInt on the public query pages;
+  treat it as pending/unverified instead of resubmitting.
 - De-dupe any further directory submission against the local queue before
-  submitting or sending email; MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and
-  Websites, and AI Tool Claw already have recorded submission/email outcomes.
+  submitting or sending email; MCP.Directory, MCP.so, Insidr.ai, AISuperHub,
+  ListedAI, Apps and Websites, and AI Tool Claw already have recorded
+  submission/email outcomes.
 - Do not reply to directory/listing PRs merely to bump visibility. Use generated
   notes only when a maintainer asks for clarification, a listing needs registry
   proof, or the owner approves a specific reply.
@@ -65,6 +69,7 @@ Last receipt refresh: 2026-06-17.
 | 2026-06-17 | Glama MCP Registry | `https://glama.ai/mcp/servers/maxbaluev/accreted-intelligence` | Submitted for review via Google OAuth as `maxbaluev@outlook.com` | Direct listing and score badge verify; search still missed AccInt at refresh. |
 | 2026-06-17 | punkpeye PR badge follow-up | `https://github.com/punkpeye/awesome-mcp-servers/pull/8091` | Owned branch pushed at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91` | Glama badge row added; no PR comment posted; PR remains open with clean merge state. |
 | 2026-06-17 | Reddit LocalLLaMA | `https://www.reddit.com/r/LocalLLaMA/submit/` | No published URL | Attempted, but not confirmed published after Rule 4 warning; no social receipt row. |
+| 2026-06-15 | MCP.Directory | `https://mcp.directory/submit` | GitHub repository URL, short description, and `maxbaluev@outlook.com` submitted from the directory queue | Page confirmed `Server Submitted`; read-only June 17 browser check did not find AccInt on `/?q=accint` or `/search?q=accint`, so treat as pending/unverified and do not resubmit without a fresh listing check. |
 
 ## Tracked directory/listing PRs
 
@@ -158,9 +163,9 @@ report ranks open directory/listing PRs by live PR state, repository reach,
 checks, and known blockers so owner-approved follow-up goes to the
 highest-upside surfaces first. The generated notes are not posting
 authorization. They are review packets for exact owner-approved maintainer
-replies or listing updates. Use the Glama form packet before the
-punkpeye badge follow-up because that PR is blocked on Glama's listing and
-score badge.
+replies or listing updates. The Glama packet and punkpeye badge follow-up are
+retained for audit checks; the live Glama row and owned branch receipt are the
+current proof for that blocker.
 
 ## Social launch receipts
 
