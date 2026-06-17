@@ -22,6 +22,7 @@ for f in \
   scripts/check-mcpb-promotion-packet.sh \
   scripts/check-live-attribution-flow.sh \
   scripts/check-mcpb-release-assets.sh \
+  scripts/prepare-punkpeye-glama-followup.sh \
   scripts/check-release-alignment.sh \
   scripts/docker-entrypoint.sh \
   scripts/package-mcpb.sh \

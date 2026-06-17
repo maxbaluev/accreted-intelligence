@@ -165,6 +165,10 @@ else
 fi
 
 echo
+echo "== punkpeye Glama follow-up pre-live proof =="
+scripts/prepare-punkpeye-glama-followup.sh
+
+echo
 echo "== read-only live growth state =="
 ACC_LIVE_STATE_STRICT=0 bash scripts/check-growth-live-state.sh "$tag"
 
@@ -287,6 +291,14 @@ $report_record_line
 
 $directory_pr_command
 $directory_refs_command
+
+15. punkpeye Glama badge follow-up after a real Glama listing exists:
+
+   scripts/prepare-punkpeye-glama-followup.sh
+   ACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh
+
+   This helper refuses to update the owned PR branch unless both the Glama
+   listing page and score badge are real.
 
    Do not comment, edit, close, merge, or push PR branches without explicit
    owner approval for that exact target.

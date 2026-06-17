@@ -250,6 +250,11 @@ After public push and site verification:
    - `https://glama.ai/mcp/servers?q=accint`
 3. Only if Glama has a real AccInt listing and score badge, update
    `punkpeye/awesome-mcp-servers#8091` with the badge required by that repo.
+   Use the dry-run helper first:
+   `scripts/prepare-punkpeye-glama-followup.sh`. After explicit owner approval,
+   and only if the helper reports `READY`, run
+   `ACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh`.
+   The helper updates only the owned fork branch and does not comment on the PR.
 4. Use `docs/ops/directory-listing.md` for future directory/list submissions
    and reviewer replies.
 5. Audit tracked PR state without posting:
