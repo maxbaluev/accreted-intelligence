@@ -29,6 +29,7 @@ Default mode is local and read-only:
   - verifies growth surface refs and attributed landing URLs
   - builds and verifies the local MCPB promotion packet without uploading
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
+  - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
     social launch, and directory follow-up
@@ -74,9 +75,11 @@ fi
 if [ -n "$growth_report" ]; then
   report_record_line="   Record published URLs and refs in: $growth_report"
   directory_pr_command="   scripts/check-directory-pr-state.sh \"$growth_report\""
+  directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown \"$growth_report\""
 else
   report_record_line="   Record published URLs and refs in the growth report."
   directory_pr_command="   scripts/check-directory-pr-state.sh path/to/report.md"
+  directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md"
 fi
 
 echo "== local growth readiness =="
@@ -143,6 +146,16 @@ elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else
   echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to audit tracked PRs"
+fi
+
+echo
+echo "== directory surface refs pre-live proof =="
+if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
+  node scripts/prepare-directory-surface-refs.js --check "$growth_report"
+elif [ -n "$growth_report" ]; then
+  printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
+else
+  echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to prepare directory attribution refs"
 fi
 
 echo
@@ -254,6 +267,7 @@ $report_record_line
 13. Read-only directory PR follow-up:
 
 $directory_pr_command
+$directory_refs_command
 
    Do not comment, edit, close, merge, or push PR branches without explicit
    owner approval for that exact target.

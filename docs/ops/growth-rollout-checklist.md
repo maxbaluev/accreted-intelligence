@@ -22,6 +22,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - attribution dashboard/runbook docs
 - social launch kit
 - growth surface ref manifest
+- directory surface ref generator
 - organic referrer classification
 - dry-run rollout approval packet
 - standard root `LICENSE` for GitHub license detection
@@ -45,6 +46,7 @@ node scripts/prepare-posthog-dashboard.js --check
 scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
 node scripts/check-growth-surfaces.js --check
+node scripts/prepare-directory-surface-refs.js --check path/to/report.md
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -74,6 +76,9 @@ Expected state:
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
   refs, attributed landing URLs, install snippets, and page prompt-copy source
   keys stay aligned
+- `node scripts/prepare-directory-surface-refs.js --check path/to/report.md`
+  passes for the tracked directory/list PR table when a growth report is
+  available
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
@@ -212,7 +217,9 @@ After public push and site verification:
    and reviewer replies.
 5. Audit tracked PR state without posting:
    `scripts/check-directory-pr-state.sh path/to/report.md`.
-6. Do not retry lists that rejected the private-engine boundary unless the
+6. Generate directory attribution refs without posting:
+   `node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md`.
+7. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
 ## Social launch lane

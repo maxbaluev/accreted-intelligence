@@ -68,6 +68,7 @@ for f in \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/check-social-launch-kit.js \
+  scripts/prepare-directory-surface-refs.js \
   scripts/prepare-growth-rollout.sh \
   scripts/prepare-posthog-dashboard.js \
   scripts/prepare-mcpb-release-assets.sh \

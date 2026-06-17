@@ -171,3 +171,26 @@ The checker prints current open/merged/closed counts, check status summaries,
 and attention items. It is advisory by default; set
 `ACC_DIRECTORY_PR_STRICT=1` only when a nonzero exit on attention items is
 useful.
+
+## Surface attribution refs
+
+When a report or PR table contains GitHub PR URLs, generate stable per-directory
+install refs before any owner-approved follow-up:
+
+```bash
+node scripts/prepare-directory-surface-refs.js --check path/to/report.md
+node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md
+```
+
+The generator reads local Markdown or stdin only. It does not query GitHub,
+comment, submit, push, or edit PRs. For each PR URL it emits:
+
+- `ACC_INSTALL_REF=gh-<owner>-<repo>`
+- `ACC_INSTALL_SOURCE='ref=...&utm_source=github&utm_campaign=directory_pr&entry=pr-<number>'`
+- an attributed `https://accint.xyz/?...` landing URL
+- POSIX and PowerShell installer snippets
+
+Use these refs only in owner-approved maintainer replies, listing updates, or
+future directory submissions where install examples are welcome. If a catalog
+only allows a plain project URL, prefer the attributed landing URL over a long
+installer command.
