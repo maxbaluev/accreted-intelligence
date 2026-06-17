@@ -1,0 +1,50 @@
+name: Live site attribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      acc_version:
+        description: "Acc release tag/version to audit"
+        required: true
+        default: "v0.1.6"
+      site_url:
+        description: "Live site base URL"
+        required: true
+        default: "https://accint.xyz"
+      strict_live_state:
+        description: "Fail if any live growth hold remains"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static integrity
+        run: bash scripts/check-integrity.sh
+
+      - name: Read-only live growth state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACC_LIVE_SITE_URL: ${{ inputs.site_url }}
+          ACC_VERSION: ${{ inputs.acc_version }}
+          STRICT_LIVE_STATE: ${{ inputs.strict_live_state }}
+        run: |
+          strict=0
+          if [ "$STRICT_LIVE_STATE" = "true" ]; then
+            strict=1
+          fi
+          ACC_LIVE_STATE_STRICT="$strict" scripts/check-growth-live-state.sh "$ACC_VERSION"
+
+      - name: Verify live prompt-copy attribution
+        env:
+          ACC_LIVE_SITE_URL: ${{ inputs.site_url }}
+        run: scripts/check-live-attribution-flow.sh "$ACC_LIVE_SITE_URL"

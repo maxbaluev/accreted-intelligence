@@ -118,6 +118,17 @@ else
   fail=1
 fi
 
+echo "== live growth workflow guard =="
+live_workflow=".github/workflows/live-site-attribution.yml"
+if [ -f "$live_workflow" ] &&
+  grep -q 'scripts/check-live-attribution-flow.sh' "$live_workflow" &&
+  grep -q 'scripts/check-growth-live-state.sh' "$live_workflow"; then
+  note "live site attribution workflow: ok"
+else
+  note "live site attribution workflow: MISSING"
+  fail=1
+fi
+
 echo "== no stale brand / no personal contact =="
 if grep -rIn 'acc4' --include='*.md' --include='*.sh' --include='*.ps1' --include='*.json' --exclude=check-integrity.sh --exclude-dir=.git --exclude-dir=.worktrees . | grep -v 'CHANGELOG.md'; then
   note "FOUND stale 'acc4' references above"; fail=1

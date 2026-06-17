@@ -57,6 +57,7 @@ for f in \
   docs/ops/growth-surfaces.json \
   docs/ops/posthog-dashboard.json \
   docs/ops/social-launch-kit.md \
+  .github/workflows/live-site-attribution.yml \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
   scripts/check-controlled-install-attribution.sh \

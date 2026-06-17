@@ -32,8 +32,8 @@ Default mode is local and read-only:
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
-    MCP Registry workflow dispatch, controlled install, dashboard creation,
-    social launch, and directory follow-up
+    hosted live-site verification, MCP Registry workflow dispatch, controlled
+    install, dashboard creation, social launch, and directory follow-up
 
 It does not push, upload, dispatch, publish, post, or submit anything.
 EOF
@@ -206,15 +206,23 @@ Run these only after explicit owner approval for the named external action.
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
 
-3. Build and verify the local MCPB promotion packet:
+3. Hosted live-site attribution verification after owner approval:
+
+   gh workflow run live-site-attribution.yml --repo $repo \\
+     -f acc_version=$tag \\
+     -f site_url=https://accint.xyz \\
+     -f strict_live_state=false
+   gh run list --workflow live-site-attribution.yml --repo $repo --limit 3
+
+4. Build and verify the local MCPB promotion packet:
 
    scripts/check-mcpb-promotion-packet.sh $tag
 
-4. Upload MCPB release assets after owner approval:
+5. Upload MCPB release assets after owner approval:
 
    ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh $tag
 
-5. Preview and then advance server.json after uploaded assets verify:
+6. Preview and then advance server.json after uploaded assets verify:
 
    scripts/advance-mcpb-server-json.sh $tag dist/server.mcpb-all.json
    ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh $tag dist/server.mcpb-all.json
@@ -223,16 +231,16 @@ Run these only after explicit owner approval for the named external action.
    bash scripts/check-growth-readiness.sh
    git push origin ${branch:-main}
 
-6. Publish MCP Registry metadata after the pushed server.json passes alignment:
+7. Publish MCP Registry metadata after the pushed server.json passes alignment:
 
    gh workflow run publish-mcp.yml --repo $repo
    gh run list --workflow publish-mcp.yml --repo $repo --limit 3
 
-7. Local controlled install attribution proof:
+8. Local controlled install attribution proof:
 
    scripts/check-controlled-install-attribution.sh
 
-8. Live controlled install attribution proof after owner approval:
+9. Live controlled install attribution proof after owner approval:
 
    ACC_INSTALL_REF=controlled-${tag#v} ACC_INSTALL_SOURCE='ref=controlled-rollout' \\
      bash -c 'curl -fsSL https://accint.xyz/install | sh'
@@ -241,21 +249,21 @@ Run these only after explicit owner approval for the named external action.
      ref=controlled-${tag#v}
      source_ref=ref=controlled-rollout
 
-9. Local PostHog dashboard spec proof:
+10. Local PostHog dashboard spec proof:
 
    node scripts/prepare-posthog-dashboard.js --check
    node scripts/prepare-posthog-dashboard.js --print
 
-10. Re-run the full read-only live-state audit:
+11. Re-run the full read-only live-state audit:
 
    scripts/check-growth-live-state.sh $tag
 
-11. Create the PostHog dashboard from:
+12. Create the PostHog dashboard from:
 
    docs/ops/attribution-dashboard.md
    docs/ops/posthog-dashboard.json
 
-12. Prepare owner-approved social launch copy:
+13. Prepare owner-approved social launch copy:
 
    node scripts/check-social-launch-kit.js --check
    node scripts/check-growth-surfaces.js --check
@@ -270,7 +278,7 @@ $report_record_line
    Do not automate HN/X/Reddit posting, commenting, DMs, payment, or account
    identity use.
 
-13. Read-only directory PR follow-up:
+14. Read-only directory PR follow-up:
 
 $directory_pr_command
 $directory_refs_command

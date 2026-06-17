@@ -13,6 +13,7 @@ repo="${ACC_GROWTH_REPO:-maxbaluev/accreted-intelligence}"
 site_url="${ACC_LIVE_SITE_URL:-https://accint.xyz}"
 tag="${1:-}"
 strict="${ACC_LIVE_STATE_STRICT:-0}"
+site_transport_needs_diagnostic=0
 
 holds=0
 skips=0
@@ -81,6 +82,15 @@ import json
 from pathlib import Path
 
 print(json.loads(Path("server.json").read_text()).get("version", ""))
+PY
+)"
+
+site_host="$(
+  SITE_URL="$site_url" python3 - <<'PY'
+import os
+from urllib.parse import urlparse
+
+print(urlparse(os.environ["SITE_URL"]).hostname or "")
 PY
 )"
 
@@ -164,6 +174,7 @@ check_live_page() {
   if [ "$status" = "200" ]; then
     ok "$label returns HTTP 200"
   else
+    site_transport_needs_diagnostic=1
     hold "$label returned HTTP ${status:-<none>}"
     return
   fi
@@ -191,6 +202,85 @@ check_live_page() {
   fi
 }
 
+diagnose_site_transport() {
+  local pages_json status cname html_url https_enforced cert_state pending
+  local records expected_matches tls_probe http_probe
+
+  section "live site transport diagnostics"
+  note "diagnostic only: explains this runner's custom-domain reachability; it does not prove live attribution markers"
+  note "host: ${site_host:-<unknown>}"
+
+  if [ -n "$site_host" ] && command -v gh >/dev/null 2>&1; then
+    pages_json="$(gh api "repos/${repo}/pages" 2>/dev/null || true)"
+    if [ -n "$pages_json" ]; then
+      status="$(json_field "$pages_json" "status")"
+      cname="$(json_field "$pages_json" "cname")"
+      html_url="$(json_field "$pages_json" "html_url")"
+      https_enforced="$(json_field "$pages_json" "https_enforced")"
+      cert_state="$(json_field "$pages_json" "https_certificate.state")"
+      pending="$(json_field "$pages_json" "pending_domain_unverified_at")"
+      note "GitHub Pages status: ${status:-<unknown>}"
+      note "GitHub Pages cname: ${cname:-<unset>}"
+      note "GitHub Pages html_url: ${html_url:-<unset>}"
+      note "GitHub Pages https_enforced: ${https_enforced:-<unknown>}"
+      note "GitHub Pages certificate: ${cert_state:-<unknown>}"
+      if [ -n "$pending" ]; then
+        note "GitHub Pages pending_domain_unverified_at: $pending"
+      fi
+      if [ "$status" = "built" ] && [ "$https_enforced" = "true" ] && [ "$cert_state" = "approved" ]; then
+        ok "GitHub Pages reports built custom domain with approved enforced HTTPS"
+      fi
+    else
+      note "GitHub Pages API unavailable for diagnostics"
+    fi
+  fi
+
+  if [ -n "$site_host" ] && command -v dig >/dev/null 2>&1; then
+    records="$(dig +short "$site_host" A 2>/dev/null | sort)"
+    if [ -n "$records" ]; then
+      note "A records: $(printf '%s\n' "$records" | tr '\n' ' ' | sed 's/ $//')"
+      expected_matches="$(
+        printf '%s\n' "$records" |
+          grep -Ec '^(185\.199\.108\.153|185\.199\.109\.153|185\.199\.110\.153|185\.199\.111\.153)$' ||
+          true
+      )"
+      if [ "$expected_matches" -eq 4 ]; then
+        ok "apex A records match GitHub Pages"
+      fi
+    else
+      note "A records: <none>"
+    fi
+  fi
+
+  if [ -n "$site_host" ] && command -v openssl >/dev/null 2>&1; then
+    tls_probe="$(
+      timeout 10 openssl s_client -connect "${site_host}:443" -servername "$site_host" -brief </dev/null 2>&1 |
+        sed -n '1,4p' ||
+        true
+    )"
+    printf '%s\n' "$tls_probe" | sed 's/^/  TLS probe: /'
+    case "$tls_probe" in
+      *"CONNECTION ESTABLISHED"*) ok "local TLS probe completes for $site_host" ;;
+      *"unexpected eof"*) note "local TLS probe ended with unexpected EOF before a certificate was served" ;;
+      *) note "local TLS probe did not complete cleanly" ;;
+    esac
+  fi
+
+  if [ -n "$site_host" ] && command -v curl >/dev/null 2>&1; then
+    http_probe="$(
+      curl -Is --connect-timeout 10 --max-time 20 "http://${site_host}/" 2>/dev/null |
+        tr -d '\r' |
+        sed -n '1,6p' ||
+        true
+    )"
+    if [ -n "$http_probe" ]; then
+      printf '%s\n' "$http_probe" | sed 's/^/  HTTP probe: /'
+    else
+      note "HTTP probe: <no headers>"
+    fi
+  fi
+}
+
 if command -v curl >/dev/null 2>&1; then
   section "live site attribution markers"
   check_live_page \
@@ -210,6 +300,10 @@ if command -v curl >/dev/null 2>&1; then
 else
   section "live site attribution markers"
   skip "curl not found; cannot read live site"
+fi
+
+if [ "$site_transport_needs_diagnostic" -eq 1 ]; then
+  diagnose_site_transport
 fi
 
 section "live prompt-copy attribution flow"

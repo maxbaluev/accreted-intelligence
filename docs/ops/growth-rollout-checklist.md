@@ -147,6 +147,24 @@ a temp directory and reuses the static attribution verifier, proving live prompt
 copies carry `ACC_INSTALL_REF`, `ACC_INSTALL_SOURCE`, and the source-only
 fallback.
 
+If the local network path cannot fetch the custom domain, run the hosted
+read-only verifier after the workflow file is pushed:
+
+```bash
+gh workflow run live-site-attribution.yml \
+  --repo maxbaluev/accreted-intelligence \
+  -f acc_version=v<tag> \
+  -f site_url=https://accint.xyz \
+  -f strict_live_state=false
+gh run list --workflow live-site-attribution.yml \
+  --repo maxbaluev/accreted-intelligence \
+  --limit 3
+```
+
+That workflow runs the live prompt-copy attribution verifier from a GitHub-hosted
+runner, then prints the advisory full live growth audit. Keep
+`strict_live_state=false` while Glama/punkpeye are still expected holds.
+
 Also run a browser copy check if possible: copy the hero agent prompt and confirm
 the copied text contains `ACC_INSTALL_REF=<install_ref>` plus
 `ACC_INSTALL_SOURCE='ref=...'` / `utm_source=...` on POSIX, and matching
