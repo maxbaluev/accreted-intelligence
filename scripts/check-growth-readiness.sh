@@ -58,6 +58,7 @@ for f in \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
   scripts/check-controlled-install-attribution.sh \
+  scripts/check-directory-pr-state.sh \
   scripts/check-growth-live-state.sh \
   scripts/check-live-attribution-flow.sh \
   scripts/check-mcpb-release-assets.sh \

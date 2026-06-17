@@ -195,7 +195,9 @@ After public push and site verification:
    `punkpeye/awesome-mcp-servers#8091` with the badge required by that repo.
 4. Use `docs/ops/directory-listing.md` for future directory/list submissions
    and reviewer replies.
-5. Do not retry lists that rejected the private-engine boundary unless the
+5. Audit tracked PR state without posting:
+   `scripts/check-directory-pr-state.sh path/to/report.md`.
+6. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
 ## Docker registry lane

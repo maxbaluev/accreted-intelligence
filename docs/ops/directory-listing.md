@@ -151,3 +151,23 @@ later use the ref as the anonymous `distinct_id` only if telemetry is enabled.
    closed source.
 4. New links resolve: GitHub repo, website, and any skill/plugin path used.
 5. The submission uses exactly one entry in the most specific matching section.
+
+## Follow-up audit
+
+After submissions are open, use the read-only PR state checker to find merges,
+closures, failing checks, or maintainer action without posting anything:
+
+```bash
+scripts/check-directory-pr-state.sh path/to/report.md
+```
+
+For a Markdown table or ad hoc list, pipe only the relevant rows:
+
+```bash
+sed -n '/^| # | List |/,/^$/p' path/to/report.md | scripts/check-directory-pr-state.sh -
+```
+
+The checker prints current open/merged/closed counts, check status summaries,
+and attention items. It is advisory by default; set
+`ACC_DIRECTORY_PR_STRICT=1` only when a nonzero exit on attention items is
+useful.

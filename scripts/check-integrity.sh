@@ -15,6 +15,7 @@ for f in \
   scripts/acc-docker.sh \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-controlled-install-attribution.sh \
+  scripts/check-directory-pr-state.sh \
   scripts/check-growth-live-state.sh \
   scripts/check-growth-readiness.sh \
   scripts/check-live-attribution-flow.sh \
