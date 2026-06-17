@@ -26,6 +26,7 @@ from the separate `maxbaluev/accreted-intelligence` clone.
 These checks are local and safe:
 
 ```bash
+bash scripts/check-growth-readiness.sh
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -37,6 +38,7 @@ Expected state:
 
 - working tree is clean
 - branch is ahead only by intended public commits
+- `scripts/check-growth-readiness.sh` passes
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
