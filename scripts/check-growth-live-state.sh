@@ -111,6 +111,12 @@ else
   else
     name="$(json_field "$repo_json" "nameWithOwner")"
     license="$(json_field "$repo_json" "licenseInfo.spdxId")"
+    if [ -z "$license" ]; then
+      license="$(json_field "$repo_json" "licenseInfo.key")"
+    fi
+    case "$license" in
+      apache-2.0) license="Apache-2.0" ;;
+    esac
     homepage="$(json_field "$repo_json" "homepageUrl")"
     topics="$(
       JSON_INPUT="$repo_json" python3 - <<'PY'
