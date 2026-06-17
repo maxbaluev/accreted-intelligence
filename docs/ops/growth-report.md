@@ -33,7 +33,7 @@ Last receipt refresh: 2026-06-17.
   Glama search for `accint` still did not show AccInt at refresh.
 - `punkpeye/awesome-mcp-servers#8091` now has the Glama badge row on the owned
   branch at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91`, but the upstream PR
-  remains open with GitHub merge status `UNSTABLE`. Wait for maintainer/check
+  remains open with GitHub merge status `CLEAN`. Wait for maintainer/check
   movement and do not comment merely to bump visibility.
 - Hacker News still requires password-based login/registration before posting.
 - Reddit r/LocalLLaMA submission was attempted under the logged-in account
@@ -57,7 +57,7 @@ Last receipt refresh: 2026-06-17.
 | 2026-06-17 | Hosted live verifier | `live-site-attribution.yml` | `https://github.com/maxbaluev/accreted-intelligence/actions/runs/27691022310` | Passed live attribution and LLM discovery checks. |
 | 2026-06-17 | Controlled live install | `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1 scripts/run-approved-controlled-live-install.sh v0.1.6` | `ref=controlled-0.1.6`; `source_ref=ref=controlled-rollout`; `captured_at_utc=2026-06-17T13:05:33Z` | Passed against the live installer stop path. |
 | 2026-06-17 | Glama MCP Registry | `https://glama.ai/mcp/servers/maxbaluev/accreted-intelligence` | Submitted for review via Google OAuth as `maxbaluev@outlook.com` | Direct listing and score badge verify; search still missed AccInt at refresh. |
-| 2026-06-17 | punkpeye PR badge follow-up | `https://github.com/punkpeye/awesome-mcp-servers/pull/8091` | Owned branch pushed at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91` | Glama badge row added; no PR comment posted; PR remains open. |
+| 2026-06-17 | punkpeye PR badge follow-up | `https://github.com/punkpeye/awesome-mcp-servers/pull/8091` | Owned branch pushed at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91` | Glama badge row added; no PR comment posted; PR remains open with clean merge state. |
 | 2026-06-17 | Reddit LocalLLaMA | `https://www.reddit.com/r/LocalLLaMA/submit/` | No published URL | Attempted, but not confirmed published after Rule 4 warning; no social receipt row. |
 
 ## Tracked directory/listing PRs
