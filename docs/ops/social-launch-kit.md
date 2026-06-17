@@ -17,6 +17,7 @@ Before any post goes live:
 bash scripts/check-growth-readiness.sh
 scripts/check-growth-live-state.sh v<tag>
 scripts/check-live-attribution-flow.sh https://accint.xyz
+scripts/check-live-llms-discovery.sh https://accint.xyz
 node scripts/check-site-metadata.js
 node scripts/check-growth-surfaces.js --check
 node scripts/check-social-launch-kit.js --check
@@ -29,6 +30,8 @@ Post only after these are true:
 - `scripts/check-growth-readiness.sh` passes in the public clone.
 - `scripts/check-live-attribution-flow.sh https://accint.xyz` passes against
   the deployed site.
+- `scripts/check-live-llms-discovery.sh https://accint.xyz` proves the deployed
+  site advertises and serves the `llms.txt` agent-discovery surface.
 - GitHub detects the public repo license as Apache-2.0.
 - The live site serves `ACC_INSTALL_REF` and `ACC_INSTALL_SOURCE` prompt-copy
   attribution.
@@ -239,6 +242,7 @@ node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published
 node scripts/prepare-social-launch-packet.js --reply-packet hn-show
 scripts/check-directory-pr-state.sh path/to/report.md
 scripts/check-growth-live-state.sh v<tag>
+scripts/check-live-llms-discovery.sh https://accint.xyz
 ```
 
 Do not reply just to bump visibility. Reply only when there is a concrete
