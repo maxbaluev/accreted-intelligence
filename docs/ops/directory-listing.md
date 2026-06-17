@@ -178,8 +178,8 @@ When the official registry/MCPB proof or install attribution should be included
 in a maintainer reply, generate a local review packet first:
 
 ```bash
-node scripts/prepare-directory-followup-kit.js --check path/to/report.md
-node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md
+node scripts/prepare-directory-followup-kit.js --check --actionable path/to/report.md
+node scripts/prepare-directory-followup-kit.js --markdown --actionable path/to/report.md
 ```
 
 The kit reads local Markdown or stdin only. It does not query GitHub, post

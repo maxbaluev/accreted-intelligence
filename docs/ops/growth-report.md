@@ -44,7 +44,7 @@ Intelligence mentions. Status can drift; verify with:
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md
-node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md
+node scripts/prepare-directory-followup-kit.js --check --actionable docs/ops/growth-report.md
 node scripts/prepare-glama-submission-packet.js --check v0.1.6
 ```
 
@@ -117,7 +117,7 @@ node scripts/prepare-growth-approval-brief.js --markdown v0.1.6
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md
-node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md
+node scripts/prepare-directory-followup-kit.js --markdown --actionable docs/ops/growth-report.md
 node scripts/prepare-glama-submission-packet.js --form-packet v0.1.6
 ```
 

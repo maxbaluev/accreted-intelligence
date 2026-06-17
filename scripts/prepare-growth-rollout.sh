@@ -91,13 +91,13 @@ if [ -n "$growth_report" ]; then
   directory_pr_command="   scripts/check-directory-pr-state.sh \"$growth_report\""
   directory_priority_command="   node scripts/prepare-directory-priority-report.js --markdown \"$growth_report\""
   directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown \"$growth_report\""
-  directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown \"$growth_report\""
+  directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown --actionable \"$growth_report\""
 else
   report_record_line="   Record published URLs and refs in the growth report."
   directory_pr_command="   scripts/check-directory-pr-state.sh path/to/report.md"
   directory_priority_command="   node scripts/prepare-directory-priority-report.js --markdown path/to/report.md"
   directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md"
-  directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md"
+  directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown --actionable path/to/report.md"
 fi
 
 echo "== local growth readiness =="
@@ -226,7 +226,7 @@ fi
 echo
 echo "== directory follow-up kit pre-live proof =="
 if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
-  node scripts/prepare-directory-followup-kit.js --check "$growth_report"
+  node scripts/prepare-directory-followup-kit.js --check --actionable "$growth_report"
 elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else

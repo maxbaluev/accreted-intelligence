@@ -68,7 +68,7 @@ node scripts/check-growth-surfaces.js --check
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md
-node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md
+node scripts/prepare-directory-followup-kit.js --check --actionable docs/ops/growth-report.md
 node scripts/prepare-glama-submission-packet.js --check v<tag>
 git status --short --branch
 git log --oneline origin/main..HEAD
@@ -142,7 +142,7 @@ Expected state:
   checks, and known blockers without posting
 - `node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md`
   passes for the tracked directory/list PR table
-- `node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md`
+- `node scripts/prepare-directory-followup-kit.js --check --actionable docs/ops/growth-report.md`
   passes for the tracked directory/list PR table and prepares owner-reviewable
   maintainer-note drafts without posting
 - `node scripts/prepare-glama-submission-packet.js --check v<tag>` passes and
@@ -379,7 +379,7 @@ After public push and site verification:
    `node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md`.
 9. Prepare owner-reviewable registry/source-boundary follow-up notes without
    posting:
-   `node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md`.
+   `node scripts/prepare-directory-followup-kit.js --markdown --actionable docs/ops/growth-report.md`.
 10. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 

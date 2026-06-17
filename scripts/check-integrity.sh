@@ -160,6 +160,12 @@ if command -v node >/dev/null 2>&1; then
     note "directory follow-up kit: FAIL"
     fail=1
   fi
+  if printf '%s\n' '| # | List | Area | State at refresh | PR | Last update | Note |' '|---|---|---|---|---|---|---|' '| 1 | example/list | MCP directory | open | https://github.com/example/list/pull/1 | 2026-06-17T00:00:00Z | Failing checks; inspect before any owner-approved fix or reply. |' | node scripts/prepare-directory-followup-kit.js --check --actionable - >/dev/null; then
+    note "actionable directory follow-up kit: ok"
+  else
+    note "actionable directory follow-up kit: FAIL"
+    fail=1
+  fi
 else
   note "node: MISSING (required for growth/directory surface verifiers)"
   fail=1

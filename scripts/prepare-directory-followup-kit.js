@@ -18,13 +18,17 @@ function usage() {
 
 Examples:
   node scripts/prepare-directory-followup-kit.js --check /path/to/NIGHT-REPORT.md
-  node scripts/prepare-directory-followup-kit.js --markdown /path/to/NIGHT-REPORT.md
+  node scripts/prepare-directory-followup-kit.js --markdown --actionable /path/to/NIGHT-REPORT.md
   sed -n '/^| # | List |/,/^$/p' report.md | node scripts/prepare-directory-followup-kit.js --json -
 
 Modes:
   --check     validate the extracted follow-up kit and print a compact summary
   --markdown  print owner-reviewable maintainer notes
   --json      print structured rows
+
+Options:
+  --actionable  keep only open rows with a current follow-up signal such as a
+                Glama blocker, review blocker, failing checks, or recent update
 
 Output is review material only. Do not post, comment, submit, push, or edit a
 directory/listing from this output without explicit owner approval for that
@@ -130,6 +134,38 @@ function rowSection(cells, url) {
   return "";
 }
 
+function rowNote(cells, url) {
+  const urlIndex = cells.findIndex((cell) => cell.includes(url));
+  if (urlIndex >= 0 && cells.length > urlIndex + 2) {
+    return cleanCell(cells[cells.length - 1]);
+  }
+  return "";
+}
+
+function actionability(row) {
+  const state = String(row.section || "").toLowerCase();
+  const note = String(row.context_note || "").toLowerCase();
+  if (state.includes("merged")) {
+    return { actionable: false, reason: "merged listing; monitor only" };
+  }
+  if (state.includes("closed")) {
+    return { actionable: false, reason: "closed listing; do not retry without policy change" };
+  }
+  if (note.includes("review required") || note.includes("merge blocked")) {
+    return { actionable: true, reason: "review or merge blocker" };
+  }
+  if (note.includes("failing checks")) {
+    return { actionable: true, reason: "failing checks" };
+  }
+  if (note.includes("blocked")) {
+    return { actionable: true, reason: "blocked prerequisite" };
+  }
+  if (note.includes("recently updated")) {
+    return { actionable: true, reason: "recent maintainer-side activity" };
+  }
+  return { actionable: false, reason: "watch-only row; hold for maintainer signal" };
+}
+
 function registryFacts() {
   const server = readJson("server.json");
   const name = server.name;
@@ -204,10 +240,12 @@ function extractRows(text, registry) {
         number,
         pr_url: url,
         section: rowSection(cells, url),
+        context_note: rowNote(cells, url),
         ref,
         source,
         landing_url: landingUrl(source),
       };
+      row.actionability = actionability(row);
       row.note = maintainerNote(row, registry);
       byUrl.set(url, row);
     }
@@ -216,10 +254,21 @@ function extractRows(text, registry) {
   return [...byUrl.values()];
 }
 
-function printMarkdown(rows, registry) {
-  console.log("# Directory Follow-up Kit");
+function filterRows(rows, options) {
+  if (!options.actionable) {
+    return rows;
+  }
+  return rows.filter((row) => row.actionability.actionable);
+}
+
+function printMarkdown(rows, registry, options) {
+  console.log(options.actionable ? "# Actionable Directory Follow-up Kit" : "# Directory Follow-up Kit");
   console.log();
   console.log("READ ONLY: this output is owner-review material. Do not post, comment, submit, push, or edit any directory/listing unless the owner explicitly approves that exact target.");
+  if (options.actionable) {
+    console.log();
+    console.log("Filtered to open rows with current follow-up signals. Watch-only, merged, and closed rows are intentionally omitted to avoid low-signal bumps.");
+  }
   console.log();
   console.log("## Registry Proof");
   console.log();
@@ -232,6 +281,12 @@ function printMarkdown(rows, registry) {
     console.log(`## ${row.target}`);
     console.log();
     console.log(`- PR: ${row.pr_url}`);
+    if (row.context_note) {
+      console.log(`- Growth report note: ${row.context_note}`);
+    }
+    if (options.actionable) {
+      console.log(`- Actionability: ${row.actionability.reason}`);
+    }
     console.log(`- Ref: \`${row.ref}\``);
     console.log(`- Source: \`${row.source}\``);
     console.log(`- Attributed landing URL: ${row.landing_url}`);
@@ -245,14 +300,16 @@ function printMarkdown(rows, registry) {
   }
 }
 
-function printCheck(rows, registry) {
+function printCheck(rows, registry, options, totalRows) {
   console.log("DIRECTORY FOLLOW-UP KIT: PASS");
   console.log(`  registry: ${registry.name}`);
   console.log(`  version: ${registry.version}`);
   console.log(`  MCPB packages: ${registry.package_count}`);
-  console.log(`  PR URLs: ${rows.length}`);
+  console.log(`  filter: ${options.actionable ? "actionable" : "all"}`);
+  console.log(`  PR URLs: ${rows.length}${options.actionable ? ` of ${totalRows}` : ""}`);
   rows.slice(0, 5).forEach((row) => {
-    console.log(`  ${row.ref}: ${row.repo}#${row.number}`);
+    const suffix = options.actionable ? ` (${row.actionability.reason})` : "";
+    console.log(`  ${row.ref}: ${row.repo}#${row.number}${suffix}`);
   });
   if (rows.length > 5) {
     console.log(`  ... ${rows.length - 5} more`);
@@ -261,29 +318,37 @@ function printCheck(rows, registry) {
 
 let mode = "--check";
 const args = process.argv.slice(2);
-if (args[0] === "-h" || args[0] === "--help") {
-  usage();
-  process.exit(0);
+const options = { actionable: false };
+const inputs = [];
+for (const arg of args) {
+  if (arg === "-h" || arg === "--help") {
+    usage();
+    process.exit(0);
+  } else if (["--check", "--markdown", "--json"].includes(arg)) {
+    mode = arg;
+  } else if (arg === "--actionable") {
+    options.actionable = true;
+  } else {
+    inputs.push(arg);
+  }
 }
-if (["--check", "--markdown", "--json"].includes(args[0])) {
-  mode = args.shift();
-}
-if (!["--check", "--markdown", "--json"].includes(mode) || args.length === 0) {
+if (!["--check", "--markdown", "--json"].includes(mode) || inputs.length === 0) {
   usage();
   process.exit(2);
 }
 
 const registry = registryFacts();
-const text = args.map(read).join("\n");
-const rows = extractRows(text, registry);
+const text = inputs.map(read).join("\n");
+const allRows = extractRows(text, registry);
+const rows = filterRows(allRows, options);
 if (!rows.length) {
-  die("no GitHub PR URLs found");
+  die(options.actionable ? "no actionable GitHub PR URLs found" : "no GitHub PR URLs found");
 }
 
 if (mode === "--json") {
-  console.log(JSON.stringify({ schema_version: 1, registry, rows }, null, 2));
+  console.log(JSON.stringify({ schema_version: 1, filter: options, total_rows: allRows.length, registry, rows }, null, 2));
 } else if (mode === "--markdown") {
-  printMarkdown(rows, registry);
+  printMarkdown(rows, registry, options);
 } else {
-  printCheck(rows, registry);
+  printCheck(rows, registry, options, allRows.length);
 }

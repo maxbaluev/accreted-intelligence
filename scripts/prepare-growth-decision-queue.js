@@ -282,7 +282,7 @@ function buildQueue(brief, tag) {
       action: "Review directory follow-up by priority",
       status: "ready_local_packet_owner_approval_for_any_reply",
       owner_decision: "Use the generated packet to choose exact maintainer replies or hold.",
-      command: `scripts/check-directory-pr-state.sh ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-priority-report.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-surface-refs.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-followup-kit.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}`,
+      command: `scripts/check-directory-pr-state.sh ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-priority-report.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-surface-refs.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-followup-kit.js --markdown --actionable ${brief.growth_report || "docs/ops/growth-report.md"}`,
       guard: "Read-only packet; no comments, edits, or PR pushes without target-specific owner approval",
       depends_on: [
         "step 2 verified live attribution for any claim about live install copy",
