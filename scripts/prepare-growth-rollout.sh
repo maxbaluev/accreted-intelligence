@@ -34,6 +34,7 @@ Default mode is local and read-only:
   - prints the approval-gated push + hosted live-site verifier command
   - prints the approval-gated controlled live install receipt verifier command
   - prints the approval-gated PostHog dashboard shell creation command
+  - prints the approval-gated PostHog funnel readout command
   - prints the owner-approval commands for MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
     social launch, and directory follow-up
@@ -141,6 +142,10 @@ node scripts/prepare-posthog-dashboard.js --check
 echo
 echo "== PostHog dashboard creation helper =="
 scripts/run-approved-posthog-dashboard.sh
+
+echo
+echo "== PostHog funnel readout helper =="
+scripts/run-approved-posthog-funnel-check.sh
 
 echo
 echo "== MCPB promotion packet pre-live proof =="
@@ -299,7 +304,24 @@ Run these only after explicit owner approval for the named external action.
    docs/ops/posthog-dashboard.json in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 
-13. Prepare owner-approved social launch copy:
+13. Read the PostHog growth funnel after the dashboard and controlled install:
+
+   scripts/run-approved-posthog-funnel-check.sh
+   POSTHOG_HOST=https://us.posthog.com \\
+   POSTHOG_PROJECT_ID=<project-id> \\
+   POSTHOG_PERSONAL_API_KEY=<personal-api-key> \\
+   ACC_APPROVE_POSTHOG_QUERY=1 \\
+     scripts/run-approved-posthog-funnel-check.sh
+
+   Optional controlled probe:
+
+   ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page> \\
+     ACC_APPROVE_POSTHOG_QUERY=1 scripts/run-approved-posthog-funnel-check.sh
+
+   Use this aggregate readout to rank surfaces by attributed first runs and
+   activation, not by copy events alone.
+
+14. Prepare owner-approved social launch copy:
 
    node scripts/check-social-launch-kit.js --check
    node scripts/check-growth-surfaces.js --check
@@ -314,12 +336,12 @@ $report_record_line
    Do not automate HN/X/Reddit posting, commenting, DMs, payment, or account
    identity use.
 
-14. Read-only directory PR follow-up:
+15. Read-only directory PR follow-up:
 
 $directory_pr_command
 $directory_refs_command
 
-15. punkpeye Glama badge follow-up after a real Glama listing exists:
+16. punkpeye Glama badge follow-up after a real Glama listing exists:
 
    scripts/prepare-punkpeye-glama-followup.sh
    ACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh

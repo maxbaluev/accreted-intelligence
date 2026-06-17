@@ -22,6 +22,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - MCPB promotion packet verifier
 - materialized PostHog dashboard spec
 - approval-gated PostHog dashboard shell helper
+- approval-gated PostHog growth funnel readout helper
 - attribution dashboard/runbook docs
 - social launch kit
 - growth surface ref manifest
@@ -50,6 +51,7 @@ scripts/check-install-surface.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
 scripts/run-approved-posthog-dashboard.sh
+scripts/run-approved-posthog-funnel-check.sh
 scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
 node scripts/check-growth-surfaces.js --check
@@ -92,6 +94,10 @@ Expected state:
   mode it creates only the dashboard shell and a markdown setup tile through
   documented PostHog dashboard endpoints; insight tiles are still created from
   `docs/ops/posthog-dashboard.json` in the PostHog UI
+- `scripts/run-approved-posthog-funnel-check.sh` prints `DRY RUN COMPLETE`
+  unless `ACC_APPROVE_POSTHOG_QUERY=1` plus PostHog env vars are set. In
+  approved mode it runs small aggregate HogQL queries through the documented
+  PostHog Query API and does not export raw event rows or mutate PostHog
 - `scripts/check-mcpb-promotion-packet.sh v<tag>` passes and proves the local
   MCPB upload bundle, generated registry metadata, and mutation guards before
   release upload/server metadata advance
@@ -245,6 +251,7 @@ binary release are live. The materialized local spec is
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/prepare-posthog-dashboard.js --print
 scripts/run-approved-posthog-dashboard.sh
+scripts/run-approved-posthog-funnel-check.sh
 ```
 
 Minimum tiles:
@@ -273,6 +280,22 @@ The helper requires a personal API key with `dashboard:read` and
 `dashboard:write`, checks for an existing exact dashboard name first, and does
 not create undocumented insight payloads. Create the five insight tiles from the
 validated spec in the PostHog UI before using the dashboard for decisions.
+
+After the dashboard is created and a controlled live install is run, query the
+aggregate funnel readout:
+
+```bash
+POSTHOG_HOST=https://us.posthog.com \
+POSTHOG_PROJECT_ID=<project-id> \
+POSTHOG_PERSONAL_API_KEY=<personal-api-key> \
+ACC_APPROVE_POSTHOG_QUERY=1 \
+  scripts/run-approved-posthog-funnel-check.sh
+```
+
+Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` when
+checking a specific controlled browser-copy install. The helper requires Query
+Read permission and uses only aggregate `LIMIT`ed HogQL queries; it is not an
+event export path.
 
 ## Directory follow-up
 
@@ -352,6 +375,8 @@ Hold instead of continuing when:
   expected temp receipt
 - PostHog dashboard shell/setup tile cannot be created or the five insight tiles
   are not present before ranking growth surfaces
+- PostHog aggregate funnel readout cannot confirm attributed first runs before
+  deciding which launch/listing surfaces to double down on
 - Glama still has no real listing for the punkpeye badge requirement
 - a target directory requires payment, CAPTCHA, anti-bot bypass, private account
   action, or owner identity input

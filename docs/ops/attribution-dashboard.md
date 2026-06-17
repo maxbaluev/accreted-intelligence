@@ -54,6 +54,7 @@ the live PostHog dashboard, run:
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/prepare-posthog-dashboard.js --print
 scripts/run-approved-posthog-dashboard.sh
+scripts/run-approved-posthog-funnel-check.sh
 ```
 
 This is local-only: it validates and prints the dashboard shape without calling
@@ -74,6 +75,21 @@ The helper requires `dashboard:read` and `dashboard:write`, checks for an
 existing exact dashboard name before creating a new shell, and does not create
 undocumented insight payloads. Add the five insight tiles below from the
 validated spec in the PostHog UI.
+
+After the live dashboard exists and a controlled install has been run, read the
+aggregate funnel:
+
+```bash
+POSTHOG_HOST=https://us.posthog.com \
+POSTHOG_PROJECT_ID=<project-id> \
+POSTHOG_PERSONAL_API_KEY=<personal-api-key> \
+ACC_APPROVE_POSTHOG_QUERY=1 \
+  scripts/run-approved-posthog-funnel-check.sh
+```
+
+Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` to
+verify one controlled browser-copy install. This uses the documented PostHog
+Query API for small aggregate HogQL readouts; it is not an event export path.
 
 ### 1. Copy to first run funnel
 
