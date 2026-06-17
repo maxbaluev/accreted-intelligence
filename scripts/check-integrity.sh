@@ -234,9 +234,12 @@ fi
 echo "== live growth workflow guard =="
 live_workflow=".github/workflows/live-site-attribution.yml"
 if [ -f "$live_workflow" ] &&
+  grep -q 'Verify live attribution and PostHog proxy' "$live_workflow" &&
   grep -q 'scripts/check-live-attribution-flow.sh' "$live_workflow" &&
   grep -q 'scripts/check-live-llms-discovery.sh' "$live_workflow" &&
   grep -q 'scripts/check-growth-live-state.sh' "$live_workflow" &&
+  grep -q 'PostHog proxy SDK markers' scripts/check-live-attribution-flow.sh &&
+  grep -q 'https://it.accint.xyz' docs/ops/growth-rollout-checklist.md &&
   grep -q 'scripts/check-live-llms-discovery.sh' scripts/check-growth-live-state.sh &&
   grep -q 'data-share-surface=\\"visitor-share\\"' scripts/check-growth-live-state.sh &&
   grep -q 'data-share-surface=\\"reddit-share\\"' scripts/check-growth-live-state.sh &&

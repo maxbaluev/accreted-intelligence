@@ -230,6 +230,8 @@ curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
+curl -fsSL https://accint.xyz/ | grep -F "https://it.accint.xyz"
+curl -fsSL https://accint.xyz/reddit/ | grep -F "https://it.accint.xyz"
 curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
 curl -fsSL https://accint.xyz/reddit/ | grep -F 'data-share-surface="reddit-share"'
 curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
@@ -244,7 +246,8 @@ scripts/check-live-llms-discovery.sh https://accint.xyz
 `scripts/check-live-attribution-flow.sh` downloads served home/Reddit HTML into
 a temp directory and reuses the static attribution verifier, proving live prompt
 copies carry `ACC_INSTALL_REF`, `ACC_INSTALL_SOURCE`, and the source-only
-fallback, and proving the home and Reddit pages serve tracked owned-share URLs.
+fallback, proving the home and Reddit pages serve tracked owned-share URLs, and
+proving both pages route browser SDK traffic through the managed PostHog proxy.
 
 If the local network path cannot fetch the custom domain, run the hosted
 read-only verifier after the workflow file is pushed:

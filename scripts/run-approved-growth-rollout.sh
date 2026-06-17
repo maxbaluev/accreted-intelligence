@@ -145,7 +145,12 @@ These are the only external mutations this script can perform when approved:
     -f site_url=$site_url \\
     -f strict_live_state=$strict_live_state
 
-Read-only follow-up:
+Read-only follow-up after deployment is visible:
+
+  scripts/check-growth-live-state.sh $tag
+  scripts/check-live-attribution-flow.sh $site_url
+  scripts/check-live-llms-discovery.sh $site_url
+  node scripts/check-site-metadata.js
 
   gh run list --workflow live-site-attribution.yml --repo $repo --limit 3
 
@@ -196,4 +201,11 @@ cat <<EOF
 APPROVED ROLLOUT SUBMITTED.
 No posts, comments, directory submissions, release uploads, registry publishes,
 or dashboard mutations were performed.
+
+Next read-only verification after the site deploy is visible:
+
+  scripts/check-growth-live-state.sh $tag
+  scripts/check-live-attribution-flow.sh $site_url
+  scripts/check-live-llms-discovery.sh $site_url
+  node scripts/check-site-metadata.js
 EOF

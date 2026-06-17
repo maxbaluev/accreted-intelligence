@@ -6,7 +6,7 @@ posting. Do not post, submit, comment, DM, pay, or use an account identity from
 this checklist unless the owner explicitly approves that exact external action.
 
 Use this after the public growth bundle is pushed and the live site deploy
-passes the attribution checks in
+passes the attribution, PostHog proxy, and discovery checks in
 [`growth-rollout-checklist.md`](growth-rollout-checklist.md).
 
 ## Preflight
@@ -29,7 +29,7 @@ Post only after these are true:
 
 - `scripts/check-growth-readiness.sh` passes in the public clone.
 - `scripts/check-live-attribution-flow.sh https://accint.xyz` passes against
-  the deployed site.
+  the deployed site, including the managed PostHog proxy markers.
 - `scripts/check-live-llms-discovery.sh https://accint.xyz` proves the deployed
   site advertises and serves the `llms.txt` agent-discovery surface.
 - GitHub detects the public repo license as Apache-2.0.

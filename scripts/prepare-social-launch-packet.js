@@ -418,7 +418,7 @@ function printDecisionPacket(rows) {
   console.log();
   console.log("## Recommended First Launch");
   console.log();
-  console.log("Start with `Show HN` after the live attribution and LLM discovery verifiers pass. It is the broadest standalone technical launch in the checked packet, has a short title, and sends traffic through a single attributed landing URL.");
+  console.log("Start with `Show HN` after the live attribution, PostHog proxy, and LLM discovery verifiers pass. It is the broadest standalone technical launch in the checked packet, has a short title, and sends traffic through a single attributed landing URL.");
   console.log();
   console.log(`- Surface ref: \`${showHn.id}\``);
   console.log(`- Attributed landing URL: ${showHn.landing_url}`);
@@ -435,7 +435,7 @@ function printDecisionPacket(rows) {
   console.log();
   console.log("| Priority | Target | Use when | Surface ref |");
   console.log("|---:|---|---|---|");
-  console.log(`| 1 | Show HN | Broad technical launch after live attribution and LLM discovery pass | \`${showHn.id}\` |`);
+  console.log(`| 1 | Show HN | Broad technical launch after live attribution, PostHog proxy, and LLM discovery pass | \`${showHn.id}\` |`);
   console.log(`| 2 | Reddit LocalLLaMA | You want technical critique of local memory/scoring from local-LLM users | \`${localLlama.id}\` |`);
   console.log(`| 3 | X launch thread | The owner account has relevant AI/coding-agent audience | \`${xThread.id}\` |`);
   console.log(`| 4 | Reddit ClaudeAI | Relevant existing Claude thread or explicit owner-approved standalone post | \`${claudeAi.id}\` |`);

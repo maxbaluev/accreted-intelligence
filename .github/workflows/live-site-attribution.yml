@@ -44,7 +44,7 @@ jobs:
           fi
           ACC_LIVE_STATE_STRICT="$strict" scripts/check-growth-live-state.sh "$ACC_VERSION"
 
-      - name: Verify live prompt-copy attribution
+      - name: Verify live attribution and PostHog proxy
         env:
           ACC_LIVE_SITE_URL: ${{ inputs.site_url }}
         run: scripts/check-live-attribution-flow.sh "$ACC_LIVE_SITE_URL"
