@@ -123,7 +123,11 @@ Expected state:
 - `node scripts/prepare-social-launch-packet.js --check` passes and turns the
   HN/X/Reddit launch copy into exact owner-review packets without posting
 - `node scripts/prepare-growth-approval-brief.js --check v<tag>` passes and
-  prints the compact decision packet without running any external action
+  prints the compact approval packet without running any external action
+- `node scripts/prepare-growth-decision-queue.js --check v<tag>` passes and
+  turns the approval actions into a dependency-aware critical path
+- `node scripts/prepare-growth-owner-handoff.js --check v<tag>` passes and
+  reduces the current owner ask to a one-page handoff
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
   refs, attributed landing URLs, README install attribution, install snippets,
   and page prompt-copy source keys stay aligned
@@ -155,9 +159,10 @@ Stop here unless the owner explicitly authorizes the public push/deploy/release
 step. After approval, keep each action separate and verify before continuing.
 The dry-run packet printed by `scripts/prepare-growth-rollout.sh` is the
 canonical command list; copy from it rather than reconstructing the sequence.
-For a concise owner decision queue and the exact approval commands, run:
+For a one-page owner handoff, dependency queue, and exact approval commands, run:
 
 ```bash
+node scripts/prepare-growth-owner-handoff.js --markdown v<tag>
 node scripts/prepare-growth-decision-queue.js --markdown v<tag>
 node scripts/prepare-growth-approval-brief.js --markdown v<tag>
 ```

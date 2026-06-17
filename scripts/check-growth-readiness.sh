@@ -77,6 +77,7 @@ for f in \
   scripts/check-social-launch-kit.js \
   scripts/prepare-growth-approval-brief.js \
   scripts/prepare-growth-decision-queue.js \
+  scripts/prepare-growth-owner-handoff.js \
   scripts/prepare-glama-submission-packet.js \
   scripts/prepare-social-launch-packet.js \
   scripts/prepare-directory-priority-report.js \

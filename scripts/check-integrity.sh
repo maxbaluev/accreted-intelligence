@@ -120,6 +120,13 @@ if command -v node >/dev/null 2>&1; then
     note "growth decision queue: FAIL"
     fail=1
   fi
+  if node --check scripts/prepare-growth-owner-handoff.js >/dev/null &&
+    node scripts/prepare-growth-owner-handoff.js --check >/dev/null; then
+    note "growth owner handoff: ok"
+  else
+    note "growth owner handoff: FAIL"
+    fail=1
+  fi
   if [ -f scripts/prepare-directory-priority-report.js ] && node --check scripts/prepare-directory-priority-report.js >/dev/null; then
     note "directory priority report syntax: ok"
   else

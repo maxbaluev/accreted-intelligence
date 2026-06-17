@@ -31,6 +31,7 @@ Default mode is local and read-only:
   - verifies the owner-reviewable social launch packet
   - verifies the compact owner approval brief
   - verifies the dependency-aware owner decision queue
+  - verifies the one-page owner growth handoff
   - verifies growth surface refs and attributed landing URLs
   - builds and verifies the local MCPB promotion packet without uploading
   - audits the tracked directory PR state from docs/ops/growth-report.md, or
@@ -184,6 +185,10 @@ echo "== growth decision queue pre-live proof =="
 ACC_GROWTH_REPORT="${growth_report:-}" node scripts/prepare-growth-decision-queue.js --check "$tag"
 
 echo
+echo "== growth owner handoff pre-live proof =="
+ACC_GROWTH_REPORT="${growth_report:-}" node scripts/prepare-growth-owner-handoff.js --check "$tag"
+
+echo
 echo "== growth surface refs pre-live proof =="
 node scripts/check-growth-surfaces.js --check
 
@@ -262,6 +267,7 @@ Run these only after explicit owner approval for the named external action.
 
 1. Push the public growth bundle:
 
+   node scripts/prepare-growth-owner-handoff.js --markdown $tag
    node scripts/prepare-growth-decision-queue.js --markdown $tag
    node scripts/prepare-growth-approval-brief.js --markdown $tag
 
