@@ -180,10 +180,44 @@ $EnginePendingNote = 'engine windows lane pending -- the acc windows engine port
 function Write-Chatter([string]$Msg) {
   if ($Json) { [Console]::Error.WriteLine($Msg) } else { Write-Host $Msg }
 }
+function Story-Mode() { return (-not $Json) -and ($VerbosePreference -ne 'Continue') }
 function Say([string]$Msg)  { Write-Chatter ('  ' + $Msg) }
 function Ok([string]$Msg)   { if ($Json) { [Console]::Error.WriteLine('  + ' + $Msg) } else { Write-Host ('  + ' + $Msg) -ForegroundColor Green } }
 function Warn([string]$Msg) { if ($Json) { [Console]::Error.WriteLine('  ! ' + $Msg) } else { Write-Host ('  ! ' + $Msg) -ForegroundColor Yellow } }
-function Step([string]$Msg) { Write-Chatter ''; if ($Json) { [Console]::Error.WriteLine('> ' + $Msg) } else { Write-Host ('> ' + $Msg) -ForegroundColor White } }
+function Step([string]$Msg) {
+  Write-Chatter ''
+  if ($Json) {
+    [Console]::Error.WriteLine('> ' + $Msg)
+  } elseif (Story-Mode) {
+    $label = switch -Regex ($Msg) {
+      '^phase 0' { '[1/5] Choose the local Work Model'; break }
+      '^phase [12]\b|^phase 3\b|^phase 3b\b' { '[2/5] Prepare the local worker'; break }
+      '^phase [4-9]\b' { '[3/5] Build the predictor'; break }
+      '^phase 1[0-4]\b' { '[4/5] Connect your agents and browser'; break }
+      '^phase 1[56]\b|^done' { '[5/5] Ready for the first task'; break }
+      default { $Msg }
+    }
+    Write-Host ('> ' + $label) -ForegroundColor White
+  } else {
+    Write-Host ('> ' + $Msg) -ForegroundColor White
+  }
+}
+function Story-Intro() {
+  if (-not (Story-Mode)) { return }
+  Write-Chatter @'
+
+AccInt is building your Work Model on this machine.
+
+The first run has five jobs:
+  1. choose the local predictor
+  2. prepare the local worker
+  3. download and warm the model
+  4. connect your agents and browser
+  5. hand you one safe first task
+
+Technical phase logs are hidden in this view. Re-run with -Verbose to see phase details and config previews.
+'@
+}
 
 $script:AnyFailed = $false
 
@@ -451,9 +485,10 @@ function Apply-DiskFloor {
 }
 
 # -- phase 0 banner + selection -----------------------------------------------------------
+Story-Intro
 Step 'phase 0 -- probe host + select embedder tier'
 if ($DryRun) { Say '(dry-run: walking every phase, mutating NOTHING)' }
-Say 'acc is a Work Model + tool loop for Claude Code: retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes.'
+Say 'acc is an H-JEPA Work Model + tool loop for Claude Code: predict the better path, retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes.'
 $OsBuild = Get-OsBuild
 $Arch = Get-Arch
 Say ("host: $OsBuild / $Arch - substrate: $DbPath")
@@ -1423,7 +1458,7 @@ if ($RepoIsClone) {
 # GLOBALLY here: Claude Code (user-scope ~/.claude.json mcpServers.acc + ~/.claude/settings.json
 # hooks, on the canonical global db), OpenCode, Codex CLI, Cursor -- each two-verb MCP +
 # lifecycle recording, ADD-ONLY (an existing acc entry is never rewritten), one backup per
-# changed file. A fresh install leaves all agents on one compounding memory with NO per-project
+# changed file. A fresh install leaves all agents on one compounding Work Model with NO per-project
 # step. Fail-soft: wiring an agent is convenience -- it NEVER fails the install. Honors -DryRun
 # (preview, nothing written) and ACC_HOSTS_SYNC=off (escape -> skip). The optional isolation
 # override is `acc hosts-sync --project .`. Mirror of install.sh phase 13. Needs the built
@@ -1452,11 +1487,10 @@ if (-not $BinaryAvailable) {
 # PHASE 15 -- telemetry (anonymous usage events, ON by default). Mirror of install.sh phase
 # 15 / parity with the POSIX installer. The PostHog token is the project's WRITE-ONLY
 # ingestion key -- public-safe by design (it can only append events, never read). Events are
-# NAMES ONLY -- never owner data, prompts, files, or memory. On by default so the maintainer
-# can see what breaks for real users; opt out any time with `acc telemetry off`, or set
-# ACC_NO_TELEMETRY=1 before install to never enable it. Fail-soft: a CLI error never fails
-# the install. Needs the built binary -- without it (windows engine port pending) we skip
-# with an honest note.
+# NAMES ONLY -- never owner data, prompts, files, or Work Model data. Local-first trust wins:
+# telemetry can be skipped with ACC_NO_TELEMETRY=1 or disabled later with `acc telemetry off`.
+# Fail-soft: a CLI error never fails the install. Needs the built binary -- without it
+# (windows engine port pending) we skip with an honest note.
 #
 # KEY SOURCE: parsed at runtime from the SAME `TELEMETRY_KEY=` line in install.sh next to this
 # script ($PSScriptRoot) -- ONE canonical home for the key (install.sh) so the two installers
@@ -1473,7 +1507,7 @@ try {
 
 Step 'phase 15 -- telemetry (anonymous usage events, on by default)'
 if ($DryRun) {
-  Emit-Phase 'telemetry' 'would' 'enable anonymous usage telemetry by default (event names only -- never your data, prompts, files, or Work Model; opt-out: acc telemetry off)' 'phase 16: verify'
+  Emit-Phase 'telemetry' 'would' 'enable anonymous usage telemetry by default (event names only -- never your data, prompts, files, or Work Model data)' 'skip install telemetry: set ACC_NO_TELEMETRY=1; turn off later: acc telemetry off'
 } elseif ($env:ACC_NO_TELEMETRY -eq '1') {
   Emit-Phase 'telemetry' 'skipped' 'ACC_NO_TELEMETRY=1 -- telemetry stays off' 'enable later: acc telemetry on --key <your key> --host us'
 } elseif (-not $TelemetryKey) {
@@ -1485,7 +1519,7 @@ if ($DryRun) {
       # One real event: `telemetry status` runs the app_opened instrumentation, queued through
       # the normal pipeline (no custom capture path here).
       & $Acc telemetry status *> $null
-      Emit-Phase 'telemetry' 'ok' 'anonymous usage telemetry ON (event names only -- never your data, prompts, files, or Work Model). opt out: acc telemetry off' 'phase 16: verify'
+      Emit-Phase 'telemetry' 'ok' 'anonymous usage telemetry ON by default (event names only -- never your data, prompts, files, or Work Model data). turn off any time: acc telemetry off' 'phase 16: verify'
     } else {
       Emit-Phase 'telemetry' 'skipped' 'could not enable telemetry (non-fatal)' 'enable later: acc telemetry on --key <your key> --host us'
     }
@@ -1552,18 +1586,25 @@ if ($script:AnyFailed) {
 }
 
 # NEXT-STEP guidance. The one-Work-Model pivot: phase 14 wired ALL agents (Claude Code,
-# OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding memory -- they work in EVERY
+# OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding Work Model -- they work in EVERY
 # directory now, no per-project step. So the next step is simply: open Claude Code anywhere
 # and talk. The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project
 # onto its own db. Mirrors install.sh's cc_next_lines.
 $CcNext = @"
-acc is wired into all your agents (Claude Code, OpenCode, Codex, Cursor) GLOBALLY on ONE Work Model
-that compounds across every task and project. Open Claude Code in ANY directory and just say what
-you want done in plain words. The two verbs (acc_retrieve + acc_act) appear after a restart / reload
-MCP if Claude Code is open.
+Your Work Model is ready for its first example.
+
+Open Claude Code in ANY directory and pick one safe first mission:
+  1. Draft    "draft an email to Alex about Thursday's demo"
+  2. Research "research 3 CRMs for a 5-person team and recommend one"
+  3. Decide   "help me decide between offer A and offer B"
+
+AccInt drafts, researches, and reasons locally first. It asks before anything is sent,
+posted, paid, deleted, or done outside your machine. After the result it shows what the
+Work Model can reuse next time. The two verbs (acc_retrieve + acc_act) appear after a
+restart / reload MCP if Claude Code is open.
 Optional -- isolate a project on its OWN separate Work Model (confidential / separated work):
   cd <your-project>; acc hosts-sync --project .
-The CLI lane works right now with no restart: acc --db $DbPath retrieve "..."  ;  acc --db $DbPath ingest ...
+CLI health check, if you want it: acc --db $DbPath status  ;  acc --db $DbPath doctor
 "@
 
 if ($NonInteractive -and (-not $warm)) {
@@ -1576,9 +1617,9 @@ if ($NonInteractive -and (-not $warm)) {
 Check progress in a few minutes:
   acc --db $DbPath doctor        (expect: embedder OK once the model finishes loading)
 
-Once the embedder is warm, retrieval is live. The CLI works immediately:
-  acc --db $DbPath ingest hello "acc is live -- the Work Model is recording"
-  acc --db $DbPath retrieve "what acc is"   (works once the embedder reports OK above)
+Once the Work Model is warm, the assistant can use it. You can check health any time:
+  acc --db $DbPath status
+  acc --db $DbPath doctor
 
 $CcNext
 
@@ -1590,10 +1631,13 @@ There is no login, credential, OAuth, or API key -- ever; the interactive sessio
 Ok 'acc install complete.'
 Write-Chatter @"
 
-Try these now:
-  1. Check health:        acc --db $DbPath doctor
-  2. Add one entry:       acc --db $DbPath ingest hello "acc is live -- the Work Model is recording"
-  3. Retrieve it:         acc --db $DbPath retrieve "what acc is"
+Try this now:
+  1. Open Claude Code in any project.
+  2. Ask one safe first task: "draft an email to Alex" or "research 3 CRMs for a small team".
+  3. acc will draft/research locally, show what happened, and ask before anything is sent.
+
+Optional health check:
+  acc --db $DbPath doctor
 
 $CcNext
 

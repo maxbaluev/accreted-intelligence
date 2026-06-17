@@ -45,15 +45,16 @@
 # Usage:  ./install.sh [substrate-db-path]   (default: ./acc.db)
 #         ./install.sh --dry-run             walk every phase, mutate NOTHING, report what
 #                                            WOULD happen (the self-test)
+#         ./install.sh --verbose             show the full technical phase log in human mode
 #         ./install.sh --json                one JSON line per phase {phase,status,detail,
 #                                            next}; final line = overall verdict + the
 #                                            `acc doctor --json` handoff (Claude-as-installer)
 #         ./install.sh --dry-run --json      both: machine-readable dry walk, exit 0
-#         ./install.sh --persist-path        OPT-IN: append the ~/.local/bin export to your
-#                                            shell rc (~/.bashrc or ~/.profile) so a NEW
-#                                            terminal finds `acc`. Default is advisory-print
-#                                            only — the installer NEVER edits your rc unless
-#                                            you pass this flag.
+#         ./install.sh --no-persist-path     OPT OUT of the default PATH persist. By default the
+#                                            installer appends the ~/.local/bin export to your
+#                                            shell rc (zsh→~/.zshrc, bash→~/.bashrc, fish→config.fish,
+#                                            else ~/.profile) so a NEW terminal finds `acc`; this
+#                                            flag skips the edit and just prints the line.
 #   Env: ACC_NO_BROWSER=1   skip the browser capability
 #        ACC_NONINTERACTIVE=1 never prompt; skip sudo steps, just warn
 #        ACC_TIER=<lane>    force the embedder lane (skip the host probe's pick)
@@ -71,13 +72,16 @@ REPO="$PWD"
 # ── flags ───────────────────────────────────────────────────────────────────────────
 DRY_RUN=0
 JSON=0
-PERSIST_PATH=0
+PERSIST_PATH=1
+VERBOSE="${ACC_INSTALL_VERBOSE:-0}"
 ARGS=()
 for a in "$@"; do
   case "$a" in
     --dry-run) DRY_RUN=1 ;;
+    --verbose) VERBOSE=1 ;;
     --json)    JSON=1 ;;
     --persist-path) PERSIST_PATH=1 ;;
+    --no-persist-path) PERSIST_PATH=0 ;;
     -h|--help) sed -n '2,/^set -euo pipefail$/p' "$0" | sed '$d'; exit 0 ;;
     *)         ARGS+=("$a") ;;
   esac
@@ -152,11 +156,44 @@ fi
 # verdict object. Everything that would clutter the JSON stream goes to stderr in JSON mode.
 # Color/glyphs are gated on USE_COLOR above so a captured (non-TTY) stream is plain ASCII.
 have() { command -v "$1" >/dev/null 2>&1; }
+story_mode() { [ "$JSON" != "1" ] && [ "${VERBOSE:-0}" != "1" ]; }
 log()  { [ "$JSON" = "1" ] && printf '%s\n' "$*" >&2 || printf '  %s\n' "$*"; }
 say()  { log "$@"; }
 ok()   { [ "$JSON" = "1" ] && printf '  %s %s\n' "$G_OK" "$*" >&2 || printf '  %s %s\n' "$G_OK" "$*"; }
 warn() { [ "$JSON" = "1" ] && printf '  %s %s\n' "$G_WARN" "$*" >&2 || printf '  %s %s\n' "$G_WARN" "$*"; }
-step() { [ "$JSON" = "1" ] && printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET" >&2 || printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET"; }
+step() {
+  if [ "$JSON" = "1" ]; then
+    printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET" >&2
+  elif story_mode; then
+    case "$*" in
+      "phase 0"*)  printf '\n%s[1/5] Choose the local Work Model%s\n' "$G_STEP" "$C_RESET" ;;
+      "phase 1 "*|"phase 2 "*|"phase 3 "*|"phase 3b"*) printf '\n%s[2/5] Prepare the local worker%s\n' "$G_STEP" "$C_RESET" ;;
+      "phase 4 "*|"phase 5 "*|"phase 6 "*|"phase 7 "*|"phase 8 "*) printf '\n%s[3/5] Build the predictor%s\n' "$G_STEP" "$C_RESET" ;;
+      "phase 9 "*|"phase 10 "*|"phase 11 "*|"phase 11b"*|"phase 12 "*|"phase 13 "*) printf '\n%s[4/5] Connect your agents and browser%s\n' "$G_STEP" "$C_RESET" ;;
+      "phase 14 "*|"phase 15 "*|"done"*) printf '\n%s[5/5] Ready for the first task%s\n' "$G_STEP" "$C_RESET" ;;
+      *) printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET" ;;
+    esac
+  else
+    printf '\n%s%s%s\n' "$G_STEP" "$*" "$C_RESET"
+  fi
+}
+
+story_intro() {
+  story_mode || return 0
+  cat <<'STORY'
+
+AccInt is building your Work Model on this machine.
+
+The first run has five jobs:
+  1. choose the local predictor
+  2. prepare the local worker
+  3. download and warm the model
+  4. connect your agents and browser
+  5. hand you one safe first task
+
+Technical phase logs are hidden in this view. Re-run with --verbose to see phase details and config previews.
+STORY
+}
 
 # json_phase NAME STATUS DETAIL NEXT — emit one machine-readable phase line (JSON mode only).
 # STATUS ∈ ok|failed|skipped|would. DETAIL/NEXT are free text (newlines/quotes escaped).
@@ -466,9 +503,10 @@ apply_disk_floor() {
 }
 
 # ── phase 0 banner + selection ────────────────────────────────────────────────────────
+story_intro
 step "phase 0 — probe host + select embedder tier"
 [ "$DRY_RUN" = "1" ] && say "(dry-run: walking every phase, mutating NOTHING)"
-say "Accreted Intelligence (AccInt) — acc is a Work Model + tool loop for Claude Code: retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes."
+say "Accreted Intelligence (AccInt) — acc is an H-JEPA Work Model + tool loop for Claude Code: predict the better path, retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes."
 say "host: $OS/$ARCH · substrate: $DB"
 [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ] || warn "untested OS '$OS' — proceeding best-effort (Windows: use install.ps1; container as fallback)"
 
@@ -692,7 +730,7 @@ prebuilt_fetch() {
   have curl || { say "curl not available — building from source"; return 1; }
   have tar  || { say "tar not available — building from source"; return 1; }
   local tmp fetched=0 base src=""
-  tmp="$(mktemp -d 2>/dev/null)" || { say "mktemp failed — building from source"; return 1; }
+  tmp="$(mktemp -d 2>/dev/null || mktemp -d -t acc.XXXXXX 2>/dev/null)" || { say "mktemp failed — building from source"; return 1; }
   for base in "$RELEASE_BASE/download/v$SRC_VER" "$RELEASE_BASE/latest/download"; do
     say "trying prebuilt: $base/$ARTIFACT"
     if curl -fsSL --connect-timeout 15 --retry 2 --max-time 180 -o "$tmp/$ARTIFACT" "$base/$ARTIFACT" 2>/dev/null \
@@ -1267,7 +1305,7 @@ fi
 # hooks, on the canonical global db), OpenCode, Codex CLI, Cursor — each two-verb MCP +
 # lifecycle recording, ADD-ONLY (an existing acc entry is never rewritten; drift is reported),
 # one .acc-backup-<ts> sibling per actually-changed file. So a fresh install leaves all agents
-# working on one compounding memory with NO per-project step. Fail-soft: wiring an agent is
+# working on one compounding Work Model with NO per-project step. Fail-soft: wiring an agent is
 # convenience — it never fails the install. Honors --dry-run (unified-diff preview, nothing
 # written) and ACC_HOSTS_SYNC=off (no-op inside the binary). Idempotent + re-runnable: install
 # a new agent later and just re-run `acc hosts-sync` (or start a session — the fingerprint
@@ -1281,7 +1319,11 @@ if [ -z "$HOSTS_BIN" ] || [ ! -x "$HOSTS_BIN" ]; then
   phase_result "hosts_sync" "skipped" "acc binary not available yet (dry-run on a fresh host) — run \`acc hosts-sync\` after the real install" "acc hosts-sync"
 elif [ "$DRY_RUN" = "1" ]; then
   HOSTS_OUT="$("$HOSTS_BIN" hosts-sync --dry-run 2>&1)" || true
-  printf '%s\n' "$HOSTS_OUT" | while IFS= read -r line; do [ -n "$line" ] || continue; say "$line"; done
+  if story_mode; then
+    say "previewed agent wiring; run with --verbose to see config diffs"
+  else
+    printf '%s\n' "$HOSTS_OUT" | while IFS= read -r line; do [ -n "$line" ] || continue; say "$line"; done
+  fi
   phase_result "hosts_sync" "would" "converge installed coding agents (preview above — add-only; nothing written in dry-run)" "phase 14: verify"
 else
   if HOSTS_OUT="$("$HOSTS_BIN" hosts-sync 2>&1)"; then
@@ -1294,7 +1336,7 @@ else
 fi
 
 # The RESPECT REPORT (read-only; G1, solved:f35b42f4a6700656): name what the user's
-# environment already contains — their MCP servers, hooks, skills, memory files — and
+# environment already contains — their MCP servers, hooks, skills, Work Model files — and
 # state acc's exact additive footprint. An installer that shows what it did NOT touch
 # earns trust. Fail-soft: a survey fault never blocks an install.
 if [ -n "$HOSTS_BIN" ] && [ -x "$HOSTS_BIN" ] && [ "$DRY_RUN" != "1" ]; then
@@ -1341,25 +1383,25 @@ fi
 # ════════════════════════════════════════════════════════════════════════════════════════
 # PHASE 15 — telemetry (anonymous usage events, ON by default). The key below is the project's
 # WRITE-ONLY PostHog token — public-safe by design (it can only append events, never read).
-# Events are NAMES ONLY — never owner data, prompts, files, or memory. On by default so the
-# maintainer can see what breaks for real users; opt out any time with `acc telemetry off`, or
-# set ACC_NO_TELEMETRY=1 before install to never enable it. Fail-soft: a CLI error never fails
-# the install.
+# Events are NAMES ONLY — never owner data, prompts, files, or Work Model data. Local-first trust wins:
+# telemetry can be skipped with ACC_NO_TELEMETRY=1 or disabled later with `acc telemetry off`.
+# Fail-soft: a CLI error never fails the install.
 # ════════════════════════════════════════════════════════════════════════════════════════
 TELEMETRY_KEY="phc_A5xgn9QqiSCKXivifKGEBPrpSZDwvFyxm5op974q3ekC"
 TELEMETRY_LATER="enable later: acc telemetry on --key <your key> --host us (works with any PostHog project)"
-TELEMETRY_OPTOUT="opt out any time: acc telemetry off  (or set ACC_NO_TELEMETRY=1 before install)"
+TELEMETRY_SKIP="set ACC_NO_TELEMETRY=1 before running the installer to skip telemetry"
+TELEMETRY_OPTOUT="turn off any time: acc telemetry off"
 
 step "phase 15 — telemetry (anonymous usage events, on by default)"
 if [ "$DRY_RUN" = "1" ]; then
-  phase_result "telemetry" "would" "enable anonymous usage telemetry by default (event names only — never your data, prompts, files, or Work Model; opt-out: acc telemetry off)"
+  phase_result "telemetry" "would" "enable anonymous usage telemetry by default (event names only — never your data, prompts, files, or Work Model data)" "$TELEMETRY_SKIP; $TELEMETRY_OPTOUT"
 elif [ "${ACC_NO_TELEMETRY:-0}" = "1" ]; then
   phase_result "telemetry" "skipped" "ACC_NO_TELEMETRY=1 — telemetry stays off" "$TELEMETRY_LATER"
 elif "$ACC_BIN" telemetry on --key "$TELEMETRY_KEY" --host us >/dev/null 2>&1; then
   # One real event: `telemetry status` runs the app_opened instrumentation, queued through the
   # normal pipeline (no custom capture path here).
   "$ACC_BIN" telemetry status >/dev/null 2>&1 || true
-  phase_result "telemetry" "ok" "anonymous usage telemetry ON (event names only — never your data, prompts, files, or Work Model). $TELEMETRY_OPTOUT"
+  phase_result "telemetry" "ok" "anonymous usage telemetry ON by default (event names only — never your data, prompts, files, or Work Model data). $TELEMETRY_OPTOUT"
 else
   phase_result "telemetry" "skipped" "could not enable telemetry (non-fatal) — $TELEMETRY_LATER"
 fi
@@ -1387,19 +1429,25 @@ if [ "$DRY_RUN" = "1" ]; then
   exit 0
 fi
 # NEXT-STEP guidance. The one-Work-Model pivot: phase 13 wired ALL your agents (Claude Code,
-# OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding memory — they work in EVERY directory
+# OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding Work Model — they work in EVERY directory
 # now, with no per-project step. So the next step is simply: open Claude Code anywhere and talk.
 # The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project onto its own db.
 cc_next_lines() {
   cat <<CCNEXT
-Next — acc is wired into all your agents (Claude Code, OpenCode, Codex, Cursor) GLOBALLY on ONE
-Work Model that compounds across every task and project. Open Claude Code in ANY directory and just
-say what you want done in plain words ("research X", "draft an email to Y"). On first open it
-shows what is set up and starts learning how you work; nothing leaves your machine without your OK.
+Your Work Model is ready for its first example.
+
+Open Claude Code in ANY directory and pick one safe first mission:
+  1. Draft    "draft an email to Alex about Thursday's demo"
+  2. Research "research 3 CRMs for a 5-person team and recommend one"
+  3. Decide   "help me decide between offer A and offer B"
+
+AccInt drafts, researches, and reasons locally first. It asks before anything is sent,
+posted, paid, deleted, or done outside your machine. After the result it shows what the
+Work Model can reuse next time.
 (The two verbs acc_retrieve + acc_act appear after a restart / reload MCP if Claude Code is open.)
 Optional — isolate a project on its OWN separate Work Model (confidential / separated work):
   cd <your-project> && acc hosts-sync --project .
-The CLI lane works right now with no restart: acc --db $DB retrieve "…"  ·  acc --db $DB ingest …
+CLI health check, if you want it: acc --db $DB status  ·  acc --db $DB doctor
 CCNEXT
 }
 
@@ -1417,8 +1465,8 @@ Check progress in a few minutes:
   acc --db $DB doctor        (expect: embedder OK once the model finishes loading)
 
 Once the embedder is warm, retrieval is live. The CLI works immediately:
-  acc --db $DB ingest hello "acc is live — the Work Model is recording"
-  acc --db $DB retrieve "what acc is"   (works once the embedder reports OK above)
+  acc --db $DB status
+  acc --db $DB doctor
 
 BGWARM
   cc_next_lines
@@ -1444,51 +1492,66 @@ else
   ok "acc install complete — embedder warm, all systems live."
   cat <<TRY
 
-Try these now:
-  1. Check health:        acc --db $DB doctor
-  2. Add one entry:       acc --db $DB ingest hello "acc is live — the Work Model is recording"
-  3. Retrieve it:         acc --db $DB retrieve "what acc is"
+Try this now:
+  1. Open Claude Code in any project.
+  2. Ask one safe first task: "draft an email to Alex" or "research 3 CRMs for a small team".
+  3. acc will draft/research locally, show what happened, and ask before anything is sent.
+
+Optional health check:
+  acc --db $DB doctor
 
 TRY
   cc_next_lines
 fi
 
-# PATH-PERSIST ADVISORY (prebuilt lane): the binary lands in ~/.local/bin and this run exported
-# it onto PATH, but only for THIS installer process — a NEW terminal that has ~/.local/bin missing
-# from its shell rc gets 'acc: command not found'. We do NOT silently edit the user's shell rc;
-# instead, when ~/.local/bin is absent from BOTH ~/.bashrc and ~/.profile, print the exact line to
-# add + a 'new terminal' note so the user makes the change knowingly.
+# ── PATH persist (default ON; parity with install.ps1's User-PATH persist) ──────────────────
+# The binary lands in ~/.local/bin and this run exported it for THIS process only — a NEW
+# terminal whose shell rc lacks ~/.local/bin gets 'acc: command not found'. By default we append
+# the export to the rc of the user's ACTUAL shell (rustup/uv style); --no-persist-path opts out
+# and just prints the line. Shell-aware: zsh→~/.zshrc (macOS default), bash→~/.bashrc,
+# fish→config.fish, else ~/.profile. Idempotent, with one timestamped backup of any file touched.
+
+# acc_shell_rc_for <shell-path> <home> → the rc file new interactive terminals of that shell read.
+acc_shell_rc_for() {
+  case "${1##*/}" in
+    zsh)  printf '%s/.zshrc\n' "$2" ;;
+    bash) printf '%s/.bashrc\n' "$2" ;;
+    fish) printf '%s/.config/fish/config.fish\n' "$2" ;;
+    *)    printf '%s/.profile\n' "$2" ;;
+  esac
+}
+
+# acc_path_export_for <shell-path> <bin-dir> → the shell-correct line prepending bin-dir to PATH.
+acc_path_export_for() {
+  case "${1##*/}" in
+    fish) printf 'fish_add_path %s\n' "$2" ;;
+    *)    printf 'export PATH="%s:$PATH"\n' "$2" ;;
+  esac
+}
+
 BIN_DIR="${BIN_DIR:-$HOME/.local/bin}"
 if [ -x "$BIN_DIR/acc" ]; then
-  in_rc=0
-  for rc in "$HOME/.bashrc" "$HOME/.profile"; do
-    [ -f "$rc" ] && grep -qF "$BIN_DIR" "$rc" 2>/dev/null && { in_rc=1; break; }
-  done
-  if [ "$in_rc" = "0" ]; then
-    EXPORT_LINE="export PATH=\"$BIN_DIR:\$PATH\""
-    if [ "$PERSIST_PATH" = "1" ]; then
-      # OPT-IN persist: the user explicitly asked us to edit their rc. Append the export to
-      # ~/.bashrc when it exists, else ~/.profile; print exactly what we changed. We NEVER
-      # reach this branch without --persist-path — the default stays advisory-print only.
-      RC_TARGET="$HOME/.bashrc"; [ -f "$RC_TARGET" ] || RC_TARGET="$HOME/.profile"
-      if [ "$DRY_RUN" = "1" ]; then
-        say "WOULD append to $RC_TARGET: $EXPORT_LINE"
-      else
-        {
-          printf '\n# added by acc install.sh --persist-path\n'
-          printf '%s\n' "$EXPORT_LINE"
-        } >> "$RC_TARGET"
-        printf '\n%sPATH persisted%s\n' "$G_STEP" "$C_RESET"
-        printf '  Appended to %s:\n' "$RC_TARGET"
-        printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
-        printf '  Start a new terminal (or `source %s`) to pick it up.\n' "$RC_TARGET"
-      fi
-    else
-      printf '\n%sPATH note%s\n' "$G_STEP" "$C_RESET"
-      printf '  acc is installed at %s, but that dir is not on your shell PATH for NEW terminals.\n' "$BIN_DIR"
-      printf '  Add this line to your ~/.bashrc (or ~/.profile), then start a new terminal:\n'
-      printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
-      printf '  Or re-run with %s--persist-path%s to have the installer append it for you.\n' "$C_BOLD" "$C_RESET"
-    fi
+  RC_TARGET="$(acc_shell_rc_for "${SHELL:-}" "$HOME")"
+  EXPORT_LINE="$(acc_path_export_for "${SHELL:-}" "$BIN_DIR")"
+  if [ -f "$RC_TARGET" ] && grep -qF "$BIN_DIR" "$RC_TARGET" 2>/dev/null; then
+    :  # already on PATH for new terminals (this rc references the bin dir) — idempotent, silent
+  elif [ "$PERSIST_PATH" != "1" ]; then
+    # --no-persist-path: do not edit the rc; print the exact line instead.
+    printf '\n%sPATH note%s\n' "$G_STEP" "$C_RESET"
+    printf '  acc is at %s, not on PATH for NEW terminals. Add to %s, then open a new terminal:\n' "$BIN_DIR" "$RC_TARGET"
+    printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
+  elif [ "$DRY_RUN" = "1" ]; then
+    say "WOULD append to $RC_TARGET: $EXPORT_LINE"
+  else
+    mkdir -p "$(dirname -- "$RC_TARGET")" 2>/dev/null || true
+    [ -f "$RC_TARGET" ] && cp "$RC_TARGET" "$RC_TARGET.acc-backup-$(date +%s)" 2>/dev/null || true
+    {
+      printf '\n# added by acc install (https://accint.xyz) — puts acc on PATH for new terminals\n'
+      printf '%s\n' "$EXPORT_LINE"
+    } >> "$RC_TARGET"
+    printf '\n%sPATH persisted%s\n' "$G_STEP" "$C_RESET"
+    printf '  Appended to %s:\n' "$RC_TARGET"
+    printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
+    printf '  Open a new terminal (or `source %s`) to pick it up. Opt out next time with --no-persist-path.\n' "$RC_TARGET"
   fi
 fi
