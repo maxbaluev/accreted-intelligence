@@ -157,6 +157,16 @@ if command -v node >/dev/null 2>&1; then
     note "owner packets include live llms.txt discovery verification: FAIL"
     fail=1
   fi
+  if grep -q 'https://it.accint.xyz' scripts/prepare-growth-rollout.sh &&
+    grep -q 'PostHog proxy' scripts/prepare-growth-approval-brief.js &&
+    grep -q 'PostHog proxy' scripts/prepare-growth-decision-queue.js &&
+    grep -q 'it\\.accint\\.xyz' scripts/check-attribution-flow.js &&
+    grep -q 'https://it.accint.xyz' scripts/check-growth-live-state.sh; then
+    note "owner packets include PostHog proxy verification: ok"
+  else
+    note "owner packets include PostHog proxy verification: FAIL"
+    fail=1
+  fi
   if [ -f scripts/prepare-directory-priority-report.js ] && node --check scripts/prepare-directory-priority-report.js >/dev/null; then
     note "directory priority report syntax: ok"
   else

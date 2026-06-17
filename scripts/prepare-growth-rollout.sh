@@ -291,7 +291,9 @@ Run these only after explicit owner approval for the named external action.
    curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
    curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
    curl -fsSL https://accint.xyz/ | grep -F 'data-share-surface="visitor-share"'
+   curl -fsSL https://accint.xyz/ | grep -F "https://it.accint.xyz"
    curl -fsSL https://accint.xyz/reddit/ | grep -F 'data-share-surface="reddit-share"'
+   curl -fsSL https://accint.xyz/reddit/ | grep -F "https://it.accint.xyz"
    curl -fsSL https://accint.xyz/ | grep -F "share_link_copied"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "share_link_copied"
    curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
@@ -348,6 +350,7 @@ Run these only after explicit owner approval for the named external action.
 
 10. Local PostHog dashboard spec proof:
 
+   node scripts/check-attribution-flow.js
    node scripts/prepare-posthog-dashboard.js --check
    node scripts/prepare-posthog-dashboard.js --print
    node scripts/prepare-posthog-dashboard.js --ui-packet

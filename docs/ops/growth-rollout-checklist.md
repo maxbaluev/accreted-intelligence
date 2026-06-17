@@ -56,6 +56,7 @@ bash scripts/check-growth-readiness.sh
 scripts/run-approved-growth-rollout.sh v<tag>
 scripts/run-approved-controlled-live-install.sh v<tag>
 scripts/check-install-surface.sh
+node scripts/check-attribution-flow.js
 node scripts/check-site-metadata.js
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
@@ -107,6 +108,10 @@ Expected state:
   Open Graph/Twitter tags, the 1200x630 `og.png`, `robots.txt`, `llms.txt`,
   and `sitemap.xml` are ready for launch previews, indexing, and agent
   discovery
+- `node scripts/check-attribution-flow.js` passes and proves home/Reddit page
+  copy events carry `ACC_INSTALL_REF`/`ACC_INSTALL_SOURCE`, identify the
+  anonymous install ref in PostHog, and route browser SDK traffic through the
+  managed reverse proxy `https://it.accint.xyz`
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
@@ -335,6 +340,9 @@ copy to attributed first run, then activation; use the owned share loop to
 detect whether owned referrals are compounding instead of only being clicked.
 Use the Reddit community loop to decide whether Reddit traffic is producing
 community participation before treating a subreddit as a pure install channel.
+The browser SDK on `index.html` and `reddit/index.html` must use
+`api_host=https://it.accint.xyz` plus `ui_host=https://us.posthog.com`; the
+static attribution verifier and live-state audit guard that route.
 
 After explicit owner approval, the shell and setup tile can be created through
 the PostHog Dashboard API:

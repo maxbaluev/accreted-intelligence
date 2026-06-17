@@ -160,6 +160,7 @@ function runLocalChecks() {
     ["node", ["scripts/prepare-social-launch-packet.js", "--decision-packet"]],
     ["node", ["scripts/prepare-social-launch-packet.js", "--reply-packet", "hn-show"]],
     ["node", ["scripts/prepare-social-launch-packet.js", "--receipt-packet", "hn-show", "https://example.com/accint-launch"]],
+    ["node", ["scripts/check-attribution-flow.js"]],
     ["node", ["scripts/check-growth-surfaces.js", "--check"]],
     ["bash", ["scripts/check-controlled-install-attribution.sh"]],
     ["bash", ["scripts/check-install-surface.sh"]],
@@ -202,6 +203,8 @@ function exactActions(tag, branch, receipts, state) {
   const currentHeadPublished = receipts.public_rollout_pushed
     && state.ahead === "0"
     && state.behind === "0";
+  const currentHeadLiveVerified = currentHeadPublished && receipts.hosted_live_verifier_passed;
+  const currentHeadControlledInstallPassed = currentHeadLiveVerified && receipts.controlled_live_install_passed;
   return [
     {
       stage: "1",
@@ -213,16 +216,16 @@ function exactActions(tag, branch, receipts, state) {
     },
     {
       stage: "2",
-      name: "Verify after deploy, no mutation",
-      status: receipts.hosted_live_verifier_passed ? "completed" : "read_only_verification_required",
+      name: "Verify after deploy: attribution, PostHog proxy, and LLM discovery",
+      status: currentHeadLiveVerified ? "completed" : "read_only_verification_required",
       command: `scripts/check-growth-live-state.sh ${tag}\nscripts/check-live-attribution-flow.sh https://accint.xyz\nscripts/check-live-llms-discovery.sh https://accint.xyz\nnode scripts/check-site-metadata.js`,
-      external_effects: ["read-only public site/GitHub checks"],
+      external_effects: ["read-only public site/GitHub/PostHog proxy marker checks"],
       guard: "Read-only",
     },
     {
       stage: "3",
       name: "Controlled live install receipt proof",
-      status: receipts.controlled_live_install_passed ? "completed" : "owner_approval_required",
+      status: currentHeadControlledInstallPassed ? "completed" : "owner_approval_required",
       command: `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1 scripts/run-approved-controlled-live-install.sh ${tag}`,
       external_effects: ["fetch live installer into temp home", "run attribution-only install stop path"],
       guard: "Requires ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1",

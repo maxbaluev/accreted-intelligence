@@ -30,10 +30,20 @@ For organic inbound links without explicit campaign parameters, the page records
 only a coarse referrer source and host such as `github` / `github.com`. It does
 not record the full inbound URL or path.
 
+The browser SDK is configured to send page events through the managed reverse
+proxy `https://it.accint.xyz` with `ui_host: https://us.posthog.com`. Keep that
+split intact: event ingest/assets go through the custom domain, while UI links
+still point at PostHog's US app. `scripts/check-attribution-flow.js` proves the
+checked-out home and Reddit pages carry this proxy config, and
+`scripts/check-growth-live-state.sh` verifies the same markers after deployment.
+
 PostHog mechanics this relies on:
 
 - `identify()` creates identified events/person profiles when
   `person_profiles` is `identified_only`.
+- `api_host` stays on `https://it.accint.xyz` and `ui_host` stays on
+  `https://us.posthog.com`; do not silently fall back to direct
+  `*.i.posthog.com` ingest in the shipped pages.
 - Funnels can break down by event properties, person properties, or cohorts.
 - HogQL / SQL insights can query `events`, `distinct_id`, and `properties.*`
   directly, including `uniqExact()` for exact distinct counts.

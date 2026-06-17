@@ -171,6 +171,7 @@ function buildQueue(brief, tag) {
     && brief.git.ahead === "0"
     && brief.git.behind === "0";
   const currentHeadLiveVerified = currentHeadPublished && receipts.hosted_live_verifier_passed;
+  const currentHeadControlledInstallPassed = currentHeadLiveVerified && receipts.controlled_live_install_passed;
   const localFailures = brief.local_checks.filter((item) => !item.ok);
   const rolloutBlockers = [];
   if (localFailures.length) {
@@ -222,19 +223,20 @@ function buildQueue(brief, tag) {
       why: "This is the highest leverage unlock because the current bundle is local-only until it is pushed.",
     }),
     queueItem(2, {
-      action: "Verify live deploy, attribution, and LLM discovery",
+      action: "Verify live deploy, attribution, PostHog proxy, and LLM discovery",
       status: currentHeadLiveVerified ? "completed" : "waiting_on_rollout",
       owner_decision: "No mutation; run immediately after the approved rollout completes.",
       command: action2.command,
       guard: action2.guard || "Read-only",
       depends_on: currentHeadLiveVerified
-        ? ["current HEAD is published and hosted verifier receipt row confirms live attribution and llms discovery passed"]
+        ? ["current HEAD is published and hosted verifier receipt row confirms live attribution, PostHog proxy, and llms discovery passed"]
         : [
           "step 1 completed",
           "GitHub Pages/site deployment visible for the target commit",
         ],
       unlocks: [
         "evidence that install copy carries attribution",
+        "evidence that browser PostHog traffic is routed through the managed proxy",
         "evidence that llms.txt agent discovery is served and advertised",
         "safe basis for social, directory, and controlled-install follow-up",
       ],
@@ -243,14 +245,14 @@ function buildQueue(brief, tag) {
     }),
     queueItem(3, {
       action: "Prove controlled live install receipt",
-      status: receipts.controlled_live_install_passed ? "completed" : "waiting_on_verified_live_site",
+      status: currentHeadControlledInstallPassed ? "completed" : "waiting_on_verified_live_site",
       owner_decision: "Approve the controlled live install helper only after the live site is verified.",
       command: action3.command,
       guard: action3.guard || "Requires ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1",
-      depends_on: receipts.controlled_live_install_passed
-        ? ["controlled live install receipt row exists"]
+      depends_on: currentHeadControlledInstallPassed
+        ? ["current HEAD is live verified and controlled live install receipt row exists"]
         : [
-          "step 2 verified live attribution and LLM discovery",
+          "step 2 verified live attribution, PostHog proxy, and LLM discovery",
           "owner approval for the controlled live install helper",
         ],
       unlocks: [
@@ -328,7 +330,7 @@ function buildQueue(brief, tag) {
       command: socialLaunchCommand,
       guard: action6.guard || "No automated posting; owner chooses exact target",
       depends_on: [
-        "step 2 verified live attribution and LLM discovery",
+        "step 2 verified live attribution, PostHog proxy, and LLM discovery",
         "owner-selected HN/X/Reddit target and exact copy",
         "published URL after the owner-approved manual post exists",
       ],
