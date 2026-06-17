@@ -26,6 +26,7 @@ Default mode is local and read-only:
   - reports read-only live public state and current holds
   - verifies local install short-route alignment
   - verifies live prompt-copy attribution in the read-only live-state audit
+  - verifies static share/SEO metadata for launch previews
   - verifies the social launch kit
   - verifies the owner-reviewable social launch packet
   - verifies growth surface refs and attributed landing URLs
@@ -152,6 +153,10 @@ echo "== PostHog funnel readout helper =="
 scripts/run-approved-posthog-funnel-check.sh
 
 echo
+echo "== site metadata pre-live proof =="
+node scripts/check-site-metadata.js
+
+echo
 echo "== MCPB promotion packet pre-live proof =="
 scripts/check-mcpb-promotion-packet.sh "$tag"
 
@@ -239,6 +244,7 @@ Run these only after explicit owner approval for the named external action.
    scripts/check-growth-live-state.sh $tag
    scripts/check-live-attribution-flow.sh https://accint.xyz
    scripts/check-install-surface.sh
+   node scripts/check-site-metadata.js
    gh repo view $repo --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
    gh workflow list --repo $repo
    curl -fsSI https://accint.xyz/
@@ -344,6 +350,7 @@ Run these only after explicit owner approval for the named external action.
    node scripts/check-social-launch-kit.js --check
    node scripts/prepare-social-launch-packet.js --check
    node scripts/prepare-social-launch-packet.js --markdown
+   node scripts/check-site-metadata.js
    node scripts/check-growth-surfaces.js --check
    node scripts/check-growth-surfaces.js --print
    scripts/check-live-attribution-flow.sh https://accint.xyz

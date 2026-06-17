@@ -17,6 +17,7 @@ Before any post goes live:
 bash scripts/check-growth-readiness.sh
 scripts/check-growth-live-state.sh v<tag>
 scripts/check-live-attribution-flow.sh https://accint.xyz
+node scripts/check-site-metadata.js
 node scripts/check-growth-surfaces.js --check
 node scripts/check-social-launch-kit.js --check
 node scripts/prepare-social-launch-packet.js --check

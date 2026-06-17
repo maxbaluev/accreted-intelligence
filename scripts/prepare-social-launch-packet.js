@@ -316,6 +316,7 @@ function printMarkdown(rows) {
   console.log("bash scripts/check-growth-readiness.sh");
   console.log("scripts/check-growth-live-state.sh v<tag>");
   console.log("scripts/check-live-attribution-flow.sh https://accint.xyz");
+  console.log("node scripts/check-site-metadata.js");
   console.log("node scripts/check-growth-surfaces.js --check");
   console.log("node scripts/check-social-launch-kit.js --check");
   console.log("node scripts/prepare-social-launch-packet.js --check");

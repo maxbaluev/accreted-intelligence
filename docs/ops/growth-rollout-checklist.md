@@ -19,6 +19,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - approval-gated controlled live install receipt helper
 - read-only live growth state auditor
 - live prompt-copy attribution verifier
+- static share/SEO metadata verifier
 - MCPB promotion packet verifier
 - official registry discovery docs/follow-up packet
 - materialized PostHog dashboard spec
@@ -50,6 +51,7 @@ bash scripts/check-growth-readiness.sh
 scripts/run-approved-growth-rollout.sh v<tag>
 scripts/run-approved-controlled-live-install.sh v<tag>
 scripts/check-install-surface.sh
+node scripts/check-site-metadata.js
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
 scripts/run-approved-posthog-dashboard.sh
@@ -89,6 +91,9 @@ Expected state:
 - `scripts/check-install-surface.sh` passes and proves `https://accint.xyz/install`
   stays aligned with the raw POSIX bootstrap and preserves attribution env
   handoff
+- `node scripts/check-site-metadata.js` passes and proves canonical URLs,
+  Open Graph/Twitter tags, the 1200x630 `og.png`, `robots.txt`, and
+  `sitemap.xml` are ready for launch previews and indexing
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the

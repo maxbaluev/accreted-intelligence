@@ -57,6 +57,8 @@ for f in \
   docs/ops/growth-surfaces.json \
   docs/ops/posthog-dashboard.json \
   docs/ops/social-launch-kit.md \
+  robots.txt \
+  sitemap.xml \
   .github/workflows/live-site-attribution.yml \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
@@ -70,6 +72,7 @@ for f in \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-registry-discovery-docs.js \
   scripts/check-release-alignment.sh \
+  scripts/check-site-metadata.js \
   scripts/check-social-launch-kit.js \
   scripts/prepare-social-launch-packet.js \
   scripts/prepare-directory-followup-kit.js \

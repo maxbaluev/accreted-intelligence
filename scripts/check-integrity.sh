@@ -79,6 +79,14 @@ else
   fail=1
 fi
 
+echo "== site metadata =="
+if command -v node >/dev/null 2>&1; then
+  if node scripts/check-site-metadata.js; then note "site metadata: ok"; else fail=1; fi
+else
+  note "node: MISSING (required for site metadata verifier)"
+  fail=1
+fi
+
 echo "== PostHog dashboard spec =="
 if command -v node >/dev/null 2>&1; then
   if node scripts/prepare-posthog-dashboard.js --check; then note "PostHog dashboard spec: ok"; else fail=1; fi
