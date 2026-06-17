@@ -240,6 +240,13 @@ function validateOwnedDocsSurfaces(manifest) {
     for (const file of DOCS_ATTRIBUTION_PATHS) {
       assertIncludes(read(file), url, `${file}: attributed docs landing URL for ${surface.id}`);
     }
+    const installHub = path.join("docs", "install", "README.md");
+    const installHubText = read(installHub);
+    const source = sourceQuery(surface);
+    assertIncludes(installHubText, `ACC_INSTALL_REF=${surface.id}`, `${installHub}: POSIX ref for ${surface.id}`);
+    assertIncludes(installHubText, `ACC_INSTALL_SOURCE='${source}'`, `${installHub}: POSIX source for ${surface.id}`);
+    assertIncludes(installHubText, `$env:ACC_INSTALL_REF='${surface.id}'`, `${installHub}: PowerShell ref for ${surface.id}`);
+    assertIncludes(installHubText, `$env:ACC_INSTALL_SOURCE='${source}'`, `${installHub}: PowerShell source for ${surface.id}`);
   }
   for (const file of markdownFiles("docs")) {
     const bareSiteLinks = read(file).match(/\]\(https:\/\/accint\.xyz\/?\)/g) || [];

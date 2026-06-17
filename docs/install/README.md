@@ -20,6 +20,17 @@ the result against a machine-readable contract — see [with-agent.md](with-agen
 prompt is the same one on [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs); the other two paths are the
 same install underneath, by hand.
 
+For installs that start from these GitHub docs, preserve the local attribution
+receipt with the `github-docs` ref:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=github-docs ACC_INSTALL_SOURCE='ref=github-docs&utm_source=github&utm_campaign=docs' sh
+```
+
+```powershell
+$env:ACC_INSTALL_REF='github-docs'; $env:ACC_INSTALL_SOURCE='ref=github-docs&utm_source=github&utm_campaign=docs'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+```
+
 ## Official MCP Registry / MCPB
 
 AccInt is also discoverable as
