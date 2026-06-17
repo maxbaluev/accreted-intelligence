@@ -14,6 +14,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - web prompt-copy `ACC_INSTALL_REF` stitching
 - web prompt-copy `ACC_INSTALL_SOURCE` source/ref stitching
 - attribution regression tests
+- controlled install attribution receipt verifier
 - attribution dashboard/runbook docs
 - organic referrer classification
 - dry-run rollout approval packet
@@ -30,6 +31,7 @@ These checks are local and safe:
 ```bash
 scripts/prepare-growth-rollout.sh
 bash scripts/check-growth-readiness.sh
+bash scripts/check-controlled-install-attribution.sh
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -44,6 +46,8 @@ Expected state:
 - `scripts/prepare-growth-rollout.sh` prints `DRY RUN COMPLETE` and does not
   push, upload, dispatch, publish, post, or submit anything
 - `scripts/check-growth-readiness.sh` passes
+- `scripts/check-controlled-install-attribution.sh` passes against temp
+  POSIX/PowerShell installer homes without touching the operator's real acc home
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
@@ -124,7 +128,9 @@ as live:
    `scripts/advance-mcpb-server-json.sh v<tag> dist/server.mcpb-all.json`, then
    `ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh v<tag> dist/server.mcpb-all.json`.
    Publish registry metadata after the alignment check passes.
-8. Run the public install path in a controlled environment.
+8. Run `scripts/check-controlled-install-attribution.sh` locally. It must pass
+   before any live controlled install.
+9. Run the public install path in a controlled environment.
 
 The controlled install should produce:
 

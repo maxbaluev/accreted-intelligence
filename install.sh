@@ -61,6 +61,7 @@
 #        ACC_INSTALL=source skip the phase-3 prebuilt-release fetch; always build from source
 #        ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
 #        ACC_INSTALL_SOURCE=<source> optional coarse source/ref context for that receipt
+#        ACC_INSTALL_ATTRIBUTION_ONLY=1 write the attribution receipt and stop (test/verification)
 #        ACC_BROWSER_HOME / ACC_BROWSER_SOCK   browser env overrides
 #
 # Windows: native installs use install.ps1 (the same phase-machine in PowerShell). This
@@ -557,6 +558,10 @@ elif write_install_attribution; then
   phase_result "install_attribution" "ok" "wrote local install attribution $INSTALL_ATTR_DESC to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
 else
   phase_result "install_attribution" "skipped" "could not write local install attribution receipt at $INSTALL_ATTR_PATH" "install continues; attribution is optional"
+fi
+if [ "${ACC_INSTALL_ATTRIBUTION_ONLY:-0}" = "1" ]; then
+  phase_result "verdict" "ok" "install attribution receipt check complete; stopped before install phases"
+  exit 0
 fi
 
 # ── update-mode detection ───────────────────────────────────────────────────────────

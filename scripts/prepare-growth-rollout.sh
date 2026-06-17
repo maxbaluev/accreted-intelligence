@@ -100,6 +100,10 @@ else
 fi
 
 echo
+echo "== controlled install attribution pre-live proof =="
+bash scripts/check-controlled-install-attribution.sh
+
+echo
 echo "== registry alignment hold check =="
 if command -v gh >/dev/null 2>&1; then
   if bash scripts/check-release-alignment.sh "$tag" server.json; then
@@ -157,7 +161,11 @@ Run these only after explicit owner approval for the named external action.
    gh workflow run publish-mcp.yml --repo $repo
    gh run list --workflow publish-mcp.yml --repo $repo --limit 3
 
-7. Controlled install attribution proof:
+7. Local controlled install attribution proof:
+
+   scripts/check-controlled-install-attribution.sh
+
+8. Live controlled install attribution proof after owner approval:
 
    ACC_INSTALL_REF=controlled-${tag#v} ACC_INSTALL_SOURCE='ref=controlled-rollout' \\
      bash -c 'curl -fsSL https://accint.xyz/install | sh'
@@ -166,7 +174,7 @@ Run these only after explicit owner approval for the named external action.
      ref=controlled-${tag#v}
      source_ref=ref=controlled-rollout
 
-8. Create the PostHog dashboard from:
+9. Create the PostHog dashboard from:
 
    docs/ops/attribution-dashboard.md
 

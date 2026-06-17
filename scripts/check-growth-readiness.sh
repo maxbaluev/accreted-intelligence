@@ -56,6 +56,7 @@ for f in \
   docs/ops/growth-rollout-checklist.md \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
+  scripts/check-controlled-install-attribution.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/prepare-growth-rollout.sh \

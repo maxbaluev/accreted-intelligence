@@ -14,6 +14,7 @@ for f in \
   bootstrap/install \
   scripts/acc-docker.sh \
   scripts/advance-mcpb-server-json.sh \
+  scripts/check-controlled-install-attribution.sh \
   scripts/check-growth-readiness.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
@@ -55,6 +56,11 @@ if command -v node >/dev/null 2>&1; then
   if node scripts/check-attribution-flow.js; then note "web attribution flow: ok"; else fail=1; fi
 else
   note "node: MISSING (required for attribution-flow verifier)"
+  fail=1
+fi
+if bash scripts/check-controlled-install-attribution.sh; then
+  note "controlled install attribution receipt: ok"
+else
   fail=1
 fi
 

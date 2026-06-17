@@ -39,6 +39,7 @@ ENV KNOBS (mirrors install.sh's Env section):
   ACC_INSTALL=source    skip the phase-3 prebuilt-release fetch; always build from source
   ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
   ACC_INSTALL_SOURCE=<source> optional coarse source/ref context for that receipt
+  ACC_INSTALL_ATTRIBUTION_ONLY=1 write the attribution receipt and stop (test/verification)
 
 ENGINE LANE HONESTY: the acc windows engine port is IN FLIGHT. Phase 3 first tries the
 PREBUILT release lane (sha256-verified download of acc.exe -- no VS Build Tools needed
@@ -546,6 +547,10 @@ if ((-not $InstallRefRaw) -and (-not $InstallSourceRaw)) {
   } catch {
     Emit-Phase 'install_attribution' 'skipped' "could not write local install attribution receipt at $InstallAttrPath" 'install continues; attribution is optional'
   }
+}
+if ($env:ACC_INSTALL_ATTRIBUTION_ONLY -eq '1') {
+  Emit-Phase 'verdict' 'ok' 'install attribution receipt check complete; stopped before install phases'
+  exit 0
 }
 
 Select-Tier
