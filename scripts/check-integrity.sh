@@ -167,6 +167,15 @@ if command -v node >/dev/null 2>&1; then
     note "owner packets include PostHog proxy verification: FAIL"
     fail=1
   fi
+  if grep -q 'head_full' scripts/prepare-growth-approval-brief.js &&
+    grep -q 'expected_head' scripts/prepare-growth-approval-brief.js &&
+    grep -q 'expected_head' scripts/prepare-growth-decision-queue.js &&
+    grep -q 'approved_head' scripts/prepare-growth-owner-handoff.js; then
+    note "owner packets bind approval to exact HEAD: ok"
+  else
+    note "owner packets bind approval to exact HEAD: FAIL"
+    fail=1
+  fi
   if [ -f scripts/prepare-directory-priority-report.js ] && node --check scripts/prepare-directory-priority-report.js >/dev/null; then
     note "directory priority report syntax: ok"
   else

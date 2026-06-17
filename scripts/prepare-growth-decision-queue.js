@@ -119,6 +119,8 @@ function queueItem(rank, item) {
     owner_decision: item.owner_decision || "",
     command: commandBlock(item.command),
     guard: item.guard,
+    expected_head: item.expected_head || "",
+    approval_scope: item.approval_scope || [],
     depends_on: item.depends_on || [],
     unlocks: item.unlocks || [],
     external_effects: item.external_effects || [],
@@ -141,6 +143,13 @@ function validationFailures(brief) {
     if (!stage(brief, number)) {
       failures.push(`growth approval brief is missing stage ${number}`);
     }
+  }
+  const rollout = stage(brief, "1");
+  if (!/^[0-9a-f]{40}$/.test((brief.git && brief.git.head_full) || "")) {
+    failures.push("growth approval brief must expose git.head_full for exact owner approval");
+  }
+  if (rollout && rollout.expected_head !== brief.git.head_full) {
+    failures.push("growth approval brief stage 1 expected_head must match git.head_full");
   }
   return failures;
 }
@@ -208,12 +217,18 @@ function buildQueue(brief, tag) {
     queueItem(1, {
       action: "Approve public growth rollout",
       status: currentHeadPublished ? "completed" : (rolloutReady ? "ready_for_owner_approval" : "blocked"),
-      owner_decision: "Approve or hold the guarded push plus hosted verifier dispatch.",
+      owner_decision: `Approve or hold the guarded push plus hosted verifier dispatch for ${brief.git.head_full}.`,
       command: action1.command,
       guard: action1.guard || "Requires ACC_APPROVE_GROWTH_ROLLOUT=1",
+      expected_head: action1.expected_head || brief.git.head_full,
+      approval_scope: action1.approval_scope || [
+        `approved branch: ${brief.git.branch}`,
+        `approved head: ${brief.git.head_full}`,
+        `hosted verifier input: expected_head=${brief.git.head_full}`,
+      ],
       depends_on: currentHeadPublished
         ? ["current HEAD is published at origin/main and receipt row confirms public rollout was pushed"]
-        : (rolloutReady ? ["Owner approval for this exact external action and current local HEAD"] : rolloutBlockers),
+        : (rolloutReady ? [`Owner approval for this exact external action and approved HEAD ${brief.git.head_full}`] : rolloutBlockers),
       unlocks: [
         "publishes the local growth bundle",
         "makes README, live-site attribution, and llms.txt discovery changes observable",
@@ -377,6 +392,7 @@ function buildDecisionQueue(tag) {
     server_name: brief.server_name,
     server_version: brief.server_version,
     git: brief.git,
+    approved_head: brief.git.head_full || "",
     growth_report: brief.growth_report,
     ready_for_owner_review: brief.ready_for_owner_review,
     local_checks: brief.local_checks,
@@ -400,6 +416,7 @@ function printCheck(decisionQueue) {
   console.log(`  repo: ${decisionQueue.repo}`);
   console.log(`  tag: ${decisionQueue.tag}`);
   console.log(`  branch: ${decisionQueue.git.branch} @ ${decisionQueue.git.head}`);
+  console.log(`  approved head: ${decisionQueue.approved_head}`);
   console.log(`  ahead/behind: ${decisionQueue.git.ahead}/${decisionQueue.git.behind}`);
   console.log(`  working tree: ${decisionQueue.git.clean ? "clean" : "dirty"}`);
   console.log(`  ready for owner review: ${decisionQueue.ready_for_owner_review ? "yes" : "not yet"}`);
@@ -419,6 +436,7 @@ function printMarkdown(decisionQueue) {
   console.log(`- Target tag: \`${decisionQueue.tag}\``);
   console.log(`- Registry server/version: \`${decisionQueue.server_name}\` / \`${decisionQueue.server_version}\``);
   console.log(`- Branch: \`${decisionQueue.git.branch}\` at \`${decisionQueue.git.head}\``);
+  console.log(`- Approved HEAD: \`${decisionQueue.approved_head}\``);
   console.log(`- Base: \`${decisionQueue.git.base_ref}\`, ahead/behind: \`${decisionQueue.git.ahead}/${decisionQueue.git.behind}\``);
   console.log(`- Working tree: ${decisionQueue.git.clean ? "clean" : "dirty"}`);
   console.log(`- Ready for owner review: ${decisionQueue.ready_for_owner_review ? "yes" : "not yet"}`);
@@ -432,6 +450,15 @@ function printMarkdown(decisionQueue) {
   console.log(`- Action: ${decisionQueue.top_decision.action}`);
   console.log(`- Status: \`${decisionQueue.top_decision.status}\``);
   console.log(`- Guard: ${decisionQueue.top_decision.guard}`);
+  if (decisionQueue.top_decision.expected_head) {
+    console.log(`- Expected hosted verifier HEAD: \`${decisionQueue.top_decision.expected_head}\``);
+  }
+  if (decisionQueue.top_decision.approval_scope.length) {
+    console.log("- Approval scope:");
+    for (const item of decisionQueue.top_decision.approval_scope) {
+      console.log(`  - ${item}`);
+    }
+  }
   console.log();
   console.log("```bash");
   console.log(decisionQueue.top_decision.command);
@@ -445,6 +472,9 @@ function printMarkdown(decisionQueue) {
     console.log(`Status: \`${item.status}\``);
     console.log(`Owner decision: ${item.owner_decision}`);
     console.log(`Guard: ${item.guard}`);
+    if (item.expected_head) {
+      console.log(`Expected hosted verifier HEAD: \`${item.expected_head}\``);
+    }
     console.log(`Why: ${item.why}`);
     console.log();
     console.log("Depends on:");

@@ -124,6 +124,15 @@ function collectValidationFailures(brief, queue) {
   if (!queue.top_decision) {
     failures.push("growth decision queue is missing a top decision");
   }
+  if (!/^[0-9a-f]{40}$/.test((brief.git && brief.git.head_full) || "")) {
+    failures.push("growth approval brief must expose the full approved HEAD");
+  }
+  if (rollout && rollout.expected_head !== brief.git.head_full) {
+    failures.push("rollout expected_head must match the full approved HEAD");
+  }
+  if (queue.top_decision && Number(queue.top_decision.rank) === 1 && queue.top_decision.expected_head !== brief.git.head_full) {
+    failures.push("decision queue top rollout expected_head must match the full approved HEAD");
+  }
   if (
     rollout
     && queue.top_decision
@@ -206,6 +215,8 @@ function buildHandoff(tag) {
       owner_decision: currentAsk.owner_decision,
       command: commandBlock(currentAsk.command),
       guard: currentAsk.guard || rollout.guard || "",
+      approved_head: currentAsk.expected_head || rollout.expected_head || (brief.git && brief.git.head_full) || "",
+      approval_scope: currentAsk.approval_scope || rollout.approval_scope || [],
       external_effects: currentAsk.external_effects || rollout.external_effects || [],
       why: currentAsk.why || "",
       unlocks: currentAsk.unlocks || [],
@@ -217,6 +228,7 @@ function buildHandoff(tag) {
       branch_clean: Boolean(brief.git && brief.git.clean),
       branch_ahead: brief.git ? brief.git.ahead : "?",
       branch_behind: brief.git ? brief.git.behind : "?",
+      approved_head: brief.git ? brief.git.head_full : "",
       unpublished_commits: brief.unpublished_bundle && brief.unpublished_bundle.available
         ? brief.unpublished_bundle.commits.length
         : null,
@@ -260,6 +272,7 @@ function printCheck(handoff) {
   console.log(`  repo: ${handoff.repo}`);
   console.log(`  tag: ${handoff.tag}`);
   console.log(`  branch: ${handoff.git.branch} @ ${handoff.git.head}`);
+  console.log(`  approved head: ${handoff.current_ask.approved_head}`);
   console.log(`  ahead/behind: ${handoff.git.ahead}/${handoff.git.behind}`);
   console.log(`  working tree: ${handoff.git.clean ? "clean" : "dirty"}`);
   if (handoff.unpublished_bundle && handoff.unpublished_bundle.available) {
@@ -283,6 +296,9 @@ function printMarkdown(handoff) {
   console.log(`- Action: ${handoff.current_ask.action}`);
   console.log(`- Status: \`${handoff.current_ask.status}\``);
   console.log(`- Guard: ${handoff.current_ask.guard}`);
+  if (handoff.current_ask.approved_head) {
+    console.log(`- Approved HEAD: \`${handoff.current_ask.approved_head}\``);
+  }
   console.log(`- Ready for owner review: ${handoff.ready_for_owner_review ? "yes" : "not yet"}`);
   if (handoff.current_ask.why) {
     console.log(`- Why now: ${handoff.current_ask.why}`);
@@ -302,6 +318,13 @@ function printMarkdown(handoff) {
     console.log("- <no external effects listed>");
   }
   console.log();
+  if (handoff.current_ask.approval_scope.length) {
+    console.log("Approval scope:");
+    for (const item of handoff.current_ask.approval_scope) {
+      console.log(`- ${item}`);
+    }
+    console.log();
+  }
   console.log("It would unlock:");
   for (const unlock of handoff.current_ask.unlocks) {
     console.log(`- ${unlock}`);
@@ -313,6 +336,7 @@ function printMarkdown(handoff) {
   console.log(`- Target tag: \`${handoff.tag}\``);
   console.log(`- Registry server/version: \`${handoff.server_name}\` / \`${handoff.server_version}\``);
   console.log(`- Branch: \`${handoff.git.branch}\` at \`${handoff.git.head}\``);
+  console.log(`- Approved HEAD: \`${handoff.evidence.approved_head}\``);
   console.log(`- Base: \`${handoff.git.base_ref}\`, ahead/behind: \`${handoff.git.ahead}/${handoff.git.behind}\``);
   console.log(`- Working tree: ${handoff.git.clean ? "clean" : "dirty"}`);
   console.log(`- Local checks: ${handoff.evidence.local_checks.passed}/${handoff.evidence.local_checks.total} passed`);

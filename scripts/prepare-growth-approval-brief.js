@@ -91,6 +91,7 @@ function normalizeTag(tag, serverVersion) {
 function gitState() {
   const branch = run("git", ["branch", "--show-current"], { optional: true }) || "<detached>";
   const head = run("git", ["rev-parse", "--short", "HEAD"]);
+  const headFull = run("git", ["rev-parse", "HEAD"]);
   const dirty = run("git", ["status", "--porcelain"], { optional: true });
   const hasBase = run("git", ["rev-parse", "--verify", BASE_REF], { optional: true });
   let ahead = "?";
@@ -102,6 +103,7 @@ function gitState() {
   return {
     branch,
     head,
+    head_full: headFull,
     base_ref: BASE_REF,
     ahead,
     behind,
@@ -211,7 +213,16 @@ function exactActions(tag, branch, receipts, state) {
       name: "Push local growth bundle and dispatch hosted live-site verifier",
       status: currentHeadPublished ? "completed" : "owner_approval_required",
       command: `ACC_APPROVE_GROWTH_ROLLOUT=1 scripts/run-approved-growth-rollout.sh ${tag}`,
-      external_effects: ["git push origin main", "gh workflow run live-site-attribution.yml"],
+      expected_head: state.head_full,
+      approval_scope: [
+        `approved branch: ${branch}`,
+        `approved head: ${state.head_full}`,
+        `hosted verifier input: expected_head=${state.head_full}`,
+      ],
+      external_effects: [
+        "git push origin main",
+        `gh workflow run live-site-attribution.yml with expected_head=${state.head_full}`,
+      ],
       guard: "Requires ACC_APPROVE_GROWTH_ROLLOUT=1",
     },
     {
@@ -265,6 +276,28 @@ function exactActions(tag, branch, receipts, state) {
   ].map((action) => ({ ...action, branch }));
 }
 
+function approvalBindingFailures(state, actions) {
+  const failures = [];
+  const rollout = actions.find((action) => String(action.stage) === "1");
+  if (!/^[0-9a-f]{40}$/.test(state.head_full || "")) {
+    failures.push("git state must expose the full 40-character HEAD SHA");
+  }
+  if (!rollout) {
+    failures.push("approval sequence is missing rollout stage 1");
+    return failures;
+  }
+  if (rollout.expected_head !== state.head_full) {
+    failures.push("rollout stage 1 expected_head must match git HEAD");
+  }
+  if (!(rollout.approval_scope || []).some((item) => item.includes(`expected_head=${state.head_full}`))) {
+    failures.push("rollout stage 1 approval scope must include the hosted verifier expected_head");
+  }
+  if (!(rollout.external_effects || []).some((item) => item.includes(`expected_head=${state.head_full}`))) {
+    failures.push("rollout stage 1 external effects must mention the hosted verifier expected_head");
+  }
+  return failures;
+}
+
 function buildBrief(tag) {
   const server = readJson("server.json");
   const state = gitState();
@@ -273,6 +306,7 @@ function buildBrief(tag) {
   const receipts = growthReceipts();
   const actions = exactActions(tag, state.branch, receipts, state);
   const failures = checks.filter((check) => !check.ok);
+  const validationFailures = approvalBindingFailures(state, actions);
   const hasUnpublishedBundle = state.ahead !== "0" && state.ahead !== "?";
   return {
     schema_version: 1,
@@ -285,7 +319,8 @@ function buildBrief(tag) {
     growth_report: GROWTH_REPORT || null,
     growth_receipts: receipts,
     local_checks: checks,
-    ready_for_owner_review: failures.length === 0 && state.clean && state.behind === "0" && state.ahead !== "0",
+    validation_failures: validationFailures,
+    ready_for_owner_review: failures.length === 0 && validationFailures.length === 0 && state.clean && state.behind === "0" && state.ahead !== "0",
     exact_actions: actions,
     forbidden_without_approval: [
       "git push",
@@ -315,16 +350,19 @@ function buildBrief(tag) {
 }
 
 function printCheck(brief) {
-  const failures = brief.local_checks.filter((check) => !check.ok);
-  if (failures.length) {
+  const checkFailures = brief.local_checks.filter((check) => !check.ok);
+  const validationFailures = brief.validation_failures || [];
+  if (checkFailures.length || validationFailures.length) {
     console.log("GROWTH APPROVAL BRIEF: FAIL");
-    failures.forEach((check) => console.log(`  FAIL: ${check.label}`));
+    checkFailures.forEach((check) => console.log(`  FAIL: ${check.label}`));
+    validationFailures.forEach((failure) => console.log(`  FAIL: ${failure}`));
     process.exit(1);
   }
   console.log("GROWTH APPROVAL BRIEF: PASS");
   console.log(`  repo: ${brief.repo}`);
   console.log(`  tag: ${brief.tag}`);
   console.log(`  branch: ${brief.git.branch} @ ${brief.git.head}`);
+  console.log(`  approved head: ${brief.git.head_full}`);
   console.log(`  ahead/behind: ${brief.git.ahead}/${brief.git.behind}`);
   console.log(`  working tree: ${brief.git.clean ? "clean" : "dirty"}`);
   if (brief.unpublished_bundle && brief.unpublished_bundle.available) {
@@ -346,6 +384,7 @@ function printMarkdown(brief) {
   console.log(`- Target tag: \`${brief.tag}\``);
   console.log(`- Registry server/version: \`${brief.server_name}\` / \`${brief.server_version}\``);
   console.log(`- Branch: \`${brief.git.branch}\` at \`${brief.git.head}\``);
+  console.log(`- Approved HEAD: \`${brief.git.head_full}\``);
   console.log(`- Base: \`${brief.git.base_ref}\`, ahead/behind: \`${brief.git.ahead}/${brief.git.behind}\``);
   console.log(`- Working tree: ${brief.git.clean ? "clean" : "dirty"}`);
   if (brief.growth_report) {
@@ -383,6 +422,16 @@ function printMarkdown(brief) {
     console.log(`${action.stage}. ${action.name}`);
     console.log();
     console.log(`Status: \`${action.status || "unknown"}\``);
+    if (action.expected_head) {
+      console.log(`Expected hosted verifier HEAD: \`${action.expected_head}\``);
+    }
+    if (action.approval_scope && action.approval_scope.length) {
+      console.log();
+      console.log("Approval scope:");
+      for (const item of action.approval_scope) {
+        console.log(`- ${item}`);
+      }
+    }
     console.log();
     console.log("```bash");
     console.log(action.command);
