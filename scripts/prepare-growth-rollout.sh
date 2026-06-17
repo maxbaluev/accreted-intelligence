@@ -27,6 +27,7 @@ Default mode is local and read-only:
   - verifies local install short-route alignment
   - verifies live prompt-copy attribution in the read-only live-state audit
   - verifies the social launch kit
+  - verifies the owner-reviewable social launch packet
   - verifies growth surface refs and attributed landing URLs
   - builds and verifies the local MCPB promotion packet without uploading
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
@@ -157,6 +158,10 @@ scripts/check-mcpb-promotion-packet.sh "$tag"
 echo
 echo "== social launch kit pre-live proof =="
 node scripts/check-social-launch-kit.js --check
+
+echo
+echo "== social launch packet pre-live proof =="
+node scripts/prepare-social-launch-packet.js --check
 
 echo
 echo "== growth surface refs pre-live proof =="
@@ -337,6 +342,8 @@ Run these only after explicit owner approval for the named external action.
 14. Prepare owner-approved social launch copy:
 
    node scripts/check-social-launch-kit.js --check
+   node scripts/prepare-social-launch-packet.js --check
+   node scripts/prepare-social-launch-packet.js --markdown
    node scripts/check-growth-surfaces.js --check
    node scripts/check-growth-surfaces.js --print
    scripts/check-live-attribution-flow.sh https://accint.xyz

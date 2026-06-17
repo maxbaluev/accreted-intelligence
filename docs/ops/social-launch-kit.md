@@ -19,6 +19,7 @@ scripts/check-growth-live-state.sh v<tag>
 scripts/check-live-attribution-flow.sh https://accint.xyz
 node scripts/check-growth-surfaces.js --check
 node scripts/check-social-launch-kit.js --check
+node scripts/prepare-social-launch-packet.js --check
 ```
 
 Post only after these are true:
@@ -93,12 +94,28 @@ landing URL instead and let the deployed copy buttons carry the attribution
 into prompt copies. The post body can still use the plain install command when
 clarity matters more than source precision.
 
+## Owner-reviewed launch packet
+
+Before any owner-approved post, generate the local review packet:
+
+```bash
+node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --markdown
+```
+
+The packet reads only this Markdown file and
+[`docs/ops/growth-surfaces.json`](growth-surfaces.json). It does not open
+posting URLs, post, submit, comment, DM, pay, or use account identity. It
+prints per-surface copy, attributed landing URLs, install snippets, and channel
+fit checks so the owner can approve an exact target without reassembling the
+launch by hand.
+
 ## Show HN
 
 Title:
 
 ```text
-Show HN: AccInt - local-first memory that makes Claude Code/Codex learn what worked
+Show HN: AccInt - local-first memory so coding agents learn what worked
 ```
 
 Body:
@@ -108,7 +125,7 @@ Most AI forgets the moment it answers. You keep paying - time and tokens - to re
 
 It slots under the agents you already run (Claude Code, Codex, OpenCode, Cursor) as an MCP server plus host plugins. Two verbs over one memory: retrieve (MaxSim over a late-interaction, ColBERT/ColPali-style scored-token memory) and act (recurse / run / register). Every run records a commitment, predicts the path most likely to work from what worked before, acts with a receipt, holds anything that leaves your machine for your OK, and lets reality settle it - a passing test, a real reply. Credit defaults to a weak prior; only reality earns full weight. The Work Model stays on your machine: swap the model, keep the judgment.
 
-Open glue (Apache-2.0 installer and plugins) so you can read the integration code that runs on your machine; the local engine binary is proprietary and the engine source is private. One-line install, no account, no API key - the installer probes your hardware and tells you honestly which embedder tier it can run.
+The public Apache-2.0 glue (installer and plugins) lets you read the integration code that runs on your machine; the local engine binary is proprietary and the engine source is private. One-line install, no account, no API key - the installer probes your hardware and tells you honestly which embedder tier it can run.
 
 It is young and I will say what is proven vs unproven. Repo and one-liner:
 https://github.com/maxbaluev/accreted-intelligence
@@ -133,8 +150,7 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 
 4. It predicts the better path before the next run starts, then replays verified steps instead of re-reasoning. Same kind of job gets cheaper and lands better every run.
 
-5. Local-first. You own it. Open install glue + plugins (Apache-2.0) so you can audit the integration code; the local engine binary is proprietary. One line, no account, no API key:
-`curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh`
+5. Local-first. You own it. Open install glue + plugins (Apache-2.0) so you can audit the integration code; the local engine binary is proprietary. No account, no API key.
 
 6. It is young. The live commitments ledger settles in real time at https://accint.xyz/?ref=x-launch-thread&utm_source=x&utm_campaign=launch - proven vs young, stated honestly. Repo: https://github.com/maxbaluev/accreted-intelligence
 
@@ -163,7 +179,7 @@ It runs under Claude Code, Codex, OpenCode, and Cursor as a local MCP server plu
 
 The technical bet is late-interaction retrieval plus reality-gated credit. Retrieval uses MaxSim over scored tokens, inspired by ColBERT/ColPali-style retrieval. A memory, script, or runtime only earns strong credit when reality answers: a passing test, a real reply, or owner approval. Self-graded results are weak evidence, not truth.
 
-Boundary: the public repo is Apache-2.0 installer/docs/plugins/registry glue; the local engine binary is proprietary and the engine source is private. No cloud memory account. Anonymous event-name telemetry is opt-out and excludes prompts, files, memory, and Work Model data.
+Boundary: the public repo is Apache-2.0 installer/docs/plugins/registry glue; the local engine binary is proprietary and the engine source is private. There is no cloud memory account. Anonymous event-name telemetry is opt-out and excludes prompts, files, memory, and Work Model data.
 
 Repo: https://github.com/maxbaluev/accreted-intelligence
 Live ledger/readout: https://accint.xyz/reddit/?ref=reddit-localllama&utm_source=reddit&utm_campaign=launch&rsub=localllama

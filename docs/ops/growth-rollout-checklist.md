@@ -26,6 +26,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - approval-gated PostHog growth funnel readout helper
 - attribution dashboard/runbook docs
 - social launch kit
+- owner-reviewed social launch packet
 - growth surface ref manifest
 - directory surface ref generator
 - organic referrer classification
@@ -55,6 +56,7 @@ scripts/run-approved-posthog-dashboard.sh
 scripts/run-approved-posthog-funnel-check.sh
 scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
+node scripts/prepare-social-launch-packet.js --check
 node scripts/check-growth-surfaces.js --check
 node scripts/prepare-directory-surface-refs.js --check path/to/report.md
 node scripts/prepare-directory-followup-kit.js --check path/to/report.md
@@ -105,6 +107,8 @@ Expected state:
   release upload/server metadata advance
 - `node scripts/check-social-launch-kit.js --check` passes and validates
   owner-approved posting copy, attribution refs, and source-boundary wording
+- `node scripts/prepare-social-launch-packet.js --check` passes and turns the
+  HN/X/Reddit launch copy into exact owner-review packets without posting
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
   refs, attributed landing URLs, install snippets, and page prompt-copy source
   keys stay aligned
@@ -339,6 +343,8 @@ posting:
 
 ```bash
 node scripts/check-social-launch-kit.js --check
+node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --markdown
 node scripts/check-growth-surfaces.js --check
 node scripts/check-growth-surfaces.js --print
 scripts/check-live-attribution-flow.sh https://accint.xyz
