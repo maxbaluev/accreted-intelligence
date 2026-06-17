@@ -155,9 +155,10 @@ Stop here unless the owner explicitly authorizes the public push/deploy/release
 step. After approval, keep each action separate and verify before continuing.
 The dry-run packet printed by `scripts/prepare-growth-rollout.sh` is the
 canonical command list; copy from it rather than reconstructing the sequence.
-For a concise owner decision view, run:
+For a concise owner decision queue and the exact approval commands, run:
 
 ```bash
+node scripts/prepare-growth-decision-queue.js --markdown v<tag>
 node scripts/prepare-growth-approval-brief.js --markdown v<tag>
 ```
 

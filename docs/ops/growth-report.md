@@ -111,6 +111,8 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 Generate these locally before any follow-up:
 
 ```bash
+node scripts/prepare-growth-decision-queue.js --markdown v0.1.6
+node scripts/prepare-growth-approval-brief.js --markdown v0.1.6
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md
@@ -118,10 +120,11 @@ node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report
 node scripts/prepare-glama-submission-packet.js --markdown v0.1.6
 ```
 
-Start with the priority report. It ranks open directory/listing PRs by live PR
-state, repository reach, checks, and known blockers so owner-approved follow-up
-goes to the highest-upside surfaces first. The generated notes are not posting
-authorization. They are review packets for exact owner-approved maintainer
-replies or listing updates. Use the Glama submission packet before the
-punkpeye badge follow-up because that PR is blocked on Glama's listing and
+Start with the decision queue, then use the approval brief for the exact
+guarded commands. The priority report ranks open directory/listing PRs by live
+PR state, repository reach, checks, and known blockers so owner-approved
+follow-up goes to the highest-upside surfaces first. The generated notes are
+not posting authorization. They are review packets for exact owner-approved
+maintainer replies or listing updates. Use the Glama submission packet before
+the punkpeye badge follow-up because that PR is blocked on Glama's listing and
 score badge.
