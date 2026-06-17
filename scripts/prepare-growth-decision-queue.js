@@ -247,7 +247,7 @@ function buildQueue(brief, tag) {
       why: "This avoids speculative PR edits while preserving the most valuable known directory unlock.",
     }),
     queueItem(6, {
-      action: "Create PostHog dashboard shell and read aggregate funnel/share loop",
+      action: "Create PostHog dashboard shell and read aggregate funnel/direct refs/share loop",
       status: "owner_held_credentials",
       owner_decision: "Supply PostHog credentials and approve dashboard/query helpers if measurement should go live.",
       command: `${action4.command}\n\n${action5.command}`,
@@ -258,10 +258,11 @@ function buildQueue(brief, tag) {
       ],
       unlocks: [
         "surface-ranked attributed first runs",
+        "direct gh-* directory/listing install ref ranking",
         "visitor-share propagation evidence",
         "activation evidence for deciding which channels deserve follow-up",
       ],
-      why: "The funnel and share-loop readout distinguish real growth from copy clicks before scaling promotion.",
+      why: "The funnel, direct-ref, and share-loop readouts distinguish real growth from copy clicks before scaling promotion.",
     }),
     queueItem(7, {
       action: "Launch social copy manually",

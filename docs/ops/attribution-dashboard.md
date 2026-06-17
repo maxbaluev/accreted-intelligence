@@ -75,7 +75,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires `dashboard:read` and `dashboard:write`, checks for an
 existing exact dashboard name before creating a new shell, and does not create
-undocumented insight payloads. Add the seven insight tiles from the generated UI
+undocumented insight payloads. Add the eight insight tiles from the generated UI
 packet in the PostHog UI:
 
 ```bash
@@ -83,7 +83,7 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the live dashboard exists and a controlled install has been run, read the
-aggregate funnel and visitor-share loop:
+aggregate funnel, direct install refs, and visitor-share loop:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -96,8 +96,8 @@ ACC_APPROVE_POSTHOG_QUERY=1 \
 Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` to
 verify one controlled browser-copy install. This uses the documented PostHog
 Query API for small aggregate HogQL readouts, including `share_link_copied`
-counts and `visitor-share` referred visitor/install conversion; it is not an
-event export path.
+counts, direct `gh-*` directory install refs, and `visitor-share` referred
+visitor/install conversion; it is not an event export path.
 
 ### 1. Copy to first run funnel
 
@@ -247,33 +247,55 @@ WHERE event = 'first_run'
   AND {filters}
 ```
 
-Optional table version:
+Expected use:
+
+- This is the compact headline count for attributed app starts.
+- Use the direct-ref tile below to split stable installer refs from generated
+  web-copy refs.
+
+### 5. Direct install refs by source
+
+Type: SQL insight, table.
 
 ```sql
 SELECT
     multiIf(
+        match(distinct_id, '^gh-'), 'github-directory-pr',
+        match(distinct_id, '^github-'), 'github-owned-surface',
+        match(distinct_id, '^reddit-'), 'reddit-surface',
+        match(distinct_id, '^(hn|x)-'), 'social-surface',
         match(distinct_id, '^[0-9a-f]{12}$'), 'web-copy-ref',
-        match(distinct_id, '^gh-'), distinct_id,
-        match(distinct_id, '^reddit'), distinct_id,
         'other-ref'
     ) AS ref_class,
-    uniqExact(distinct_id) AS first_runs
+    distinct_id AS install_ref,
+    count() AS first_run_events,
+    min(timestamp) AS first_seen,
+    max(timestamp) AS last_seen
 FROM events
 WHERE event = 'first_run'
   AND properties.has_install_ref = 'true'
   AND {filters}
-GROUP BY ref_class
-ORDER BY first_runs DESC
+GROUP BY ref_class, install_ref
+ORDER BY first_run_events DESC, last_seen DESC
+LIMIT 50
 ```
+
+This is the directory win tile: it catches installs where a reader copied an
+attributed command from a listing, PR, docs page, or maintainer reply and went
+straight to first run.
 
 Expected use:
 
-- `web-copy-ref` means the install came from a web-generated nonce; use the
-  join tile below for the source.
-- Direct labels such as `gh-awesome-list` show installs from docs, PRs, or
-  directory listings where the command itself carried a stable surface label.
+- Treat `github-directory-pr` rows as the first signal that directory/listing
+  placements are producing installs.
+- `first_run_events` is intentionally event-count based because stable direct
+  refs can be reused by many installs.
+- Use `install_ref` to map back to generated refs from
+  `node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md`.
+- Use the web-copy source and landing tiles for `web-copy-ref` rows, because
+  those generated refs need their source context from page events.
 
-### 5. Copy to attributed first run by surface
+### 6. Copy to attributed first run by surface
 
 Type: SQL insight, table.
 
@@ -337,7 +359,7 @@ Expected use:
 - If `copied_people` is high and `first_runs` is low, fix installer trust,
   prompt wording, or first-run reliability before adding more traffic.
 
-### 6. Visitor share loop
+### 7. Visitor share loop
 
 Type: SQL insight, table.
 
@@ -412,7 +434,7 @@ Expected use:
   referred visitors with low `referred_visit_to_run_pct` means the shared
   landing traffic needs stronger trust or channel fit before scaling it.
 
-### 7. Activation after install
+### 8. Activation after install
 
 Type: Funnel.
 

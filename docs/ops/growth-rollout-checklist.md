@@ -330,7 +330,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires a personal API key with `dashboard:read` and
 `dashboard:write`, checks for an existing exact dashboard name first, and does
-not create undocumented insight payloads. Create the seven insight tiles from
+not create undocumented insight payloads. Create the eight insight tiles from
 the generated UI packet before using the dashboard for decisions:
 
 ```bash
@@ -338,7 +338,7 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the dashboard is created and a controlled live install is run, query the
-aggregate funnel and visitor-share-loop readout:
+aggregate funnel, direct install refs, and visitor-share-loop readout:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -442,10 +442,11 @@ Hold instead of continuing when:
   `distinct_id`
 - controlled live receipt proof cannot fetch the live installer or produce the
   expected temp receipt
-- PostHog dashboard shell/setup tile cannot be created or the seven insight tiles
+- PostHog dashboard shell/setup tile cannot be created or the eight insight tiles
   are not present before ranking growth surfaces
-- PostHog aggregate funnel readout cannot confirm attributed first runs before
-  deciding which launch/listing surfaces to double down on
+- PostHog aggregate funnel readout cannot confirm attributed first runs and
+  direct `gh-*` directory install refs before deciding which launch/listing
+  surfaces to double down on
 - Glama still has no real listing for the punkpeye badge requirement
 - a target directory requires payment, CAPTCHA, anti-bot bypass, private account
   action, or owner identity input

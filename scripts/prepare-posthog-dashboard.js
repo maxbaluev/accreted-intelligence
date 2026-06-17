@@ -14,6 +14,7 @@ const REQUIRED_TILES = [
   "web_copy_source_leaderboard",
   "landing_to_copy_to_first_run_by_surface",
   "attributed_first_runs",
+  "direct_install_refs_by_source",
   "copy_to_attributed_first_run_by_surface",
   "visitor_share_loop",
   "activation_after_install",
@@ -115,6 +116,13 @@ function validate() {
     "event = 'first_run'",
     "properties.has_install_ref = 'true'",
     "attributed_first_runs",
+  ]);
+  validateSql(bySlug.get("direct_install_refs_by_source"), [
+    "event = 'first_run'",
+    "properties.has_install_ref = 'true'",
+    "match(distinct_id, '^gh-')",
+    "distinct_id AS install_ref",
+    "first_run_events",
   ]);
   validateSql(bySlug.get("copy_to_attributed_first_run_by_surface"), [
     "copies AS",

@@ -43,7 +43,7 @@ Default mode is local and read-only:
   - prints the approval-gated push + hosted live-site verifier command
   - prints the approval-gated controlled live install receipt verifier command
   - prints the approval-gated PostHog dashboard shell creation command
-  - prints the approval-gated PostHog funnel readout command
+  - prints the approval-gated PostHog funnel/direct-ref readout command
   - prints the owner-approval commands for MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
     social launch, and directory follow-up
@@ -370,7 +370,7 @@ Run these only after explicit owner approval for the named external action.
    the generated UI packet in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 
-13. Read the PostHog growth funnel and visitor-share loop after the dashboard and controlled install:
+13. Read the PostHog growth funnel, direct install refs, and visitor-share loop after the dashboard and controlled install:
 
    scripts/run-approved-posthog-funnel-check.sh
    POSTHOG_HOST=https://us.posthog.com \\

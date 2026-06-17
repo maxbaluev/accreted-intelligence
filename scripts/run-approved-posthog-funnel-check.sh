@@ -93,12 +93,13 @@ Approved mode runs aggregate HogQL via:
   POST $posthog_host/api/projects/<project-id>/query/
 
 Readouts:
-  1. landing views, share events, copy events, attributed first runs, first retrieves, daily rollups
+  1. landing views, share events, copy events, attributed first-run events, first retrieves, daily rollups
   2. landing-to-copy-to-first-run conversion by surface
   3. copy-to-attributed-first-run conversion by surface and method
-  4. visitor share loop
-  5. activation after attributed first run
-  6. optional controlled distinct_id event presence
+  4. direct install refs by source, including gh-* directory/listing refs
+  5. visitor share loop
+  6. activation after attributed first run
+  7. optional controlled distinct_id event presence
 EOF
 
 if [ "${ACC_APPROVE_POSTHOG_QUERY:-0}" != "1" ]; then
@@ -176,6 +177,7 @@ SELECT
     uniqExactIf(distinct_id, event = 'share_link_copied') AS sharers,
     countIf(event = 'install_command_copied') AS copy_events,
     uniqExactIf(distinct_id, event = 'install_command_copied') AS copied_people,
+    countIf(event = 'first_run' AND properties.has_install_ref = 'true') AS attributed_first_run_events,
     uniqExactIf(distinct_id, event = 'first_run' AND properties.has_install_ref = 'true') AS attributed_first_runs,
     uniqExactIf(distinct_id, event = 'first_retrieve') AS first_retrieves,
     uniqExactIf(distinct_id, event = 'daily_rollup') AS daily_rollups
@@ -303,6 +305,29 @@ ORDER BY first_runs DESC, copied_people DESC
 LIMIT 25
 """.strip()
 
+direct_refs_sql = f"""
+SELECT
+    multiIf(
+        match(distinct_id, '^gh-'), 'github-directory-pr',
+        match(distinct_id, '^github-'), 'github-owned-surface',
+        match(distinct_id, '^reddit-'), 'reddit-surface',
+        match(distinct_id, '^(hn|x)-'), 'social-surface',
+        match(distinct_id, '^[0-9a-f]{{12}}$'), 'web-copy-ref',
+        'other-ref'
+    ) AS ref_class,
+    distinct_id AS install_ref,
+    count() AS first_run_events,
+    min(timestamp) AS first_seen,
+    max(timestamp) AS last_seen
+FROM events
+WHERE event = 'first_run'
+  AND properties.has_install_ref = 'true'
+  AND {window}
+GROUP BY ref_class, install_ref
+ORDER BY first_run_events DESC, last_seen DESC
+LIMIT 50
+""".strip()
+
 share_loop_sql = f"""
 WITH
 shares AS (
@@ -402,6 +427,7 @@ queries = [
     ("summary", summary_sql),
     ("traffic to first run by surface", traffic_sql),
     ("surface conversion", surface_sql),
+    ("direct install refs by source", direct_refs_sql),
     ("visitor share loop", share_loop_sql),
     ("activation", activation_sql),
 ]
