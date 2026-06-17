@@ -291,6 +291,57 @@ else
   skip "gh CLI not found; cannot run release alignment check"
 fi
 
+section "Official MCP Registry"
+if command -v curl >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
+  registry_server="$(
+    python3 - <<'PY'
+import json
+from pathlib import Path
+from urllib.parse import quote
+
+name = json.loads(Path("server.json").read_text()).get("name", "")
+print(quote(name, safe=""))
+PY
+  )"
+  registry_url="https://registry.modelcontextprotocol.io/v0.1/servers/${registry_server}/versions/latest"
+  registry_json="$(fetch_body "$registry_url")"
+  if [ -z "$registry_json" ]; then
+    hold "official MCP Registry latest endpoint is empty or unavailable"
+  else
+    REGISTRY_JSON="$registry_json" EXPECTED_VERSION="${tag#v}" python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["REGISTRY_JSON"])
+expected = os.environ["EXPECTED_VERSION"]
+server = data.get("server", {})
+official = data.get("_meta", {}).get("io.modelcontextprotocol.registry/official", {})
+name = server.get("name", "<unknown>")
+version = server.get("version", "<unknown>")
+status = official.get("status", "<unknown>")
+is_latest = official.get("isLatest")
+published = official.get("publishedAt", "<unknown>")
+print(f"  registry server: {name}")
+print(f"  registry version: {version}")
+print(f"  registry status: {status}")
+print(f"  registry latest: {is_latest}")
+print(f"  registry published: {published}")
+if version == expected and status == "active" and is_latest is True:
+    sys.exit(0)
+sys.exit(1)
+PY
+    registry_status=$?
+    if [ "$registry_status" -eq 0 ]; then
+      ok "official MCP Registry serves ${tag#v} as active latest"
+    else
+      hold "official MCP Registry is not serving ${tag#v} as active latest"
+    fi
+  fi
+else
+  skip "curl and python3 are required for the official MCP Registry check"
+fi
+
 glama_check() {
   local label="$1"
   local url="$2"
