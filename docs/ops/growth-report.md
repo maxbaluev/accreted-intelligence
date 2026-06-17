@@ -51,10 +51,14 @@ Last receipt refresh: 2026-06-17.
 - MCP.Directory already has a recorded June 15 submission receipt, but a
   read-only June 17 browser check did not find AccInt on the public query pages;
   treat it as pending/unverified instead of resubmitting.
+- Launchpadly invite inspected on June 17: the free startup listing requires a
+  Launchpadly badge/backlink on the AccInt site, while the featured path is
+  paid. Hold unless the owner explicitly approves that badge/backlink tradeoff
+  or a paid placement.
 - De-dupe any further directory submission against the local queue before
-  submitting or sending email; All AI Tool Hub, MCP.Directory, MCP.so,
-  Insidr.ai, AISuperHub, ListedAI, Apps and Websites, and AI Tool Claw already
-  have recorded submission/email outcomes.
+  submitting or sending email; All AI Tool Hub, Launchpadly, MCP.Directory,
+  MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and Websites, and AI Tool Claw
+  already have recorded submission/email outcomes or held blockers.
 - Do not reply to directory/listing PRs merely to bump visibility. Use generated
   notes only when a maintainer asks for clarification, a listing needs registry
   proof, or the owner approves a specific reply.
