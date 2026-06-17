@@ -28,6 +28,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - attribution dashboard/runbook docs
 - social launch kit
 - owner-reviewed social launch packet
+- owner-reviewed social reply packet
 - compact owner approval brief
 - growth surface ref manifest
 - tracked growth report
@@ -64,6 +65,7 @@ node scripts/check-social-launch-kit.js --check
 node scripts/prepare-growth-approval-brief.js --check v<tag>
 node scripts/prepare-social-launch-packet.js --check
 node scripts/prepare-social-launch-packet.js --decision-packet
+node scripts/prepare-social-launch-packet.js --reply-packet hn-show
 node scripts/check-growth-surfaces.js --check
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
@@ -125,6 +127,8 @@ Expected state:
   HN/X/Reddit launch copy into exact owner-review packets without posting
 - `node scripts/prepare-social-launch-packet.js --decision-packet` prints the
   one-page owner target choice packet without opening compose/submit URLs
+- `node scripts/prepare-social-launch-packet.js --reply-packet hn-show` prints
+  owner-reviewable response drafts for real launch comments without posting
 - `node scripts/prepare-growth-approval-brief.js --check v<tag>` passes and
   prints the compact approval packet without running any external action
 - `node scripts/prepare-growth-decision-queue.js --check v<tag>` passes and
@@ -399,6 +403,7 @@ node scripts/check-social-launch-kit.js --check
 node scripts/prepare-social-launch-packet.js --check
 node scripts/prepare-social-launch-packet.js --decision-packet
 node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>
+node scripts/prepare-social-launch-packet.js --reply-packet hn-show
 node scripts/prepare-social-launch-packet.js --markdown
 node scripts/check-growth-surfaces.js --check
 node scripts/check-growth-surfaces.js --print

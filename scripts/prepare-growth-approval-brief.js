@@ -132,6 +132,7 @@ function runLocalChecks() {
     ["node", ["scripts/check-site-metadata.js"]],
     ["node", ["scripts/check-social-launch-kit.js", "--check"]],
     ["node", ["scripts/prepare-social-launch-packet.js", "--check"]],
+    ["node", ["scripts/prepare-social-launch-packet.js", "--reply-packet", "hn-show"]],
     ["node", ["scripts/check-growth-surfaces.js", "--check"]],
     ["bash", ["scripts/check-controlled-install-attribution.sh"]],
     ["bash", ["scripts/check-install-surface.sh"]],

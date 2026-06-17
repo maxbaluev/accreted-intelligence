@@ -29,6 +29,7 @@ const REQUIRED_SNIPPETS = [
   "scripts/check-growth-live-state.sh v<tag>",
   "scripts/check-live-attribution-flow.sh https://accint.xyz",
   "node scripts/check-site-metadata.js",
+  "node scripts/prepare-social-launch-packet.js --reply-packet hn-show",
   "ACC_INSTALL_REF=hn-show",
   "ACC_INSTALL_SOURCE='ref=hn-show&utm_source=hacker_news&utm_campaign=launch'",
   "ACC_INSTALL_REF=x-launch-thread",

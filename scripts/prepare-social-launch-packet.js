@@ -16,11 +16,12 @@ const VALUE_RE = /^[A-Za-z0-9._:/?+,-]{1,96}$/;
 const FORBIDDEN_CLAIMS = ["fully open source", "open-source engine", "public memory implementation"];
 
 function usage() {
-  console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--decision-packet|--receipt-packet|--markdown|--json] [surface-ref] [published-url]
+  console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--decision-packet|--reply-packet|--receipt-packet|--markdown|--json] [surface-ref] [published-url]
 
 Modes:
   --check            validate the social launch packet and print a compact summary
   --decision-packet  print the one-page owner target choice packet
+  --reply-packet     print owner-reviewable replies for a posted launch surface
   --receipt-packet   print the after-posting receipt row for the growth report
   --markdown         print owner-reviewable post packets
   --json             print structured packet data
@@ -291,6 +292,10 @@ function validatePacket(rows, kitText) {
   if (!redditPost.body.includes("no cloud memory account") || !redditPost.body.includes("proprietary")) {
     die("reddit-localllama: body must state privacy/source boundary");
   }
+
+  for (const row of rows) {
+    validateReplyDrafts(row);
+  }
 }
 
 function printCheck(rows) {
@@ -448,11 +453,151 @@ function printDecisionPacket(rows) {
   console.log();
   console.log("```bash");
   console.log("node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>");
+  console.log("node scripts/prepare-social-launch-packet.js --reply-packet hn-show");
   console.log("scripts/check-growth-live-state.sh v<tag>");
   console.log("scripts/run-approved-posthog-funnel-check.sh");
   console.log("```");
   console.log();
   console.log("Reply only to concrete questions, corrections, or useful technical discussion.");
+}
+
+function replyDrafts(row) {
+  return [
+    {
+      label: "Short positioning",
+      use_when: "Someone asks what AccInt is in one sentence.",
+      text: [
+        "AccInt is a local Work Model under coding agents: it records commitments, actions, approvals, outcomes, failures, and reusable paths, then retrieves the parts that actually earned trust after reality answered.",
+        "",
+        `Launch link for this thread: ${row.landing_url}`,
+      ].join("\n"),
+    },
+    {
+      label: "Difference from memory/RAG",
+      use_when: "Someone asks how this differs from agent memory, RAG, or saved context.",
+      text: [
+        "The difference I care about is outcome credit. Plain memory recalls context. AccInt keeps a scored work state: what was promised, what ran, what needed approval, what passed, what failed, and which retrieved tokens or reusable paths were actually involved.",
+        "",
+        "Self-graded success stays weak. Tests, owner approval, and real replies are stronger evidence. The next run uses that scored history to predict a better path instead of just remembering more text.",
+      ].join("\n"),
+    },
+    {
+      label: "Privacy and locality",
+      use_when: "Someone asks what leaves the machine.",
+      text: [
+        "The Work Model and memory stay local. There is no cloud memory account. The public telemetry contract is narrow: anonymous event names and coarse install/source refs for growth measurement, opt-out, with no prompts, files, memory contents, or Work Model data.",
+        "",
+        "Anything that would post, comment, pay, delete, submit, or use account identity is supposed to stop at an owner approval gate.",
+      ].join("\n"),
+    },
+    {
+      label: "Source boundary",
+      use_when: "Someone asks whether it is open source.",
+      text: [
+        "The public repo is Apache-2.0 installer/docs/plugins/registry glue so the host integration can be audited. The local engine is shipped as a proprietary binary under the EULA, and the engine source is private.",
+        "",
+        "I am trying to be explicit about that boundary instead of implying the whole engine is open source.",
+      ].join("\n"),
+    },
+    {
+      label: "How to try it",
+      use_when: "Someone asks for the install command or wants to reproduce the launch path.",
+      text: [
+        "The quickest path is the attributed launch link, then the one-line installer:",
+        "",
+        row.landing_url,
+        "",
+        row.posix,
+        "",
+        "The installer probes the machine and reports which embedder tier it can run instead of assuming a GPU or cloud model.",
+      ].join("\n"),
+    },
+    {
+      label: "What is proven",
+      use_when: "Someone asks whether this is production mature.",
+      text: [
+        "It is young. What is real today: local MCP integration, host wiring for Claude Code/Codex/OpenCode/Cursor, a commitment/action/outcome ledger, MaxSim retrieval over scored memory, approval gates for external actions, and local checks around the public installer/distribution path.",
+        "",
+        "What I am still trying to prove publicly is adoption, retention, and whether the scored Work Model measurably makes repeated work faster and better outside my own usage.",
+      ].join("\n"),
+    },
+  ];
+}
+
+function validateReplyDrafts(row) {
+  const drafts = replyDrafts(row);
+  if (drafts.length < 6) {
+    die(`${row.id}: expected at least 6 reply drafts`);
+  }
+  const joined = drafts.map((draft) => draft.text).join("\n").toLowerCase();
+  for (const phrase of FORBIDDEN_CLAIMS) {
+    if (joined.includes(phrase)) {
+      die(`${row.id}: reply draft contains forbidden overclaim: ${phrase}`);
+    }
+  }
+  if (!joined.includes("no cloud memory account")) {
+    die(`${row.id}: reply packet must state no cloud memory account`);
+  }
+  if (!joined.includes("proprietary binary") || !joined.includes("engine source is private")) {
+    die(`${row.id}: reply packet must state source boundary`);
+  }
+  if (!joined.includes("no prompts, files, memory contents, or work model data")) {
+    die(`${row.id}: reply packet must state telemetry exclusion boundary`);
+  }
+  if (!drafts.some((draft) => draft.text.includes(row.landing_url))) {
+    die(`${row.id}: reply packet missing attributed landing URL`);
+  }
+  if (!drafts.some((draft) => draft.text.includes(row.posix))) {
+    die(`${row.id}: reply packet missing attributed install snippet`);
+  }
+  for (const draft of drafts) {
+    if (/https?:\/\/news\.ycombinator\.com\/submit/i.test(draft.text) || /https?:\/\/x\.com\/compose/i.test(draft.text)) {
+      die(`${row.id}: reply draft must not include submit/compose URLs`);
+    }
+    if (draft.text.length > 1200) {
+      die(`${row.id}: reply draft ${draft.label} is too long (${draft.text.length} chars)`);
+    }
+  }
+}
+
+function printReplyPacket(rows, surfaceId) {
+  const id = surfaceId || "hn-show";
+  const row = rows.find((item) => item.id === id);
+  if (!row) {
+    die(`unknown social launch surface ${id}`);
+  }
+
+  console.log("# Social Launch Reply Packet");
+  console.log();
+  console.log("READ ONLY: owner-review material only. Do not post, submit, comment, DM, pay, open compose forms, or use account identity without explicit owner approval for the exact reply.");
+  console.log();
+  console.log(`- Surface ref: \`${row.id}\``);
+  console.log(`- Surface label: ${row.label}`);
+  console.log(`- Attributed landing URL: ${row.landing_url}`);
+  console.log(`- Source envelope: \`${row.source}\``);
+  console.log();
+  console.log("Use these only after an owner-approved post exists and a real comment asks for the point covered. Do not reply just to bump visibility.");
+  console.log();
+  console.log("Monitoring commands:");
+  console.log();
+  console.log("```bash");
+  console.log(`node scripts/prepare-social-launch-packet.js --receipt-packet ${row.id} <published-url>`);
+  console.log(`node scripts/prepare-social-launch-packet.js --reply-packet ${row.id}`);
+  console.log("scripts/check-growth-live-state.sh v<tag>");
+  console.log("scripts/run-approved-posthog-funnel-check.sh");
+  console.log("```");
+  console.log();
+
+  for (const draft of replyDrafts(row)) {
+    console.log(`## ${draft.label}`);
+    console.log();
+    console.log(`Use when: ${draft.use_when}`);
+    console.log();
+    console.log("```text");
+    console.log(draft.text);
+    console.log("```");
+    console.log();
+  }
 }
 
 function printReceiptPacket(rows, surfaceId, publishedUrl) {
@@ -492,6 +637,7 @@ function printReceiptPacket(rows, surfaceId, publishedUrl) {
   console.log("```bash");
   console.log("scripts/check-growth-live-state.sh v<tag>");
   console.log("scripts/run-approved-posthog-funnel-check.sh");
+  console.log(`node scripts/prepare-social-launch-packet.js --reply-packet ${row.id}`);
   console.log("```");
 }
 
@@ -501,7 +647,7 @@ if (mode === "-h" || mode === "--help") {
   usage();
   process.exit(0);
 }
-if (!["--check", "--decision-packet", "--receipt-packet", "--markdown", "--json"].includes(mode)) {
+if (!["--check", "--decision-packet", "--reply-packet", "--receipt-packet", "--markdown", "--json"].includes(mode)) {
   usage();
   process.exit(2);
 }
@@ -516,6 +662,8 @@ if (mode === "--json") {
   console.log(JSON.stringify({ schema_version: 1, rows }, null, 2));
 } else if (mode === "--decision-packet") {
   printDecisionPacket(rows);
+} else if (mode === "--reply-packet") {
+  printReplyPacket(rows, args[1]);
 } else if (mode === "--receipt-packet") {
   printReceiptPacket(rows, args[1], args[2]);
 } else if (mode === "--markdown") {

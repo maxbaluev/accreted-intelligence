@@ -393,6 +393,7 @@ Run these only after explicit owner approval for the named external action.
    node scripts/prepare-social-launch-packet.js --check
    node scripts/prepare-social-launch-packet.js --decision-packet
    node scripts/prepare-social-launch-packet.js --markdown
+   node scripts/prepare-social-launch-packet.js --reply-packet hn-show
    node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>
    node scripts/check-site-metadata.js
    node scripts/check-growth-surfaces.js --check

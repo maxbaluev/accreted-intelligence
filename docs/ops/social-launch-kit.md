@@ -21,6 +21,7 @@ node scripts/check-site-metadata.js
 node scripts/check-growth-surfaces.js --check
 node scripts/check-social-launch-kit.js --check
 node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --reply-packet hn-show
 ```
 
 Post only after these are true:
@@ -103,15 +104,17 @@ Before any owner-approved post, generate the local review packet:
 node scripts/prepare-social-launch-packet.js --check
 node scripts/prepare-social-launch-packet.js --decision-packet
 node scripts/prepare-social-launch-packet.js --markdown
+node scripts/prepare-social-launch-packet.js --reply-packet hn-show
 ```
 
 The packet reads only this Markdown file and
 [`docs/ops/growth-surfaces.json`](growth-surfaces.json). It does not open
 posting URLs, post, submit, comment, DM, pay, or use account identity. The
 decision packet gives a one-page target choice and first-launch recommendation;
-the full markdown packet prints per-surface copy, attributed landing URLs,
-install snippets, and channel fit checks so the owner can approve an exact
-target without reassembling the launch by hand.
+the reply packet prepares source-boundary, privacy, install, and "what is this"
+answers for real post comments; the full markdown packet prints per-surface
+copy, attributed landing URLs, install snippets, and channel fit checks so the
+owner can approve an exact target without reassembling the launch by hand.
 
 ## Show HN
 
@@ -233,6 +236,7 @@ growth report, then monitor without spamming:
 
 ```bash
 node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>
+node scripts/prepare-social-launch-packet.js --reply-packet hn-show
 scripts/check-directory-pr-state.sh path/to/report.md
 scripts/check-growth-live-state.sh v<tag>
 ```
