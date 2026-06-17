@@ -143,6 +143,15 @@ if command -v node >/dev/null 2>&1; then
     note "growth owner handoff: FAIL"
     fail=1
   fi
+  if grep -q 'scripts/check-live-llms-discovery.sh https://accint.xyz' scripts/prepare-growth-approval-brief.js &&
+    grep -q 'scripts/check-live-llms-discovery.sh' scripts/prepare-growth-decision-queue.js &&
+    grep -q 'scripts/check-live-llms-discovery.sh' scripts/prepare-growth-owner-handoff.js &&
+    grep -q 'scripts/check-live-llms-discovery.sh https://accint.xyz' scripts/prepare-social-launch-packet.js; then
+    note "owner packets include live llms.txt discovery verification: ok"
+  else
+    note "owner packets include live llms.txt discovery verification: FAIL"
+    fail=1
+  fi
   if [ -f scripts/prepare-directory-priority-report.js ] && node --check scripts/prepare-directory-priority-report.js >/dev/null; then
     note "directory priority report syntax: ok"
   else

@@ -17,6 +17,7 @@ const REQUIRED_FILES = [
   "scripts/run-approved-growth-rollout.sh",
   "scripts/check-growth-live-state.sh",
   "scripts/check-live-attribution-flow.sh",
+  "scripts/check-live-llms-discovery.sh",
   "scripts/run-approved-controlled-live-install.sh",
   "scripts/prepare-posthog-dashboard.js",
   "scripts/run-approved-posthog-dashboard.sh",
@@ -177,13 +178,13 @@ function buildQueue(brief, tag) {
       depends_on: rolloutReady ? ["Owner approval for this exact external action"] : rolloutBlockers,
       unlocks: [
         "publishes the local growth bundle",
-        "makes README and live-site attribution changes observable",
+        "makes README, live-site attribution, and llms.txt discovery changes observable",
         "dispatches the hosted live-site verifier after GitHub indexes the workflow",
       ],
       why: "This is the highest leverage unlock because the current bundle is local-only until it is pushed.",
     }),
     queueItem(2, {
-      action: "Verify live deploy and attribution",
+      action: "Verify live deploy, attribution, and LLM discovery",
       status: "waiting_on_rollout",
       owner_decision: "No mutation; run immediately after the approved rollout completes.",
       command: action2.command,
@@ -194,6 +195,7 @@ function buildQueue(brief, tag) {
       ],
       unlocks: [
         "evidence that install copy carries attribution",
+        "evidence that llms.txt agent discovery is served and advertised",
         "safe basis for social, directory, and controlled-install follow-up",
       ],
       why: "Promotion should point at a verified live surface instead of an assumed deployment.",
@@ -205,7 +207,7 @@ function buildQueue(brief, tag) {
       command: action3.command,
       guard: action3.guard || "Requires ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1",
       depends_on: [
-        "step 2 verified live attribution",
+        "step 2 verified live attribution and LLM discovery",
         "owner approval for the controlled live install helper",
       ],
       unlocks: [
@@ -272,7 +274,7 @@ function buildQueue(brief, tag) {
       command: action6.command,
       guard: action6.guard || "No automated posting; owner chooses exact target",
       depends_on: [
-        "step 2 verified live attribution",
+        "step 2 verified live attribution and LLM discovery",
         "owner-selected HN/X/Reddit target and exact copy",
       ],
       unlocks: [
@@ -288,7 +290,7 @@ function buildQueue(brief, tag) {
       command: `scripts/check-directory-pr-state.sh ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-priority-report.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-surface-refs.js --markdown ${brief.growth_report || "docs/ops/growth-report.md"}\nnode scripts/prepare-directory-followup-kit.js --markdown --actionable ${brief.growth_report || "docs/ops/growth-report.md"}`,
       guard: "Read-only packet; no comments, edits, or PR pushes without target-specific owner approval",
       depends_on: [
-        "step 2 verified live attribution for any claim about live install copy",
+        "step 2 verified live attribution and LLM discovery for any claim about live install copy or agent-discovery files",
         "maintainer request, registry proof need, failing-check fix, or owner-approved target",
       ],
       unlocks: [

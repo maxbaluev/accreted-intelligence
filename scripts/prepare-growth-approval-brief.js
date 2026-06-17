@@ -183,7 +183,7 @@ function exactActions(tag, branch) {
     {
       stage: "2",
       name: "Verify after deploy, no mutation",
-      command: `scripts/check-growth-live-state.sh ${tag}\nscripts/check-live-attribution-flow.sh https://accint.xyz\nnode scripts/check-site-metadata.js`,
+      command: `scripts/check-growth-live-state.sh ${tag}\nscripts/check-live-attribution-flow.sh https://accint.xyz\nscripts/check-live-llms-discovery.sh https://accint.xyz\nnode scripts/check-site-metadata.js`,
       external_effects: ["read-only public site/GitHub checks"],
       guard: "Read-only",
     },

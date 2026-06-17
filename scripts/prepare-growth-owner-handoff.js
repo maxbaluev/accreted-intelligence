@@ -17,6 +17,7 @@ const REQUIRED_FILES = [
   "scripts/run-approved-growth-rollout.sh",
   "scripts/check-growth-live-state.sh",
   "scripts/check-live-attribution-flow.sh",
+  "scripts/check-live-llms-discovery.sh",
   "docs/ops/growth-rollout-checklist.md",
   "docs/ops/growth-report.md",
 ];
@@ -116,6 +117,9 @@ function collectValidationFailures(brief, queue) {
   }
   if (!verification) {
     failures.push("growth approval brief is missing verification stage 2");
+  }
+  if (verification && !commandBlock(verification.command).includes("scripts/check-live-llms-discovery.sh")) {
+    failures.push("growth approval brief stage 2 must verify live llms.txt discovery");
   }
   if (!queue.top_decision) {
     failures.push("growth decision queue is missing a top decision");
