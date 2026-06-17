@@ -15,6 +15,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - web prompt-copy `ACC_INSTALL_SOURCE` source/ref stitching
 - attribution regression tests
 - controlled install attribution receipt verifier
+- read-only live growth state auditor
 - materialized PostHog dashboard spec
 - attribution dashboard/runbook docs
 - organic referrer classification
@@ -27,10 +28,12 @@ from the separate `maxbaluev/accreted-intelligence` clone.
 
 ## Before approval
 
-These checks are local and safe:
+These checks are safe before approval. All are local except
+`scripts/check-growth-live-state.sh`, which performs read-only public lookups:
 
 ```bash
 scripts/prepare-growth-rollout.sh
+scripts/check-growth-live-state.sh v<tag>
 bash scripts/check-growth-readiness.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
@@ -47,6 +50,9 @@ Expected state:
 - branch is ahead only by intended public commits
 - `scripts/prepare-growth-rollout.sh` prints `DRY RUN COMPLETE` and does not
   push, upload, dispatch, publish, post, or submit anything
+- `scripts/check-growth-live-state.sh v<tag>` reports current live OK/HOLD/SKIP
+  state without pushing, uploading, dispatching, publishing, posting, submitting,
+  or creating dashboards/listings
 - `scripts/check-growth-readiness.sh` passes
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
@@ -77,6 +83,7 @@ git push origin main
 Immediately verify:
 
 ```bash
+scripts/check-growth-live-state.sh v<tag>
 gh repo view maxbaluev/accreted-intelligence --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
 gh workflow list --repo maxbaluev/accreted-intelligence
 ```
@@ -96,6 +103,7 @@ re-index before re-submitting to OSS-first lists.
 After GitHub Pages / site deploy completes, verify the deployed pages:
 
 ```bash
+scripts/check-growth-live-state.sh v<tag>
 curl -fsSI https://accint.xyz/
 curl -fsSI https://accint.xyz/reddit/
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
@@ -170,14 +178,16 @@ first runs and activation.
 
 After public push and site verification:
 
-1. Re-check Glama:
+1. Run the advisory live-state audit:
+   `scripts/check-growth-live-state.sh v<tag>`.
+2. Re-check Glama:
    - `https://glama.ai/mcp/servers/maxbaluev/accreted-intelligence`
    - `https://glama.ai/mcp/servers?q=accint`
-2. Only if Glama has a real AccInt listing and score badge, update
+3. Only if Glama has a real AccInt listing and score badge, update
    `punkpeye/awesome-mcp-servers#8091` with the badge required by that repo.
-3. Use `docs/ops/directory-listing.md` for future directory/list submissions
+4. Use `docs/ops/directory-listing.md` for future directory/list submissions
    and reviewer replies.
-4. Do not retry lists that rejected the private-engine boundary unless the
+5. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
 ## Docker registry lane

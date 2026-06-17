@@ -22,6 +22,7 @@ Examples:
 Default mode is local and read-only:
   - runs the growth-readiness gate
   - reports branch/release/registry state
+  - reports read-only live public state and current holds
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, and dashboard creation
 
@@ -108,6 +109,10 @@ echo "== PostHog dashboard pre-live proof =="
 node scripts/prepare-posthog-dashboard.js --check
 
 echo
+echo "== read-only live growth state =="
+ACC_LIVE_STATE_STRICT=0 bash scripts/check-growth-live-state.sh "$tag"
+
+echo
 echo "== registry alignment hold check =="
 if command -v gh >/dev/null 2>&1; then
   if bash scripts/check-release-alignment.sh "$tag" server.json; then
@@ -134,6 +139,7 @@ Run these only after explicit owner approval for the named external action.
 
 2. Read-only verification after the push/site deploy:
 
+   scripts/check-growth-live-state.sh $tag
    gh repo view $repo --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
    gh workflow list --repo $repo
    curl -fsSI https://accint.xyz/
@@ -183,7 +189,11 @@ Run these only after explicit owner approval for the named external action.
    node scripts/prepare-posthog-dashboard.js --check
    node scripts/prepare-posthog-dashboard.js --print
 
-10. Create the PostHog dashboard from:
+10. Re-run the full read-only live-state audit:
+
+   scripts/check-growth-live-state.sh $tag
+
+11. Create the PostHog dashboard from:
 
    docs/ops/attribution-dashboard.md
    docs/ops/posthog-dashboard.json
