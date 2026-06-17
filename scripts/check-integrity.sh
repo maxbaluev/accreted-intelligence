@@ -29,6 +29,7 @@ for f in \
   scripts/prepare-growth-rollout.sh \
   scripts/prepare-mcpb-release-assets.sh \
   scripts/run-approved-controlled-live-install.sh \
+  scripts/run-approved-posthog-dashboard.sh \
   scripts/run-approved-growth-rollout.sh; do
   if [ -f "$f" ]; then
     if bash -n "$f"; then note "$f: ok"; else note "$f: SYNTAX ERROR"; fail=1; fi

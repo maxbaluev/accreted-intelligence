@@ -21,6 +21,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - live prompt-copy attribution verifier
 - MCPB promotion packet verifier
 - materialized PostHog dashboard spec
+- approval-gated PostHog dashboard shell helper
 - attribution dashboard/runbook docs
 - social launch kit
 - growth surface ref manifest
@@ -48,6 +49,7 @@ scripts/run-approved-controlled-live-install.sh v<tag>
 scripts/check-install-surface.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
+scripts/run-approved-posthog-dashboard.sh
 scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
 node scripts/check-growth-surfaces.js --check
@@ -85,6 +87,11 @@ Expected state:
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
   five required attribution dashboard tiles
+- `scripts/run-approved-posthog-dashboard.sh` prints `DRY RUN COMPLETE` unless
+  `ACC_APPROVE_POSTHOG_DASHBOARD=1` plus PostHog env vars are set. In approved
+  mode it creates only the dashboard shell and a markdown setup tile through
+  documented PostHog dashboard endpoints; insight tiles are still created from
+  `docs/ops/posthog-dashboard.json` in the PostHog UI
 - `scripts/check-mcpb-promotion-packet.sh v<tag>` passes and proves the local
   MCPB upload bundle, generated registry metadata, and mutation guards before
   release upload/server metadata advance
@@ -237,6 +244,7 @@ binary release are live. The materialized local spec is
 ```bash
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/prepare-posthog-dashboard.js --print
+scripts/run-approved-posthog-dashboard.sh
 ```
 
 Minimum tiles:
@@ -249,6 +257,22 @@ Minimum tiles:
 
 Do not rank acquisition surfaces from copy events alone. Rank from attributed
 first runs and activation.
+
+After explicit owner approval, the shell and setup tile can be created through
+the PostHog Dashboard API:
+
+```bash
+POSTHOG_HOST=https://app.posthog.com \
+POSTHOG_ENVIRONMENT_ID=<environment-id> \
+POSTHOG_PERSONAL_API_KEY=<personal-api-key> \
+ACC_APPROVE_POSTHOG_DASHBOARD=1 \
+  scripts/run-approved-posthog-dashboard.sh
+```
+
+The helper requires a personal API key with `dashboard:read` and
+`dashboard:write`, checks for an existing exact dashboard name first, and does
+not create undocumented insight payloads. Create the five insight tiles from the
+validated spec in the PostHog UI before using the dashboard for decisions.
 
 ## Directory follow-up
 
@@ -326,6 +350,8 @@ Hold instead of continuing when:
   `distinct_id`
 - controlled live receipt proof cannot fetch the live installer or produce the
   expected temp receipt
+- PostHog dashboard shell/setup tile cannot be created or the five insight tiles
+  are not present before ranking growth surfaces
 - Glama still has no real listing for the punkpeye badge requirement
 - a target directory requires payment, CAPTCHA, anti-bot bypass, private account
   action, or owner identity input

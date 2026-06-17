@@ -53,10 +53,27 @@ the live PostHog dashboard, run:
 ```bash
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/prepare-posthog-dashboard.js --print
+scripts/run-approved-posthog-dashboard.sh
 ```
 
 This is local-only: it validates and prints the dashboard shape without calling
 PostHog or using credentials.
+
+After explicit owner approval, create the live dashboard shell and setup tile
+through the PostHog Dashboard API:
+
+```bash
+POSTHOG_HOST=https://app.posthog.com \
+POSTHOG_ENVIRONMENT_ID=<environment-id> \
+POSTHOG_PERSONAL_API_KEY=<personal-api-key> \
+ACC_APPROVE_POSTHOG_DASHBOARD=1 \
+  scripts/run-approved-posthog-dashboard.sh
+```
+
+The helper requires `dashboard:read` and `dashboard:write`, checks for an
+existing exact dashboard name before creating a new shell, and does not create
+undocumented insight payloads. Add the five insight tiles below from the
+validated spec in the PostHog UI.
 
 ### 1. Copy to first run funnel
 

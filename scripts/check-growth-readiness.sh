@@ -76,6 +76,7 @@ for f in \
   scripts/prepare-punkpeye-glama-followup.sh \
   scripts/prepare-mcpb-release-assets.sh \
   scripts/run-approved-controlled-live-install.sh \
+  scripts/run-approved-posthog-dashboard.sh \
   scripts/run-approved-growth-rollout.sh \
   scripts/check-integrity.sh; do
   if [ -f "$f" ]; then

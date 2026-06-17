@@ -33,6 +33,7 @@ Default mode is local and read-only:
   - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
   - prints the approval-gated push + hosted live-site verifier command
   - prints the approval-gated controlled live install receipt verifier command
+  - prints the approval-gated PostHog dashboard shell creation command
   - prints the owner-approval commands for MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
     social launch, and directory follow-up
@@ -136,6 +137,10 @@ scripts/check-install-surface.sh
 echo
 echo "== PostHog dashboard pre-live proof =="
 node scripts/prepare-posthog-dashboard.js --check
+
+echo
+echo "== PostHog dashboard creation helper =="
+scripts/run-approved-posthog-dashboard.sh
 
 echo
 echo "== MCPB promotion packet pre-live proof =="
@@ -282,6 +287,17 @@ Run these only after explicit owner approval for the named external action.
 
    docs/ops/attribution-dashboard.md
    docs/ops/posthog-dashboard.json
+   scripts/run-approved-posthog-dashboard.sh
+   POSTHOG_HOST=https://app.posthog.com \\
+   POSTHOG_ENVIRONMENT_ID=<environment-id> \\
+   POSTHOG_PERSONAL_API_KEY=<personal-api-key> \\
+   ACC_APPROVE_POSTHOG_DASHBOARD=1 \\
+     scripts/run-approved-posthog-dashboard.sh
+
+   The helper creates only the dashboard shell and a markdown setup tile through
+   documented PostHog dashboard endpoints. Add the five insight tiles from
+   docs/ops/posthog-dashboard.json in the PostHog UI, then confirm the
+   controlled install appears in both web copy and first-run events.
 
 13. Prepare owner-approved social launch copy:
 
