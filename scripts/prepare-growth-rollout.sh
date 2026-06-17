@@ -9,6 +9,7 @@ cd "$(dirname "$0")/.." || exit 1
 
 repo="${ACC_GROWTH_REPO:-maxbaluev/accreted-intelligence}"
 base_ref="${ACC_GROWTH_BASE_REF:-origin/main}"
+growth_report="${ACC_GROWTH_REPORT:-}"
 tag="${1:-}"
 
 usage() {
@@ -24,8 +25,11 @@ Default mode is local and read-only:
   - reports branch/release/registry state
   - reports read-only live public state and current holds
   - verifies live prompt-copy attribution in the read-only live-state audit
+  - verifies the social launch kit
+  - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
-    MCP Registry workflow dispatch, controlled install, and dashboard creation
+    MCP Registry workflow dispatch, controlled install, dashboard creation,
+    social launch, and directory follow-up
 
 It does not push, upload, dispatch, publish, post, or submit anything.
 EOF
@@ -63,6 +67,14 @@ behind="?"
 if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
   ahead="$(git rev-list --count "$base_ref"..HEAD)"
   behind="$(git rev-list --count HEAD.."$base_ref")"
+fi
+
+if [ -n "$growth_report" ]; then
+  report_record_line="   Record published URLs and refs in: $growth_report"
+  directory_pr_command="   scripts/check-directory-pr-state.sh \"$growth_report\""
+else
+  report_record_line="   Record published URLs and refs in the growth report."
+  directory_pr_command="   scripts/check-directory-pr-state.sh path/to/report.md"
 fi
 
 echo "== local growth readiness =="
@@ -108,6 +120,20 @@ bash scripts/check-controlled-install-attribution.sh
 echo
 echo "== PostHog dashboard pre-live proof =="
 node scripts/prepare-posthog-dashboard.js --check
+
+echo
+echo "== social launch kit pre-live proof =="
+node scripts/check-social-launch-kit.js --check
+
+echo
+echo "== directory PR state pre-live proof =="
+if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
+  scripts/check-directory-pr-state.sh "$growth_report"
+elif [ -n "$growth_report" ]; then
+  printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
+else
+  echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to audit tracked PRs"
+fi
 
 echo
 echo "== read-only live growth state =="
@@ -199,6 +225,26 @@ Run these only after explicit owner approval for the named external action.
 
    docs/ops/attribution-dashboard.md
    docs/ops/posthog-dashboard.json
+
+12. Prepare owner-approved social launch copy:
+
+   node scripts/check-social-launch-kit.js --check
+   scripts/check-live-attribution-flow.sh https://accint.xyz
+$report_record_line
+
+   Review, then owner posts manually from:
+
+   docs/ops/social-launch-kit.md
+
+   Do not automate HN/X/Reddit posting, commenting, DMs, payment, or account
+   identity use.
+
+13. Read-only directory PR follow-up:
+
+$directory_pr_command
+
+   Do not comment, edit, close, merge, or push PR branches without explicit
+   owner approval for that exact target.
 
 Still hold if Glama has no real AccInt listing, if license detection is null for
 OSS-first lists, if MCPB release alignment fails, or if a target directory needs
