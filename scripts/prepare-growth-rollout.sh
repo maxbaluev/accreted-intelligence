@@ -26,6 +26,7 @@ Default mode is local and read-only:
   - reports read-only live public state and current holds
   - verifies live prompt-copy attribution in the read-only live-state audit
   - verifies the social launch kit
+  - verifies growth surface refs and attributed landing URLs
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
@@ -124,6 +125,10 @@ node scripts/prepare-posthog-dashboard.js --check
 echo
 echo "== social launch kit pre-live proof =="
 node scripts/check-social-launch-kit.js --check
+
+echo
+echo "== growth surface refs pre-live proof =="
+node scripts/check-growth-surfaces.js --check
 
 echo
 echo "== directory PR state pre-live proof =="
@@ -229,6 +234,8 @@ Run these only after explicit owner approval for the named external action.
 12. Prepare owner-approved social launch copy:
 
    node scripts/check-social-launch-kit.js --check
+   node scripts/check-growth-surfaces.js --check
+   node scripts/check-growth-surfaces.js --print
    scripts/check-live-attribution-flow.sh https://accint.xyz
 $report_record_line
 

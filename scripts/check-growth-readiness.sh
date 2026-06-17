@@ -54,6 +54,7 @@ for f in \
   docs/ops/attribution-dashboard.md \
   docs/ops/directory-listing.md \
   docs/ops/growth-rollout-checklist.md \
+  docs/ops/growth-surfaces.json \
   docs/ops/posthog-dashboard.json \
   docs/ops/social-launch-kit.md \
   scripts/advance-mcpb-server-json.sh \
@@ -62,6 +63,7 @@ for f in \
   scripts/check-directory-pr-state.sh \
   scripts/check-growth-live-state.sh \
   scripts/check-live-attribution-flow.sh \
+  scripts/check-growth-surfaces.js \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/check-social-launch-kit.js \

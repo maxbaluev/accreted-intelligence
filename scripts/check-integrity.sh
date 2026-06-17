@@ -83,6 +83,14 @@ else
   fail=1
 fi
 
+echo "== growth surface refs =="
+if command -v node >/dev/null 2>&1; then
+  if node scripts/check-growth-surfaces.js --check; then note "growth surface refs: ok"; else fail=1; fi
+else
+  note "node: MISSING (required for growth surface verifier)"
+  fail=1
+fi
+
 echo "== MCP registry publish guard =="
 if grep -q 'scripts/check-mcpb-release-assets.sh "v${version}" server.json' .github/workflows/publish-mcp.yml; then
   note "publish workflow release-asset guard: ok"

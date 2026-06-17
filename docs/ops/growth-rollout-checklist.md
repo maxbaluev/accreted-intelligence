@@ -20,6 +20,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - materialized PostHog dashboard spec
 - attribution dashboard/runbook docs
 - social launch kit
+- growth surface ref manifest
 - organic referrer classification
 - dry-run rollout approval packet
 - standard root `LICENSE` for GitHub license detection
@@ -41,6 +42,7 @@ bash scripts/check-growth-readiness.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/check-social-launch-kit.js --check
+node scripts/check-growth-surfaces.js --check
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -64,10 +66,14 @@ Expected state:
   five required attribution dashboard tiles
 - `node scripts/check-social-launch-kit.js --check` passes and validates
   owner-approved posting copy, attribution refs, and source-boundary wording
+- `node scripts/check-growth-surfaces.js --check` passes and proves launch
+  refs, attributed landing URLs, install snippets, and page prompt-copy source
+  keys stay aligned
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
 - `docs/ops/directory-listing.md` exists
+- `docs/ops/growth-surfaces.json` exists
 - no private `src/**`, `Cargo.toml`, `Cargo.lock`, private tests, or substrate
   data appear in `git diff origin/main..HEAD --name-only`
 
@@ -213,8 +219,15 @@ posting:
 
 ```bash
 node scripts/check-social-launch-kit.js --check
+node scripts/check-growth-surfaces.js --check
+node scripts/check-growth-surfaces.js --print
 scripts/check-live-attribution-flow.sh https://accint.xyz
 ```
+
+Use the attributed landing URLs printed by the growth-surface checker when a
+post links to `accint.xyz` instead of carrying a long installer command. Those
+URLs populate `source_props` on the page, and the deployed copy buttons then add
+the same `ref`/source envelope to copied prompt and installer text.
 
 ## Docker registry lane
 

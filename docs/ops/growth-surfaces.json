@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "base_urls": {
+    "home": "https://accint.xyz/",
+    "reddit": "https://accint.xyz/reddit/",
+    "posix_installer": "https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install",
+    "powershell_installer": "https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1"
+  },
+  "surfaces": [
+    {
+      "id": "hn-show",
+      "kind": "social_launch",
+      "label": "Show HN",
+      "landing": "home",
+      "source": {
+        "ref": "hn-show",
+        "utm_source": "hacker_news",
+        "utm_campaign": "launch"
+      }
+    },
+    {
+      "id": "x-launch-thread",
+      "kind": "social_launch",
+      "label": "X launch thread",
+      "landing": "home",
+      "source": {
+        "ref": "x-launch-thread",
+        "utm_source": "x",
+        "utm_campaign": "launch"
+      }
+    },
+    {
+      "id": "reddit-localllama",
+      "kind": "social_launch",
+      "label": "Reddit LocalLLaMA",
+      "landing": "reddit",
+      "source": {
+        "ref": "reddit-localllama",
+        "utm_source": "reddit",
+        "utm_campaign": "launch",
+        "rsub": "localllama"
+      }
+    },
+    {
+      "id": "reddit-claudeai",
+      "kind": "social_launch",
+      "label": "Reddit ClaudeAI",
+      "landing": "reddit",
+      "source": {
+        "ref": "reddit-claudeai",
+        "utm_source": "reddit",
+        "utm_campaign": "launch",
+        "rsub": "claudeai"
+      }
+    },
+    {
+      "id": "reddit-chatgptcoding",
+      "kind": "social_launch",
+      "label": "Reddit ChatGPTCoding",
+      "landing": "reddit",
+      "source": {
+        "ref": "reddit-chatgptcoding",
+        "utm_source": "reddit",
+        "utm_campaign": "launch",
+        "rsub": "chatgptcoding"
+      }
+    }
+  ]
+}

@@ -17,6 +17,7 @@ Before any post goes live:
 bash scripts/check-growth-readiness.sh
 scripts/check-growth-live-state.sh v<tag>
 scripts/check-live-attribution-flow.sh https://accint.xyz
+node scripts/check-growth-surfaces.js --check
 node scripts/check-social-launch-kit.js --check
 ```
 
@@ -45,13 +46,27 @@ Do not claim:
 Use stable lowercase refs so installs can be grouped without storing post text,
 prompts, files, memory, or Work Model data.
 
+The canonical checked manifest is
+[`docs/ops/growth-surfaces.json`](growth-surfaces.json). Keep launch links and
+installer snippets in sync with it.
+
 | Surface | Ref | Source |
 |---|---|---|
 | Show HN | `hn-show` | `ref=hn-show&utm_source=hacker_news&utm_campaign=launch` |
 | X launch thread | `x-launch-thread` | `ref=x-launch-thread&utm_source=x&utm_campaign=launch` |
-| Reddit LocalLLaMA | `reddit-localllama` | `ref=reddit-localllama&utm_source=reddit&utm_campaign=launch` |
-| Reddit ClaudeAI | `reddit-claudeai` | `ref=reddit-claudeai&utm_source=reddit&utm_campaign=launch` |
-| Reddit ChatGPTCoding | `reddit-chatgptcoding` | `ref=reddit-chatgptcoding&utm_source=reddit&utm_campaign=launch` |
+| Reddit LocalLLaMA | `reddit-localllama` | `ref=reddit-localllama&utm_source=reddit&utm_campaign=launch&rsub=localllama` |
+| Reddit ClaudeAI | `reddit-claudeai` | `ref=reddit-claudeai&utm_source=reddit&utm_campaign=launch&rsub=claudeai` |
+| Reddit ChatGPTCoding | `reddit-chatgptcoding` | `ref=reddit-chatgptcoding&utm_source=reddit&utm_campaign=launch&rsub=chatgptcoding` |
+
+Attributed landing URLs:
+
+| Surface | URL |
+|---|---|
+| Show HN | `https://accint.xyz/?ref=hn-show&utm_source=hacker_news&utm_campaign=launch` |
+| X launch thread | `https://accint.xyz/?ref=x-launch-thread&utm_source=x&utm_campaign=launch` |
+| Reddit LocalLLaMA | `https://accint.xyz/reddit/?ref=reddit-localllama&utm_source=reddit&utm_campaign=launch&rsub=localllama` |
+| Reddit ClaudeAI | `https://accint.xyz/reddit/?ref=reddit-claudeai&utm_source=reddit&utm_campaign=launch&rsub=claudeai` |
+| Reddit ChatGPTCoding | `https://accint.xyz/reddit/?ref=reddit-chatgptcoding&utm_source=reddit&utm_campaign=launch&rsub=chatgptcoding` |
 
 Plain install link:
 
@@ -64,7 +79,7 @@ Attributed POSIX snippets:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=hn-show ACC_INSTALL_SOURCE='ref=hn-show&utm_source=hacker_news&utm_campaign=launch' sh
 curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=x-launch-thread ACC_INSTALL_SOURCE='ref=x-launch-thread&utm_source=x&utm_campaign=launch' sh
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-localllama ACC_INSTALL_SOURCE='ref=reddit-localllama&utm_source=reddit&utm_campaign=launch' sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-localllama ACC_INSTALL_SOURCE='ref=reddit-localllama&utm_source=reddit&utm_campaign=launch&rsub=localllama' sh
 ```
 
 Attributed PowerShell example:
@@ -73,10 +88,10 @@ Attributed PowerShell example:
 $env:ACC_INSTALL_REF='hn-show'; $env:ACC_INSTALL_SOURCE='ref=hn-show&utm_source=hacker_news&utm_campaign=launch'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
-If a channel dislikes long install commands, link to `https://accint.xyz`
-instead and let the deployed copy buttons carry the attribution. The post body
-can still use the plain install command when clarity matters more than source
-precision.
+If a channel dislikes long install commands, link to that surface's attributed
+landing URL instead and let the deployed copy buttons carry the attribution
+into prompt copies. The post body can still use the plain install command when
+clarity matters more than source precision.
 
 ## Show HN
 
@@ -97,7 +112,7 @@ Open glue (Apache-2.0 installer and plugins) so you can read the integration cod
 
 It is young and I will say what is proven vs unproven. Repo and one-liner:
 https://github.com/maxbaluev/accreted-intelligence
-Live ledger: https://accint.xyz
+Live ledger: https://accint.xyz/?ref=hn-show&utm_source=hacker_news&utm_campaign=launch
 
 Happy to go deep on the MaxSim credit assignment (which retrieved tokens actually earned their keep) and the reality-gated scoring in the comments.
 ```
@@ -121,7 +136,7 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 5. Local-first. You own it. Open install glue + plugins (Apache-2.0) so you can audit the integration code; the local engine binary is proprietary. One line, no account, no API key:
 `curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh`
 
-6. It is young. The live commitments ledger settles in real time at https://accint.xyz - proven vs young, stated honestly. Repo: https://github.com/maxbaluev/accreted-intelligence
+6. It is young. The live commitments ledger settles in real time at https://accint.xyz/?ref=x-launch-thread&utm_source=x&utm_campaign=launch - proven vs young, stated honestly. Repo: https://github.com/maxbaluev/accreted-intelligence
 
 Attributed install reply if useful:
 
@@ -151,9 +166,9 @@ The technical bet is late-interaction retrieval plus reality-gated credit. Retri
 Boundary: the public repo is Apache-2.0 installer/docs/plugins/registry glue; the local engine binary is proprietary and the engine source is private. No cloud memory account. Anonymous event-name telemetry is opt-out and excludes prompts, files, memory, and Work Model data.
 
 Repo: https://github.com/maxbaluev/accreted-intelligence
-Live ledger/readout: https://accint.xyz
+Live ledger/readout: https://accint.xyz/reddit/?ref=reddit-localllama&utm_source=reddit&utm_campaign=launch&rsub=localllama
 Install:
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-localllama ACC_INSTALL_SOURCE='ref=reddit-localllama&utm_source=reddit&utm_campaign=launch' sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-localllama ACC_INSTALL_SOURCE='ref=reddit-localllama&utm_source=reddit&utm_campaign=launch&rsub=localllama' sh
 
 I would especially value critique of the scoring approach: what should count as reality, and how should a local agent memory avoid rewarding accidental success?
 ```
@@ -166,13 +181,13 @@ Use this only in a relevant thread or with owner approval for a standalone post:
 I built AccInt as a local Work Model under Claude Code (and Codex/OpenCode/Cursor): it records commitments, retrieves scored memory, and only gives strong credit to what survived reality - tests, owner approval, or real replies. It is local-first: public Apache-2.0 install/plugin glue, proprietary local engine binary, private engine source, no cloud memory account.
 
 Repo: https://github.com/maxbaluev/accreted-intelligence
-Live readout: https://accint.xyz
+Live readout: https://accint.xyz/reddit/?ref=reddit-claudeai&utm_source=reddit&utm_campaign=launch&rsub=claudeai
 ```
 
 Attributed install snippet for a comment if requested:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-claudeai ACC_INSTALL_SOURCE='ref=reddit-claudeai&utm_source=reddit&utm_campaign=launch' sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-claudeai ACC_INSTALL_SOURCE='ref=reddit-claudeai&utm_source=reddit&utm_campaign=launch&rsub=claudeai' sh
 ```
 
 ### r/ChatGPTCoding
@@ -183,13 +198,13 @@ Use this only in a relevant thread or with owner approval for a standalone post:
 AccInt is a local Work Model for coding agents, including Codex. It gives agents a shared local commitment ledger: retrieve prior scored memory, act with a receipt, and credit the result only after tests, owner approval, or real-world feedback. The point is to keep what worked across model/tool swaps.
 
 Repo: https://github.com/maxbaluev/accreted-intelligence
-Live readout: https://accint.xyz
+Live readout: https://accint.xyz/reddit/?ref=reddit-chatgptcoding&utm_source=reddit&utm_campaign=launch&rsub=chatgptcoding
 ```
 
 Attributed install snippet for a comment if requested:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-chatgptcoding ACC_INSTALL_SOURCE='ref=reddit-chatgptcoding&utm_source=reddit&utm_campaign=launch' sh
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=reddit-chatgptcoding ACC_INSTALL_SOURCE='ref=reddit-chatgptcoding&utm_source=reddit&utm_campaign=launch&rsub=chatgptcoding' sh
 ```
 
 ## After posting
