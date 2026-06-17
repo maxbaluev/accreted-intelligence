@@ -24,6 +24,7 @@ Maintainer references: [PUBLIC_REPO_MANIFEST.md](PUBLIC_REPO_MANIFEST.md),
 [RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md),
 [ops/attribution-dashboard.md](ops/attribution-dashboard.md),
 [ops/directory-listing.md](ops/directory-listing.md), and
-[ops/growth-rollout-checklist.md](ops/growth-rollout-checklist.md). Use
+[ops/growth-rollout-checklist.md](ops/growth-rollout-checklist.md), and
+[ops/social-launch-kit.md](ops/social-launch-kit.md). Use
 `scripts/prepare-growth-rollout.sh` as the dry-run approval packet before any
 public push, release upload, registry publish, or directory follow-up.

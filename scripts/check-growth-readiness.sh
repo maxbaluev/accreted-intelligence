@@ -55,6 +55,7 @@ for f in \
   docs/ops/directory-listing.md \
   docs/ops/growth-rollout-checklist.md \
   docs/ops/posthog-dashboard.json \
+  docs/ops/social-launch-kit.md \
   scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
   scripts/check-controlled-install-attribution.sh \
@@ -63,6 +64,7 @@ for f in \
   scripts/check-live-attribution-flow.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
+  scripts/check-social-launch-kit.js \
   scripts/prepare-growth-rollout.sh \
   scripts/prepare-posthog-dashboard.js \
   scripts/prepare-mcpb-release-assets.sh \

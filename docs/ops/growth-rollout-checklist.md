@@ -19,6 +19,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - live prompt-copy attribution verifier
 - materialized PostHog dashboard spec
 - attribution dashboard/runbook docs
+- social launch kit
 - organic referrer classification
 - dry-run rollout approval packet
 - standard root `LICENSE` for GitHub license detection
@@ -39,6 +40,7 @@ scripts/check-growth-live-state.sh v<tag>
 bash scripts/check-growth-readiness.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
+node scripts/check-social-launch-kit.js --check
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -60,6 +62,8 @@ Expected state:
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
   five required attribution dashboard tiles
+- `node scripts/check-social-launch-kit.js --check` passes and validates
+  owner-approved posting copy, attribution refs, and source-boundary wording
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
@@ -199,6 +203,18 @@ After public push and site verification:
    `scripts/check-directory-pr-state.sh path/to/report.md`.
 6. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
+
+## Social launch lane
+
+After public push, site verification, and attribution checks pass, review
+`docs/ops/social-launch-kit.md` for owner-approved HN/X/Reddit posting. The
+kit is copy only; it does not authorize or perform any post. Validate before
+posting:
+
+```bash
+node scripts/check-social-launch-kit.js --check
+scripts/check-live-attribution-flow.sh https://accint.xyz
+```
 
 ## Docker registry lane
 
