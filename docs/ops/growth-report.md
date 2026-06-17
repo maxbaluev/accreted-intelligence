@@ -38,6 +38,7 @@ Intelligence mentions. Status can drift; verify with:
 
 ```bash
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
+node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md
 ```
@@ -106,9 +107,13 @@ Generate these locally before any follow-up:
 
 ```bash
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
+node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md
 node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md
 ```
 
-The generated notes are not posting authorization. They are review packets for
-exact owner-approved maintainer replies or listing updates.
+Start with the priority report. It ranks open directory/listing PRs by live PR
+state, repository reach, checks, and known blockers so owner-approved follow-up
+goes to the highest-upside surfaces first. The generated notes are not posting
+authorization. They are review packets for exact owner-approved maintainer
+replies or listing updates.

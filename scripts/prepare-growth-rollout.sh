@@ -34,6 +34,7 @@ Default mode is local and read-only:
   - builds and verifies the local MCPB promotion packet without uploading
   - audits the tracked directory PR state from docs/ops/growth-report.md, or
     ACC_GROWTH_REPORT when set
+  - ranks tracked directory/list PRs by live reach, state, and blockers
   - prepares directory/list attribution refs from the tracked report
   - prepares owner-reviewable directory/list follow-up notes from the tracked report
   - prints the approval-gated push + hosted live-site verifier command
@@ -85,11 +86,13 @@ fi
 if [ -n "$growth_report" ]; then
   report_record_line="   Record published URLs and refs in: $growth_report"
   directory_pr_command="   scripts/check-directory-pr-state.sh \"$growth_report\""
+  directory_priority_command="   node scripts/prepare-directory-priority-report.js --markdown \"$growth_report\""
   directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown \"$growth_report\""
   directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown \"$growth_report\""
 else
   report_record_line="   Record published URLs and refs in the growth report."
   directory_pr_command="   scripts/check-directory-pr-state.sh path/to/report.md"
+  directory_priority_command="   node scripts/prepare-directory-priority-report.js --markdown path/to/report.md"
   directory_refs_command="   node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md"
   directory_followup_command="   node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md"
 fi
@@ -182,6 +185,16 @@ echo
 echo "== directory PR state pre-live proof =="
 if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
   scripts/check-directory-pr-state.sh "$growth_report"
+elif [ -n "$growth_report" ]; then
+  printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
+else
+  echo "  skipped: no growth report configured"
+fi
+
+echo
+echo "== directory priority report pre-live proof =="
+if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
+  node scripts/prepare-directory-priority-report.js --check "$growth_report"
 elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else
@@ -374,6 +387,7 @@ $report_record_line
 15. Read-only directory PR follow-up:
 
 $directory_pr_command
+$directory_priority_command
 $directory_refs_command
 $directory_followup_command
 

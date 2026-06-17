@@ -113,6 +113,12 @@ if command -v node >/dev/null 2>&1; then
     note "growth approval brief: FAIL"
     fail=1
   fi
+  if [ -f scripts/prepare-directory-priority-report.js ] && node --check scripts/prepare-directory-priority-report.js >/dev/null; then
+    note "directory priority report syntax: ok"
+  else
+    note "directory priority report syntax: FAIL"
+    fail=1
+  fi
   if printf '%s\n' '| 1 | example/list | 1 | Memory | https://github.com/example/list/pull/1 | ok |' | node scripts/prepare-directory-surface-refs.js --check - >/dev/null; then
     note "directory surface refs: ok"
   else

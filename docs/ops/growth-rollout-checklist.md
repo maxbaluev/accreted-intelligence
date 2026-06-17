@@ -31,6 +31,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - compact owner approval brief
 - growth surface ref manifest
 - tracked growth report
+- directory priority report generator
 - directory surface ref generator
 - organic referrer classification
 - dry-run rollout approval packet
@@ -64,6 +65,7 @@ node scripts/prepare-growth-approval-brief.js --check v<tag>
 node scripts/prepare-social-launch-packet.js --check
 node scripts/check-growth-surfaces.js --check
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
+node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md
 node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md
 git status --short --branch
@@ -126,6 +128,9 @@ Expected state:
 - `scripts/check-directory-pr-state.sh docs/ops/growth-report.md` reads the
   tracked directory/list PR table and reports current open/merged/closed
   status without posting
+- `node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md`
+  ranks the tracked directory/list PR table by live PR state, repository reach,
+  checks, and known blockers without posting
 - `node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md`
   passes for the tracked directory/list PR table
 - `node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md`
@@ -345,12 +350,14 @@ After public push and site verification:
    and reviewer replies.
 5. Audit tracked PR state without posting:
    `scripts/check-directory-pr-state.sh docs/ops/growth-report.md`.
-6. Generate directory attribution refs without posting:
+6. Generate the directory priority queue without posting:
+   `node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md`.
+7. Generate directory attribution refs without posting:
    `node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md`.
-7. Prepare owner-reviewable registry/source-boundary follow-up notes without
+8. Prepare owner-reviewable registry/source-boundary follow-up notes without
    posting:
    `node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md`.
-8. Do not retry lists that rejected the private-engine boundary unless the
+9. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
 ## Social launch lane
