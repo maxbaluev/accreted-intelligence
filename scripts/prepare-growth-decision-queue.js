@@ -107,6 +107,10 @@ function shortCommand(command) {
   return commandBlock(command).split(/\r?\n/)[0] || "<missing>";
 }
 
+function byRank(queue, rank) {
+  return (queue || []).find((item) => Number(item.rank) === Number(rank)) || null;
+}
+
 function queueItem(rank, item) {
   return {
     rank,
@@ -140,6 +144,26 @@ function validationFailures(brief) {
   return failures;
 }
 
+function queueValidationFailures(queue) {
+  const failures = [];
+  const socialLaunch = byRank(queue, 7);
+  if (!socialLaunch) {
+    failures.push("decision queue is missing the manual social launch lane");
+    return failures;
+  }
+
+  const socialCommand = commandBlock(socialLaunch.command);
+  for (const requiredMode of ["--decision-packet", "--receipt-packet", "--reply-packet"]) {
+    if (!socialCommand.includes(requiredMode)) {
+      failures.push(`manual social launch lane must include ${requiredMode}`);
+    }
+  }
+  if (!socialLaunch.unlocks.some((unlock) => unlock.includes("Social launch receipts"))) {
+    failures.push("manual social launch lane must unlock Social launch receipts accounting");
+  }
+  return failures;
+}
+
 function buildQueue(brief, tag) {
   const localFailures = brief.local_checks.filter((item) => !item.ok);
   const rolloutBlockers = [];
@@ -167,6 +191,11 @@ function buildQueue(brief, tag) {
   const action5 = stage(brief, "5") || {};
   const action6 = stage(brief, "6") || {};
   const action7 = stage(brief, "7") || {};
+  const socialLaunchCommand = [
+    action6.command || "node scripts/prepare-social-launch-packet.js --decision-packet",
+    "node scripts/prepare-social-launch-packet.js --receipt-packet <surface-ref> <published-url>",
+    "node scripts/prepare-social-launch-packet.js --reply-packet <surface-ref>",
+  ].join("\n");
 
   return [
     queueItem(1, {
@@ -270,16 +299,19 @@ function buildQueue(brief, tag) {
     queueItem(7, {
       action: "Launch social copy manually",
       status: "owner_held_after_live_verification",
-      owner_decision: "Owner chooses exact platform and posts manually.",
-      command: action6.command,
+      owner_decision: "Owner chooses exact platform, posts manually, then records the live URL.",
+      command: socialLaunchCommand,
       guard: action6.guard || "No automated posting; owner chooses exact target",
       depends_on: [
         "step 2 verified live attribution and LLM discovery",
         "owner-selected HN/X/Reddit target and exact copy",
+        "published URL after the owner-approved manual post exists",
       ],
       unlocks: [
         "attributed top-of-funnel traffic",
         "source comparison against directory traffic",
+        "Social launch receipts row for docs/ops/growth-report.md",
+        "owner-reviewable reply packet for the selected surface",
       ],
       why: "Social launch should happen only after the measurement surface is live and inspectable.",
     }),
@@ -304,8 +336,11 @@ function buildQueue(brief, tag) {
 
 function buildDecisionQueue(tag) {
   const brief = readApprovalBrief(tag);
-  const validations = validationFailures(brief);
   const queue = buildQueue(brief, tag);
+  const validations = [
+    ...validationFailures(brief),
+    ...queueValidationFailures(queue),
+  ];
   return {
     schema_version: 1,
     repo: brief.repo,

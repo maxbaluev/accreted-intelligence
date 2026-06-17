@@ -127,6 +127,21 @@ function collectValidationFailures(brief, queue) {
   if (rollout && queue.top_decision && commandBlock(rollout.command) !== commandBlock(queue.top_decision.command)) {
     failures.push("approval brief stage 1 command does not match decision queue top command");
   }
+  const socialLaunch = byRank(queue, 7);
+  if (!socialLaunch) {
+    failures.push("growth decision queue is missing social launch lane 7");
+  } else {
+    const socialCommand = commandBlock(socialLaunch.command);
+    if (!socialCommand.includes("--receipt-packet")) {
+      failures.push("growth decision queue social launch lane must include the receipt packet");
+    }
+    if (!socialCommand.includes("--reply-packet")) {
+      failures.push("growth decision queue social launch lane must include the reply packet");
+    }
+    if (!(socialLaunch.unlocks || []).some((unlock) => unlock.includes("Social launch receipts"))) {
+      failures.push("growth decision queue social launch lane must mention Social launch receipts accounting");
+    }
+  }
   for (const item of queue.critical_path || []) {
     if (Number(item.rank) >= 3 && !commandBlock(item.command)) {
       failures.push(`decision queue item ${item.rank} is missing its next command`);
