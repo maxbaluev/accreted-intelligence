@@ -96,6 +96,8 @@ if command -v node >/dev/null 2>&1; then
   if grep -q "event = 'share_link_copied'" scripts/run-approved-posthog-funnel-check.sh &&
     grep -q "llm-discovery" docs/ops/posthog-dashboard.json &&
     grep -q "distinct_id = 'llms-txt', 'llm-discovery'" scripts/run-approved-posthog-funnel-check.sh &&
+    grep -Fq "5. direct install refs by source" docs/ops/growth-rollout-checklist.md &&
+    grep -Fq 'direct `llms-txt` and `gh-*` install refs' docs/ops/growth-rollout-checklist.md &&
     grep -q "direct install refs by source" scripts/run-approved-posthog-funnel-check.sh &&
     printf '%s\n' "$funnel_dry_run" | grep -q "direct install refs by source" &&
     printf '%s\n' "$funnel_dry_run" | grep -q "llms-txt discovery" &&

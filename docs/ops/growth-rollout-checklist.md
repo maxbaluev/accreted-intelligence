@@ -324,10 +324,11 @@ Minimum tiles:
 2. web copy source leaderboard
 3. landing to copy to first run by surface
 4. attributed first runs
-5. copy to attributed first run by surface
-6. owned share loop
-7. reddit community loop
-8. activation after install
+5. direct install refs by source
+6. copy to attributed first run by surface
+7. owned share loop
+8. reddit community loop
+9. activation after install
 
 Do not rank acquisition surfaces from copy events alone. Rank from visitor to
 copy to attributed first run, then activation; use the owned share loop to
@@ -356,8 +357,8 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the dashboard is created and a controlled live install is run, query the
-aggregate funnel, direct install refs, owned-share-loop, and Reddit community
-readout:
+aggregate funnel, direct install refs including `llms-txt` and `gh-*`,
+owned-share-loop, and Reddit community readout:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -469,9 +470,9 @@ Hold instead of continuing when:
   expected temp receipt
 - PostHog dashboard shell/setup tile cannot be created or the nine insight tiles
   are not present before ranking growth surfaces
-- PostHog aggregate funnel readout cannot confirm attributed first runs and
-  direct `gh-*` directory install refs before deciding which launch/listing
-  surfaces to double down on
+- PostHog aggregate funnel readout cannot confirm attributed first runs plus
+  direct `llms-txt` and `gh-*` install refs before deciding which
+  launch/listing surfaces to double down on
 - Glama still has no real listing for the punkpeye badge requirement
 - a target directory requires payment, CAPTCHA, anti-bot bypass, private account
   action, or owner identity input
