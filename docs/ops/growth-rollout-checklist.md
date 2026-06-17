@@ -401,8 +401,8 @@ After public push and site verification:
    `node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md`.
 8. Generate directory attribution refs without posting:
    `node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md`.
-9. Prepare owner-reviewable registry/source-boundary follow-up notes without
-   posting:
+9. Prepare owner-reviewable blocker-specific follow-up guidance and
+   registry/source-boundary notes without posting:
    `node scripts/prepare-directory-followup-kit.js --markdown --actionable docs/ops/growth-report.md`.
 10. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.

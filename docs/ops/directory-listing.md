@@ -190,6 +190,8 @@ prints:
 - the current Official MCP Registry endpoint derived from `server.json`
 - MCPB package count/version context
 - the Apache-2.0 public glue / proprietary local engine boundary
+- a blocker-specific owner-review next step for Glama prerequisites, review
+  blockers, failing checks, recent maintainer activity, or watch-only rows
 - a maintainer-note draft that can be reviewed before any owner-approved reply
 
 Use the output only when a maintainer asks for clarification, a listing needs a

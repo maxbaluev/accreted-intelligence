@@ -166,6 +166,27 @@ function actionability(row) {
   return { actionable: false, reason: "watch-only row; hold for maintainer signal" };
 }
 
+function ownerNextStep(row) {
+  const reason = row.actionability ? row.actionability.reason : "";
+  const note = String(row.context_note || "").toLowerCase();
+  if (reason === "blocked prerequisite" && note.includes("glama")) {
+    return "Do not reply yet; generate the Glama form packet, wait for a real Glama listing/badge, then run the punkpeye guard before any owner-approved badge branch update.";
+  }
+  if (reason === "blocked prerequisite") {
+    return "Resolve the named prerequisite first, then regenerate this packet before any owner-approved reply or listing update.";
+  }
+  if (reason === "review or merge blocker") {
+    return "Read the current review/merge blocker, then use a concise registry/source-boundary clarification only if the maintainer asked or the owner approves this exact reply.";
+  }
+  if (reason === "failing checks") {
+    return "Inspect the failing checks before any reply; prefer an owner-approved branch fix path over a generic comment when the failure is actionable.";
+  }
+  if (reason === "recent maintainer-side activity") {
+    return "Check the latest PR activity first; reply only to a concrete maintainer question or an owner-approved target.";
+  }
+  return "Hold for maintainer signal and do not bump the PR just to create activity.";
+}
+
 function registryFacts() {
   const server = readJson("server.json");
   const name = server.name;
@@ -246,6 +267,7 @@ function extractRows(text, registry) {
         landing_url: landingUrl(source),
       };
       row.actionability = actionability(row);
+      row.owner_next_step = ownerNextStep(row);
       row.note = maintainerNote(row, registry);
       byUrl.set(url, row);
     }
@@ -286,6 +308,7 @@ function printMarkdown(rows, registry, options) {
     }
     if (options.actionable) {
       console.log(`- Actionability: ${row.actionability.reason}`);
+      console.log(`- Owner-review next step: ${row.owner_next_step}`);
     }
     console.log(`- Ref: \`${row.ref}\``);
     console.log(`- Source: \`${row.source}\``);
@@ -310,6 +333,9 @@ function printCheck(rows, registry, options, totalRows) {
   rows.slice(0, 5).forEach((row) => {
     const suffix = options.actionable ? ` (${row.actionability.reason})` : "";
     console.log(`  ${row.ref}: ${row.repo}#${row.number}${suffix}`);
+    if (options.actionable) {
+      console.log(`    next: ${row.owner_next_step}`);
+    }
   });
   if (rows.length > 5) {
     console.log(`  ... ${rows.length - 5} more`);
