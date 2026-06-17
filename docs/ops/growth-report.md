@@ -4,7 +4,7 @@ READ ONLY: this report tracks promotion surfaces and owner-review material. It
 does not authorize pushing, posting, commenting, submitting, paying, dispatching
 workflows, using account identity, or bypassing CAPTCHA/security controls.
 
-Last read-only refresh: 2026-06-17.
+Last receipt refresh: 2026-06-17.
 
 ## Current launch state
 
@@ -12,8 +12,13 @@ Last read-only refresh: 2026-06-17.
 - Live site: `https://accint.xyz`
 - Release: `v0.1.6`
 - Official MCP Registry: `io.github.maxbaluev/accint` / `0.1.6`
-- Local public clone state at refresh: `main` ahead of `origin/main` with the
-  approval-gated growth bundle.
+- Public clone state at refresh: `main` synced with `origin/main` at
+  `21a635e` after the approved public growth rollout.
+- Live verification: hosted GitHub Actions verifier run
+  `27691022310` passed after GitHub Pages finished building.
+- Controlled live install receipt: `ref=controlled-0.1.6`,
+  `source_ref=ref=controlled-rollout`, captured at
+  `2026-06-17T13:05:33Z` from the live `https://accint.xyz/install` path.
 - Owned growth surfaces include the GitHub README (`github-readme`), public
   GitHub docs (`github-docs`), and LLM/agent discovery file (`llms-txt`) so
   README/docs/live-discovery clicks and copied installer commands can be
@@ -21,21 +26,39 @@ Last read-only refresh: 2026-06-17.
 
 ## Holds
 
-- Public growth bundle still requires explicit owner approval before
-  `git push origin main` or hosted verifier dispatch. The guarded rollout helper
-  retries the hosted verifier dispatch after push if GitHub has not indexed the
-  workflow yet.
 - Directory PR state audit at refresh: 55 PRs checked, 42 open, 8 merged,
   5 closed/unmerged, 1 open PR with failing checks, 7 attention items.
-- The local runner can report `https://accint.xyz` TLS EOF and an HTTP redirect
-  to `snap.pango-cloud.com`; use the hosted verifier once the workflow is
-  pushed.
-- `punkpeye/awesome-mcp-servers#8091` is blocked on a real Glama listing and
-  score badge. Do not patch the badge row until
-  `scripts/prepare-punkpeye-glama-followup.sh` reports `READY`.
+- Glama submission was made through Google OAuth with
+  `maxbaluev@outlook.com`; the direct listing and score badge now verify, but
+  Glama search for `accint` still did not show AccInt at refresh.
+- `punkpeye/awesome-mcp-servers#8091` now has the Glama badge row on the owned
+  branch at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91`, but the upstream PR
+  remains open with GitHub merge status `UNSTABLE`. Wait for maintainer/check
+  movement and do not comment merely to bump visibility.
+- Hacker News still requires password-based login/registration before posting.
+- Reddit r/LocalLLaMA submission was attempted under the logged-in account
+  `Effective_Iron2146`, but Reddit showed a Rule 4 self-promotion warning and
+  the browser stayed on the submit page with no published URL. Do not record a
+  social receipt unless a public post URL exists.
+- PostHog dashboard/funnel checks still require valid PostHog credentials before
+  live funnel evidence can be read.
+- De-dupe any further directory submission against the local queue before
+  submitting or sending email; MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and
+  Websites, and AI Tool Claw already have recorded submission/email outcomes.
 - Do not reply to directory/listing PRs merely to bump visibility. Use generated
   notes only when a maintainer asks for clarification, a listing needs registry
   proof, or the owner approves a specific reply.
+
+## External rollout receipts
+
+| Date | Surface | Action | Receipt | State |
+|---|---|---|---|---|
+| 2026-06-17 | Public repo | `ACC_APPROVE_GROWTH_ROLLOUT=1 scripts/run-approved-growth-rollout.sh v0.1.6` | `21a635e` pushed to `origin/main` | GitHub Pages built after push. |
+| 2026-06-17 | Hosted live verifier | `live-site-attribution.yml` | `https://github.com/maxbaluev/accreted-intelligence/actions/runs/27691022310` | Passed live attribution and LLM discovery checks. |
+| 2026-06-17 | Controlled live install | `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1 scripts/run-approved-controlled-live-install.sh v0.1.6` | `ref=controlled-0.1.6`; `source_ref=ref=controlled-rollout`; `captured_at_utc=2026-06-17T13:05:33Z` | Passed against the live installer stop path. |
+| 2026-06-17 | Glama MCP Registry | `https://glama.ai/mcp/servers/maxbaluev/accreted-intelligence` | Submitted for review via Google OAuth as `maxbaluev@outlook.com` | Direct listing and score badge verify; search still missed AccInt at refresh. |
+| 2026-06-17 | punkpeye PR badge follow-up | `https://github.com/punkpeye/awesome-mcp-servers/pull/8091` | Owned branch pushed at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91` | Glama badge row added; no PR comment posted; PR remains open. |
+| 2026-06-17 | Reddit LocalLLaMA | `https://www.reddit.com/r/LocalLLaMA/submit/` | No published URL | Attempted, but not confirmed published after Rule 4 warning; no social receipt row. |
 
 ## Tracked directory/listing PRs
 
@@ -52,7 +75,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 
 | # | List | Area | State at refresh | PR | Last update | Note |
 |---|---|---|---|---|---|---|
-| 1 | punkpeye/awesome-mcp-servers | MCP directory | open | https://github.com/punkpeye/awesome-mcp-servers/pull/8091 | 2026-06-16T03:55:58Z | Blocked on Glama listing/badge. |
+| 1 | punkpeye/awesome-mcp-servers | MCP directory | open | https://github.com/punkpeye/awesome-mcp-servers/pull/8091 | 2026-06-17T13:36:11Z | Glama badge row pushed to owned branch; wait for checks/maintainer. |
 | 2 | appcypher/wong2/TensorBlock alternatives via TensorBlock/awesome-mcp-servers | MCP directory | merged | https://github.com/TensorBlock/awesome-mcp-servers/pull/721 | 2026-06-15T21:49:38Z | Listing win; monitor only. |
 | 3 | mcpHQ/awesome-mcp-servers | MCP directory | merged | https://github.com/mcpHQ/awesome-mcp-servers/pull/2 | 2026-06-15T19:43:45Z | Listing win; monitor only. |
 | 4 | DhanushNehru/awesome-mcp-servers | MCP directory | merged | https://github.com/DhanushNehru/awesome-mcp-servers/pull/33 | 2026-06-15T11:18:19Z | Listing win; monitor only. |
