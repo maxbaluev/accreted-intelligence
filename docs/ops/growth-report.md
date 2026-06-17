@@ -59,11 +59,17 @@ Last receipt refresh: 2026-06-17.
   email on June 17 after a read-only site check confirmed built-in MCP support.
   The `/apps` route redirected to auth requesting `phone` scope, so no account
   path was used.
+- WithAI Tools has a live AccInt listing at
+  `https://www.withaitools.com/tools/accreted-intelligence`, but the generated
+  copy still misclassifies AccInt as a sales/prospecting tool with freemium
+  pricing and sales-outreach use cases. A correction request was sent to the
+  public contact email on June 17; do not promote or resubmit this listing
+  until the public copy is corrected.
 - De-dupe any further directory submission against the local queue before
   submitting or sending email; All AI Tool Hub, Launchpadly, MCP.Directory,
-  mcpservers.org, MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and Websites,
-  and AI Tool Claw already have recorded submission/email outcomes or held
-  blockers.
+  WithAI Tools, mcpservers.org, MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps
+  and Websites, and AI Tool Claw already have recorded submission/email
+  outcomes or held blockers.
 - Do not reply to directory/listing PRs merely to bump visibility. Use generated
   notes only when a maintainer asks for clarification, a listing needs registry
   proof, or the owner approves a specific reply.
@@ -80,6 +86,7 @@ Last receipt refresh: 2026-06-17.
 | 2026-06-17 | Reddit LocalLLaMA | `https://www.reddit.com/r/LocalLLaMA/submit/` | No published URL | Attempted, but not confirmed published after Rule 4 warning; no social receipt row. |
 | 2026-06-17 | All AI Tool Hub | `https://allaitoolhub.com/tool/accint` | Approval email from `allaitoolhub@gmail.com` to `maxbaluev@outlook.com`; public listing verified in browser | Listed under Coding & Dev as a free tool with AccInt description, tags, rating, and visit CTA. |
 | 2026-06-17 | BuilderStudio / WunderCorp follow-up | `support@wundercorp.co` | Sent `AccInt x BuilderStudio MCP integration` from Outlook after the maintainer invitation on `wundercorp/awesome-mcp#7` | Targeted integration email included AccInt site, GitHub, official MCP Registry link, and `acc mcp` config; no public follow-up comment posted. |
+| 2026-06-17 | WithAI Tools correction | `https://www.withaitools.com/tools/accreted-intelligence` | Sent `Correction request for AccInt listing` to `team@mail.withaitools.com` from Outlook; Sent Items verified at 9:46 PM | Public page still misclassified AccInt as sales/prospecting with freemium pricing and sales-outreach use cases; requested developer/AI-agent memory/MCP copy instead. |
 | 2026-06-15 | mcpservers.org | `https://mcpservers.org/servers/maxbaluev/accreted-intelligence` | Submission approval email plus public browser verification | Published as `AccInt MCP Server` with GitHub/documentation links and AccInt long-form description. |
 | 2026-06-15 | MCP.so | `https://mcp.so/server/accint` | Public browser verification after Google OAuth submission | Published as `AccInt` by `@maxbaluev`, with tags, website/repository links, and `acc mcp` server config. |
 | 2026-06-15 | MCP.Directory | `https://mcp.directory/submit` | GitHub repository URL, short description, and `maxbaluev@outlook.com` submitted from the directory queue | Page confirmed `Server Submitted`; read-only June 17 browser check did not find AccInt on `/?q=accint` or `/search?q=accint`, so treat as pending/unverified and do not resubmit without a fresh listing check. |
