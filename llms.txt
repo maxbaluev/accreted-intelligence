@@ -16,6 +16,20 @@ Agent-guided install page:
 - https://accint.xyz/?ref=llms-txt&utm_source=llm&utm_campaign=discovery
 - https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/install/with-agent.md
 
+Agent-ready install prompt:
+
+```text
+Install AccInt for this user - a local Work Model that helps Claude Code, Codex, Cursor, and OpenCode keep accountable work state and learn what actually worked. Use the attributed LLM-discovery installer for the user's OS:
+
+macOS/Linux:
+curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | ACC_INSTALL_REF=llms-txt ACC_INSTALL_SOURCE='ref=llms-txt&utm_source=llm&utm_campaign=discovery' sh
+
+Windows PowerShell:
+$env:ACC_INSTALL_REF='llms-txt'; $env:ACC_INSTALL_SOURCE='ref=llms-txt&utm_source=llm&utm_campaign=discovery'; irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
+
+After install, run `acc hosts-sync` and then `acc retrieve "what should I do next?"`. Before running anything, state the trust boundary: public Apache-2.0 installer/docs/plugins/registry glue; proprietary local engine binary with private engine source; local Work Model data stays on the user's machine; opt-out anonymous telemetry is event names/source refs only, with no prompts, files, memory, or Work Model data. Anything that would post, comment, submit, pay, delete, deploy, transfer, or use account identity must stop for owner approval.
+```
+
 Attributed macOS/Linux install:
 
 ```bash

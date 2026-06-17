@@ -266,6 +266,8 @@ function validateOwnedLlmsSurfaces(manifest) {
     die(`${MANIFEST_PATH}: missing owned_llms surface`);
   }
   const text = read(LLMS_PATH);
+  assertIncludes(text, "Agent-ready install prompt", `${LLMS_PATH}: agent install prompt heading`);
+  assertIncludes(text, "Install AccInt for this user", `${LLMS_PATH}: agent install prompt copy`);
   for (const surface of llmsSurfaces) {
     const source = sourceQuery(surface);
     assertIncludes(text, landingUrl(manifest, surface), `${LLMS_PATH}: attributed landing URL for ${surface.id}`);

@@ -146,6 +146,8 @@ function checkLlmsTxt() {
   assertIncludes(text, "# AccInt", `${LLMS_PATH}: title`);
   assertIncludes(text, "local-first Work Model", `${LLMS_PATH}: positioning`);
   assertIncludes(text, "Claude Code, Codex, Cursor, and OpenCode", `${LLMS_PATH}: host fit`);
+  assertIncludes(text, "Agent-ready install prompt", `${LLMS_PATH}: agent install prompt heading`);
+  assertIncludes(text, "Install AccInt for this user", `${LLMS_PATH}: agent install prompt copy`);
   assertIncludes(text, "ACC_INSTALL_REF=llms-txt", `${LLMS_PATH}: POSIX attribution`);
   assertIncludes(text, "$env:ACC_INSTALL_REF='llms-txt'", `${LLMS_PATH}: PowerShell attribution`);
   assertIncludes(text, "ref=llms-txt&utm_source=llm&utm_campaign=discovery", `${LLMS_PATH}: source attribution`);
