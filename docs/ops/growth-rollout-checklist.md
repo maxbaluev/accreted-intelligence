@@ -105,7 +105,7 @@ Expected state:
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
-  five required attribution dashboard tiles
+  six required attribution dashboard tiles
 - `scripts/run-approved-posthog-dashboard.sh` prints `DRY RUN COMPLETE` unless
   `ACC_APPROVE_POSTHOG_DASHBOARD=1` plus PostHog env vars are set. In approved
   mode it creates only the dashboard shell and a markdown setup tile through
@@ -301,12 +301,13 @@ Minimum tiles:
 
 1. copy to first run funnel
 2. web copy source leaderboard
-3. attributed first runs
-4. copy to attributed first run by surface
-5. activation after install
+3. landing to copy to first run by surface
+4. attributed first runs
+5. copy to attributed first run by surface
+6. activation after install
 
-Do not rank acquisition surfaces from copy events alone. Rank from attributed
-first runs and activation.
+Do not rank acquisition surfaces from copy events alone. Rank from visitor to
+copy to attributed first run, then activation.
 
 After explicit owner approval, the shell and setup tile can be created through
 the PostHog Dashboard API:
@@ -321,7 +322,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires a personal API key with `dashboard:read` and
 `dashboard:write`, checks for an existing exact dashboard name first, and does
-not create undocumented insight payloads. Create the five insight tiles from the
+not create undocumented insight payloads. Create the six insight tiles from the
 validated spec in the PostHog UI before using the dashboard for decisions.
 
 After the dashboard is created and a controlled live install is run, query the
@@ -427,7 +428,7 @@ Hold instead of continuing when:
   `distinct_id`
 - controlled live receipt proof cannot fetch the live installer or produce the
   expected temp receipt
-- PostHog dashboard shell/setup tile cannot be created or the five insight tiles
+- PostHog dashboard shell/setup tile cannot be created or the six insight tiles
   are not present before ranking growth surfaces
 - PostHog aggregate funnel readout cannot confirm attributed first runs before
   deciding which launch/listing surfaces to double down on

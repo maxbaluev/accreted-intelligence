@@ -142,6 +142,7 @@ function validatePages(usedSourceKeys) {
     assertIncludes(html, "function withInstallRef", `${file}: prompt-copy helper`);
     assertIncludes(html, "ACC_INSTALL_SOURCE", `${file}: prompt-copy source env`);
     assertIncludes(html, "posthog.identify(install_ref)", `${file}: install_ref identity`);
+    assertIncludes(html, "ph('landing_viewed'", `${file}: landing event`);
     for (const key of usedSourceKeys) {
       assertIncludes(html, `'${key}'`, `${file}: source key`);
     }

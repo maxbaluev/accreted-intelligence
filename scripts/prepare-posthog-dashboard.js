@@ -12,6 +12,7 @@ const RUNBOOK_PATH = path.join("docs", "ops", "attribution-dashboard.md");
 const REQUIRED_TILES = [
   "copy_to_first_run_funnel",
   "web_copy_source_leaderboard",
+  "landing_to_copy_to_first_run_by_surface",
   "attributed_first_runs",
   "copy_to_attributed_first_run_by_surface",
   "activation_after_install",
@@ -50,7 +51,7 @@ function validateTileSet(spec, runbook) {
   REQUIRED_TILES.forEach((slug) => {
     assert(bySlug.has(slug), `missing required tile ${slug}`);
   });
-  assert(tiles.length >= REQUIRED_TILES.length, "dashboard spec has fewer than five tiles");
+  assert(tiles.length >= REQUIRED_TILES.length, "dashboard spec has fewer than six tiles");
 
   tiles.forEach((tile) => {
     assert(tile.slug && /^[a-z0-9_]+$/.test(tile.slug), `bad tile slug: ${tile.slug}`);
@@ -100,6 +101,14 @@ function validate() {
     "event = 'install_command_copied'",
     "uniqExact(distinct_id) AS copied_people",
     "properties.ref_source",
+  ]);
+  validateSql(bySlug.get("landing_to_copy_to_first_run_by_surface"), [
+    "landings AS",
+    "event = 'landing_viewed'",
+    "install_command_copied",
+    "first_run",
+    "copy_rate_pct",
+    "visit_to_run_pct",
   ]);
   validateSql(bySlug.get("attributed_first_runs"), [
     "event = 'first_run'",

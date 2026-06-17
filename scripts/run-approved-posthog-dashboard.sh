@@ -34,7 +34,7 @@ Optional:
 
 Approved mode requires a personal API key with dashboard:read and
 dashboard:write scopes. It checks for an existing exact dashboard name before
-creating a new dashboard shell, then adds a markdown text tile with the five
+creating a new dashboard shell, then adds a markdown text tile with the six
 required insight specs from docs/ops/posthog-dashboard.json.
 
 It does not create insight tiles through undocumented APIs, read event data,
@@ -165,7 +165,7 @@ def setup_markdown():
         "# AccInt install attribution setup",
         "",
         "This dashboard shell was created from `docs/ops/posthog-dashboard.json`.",
-        "Create the insight tiles below in PostHog's UI, then use this dashboard to rank growth surfaces from attributed first runs and activation, not copy events alone.",
+        "Create the insight tiles below in PostHog's UI, then use this dashboard to rank growth surfaces from visitor-to-copy-to-first-run conversion and activation, not copy events alone.",
         "",
         "Privacy contract: no raw prompt text, file contents, memory contents, Work Model data, or full inbound referrer URLs.",
         "",

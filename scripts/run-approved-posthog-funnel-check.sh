@@ -4,7 +4,8 @@
 # Default mode is dry-run: validate the local dashboard spec and print the exact
 # approved command. Approved mode runs small aggregate HogQL queries through the
 # documented PostHog Query API so launch channels can be ranked by attributed
-# first runs and activation, not copy clicks. It does not export raw events,
+# visitor-to-copy-to-first-run conversion and activation, not copy clicks. It
+# does not export raw events,
 # mutate PostHog, post, comment, submit, pay, or use account identity beyond the
 # supplied PostHog API key.
 set -euo pipefail
@@ -92,10 +93,11 @@ Approved mode runs aggregate HogQL via:
   POST $posthog_host/api/projects/<project-id>/query/
 
 Readouts:
-  1. copy events, copied people, attributed first runs, first retrieves, daily rollups
-  2. copy-to-attributed-first-run conversion by surface and method
-  3. activation after attributed first run
-  4. optional controlled distinct_id event presence
+  1. landing views, copy events, attributed first runs, first retrieves, daily rollups
+  2. landing-to-copy-to-first-run conversion by surface
+  3. copy-to-attributed-first-run conversion by surface and method
+  4. activation after attributed first run
+  5. optional controlled distinct_id event presence
 EOF
 
 if [ "${ACC_APPROVE_POSTHOG_QUERY:-0}" != "1" ]; then
@@ -167,6 +169,8 @@ window = f"timestamp >= now() - INTERVAL {days} DAY"
 
 summary_sql = f"""
 SELECT
+    countIf(event = 'landing_viewed') AS landing_events,
+    uniqExactIf(distinct_id, event = 'landing_viewed') AS landing_people,
     countIf(event = 'install_command_copied') AS copy_events,
     uniqExactIf(distinct_id, event = 'install_command_copied') AS copied_people,
     uniqExactIf(distinct_id, event = 'first_run' AND properties.has_install_ref = 'true') AS attributed_first_runs,
@@ -174,7 +178,73 @@ SELECT
     uniqExactIf(distinct_id, event = 'daily_rollup') AS daily_rollups
 FROM events
 WHERE {window}
-  AND event IN ('install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+  AND event IN ('landing_viewed', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+""".strip()
+
+traffic_sql = f"""
+WITH
+landings AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS landed_at,
+        any(properties.landing) AS landing,
+        any(properties.utm_source) AS utm_source,
+        any(properties.utm_campaign) AS utm_campaign,
+        any(properties.ref) AS ref,
+        any(properties.ref_source) AS ref_source,
+        any(properties.ref_host) AS ref_host,
+        any(properties.rsub) AS rsub
+    FROM events
+    WHERE event = 'landing_viewed'
+      AND {window}
+    GROUP BY distinct_id
+),
+copies AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS copied_at
+    FROM events
+    WHERE event = 'install_command_copied'
+      AND {window}
+    GROUP BY distinct_id
+),
+first_runs AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS first_run_at
+    FROM events
+    WHERE event = 'first_run'
+      AND properties.has_install_ref = 'true'
+      AND {window}
+    GROUP BY distinct_id
+)
+SELECT
+    multiIf(
+        l.utm_campaign IS NOT NULL AND l.utm_campaign != '', l.utm_campaign,
+        l.rsub IS NOT NULL AND l.rsub != '', l.rsub,
+        l.ref IS NOT NULL AND l.ref != '', l.ref,
+        l.utm_source IS NOT NULL AND l.utm_source != '', l.utm_source,
+        l.ref_source IS NOT NULL AND l.ref_source != '', l.ref_source,
+        l.ref_host IS NOT NULL AND l.ref_host != '', l.ref_host,
+        l.landing IS NOT NULL AND l.landing != '', l.landing,
+        'unknown'
+    ) AS surface,
+    l.landing AS landing,
+    uniqExact(l.distinct_id) AS visitors,
+    uniqExact(c.distinct_id) AS copied_people,
+    uniqExact(f.distinct_id) AS first_runs,
+    round(100.0 * copied_people / visitors, 1) AS copy_rate_pct,
+    round(100.0 * first_runs / visitors, 1) AS visit_to_run_pct
+FROM landings l
+LEFT JOIN copies c ON c.distinct_id = l.distinct_id
+    AND c.copied_at >= l.landed_at
+    AND c.copied_at < l.landed_at + interval 7 day
+LEFT JOIN first_runs f ON f.distinct_id = l.distinct_id
+    AND f.first_run_at >= l.landed_at
+    AND f.first_run_at < l.landed_at + interval 7 day
+GROUP BY surface, landing
+ORDER BY first_runs DESC, copied_people DESC, visitors DESC
+LIMIT 25
 """.strip()
 
 surface_sql = f"""
@@ -265,6 +335,7 @@ LEFT JOIN rollups d ON d.distinct_id = f.distinct_id
 
 queries = [
     ("summary", summary_sql),
+    ("traffic to first run by surface", traffic_sql),
     ("surface conversion", surface_sql),
     ("activation", activation_sql),
 ]
@@ -279,7 +350,7 @@ SELECT
 FROM events
 WHERE {window}
   AND distinct_id = '{safe_controlled}'
-  AND event IN ('install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+  AND event IN ('landing_viewed', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
 GROUP BY event
 ORDER BY first_seen ASC
 LIMIT 10

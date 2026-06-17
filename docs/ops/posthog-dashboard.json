@@ -2,7 +2,7 @@
   "schema_version": 1,
   "dashboard": {
     "name": "AccInt install attribution",
-    "description": "Operator spec for the PostHog dashboard that measures web copy events to attributed first runs and activation without collecting prompts, files, memory, or Work Model data.",
+    "description": "Operator spec for the PostHog dashboard that measures landing views, web copy events, attributed first runs, and activation without collecting prompts, files, memory, or Work Model data.",
     "privacy_contract": {
       "allowed_identity": "install_ref / telemetry_install_ref only",
       "allowed_source_properties": [
@@ -65,6 +65,13 @@
         "type": "sql",
         "display": "table",
         "hogql": "SELECT\n    multiIf(\n        properties.utm_campaign IS NOT NULL AND properties.utm_campaign != '', properties.utm_campaign,\n        properties.rsub IS NOT NULL AND properties.rsub != '', properties.rsub,\n        properties.ref IS NOT NULL AND properties.ref != '', properties.ref,\n        properties.utm_source IS NOT NULL AND properties.utm_source != '', properties.utm_source,\n        properties.ref_source IS NOT NULL AND properties.ref_source != '', properties.ref_source,\n        properties.ref_host IS NOT NULL AND properties.ref_host != '', properties.ref_host,\n        properties.placement IS NOT NULL AND properties.placement != '', properties.placement,\n        'unknown'\n    ) AS surface,\n    properties.method AS method,\n    uniqExact(distinct_id) AS copied_people,\n    count() AS copy_events\nFROM events\nWHERE event = 'install_command_copied'\n  AND {filters}\nGROUP BY surface, method\nORDER BY copied_people DESC\nLIMIT 25"
+      },
+      {
+        "slug": "landing_to_copy_to_first_run_by_surface",
+        "title": "Landing to copy to first run by surface",
+        "type": "sql",
+        "display": "table",
+        "hogql": "WITH\nlandings AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS landed_at,\n        any(properties.landing) AS landing,\n        any(properties.utm_source) AS utm_source,\n        any(properties.utm_campaign) AS utm_campaign,\n        any(properties.ref) AS ref,\n        any(properties.ref_source) AS ref_source,\n        any(properties.ref_host) AS ref_host,\n        any(properties.rsub) AS rsub\n    FROM events\n    WHERE event = 'landing_viewed'\n      AND {filters}\n    GROUP BY distinct_id\n),\ncopies AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS copied_at\n    FROM events\n    WHERE event = 'install_command_copied'\n      AND {filters}\n    GROUP BY distinct_id\n),\nfirst_runs AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS first_run_at\n    FROM events\n    WHERE event = 'first_run'\n      AND properties.has_install_ref = 'true'\n      AND {filters}\n    GROUP BY distinct_id\n)\nSELECT\n    multiIf(\n        l.utm_campaign IS NOT NULL AND l.utm_campaign != '', l.utm_campaign,\n        l.rsub IS NOT NULL AND l.rsub != '', l.rsub,\n        l.ref IS NOT NULL AND l.ref != '', l.ref,\n        l.utm_source IS NOT NULL AND l.utm_source != '', l.utm_source,\n        l.ref_source IS NOT NULL AND l.ref_source != '', l.ref_source,\n        l.ref_host IS NOT NULL AND l.ref_host != '', l.ref_host,\n        l.landing IS NOT NULL AND l.landing != '', l.landing,\n        'unknown'\n    ) AS surface,\n    l.landing AS landing,\n    uniqExact(l.distinct_id) AS visitors,\n    uniqExact(c.distinct_id) AS copied_people,\n    uniqExact(f.distinct_id) AS first_runs,\n    round(100.0 * copied_people / visitors, 1) AS copy_rate_pct,\n    round(100.0 * first_runs / visitors, 1) AS visit_to_run_pct\nFROM landings l\nLEFT JOIN copies c ON c.distinct_id = l.distinct_id\n    AND c.copied_at >= l.landed_at\n    AND c.copied_at < l.landed_at + interval 7 day\nLEFT JOIN first_runs f ON f.distinct_id = l.distinct_id\n    AND f.first_run_at >= l.landed_at\n    AND f.first_run_at < l.landed_at + interval 7 day\nGROUP BY surface, landing\nORDER BY first_runs DESC, copied_people DESC, visitors DESC\nLIMIT 25"
       },
       {
         "slug": "attributed_first_runs",

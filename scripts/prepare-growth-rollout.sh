@@ -362,7 +362,7 @@ Run these only after explicit owner approval for the named external action.
      scripts/run-approved-posthog-dashboard.sh
 
    The helper creates only the dashboard shell and a markdown setup tile through
-   documented PostHog dashboard endpoints. Add the five insight tiles from
+   documented PostHog dashboard endpoints. Add the six insight tiles from
    docs/ops/posthog-dashboard.json in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 
@@ -380,8 +380,8 @@ Run these only after explicit owner approval for the named external action.
    ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page> \\
      ACC_APPROVE_POSTHOG_QUERY=1 scripts/run-approved-posthog-funnel-check.sh
 
-   Use this aggregate readout to rank surfaces by attributed first runs and
-   activation, not by copy events alone.
+   Use this aggregate readout to rank surfaces by visitor-to-copy-to-first-run
+   conversion and activation, not by copy events alone.
 
 14. Prepare owner-approved social launch copy:
 

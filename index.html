@@ -1312,6 +1312,7 @@ if(typeof PH_KEY==='string'&&PH_KEY!==''){try{
 posthog.init(PH_KEY,{api_host:PH_HOST,defaults:'2026-01-30',person_profiles:'identified_only',autocapture:false,capture_pageview:false,capture_pageleave:false,capture_dead_clicks:false,disable_session_recording:true,disable_surveys:true,advanced_disable_flags:true,capture_exceptions:true});
 if(install_ref&&window.posthog&&typeof posthog.identify==='function'){posthog.identify(install_ref);}
 if(window.posthog&&typeof posthog.register_for_session==='function'){posthog.register_for_session(Object.assign({install_ref:install_ref},source_props));}
+ph('landing_viewed',Object.assign({install_ref:install_ref},source_props));
 if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph('reddit_entry_viewed',source_props);}
 	}catch(_e){}}
 </script>

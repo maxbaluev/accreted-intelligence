@@ -11,7 +11,7 @@ The attribution chain is intentionally narrow:
 
 | Stage | Event / artifact | Identity | Properties |
 |---|---|---|---|
-| Web page view | page script on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref` session property plus `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
+| Web page view | `landing_viewed` on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref`, `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
 | Copy install text | `install_command_copied` | same generated `install_ref` | `method` (`agent_prompt` or `manual_command`), `os`, `placement`, `install_ref`, source props |
 | Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local `ref` plus optional `source_ref` from copied `ACC_INSTALL_SOURCE`; not sent by the installer |
 | App telemetry | `first_run`, `daily_rollup`, lifecycle events | `distinct_id = telemetry_install_ref` when present, otherwise random device UUID | `first_run.has_install_ref`, `os`, `agent`, `project_lang`; no raw prompt/file/memory data |
@@ -73,7 +73,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires `dashboard:read` and `dashboard:write`, checks for an
 existing exact dashboard name before creating a new shell, and does not create
-undocumented insight payloads. Add the five insight tiles below from the
+undocumented insight payloads. Add the six insight tiles below from the
 validated spec in the PostHog UI.
 
 After the live dashboard exists and a controlled install has been run, read the
@@ -148,7 +148,85 @@ Expected use:
 - `surface=unknown` should shrink as campaign links and Reddit thread params
   are used consistently.
 
-### 3. Attributed first runs
+### 3. Landing to copy to first run by surface
+
+Type: SQL insight, table.
+
+```sql
+WITH
+landings AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS landed_at,
+        any(properties.landing) AS landing,
+        any(properties.utm_source) AS utm_source,
+        any(properties.utm_campaign) AS utm_campaign,
+        any(properties.ref) AS ref,
+        any(properties.ref_source) AS ref_source,
+        any(properties.ref_host) AS ref_host,
+        any(properties.rsub) AS rsub
+    FROM events
+    WHERE event = 'landing_viewed'
+      AND {filters}
+    GROUP BY distinct_id
+),
+copies AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS copied_at
+    FROM events
+    WHERE event = 'install_command_copied'
+      AND {filters}
+    GROUP BY distinct_id
+),
+first_runs AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS first_run_at
+    FROM events
+    WHERE event = 'first_run'
+      AND properties.has_install_ref = 'true'
+      AND {filters}
+    GROUP BY distinct_id
+)
+SELECT
+    multiIf(
+        l.utm_campaign IS NOT NULL AND l.utm_campaign != '', l.utm_campaign,
+        l.rsub IS NOT NULL AND l.rsub != '', l.rsub,
+        l.ref IS NOT NULL AND l.ref != '', l.ref,
+        l.utm_source IS NOT NULL AND l.utm_source != '', l.utm_source,
+        l.ref_source IS NOT NULL AND l.ref_source != '', l.ref_source,
+        l.ref_host IS NOT NULL AND l.ref_host != '', l.ref_host,
+        l.landing IS NOT NULL AND l.landing != '', l.landing,
+        'unknown'
+    ) AS surface,
+    l.landing AS landing,
+    uniqExact(l.distinct_id) AS visitors,
+    uniqExact(c.distinct_id) AS copied_people,
+    uniqExact(f.distinct_id) AS first_runs,
+    round(100.0 * copied_people / visitors, 1) AS copy_rate_pct,
+    round(100.0 * first_runs / visitors, 1) AS visit_to_run_pct
+FROM landings l
+LEFT JOIN copies c ON c.distinct_id = l.distinct_id
+    AND c.copied_at >= l.landed_at
+    AND c.copied_at < l.landed_at + interval 7 day
+LEFT JOIN first_runs f ON f.distinct_id = l.distinct_id
+    AND f.first_run_at >= l.landed_at
+    AND f.first_run_at < l.landed_at + interval 7 day
+GROUP BY surface, landing
+ORDER BY first_runs DESC, copied_people DESC, visitors DESC
+LIMIT 25
+```
+
+Expected use:
+
+- This is the traffic quality tile: it shows whether a launch surface sends
+  readers who copy and run, not only whether copied users complete install.
+- High visitors with low `copy_rate_pct` means the landing copy or channel fit
+  is weak; high copy rate with low `visit_to_run_pct` means install trust or
+  first-run reliability needs work.
+
+### 4. Attributed first runs
 
 Type: SQL insight, number or table.
 
@@ -187,7 +265,7 @@ Expected use:
 - Direct labels such as `gh-awesome-list` show installs from docs, PRs, or
   directory listings where the command itself carried a stable surface label.
 
-### 4. Copy to attributed first run by surface
+### 5. Copy to attributed first run by surface
 
 Type: SQL insight, table.
 
@@ -251,7 +329,7 @@ Expected use:
 - If `copied_people` is high and `first_runs` is low, fix installer trust,
   prompt wording, or first-run reliability before adding more traffic.
 
-### 5. Activation after install
+### 6. Activation after install
 
 Type: Funnel.
 
@@ -286,8 +364,9 @@ Before using this dashboard for decisions:
 4. `node scripts/prepare-posthog-dashboard.js --check` passes in the public repo.
 5. A controlled install from the live page is run once with a test date range,
    then excluded from public reporting.
-6. Dashboard tiles show the controlled install in both `install_command_copied`
-   and `first_run` with the same `distinct_id`.
+6. Dashboard tiles show the controlled install in `landing_viewed`,
+   `install_command_copied`, and `first_run` with the same `distinct_id`.
 
 Do not rank directories or paid surfaces from copy events alone. Rank them from
-attributed first runs and activation, then spend effort where reality moved.
+visitor-to-copy-to-first-run conversion and activation, then spend effort where
+reality moved.

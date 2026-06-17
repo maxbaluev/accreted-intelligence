@@ -98,6 +98,7 @@ function assertInlineScriptsParse(file, html) {
 function assertPageIdentity(file, html) {
   assertIncludes(html, "posthog.identify(install_ref)", `${file}: page identity`);
   assertIncludes(html, "register_for_session", `${file}: session properties`);
+  assertIncludes(html, "ph('landing_viewed'", `${file}: landing event`);
   assertIncludes(html, "install_ref", `${file}: install_ref`);
   assertIncludes(html, "referrerSourceProps(document.referrer||'')", `${file}: referrer source`);
 }
