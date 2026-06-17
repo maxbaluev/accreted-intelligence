@@ -13,6 +13,7 @@ if bash -n install.sh; then note "install.sh: ok"; else note "install.sh: SYNTAX
 for f in \
   bootstrap/install \
   scripts/acc-docker.sh \
+  scripts/advance-mcpb-server-json.sh \
   scripts/check-growth-readiness.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \

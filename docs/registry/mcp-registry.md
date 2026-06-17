@@ -94,8 +94,8 @@ already the publishable metadata file.
 For a new release, regenerate it from the generated multi-package file:
 
 ```bash
-scripts/check-mcpb-release-assets.sh v0.1.5 dist/server.mcpb-all.json
-cp dist/server.mcpb-all.json server.json
+scripts/advance-mcpb-server-json.sh v0.1.5 dist/server.mcpb-all.json
+ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh v0.1.5 dist/server.mcpb-all.json
 scripts/check-release-alignment.sh v0.1.5 server.json
 ```
 

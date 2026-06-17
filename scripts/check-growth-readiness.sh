@@ -54,6 +54,7 @@ for f in \
   docs/ops/attribution-dashboard.md \
   docs/ops/directory-listing.md \
   docs/ops/growth-rollout-checklist.md \
+  scripts/advance-mcpb-server-json.sh \
   scripts/check-attribution-flow.js \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \

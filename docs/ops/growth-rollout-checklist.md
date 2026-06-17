@@ -109,8 +109,10 @@ as live:
    `ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh v<tag>`.
 6. Run
    `scripts/check-mcpb-release-assets.sh v<tag> dist/server.mcpb-all.json`.
-7. Only after that check passes, copy `dist/server.mcpb-all.json` to
-   `server.json` and publish registry metadata.
+7. Only after that check passes, preview and advance `server.json`:
+   `scripts/advance-mcpb-server-json.sh v<tag> dist/server.mcpb-all.json`, then
+   `ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh v<tag> dist/server.mcpb-all.json`.
+   Publish registry metadata after the alignment check passes.
 8. Run the public install path in a controlled environment.
 
 The controlled install should produce:
