@@ -58,6 +58,7 @@ for f in \
   scripts/check-attribution-flow.js \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
+  scripts/prepare-growth-rollout.sh \
   scripts/prepare-mcpb-release-assets.sh \
   scripts/check-integrity.sh; do
   if [ -f "$f" ]; then

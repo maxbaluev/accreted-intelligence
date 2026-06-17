@@ -77,9 +77,8 @@ After owner approval, run:
 
 Then verify and advance registry metadata:
 
-  scripts/check-mcpb-release-assets.sh $tag dist/server.mcpb-all.json
-  cp dist/server.mcpb-all.json server.json
-  scripts/check-release-alignment.sh $tag server.json
+  scripts/advance-mcpb-server-json.sh $tag dist/server.mcpb-all.json
+  ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh $tag dist/server.mcpb-all.json
 EOF
   exit 0
 fi

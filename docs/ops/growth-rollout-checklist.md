@@ -16,6 +16,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - attribution regression tests
 - attribution dashboard/runbook docs
 - organic referrer classification
+- dry-run rollout approval packet
 - standard root `LICENSE` for GitHub license detection
 - directory/listing factsheets
 
@@ -27,6 +28,7 @@ from the separate `maxbaluev/accreted-intelligence` clone.
 These checks are local and safe:
 
 ```bash
+scripts/prepare-growth-rollout.sh
 bash scripts/check-growth-readiness.sh
 git status --short --branch
 git log --oneline origin/main..HEAD
@@ -39,6 +41,8 @@ Expected state:
 
 - working tree is clean
 - branch is ahead only by intended public commits
+- `scripts/prepare-growth-rollout.sh` prints `DRY RUN COMPLETE` and does not
+  push, upload, dispatch, publish, post, or submit anything
 - `scripts/check-growth-readiness.sh` passes
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
@@ -51,6 +55,8 @@ Expected state:
 
 Stop here unless the owner explicitly authorizes the public push/deploy/release
 step. After approval, keep each action separate and verify before continuing.
+The dry-run packet printed by `scripts/prepare-growth-rollout.sh` is the
+canonical command list; copy from it rather than reconstructing the sequence.
 
 ## Public push sequence
 

@@ -36,15 +36,19 @@ source).
    `gh release create vX.Y.Z --repo maxbaluev/accreted-intelligence` with the
    prebuilt binaries + `sha256sums.txt` as assets (no source in the release).
 5. **Package MCPB assets** — after the release binaries are attached, run
-   `scripts/package-mcpb.sh vX.Y.Z all` from this public clone and attach the
-   generated `dist/acc-mcp-*.mcpb` + `.sha256` files to the same release. Run
-   `scripts/check-mcpb-release-assets.sh vX.Y.Z dist/server.mcpb-all.json`;
-   only after it passes, copy `dist/server.mcpb-all.json` to `server.json`,
-   then run `scripts/check-release-alignment.sh vX.Y.Z server.json`, commit it,
-   and use `docs/registry/mcp-registry.md` for the official MCP Registry
-   `mcp-publisher` steps. The tracked `publish-mcp-registry` workflow is manual,
-   re-runs the asset and latest-release alignment checks before publishing, and
-   uses GitHub OIDC, so no maintainer token needs to be stored.
+   `scripts/prepare-mcpb-release-assets.sh vX.Y.Z` from this public clone. After
+   owner approval, attach the generated `dist/acc-mcp-*.mcpb` + `.sha256` files
+   to the same release with
+   `ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh vX.Y.Z`.
+   Then preview and advance `server.json` only through
+   `scripts/advance-mcpb-server-json.sh vX.Y.Z dist/server.mcpb-all.json` and
+   `ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh vX.Y.Z dist/server.mcpb-all.json`;
+   the helper re-runs the release-asset and latest-release alignment checks.
+   Commit the updated `server.json`, and use `docs/registry/mcp-registry.md` for
+   the official MCP Registry `mcp-publisher` steps. The tracked
+   `publish-mcp-registry` workflow is manual, re-runs the asset and
+   latest-release alignment checks before publishing, and uses GitHub OIDC, so no
+   maintainer token needs to be stored.
 6. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
    from `index.html` + `CNAME` at repo root; confirm the deep-doc links resolve on
    the published default branch.
