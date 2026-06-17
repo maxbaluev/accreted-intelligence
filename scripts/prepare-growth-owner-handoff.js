@@ -124,7 +124,12 @@ function collectValidationFailures(brief, queue) {
   if (!queue.top_decision) {
     failures.push("growth decision queue is missing a top decision");
   }
-  if (rollout && queue.top_decision && commandBlock(rollout.command) !== commandBlock(queue.top_decision.command)) {
+  if (
+    rollout
+    && queue.top_decision
+    && Number(queue.top_decision.rank) === 1
+    && commandBlock(rollout.command) !== commandBlock(queue.top_decision.command)
+  ) {
     failures.push("approval brief stage 1 command does not match decision queue top command");
   }
   const socialLaunch = byRank(queue, 7);
@@ -201,7 +206,7 @@ function buildHandoff(tag) {
       owner_decision: currentAsk.owner_decision,
       command: commandBlock(currentAsk.command),
       guard: currentAsk.guard || rollout.guard || "",
-      external_effects: rollout.external_effects || [],
+      external_effects: currentAsk.external_effects || rollout.external_effects || [],
       why: currentAsk.why || "",
       unlocks: currentAsk.unlocks || [],
     },
@@ -225,7 +230,7 @@ function buildHandoff(tag) {
       guard: verification.guard || "Read-only",
     },
     later_owner_lanes: (queue.critical_path || [])
-      .filter((item) => Number(item.rank) >= 3)
+      .filter((item) => Number(item.rank) >= 3 && item.status !== "completed" && Number(item.rank) !== Number(currentAsk.rank))
       .map((item) => ({
         rank: item.rank,
         action: item.action,
@@ -233,6 +238,7 @@ function buildHandoff(tag) {
         owner_decision: item.owner_decision || "",
         guard: item.guard,
         command: commandBlock(item.command),
+        external_effects: item.external_effects || [],
         unlocks: item.unlocks || [],
         why: item.why || "",
       })),
@@ -356,6 +362,9 @@ function printMarkdown(handoff) {
     }
     if (lane.unlocks.length) {
       console.log(`  Unlocks: ${lane.unlocks.join("; ")}`);
+    }
+    if (lane.external_effects.length) {
+      console.log(`  External effects: ${lane.external_effects.join("; ")}`);
     }
     console.log();
     console.log("```bash");

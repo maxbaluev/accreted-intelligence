@@ -121,6 +121,7 @@ function queueItem(rank, item) {
     guard: item.guard,
     depends_on: item.depends_on || [],
     unlocks: item.unlocks || [],
+    external_effects: item.external_effects || [],
     why: item.why,
   };
 }
@@ -165,6 +166,7 @@ function queueValidationFailures(queue) {
 }
 
 function buildQueue(brief, tag) {
+  const receipts = brief.growth_receipts || {};
   const localFailures = brief.local_checks.filter((item) => !item.ok);
   const rolloutBlockers = [];
   if (localFailures.length) {
@@ -200,81 +202,96 @@ function buildQueue(brief, tag) {
   return [
     queueItem(1, {
       action: "Approve public growth rollout",
-      status: rolloutReady ? "ready_for_owner_approval" : "blocked",
+      status: receipts.public_rollout_pushed ? "completed" : (rolloutReady ? "ready_for_owner_approval" : "blocked"),
       owner_decision: "Approve or hold the guarded push plus hosted verifier dispatch.",
       command: action1.command,
       guard: action1.guard || "Requires ACC_APPROVE_GROWTH_ROLLOUT=1",
-      depends_on: rolloutReady ? ["Owner approval for this exact external action"] : rolloutBlockers,
+      depends_on: receipts.public_rollout_pushed
+        ? ["receipt row confirms public rollout was pushed"]
+        : (rolloutReady ? ["Owner approval for this exact external action"] : rolloutBlockers),
       unlocks: [
         "publishes the local growth bundle",
         "makes README, live-site attribution, and llms.txt discovery changes observable",
         "dispatches the hosted live-site verifier after GitHub indexes the workflow",
       ],
+      external_effects: action1.external_effects || ["git push origin main", "gh workflow run live-site-attribution.yml"],
       why: "This is the highest leverage unlock because the current bundle is local-only until it is pushed.",
     }),
     queueItem(2, {
       action: "Verify live deploy, attribution, and LLM discovery",
-      status: "waiting_on_rollout",
+      status: receipts.hosted_live_verifier_passed ? "completed" : "waiting_on_rollout",
       owner_decision: "No mutation; run immediately after the approved rollout completes.",
       command: action2.command,
       guard: action2.guard || "Read-only",
-      depends_on: [
-        "step 1 completed",
-        "GitHub Pages/site deployment visible for the target commit",
-      ],
+      depends_on: receipts.hosted_live_verifier_passed
+        ? ["hosted verifier receipt row confirms live attribution and llms discovery passed"]
+        : [
+          "step 1 completed",
+          "GitHub Pages/site deployment visible for the target commit",
+        ],
       unlocks: [
         "evidence that install copy carries attribution",
         "evidence that llms.txt agent discovery is served and advertised",
         "safe basis for social, directory, and controlled-install follow-up",
       ],
+      external_effects: action2.external_effects || ["read-only public site/GitHub checks"],
       why: "Promotion should point at a verified live surface instead of an assumed deployment.",
     }),
     queueItem(3, {
       action: "Prove controlled live install receipt",
-      status: "waiting_on_verified_live_site",
+      status: receipts.controlled_live_install_passed ? "completed" : "waiting_on_verified_live_site",
       owner_decision: "Approve the controlled live install helper only after the live site is verified.",
       command: action3.command,
       guard: action3.guard || "Requires ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1",
-      depends_on: [
-        "step 2 verified live attribution and LLM discovery",
-        "owner approval for the controlled live install helper",
-      ],
+      depends_on: receipts.controlled_live_install_passed
+        ? ["controlled live install receipt row exists"]
+        : [
+          "step 2 verified live attribution and LLM discovery",
+          "owner approval for the controlled live install helper",
+        ],
       unlocks: [
         "receipt-level proof for first-run attribution",
         "a concrete event to inspect in PostHog",
       ],
+      external_effects: action3.external_effects || ["fetch live installer into temp home", "run attribution-only install stop path"],
       why: "This converts launch copy into an inspectable install-attribution proof without a full install.",
     }),
     queueItem(4, {
       action: "Submit the Glama listing packet manually",
-      status: "owner_held_after_rollout",
+      status: receipts.glama_listing_verified ? "completed" : "owner_held_after_rollout",
       owner_decision: "Owner submits manually in Glama if the listing target is acceptable.",
       command: action7.command,
       guard: action7.guard || "Read-only packet; owner performs any browser submission manually",
-      depends_on: [
-        "step 1 pushed if packet fields depend on local growth assets",
-        "owner logged-in browser decision for Glama",
-      ],
+      depends_on: receipts.glama_listing_verified
+        ? ["Glama direct listing and score badge receipt row exists"]
+        : [
+          "step 1 pushed if packet fields depend on local growth assets",
+          "owner logged-in browser decision for Glama",
+        ],
       unlocks: [
         "real Glama listing URL",
         "Glama score badge prerequisite for punkpeye/awesome-mcp-servers#8091",
       ],
+      external_effects: action7.external_effects || ["owner may manually submit the Glama listing in a logged-in browser"],
       why: "The highest-reach open MCP directory follow-up is blocked on a real Glama listing and badge.",
     }),
     queueItem(5, {
       action: "Update punkpeye Glama badge branch only after READY",
-      status: "blocked_on_real_glama_listing",
+      status: receipts.punkpeye_badge_branch_pushed ? "completed" : "blocked_on_real_glama_listing",
       owner_decision: "Approve the badge branch update only after the guard reports READY.",
       command: `scripts/prepare-punkpeye-glama-followup.sh\nACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh`,
       guard: "Requires a real Glama listing, a real Glama score badge, and ACC_APPROVE_PUNKPEYE_GLAMA=1",
-      depends_on: [
-        "step 4 real Glama listing exists",
-        "scripts/prepare-punkpeye-glama-followup.sh reports READY",
-      ],
+      depends_on: receipts.punkpeye_badge_branch_pushed
+        ? ["punkpeye badge follow-up receipt row exists"]
+        : [
+          "step 4 real Glama listing exists",
+          "scripts/prepare-punkpeye-glama-followup.sh reports READY",
+        ],
       unlocks: [
         "removes the blocker from the largest tracked MCP directory PR",
         "turns Glama proof into directory-discovery reach",
       ],
+      external_effects: ["pushes only the owned punkpeye PR branch when approved"],
       why: "This avoids speculative PR edits while preserving the most valuable known directory unlock.",
     }),
     queueItem(6, {
@@ -294,11 +311,15 @@ function buildQueue(brief, tag) {
         "Reddit community participation evidence",
         "activation evidence for deciding which channels deserve follow-up",
       ],
+      external_effects: [
+        "PostHog dashboard shell/setup tile creation",
+        "read-only aggregate PostHog Query API calls",
+      ],
       why: "The funnel, direct-ref, share-loop, and Reddit community readouts distinguish real growth from copy clicks before scaling promotion.",
     }),
     queueItem(7, {
       action: "Launch social copy manually",
-      status: "owner_held_after_live_verification",
+      status: receipts.social_launch_receipt_recorded ? "completed" : "owner_held_after_live_verification",
       owner_decision: "Owner chooses exact platform, posts manually, then records the live URL.",
       command: socialLaunchCommand,
       guard: action6.guard || "No automated posting; owner chooses exact target",
@@ -313,6 +334,7 @@ function buildQueue(brief, tag) {
         "Social launch receipts row for docs/ops/growth-report.md",
         "owner-reviewable reply packet for the selected surface",
       ],
+      external_effects: action6.external_effects || ["owner manually posts selected HN/X/Reddit copy outside automation"],
       why: "Social launch should happen only after the measurement surface is live and inspectable.",
     }),
     queueItem(8, {
@@ -329,6 +351,7 @@ function buildQueue(brief, tag) {
         "focused attention on high-reach open listings",
         "avoids low-signal bump comments",
       ],
+      external_effects: ["read-only local packets; no comments or PR edits"],
       why: "Directory follow-up scales only when it is prioritized by reach and actual blocker status.",
     }),
   ];
@@ -352,7 +375,7 @@ function buildDecisionQueue(tag) {
     ready_for_owner_review: brief.ready_for_owner_review,
     local_checks: brief.local_checks,
     validation_failures: validations,
-    top_decision: queue[0],
+    top_decision: queue.find((item) => item.status !== "completed") || queue[0],
     critical_path: queue,
     known_holds: brief.known_holds,
     forbidden_without_approval: brief.forbidden_without_approval,

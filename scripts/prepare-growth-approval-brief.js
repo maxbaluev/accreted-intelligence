@@ -55,6 +55,31 @@ function readJson(file) {
   }
 }
 
+function readText(file) {
+  try {
+    return fs.readFileSync(file, "utf8");
+  } catch (_) {
+    return "";
+  }
+}
+
+function growthReceipts() {
+  const report = readText(GROWTH_REPORT);
+  return {
+    public_rollout_pushed: report.includes("| 2026-06-17 | Public repo |")
+      && report.includes("`21a635e` pushed to `origin/main`"),
+    hosted_live_verifier_passed: report.includes("| 2026-06-17 | Hosted live verifier |")
+      && report.includes("Passed live attribution and LLM discovery checks"),
+    controlled_live_install_passed: report.includes("| 2026-06-17 | Controlled live install |")
+      && report.includes("Passed against the live installer stop path"),
+    glama_listing_verified: report.includes("| 2026-06-17 | Glama MCP Registry |")
+      && report.includes("Direct listing and score badge verify"),
+    punkpeye_badge_branch_pushed: report.includes("| 2026-06-17 | punkpeye PR badge follow-up |")
+      && report.includes("Owned branch pushed"),
+    social_launch_receipt_recorded: /## Social launch receipts[\s\S]*\n\|\s*20\d\d-\d\d-\d\d\s*\|/.test(report),
+  };
+}
+
 function normalizeTag(tag, serverVersion) {
   let result = tag || `v${serverVersion}`;
   if (!result.startsWith("v")) {
@@ -173,11 +198,12 @@ function runLocalChecks() {
   return results;
 }
 
-function exactActions(tag, branch) {
+function exactActions(tag, branch, receipts) {
   return [
     {
       stage: "1",
       name: "Push local growth bundle and dispatch hosted live-site verifier",
+      status: receipts.public_rollout_pushed ? "completed" : "owner_approval_required",
       command: `ACC_APPROVE_GROWTH_ROLLOUT=1 scripts/run-approved-growth-rollout.sh ${tag}`,
       external_effects: ["git push origin main", "gh workflow run live-site-attribution.yml"],
       guard: "Requires ACC_APPROVE_GROWTH_ROLLOUT=1",
@@ -185,6 +211,7 @@ function exactActions(tag, branch) {
     {
       stage: "2",
       name: "Verify after deploy, no mutation",
+      status: receipts.hosted_live_verifier_passed ? "completed" : "read_only_verification_required",
       command: `scripts/check-growth-live-state.sh ${tag}\nscripts/check-live-attribution-flow.sh https://accint.xyz\nscripts/check-live-llms-discovery.sh https://accint.xyz\nnode scripts/check-site-metadata.js`,
       external_effects: ["read-only public site/GitHub checks"],
       guard: "Read-only",
@@ -192,6 +219,7 @@ function exactActions(tag, branch) {
     {
       stage: "3",
       name: "Controlled live install receipt proof",
+      status: receipts.controlled_live_install_passed ? "completed" : "owner_approval_required",
       command: `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1 scripts/run-approved-controlled-live-install.sh ${tag}`,
       external_effects: ["fetch live installer into temp home", "run attribution-only install stop path"],
       guard: "Requires ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1",
@@ -199,6 +227,7 @@ function exactActions(tag, branch) {
     {
       stage: "4",
       name: "PostHog dashboard shell after owner supplies PostHog env",
+      status: "owner_held_credentials",
       command: "POSTHOG_HOST=https://app.posthog.com POSTHOG_ENVIRONMENT_ID=<environment-id> POSTHOG_PERSONAL_API_KEY=<personal-api-key> ACC_APPROVE_POSTHOG_DASHBOARD=1 scripts/run-approved-posthog-dashboard.sh",
       external_effects: ["PostHog dashboard shell/setup tile creation"],
       guard: "Requires ACC_APPROVE_POSTHOG_DASHBOARD=1 and PostHog credentials",
@@ -206,6 +235,7 @@ function exactActions(tag, branch) {
     {
       stage: "5",
       name: "PostHog aggregate funnel, direct refs, share loop, and Reddit community readout after dashboard/control install",
+      status: "owner_held_credentials",
       command: "POSTHOG_HOST=https://us.posthog.com POSTHOG_PROJECT_ID=<project-id> POSTHOG_PERSONAL_API_KEY=<personal-api-key> ACC_APPROVE_POSTHOG_QUERY=1 scripts/run-approved-posthog-funnel-check.sh",
       external_effects: ["read-only aggregate PostHog Query API calls"],
       guard: "Requires ACC_APPROVE_POSTHOG_QUERY=1 and PostHog credentials",
@@ -213,6 +243,7 @@ function exactActions(tag, branch) {
     {
       stage: "6",
       name: "Manual social launch posting",
+      status: receipts.social_launch_receipt_recorded ? "completed" : "owner_target_selection_required",
       command: "node scripts/prepare-social-launch-packet.js --decision-packet",
       external_effects: ["owner manually posts selected HN/X/Reddit copy outside automation"],
       guard: "No automated posting; owner chooses exact target",
@@ -220,6 +251,7 @@ function exactActions(tag, branch) {
     {
       stage: "7",
       name: "Owner-held Glama submission packet for punkpeye blocker",
+      status: receipts.glama_listing_verified ? "completed" : "owner_submission_required",
       command: `node scripts/prepare-glama-submission-packet.js --form-packet ${tag}`,
       external_effects: ["owner may manually submit the Glama listing in a logged-in browser"],
       guard: "Packet is read-only; no automated Glama submission or PR badge update",
@@ -232,7 +264,8 @@ function buildBrief(tag) {
   const state = gitState();
   const bundle = unpublishedBundle(state);
   const checks = runLocalChecks();
-  const actions = exactActions(tag, state.branch);
+  const receipts = growthReceipts();
+  const actions = exactActions(tag, state.branch, receipts);
   const failures = checks.filter((check) => !check.ok);
   return {
     schema_version: 1,
@@ -243,6 +276,7 @@ function buildBrief(tag) {
     git: state,
     unpublished_bundle: bundle,
     growth_report: GROWTH_REPORT || null,
+    growth_receipts: receipts,
     local_checks: checks,
     ready_for_owner_review: failures.length === 0 && state.clean && state.behind === "0" && state.ahead !== "0",
     exact_actions: actions,
@@ -257,8 +291,15 @@ function buildBrief(tag) {
       "payment/CAPTCHA/private account action",
     ],
     known_holds: [
-      "Live custom-domain fetch from this environment can report TLS EOF / snap.pango-cloud.com redirect; use hosted verifier after push.",
-      "Glama listing/badge is still required before punkpeye badge branch update; use the Glama packet first, then the badge follow-up guard only after the listing is real.",
+      receipts.public_rollout_pushed
+        ? "Public rollout has already been pushed; do not repeat the guarded rollout unless a new local bundle is ahead of origin/main."
+        : "Public rollout still requires owner approval before git push or hosted verifier dispatch.",
+      receipts.glama_listing_verified
+        ? "Glama direct listing and score badge verify, but Glama search indexing may lag."
+        : "Glama listing/badge is still required before punkpeye badge branch update; use the Glama packet first, then the badge follow-up guard only after the listing is real.",
+      receipts.punkpeye_badge_branch_pushed
+        ? "punkpeye badge row has been pushed to the owned PR branch; the upstream PR remains maintainer-held."
+        : "punkpeye badge branch update still requires a real Glama listing/badge and ACC_APPROVE_PUNKPEYE_GLAMA=1.",
       "PostHog dashboard/funnel and social posting require explicit owner approval and credentials/manual posting.",
     ],
   };
@@ -331,6 +372,8 @@ function printMarkdown(brief) {
   console.log();
   for (const action of brief.exact_actions) {
     console.log(`${action.stage}. ${action.name}`);
+    console.log();
+    console.log(`Status: \`${action.status || "unknown"}\``);
     console.log();
     console.log("```bash");
     console.log(action.command);
