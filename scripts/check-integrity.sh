@@ -149,6 +149,13 @@ if command -v node >/dev/null 2>&1; then
     note "growth owner handoff: FAIL"
     fail=1
   fi
+  if node --check scripts/prepare-growth-rollout-receipt.js >/dev/null &&
+    node scripts/prepare-growth-rollout-receipt.js --check >/dev/null; then
+    note "growth rollout receipt packet: ok"
+  else
+    note "growth rollout receipt packet: FAIL"
+    fail=1
+  fi
   if grep -q 'scripts/check-live-llms-discovery.sh https://accint.xyz' scripts/prepare-growth-approval-brief.js &&
     grep -q 'scripts/check-live-llms-discovery.sh' scripts/prepare-growth-decision-queue.js &&
     grep -q 'scripts/check-live-llms-discovery.sh' scripts/prepare-growth-owner-handoff.js &&
@@ -174,10 +181,19 @@ if command -v node >/dev/null 2>&1; then
     grep -q 'expected_head' scripts/prepare-growth-decision-queue.js &&
     grep -q 'approved_head' scripts/prepare-growth-owner-handoff.js &&
     grep -q 'approved head: %s' scripts/prepare-growth-rollout.sh &&
-    grep -q 'expected_head=$head_sha' scripts/prepare-growth-rollout.sh; then
+    grep -q 'expected_head=$head_sha' scripts/prepare-growth-rollout.sh &&
+    grep -q 'expected_head=${receipt.approved_head}' scripts/prepare-growth-rollout-receipt.js; then
     note "owner packets bind approval to exact HEAD: ok"
   else
     note "owner packets bind approval to exact HEAD: FAIL"
+    fail=1
+  fi
+  if grep -q 'prepare-growth-rollout-receipt.js --markdown' scripts/run-approved-growth-rollout.sh &&
+    grep -q 'prepare-growth-rollout-receipt.js --markdown' scripts/prepare-growth-rollout.sh &&
+    grep -q 'prepare-growth-rollout-receipt.js --markdown' scripts/prepare-growth-approval-brief.js; then
+    note "owner packets include rollout receipt capture: ok"
+  else
+    note "owner packets include rollout receipt capture: FAIL"
     fail=1
   fi
   if [ -f scripts/prepare-directory-priority-report.js ] && node --check scripts/prepare-directory-priority-report.js >/dev/null; then

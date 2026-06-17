@@ -80,6 +80,7 @@ for f in \
   scripts/prepare-growth-approval-brief.js \
   scripts/prepare-growth-decision-queue.js \
   scripts/prepare-growth-owner-handoff.js \
+  scripts/prepare-growth-rollout-receipt.js \
   scripts/prepare-glama-submission-packet.js \
   scripts/prepare-social-launch-packet.js \
   scripts/prepare-directory-priority-report.js \

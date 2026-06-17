@@ -154,6 +154,7 @@ Read-only follow-up after deployment is visible:
   scripts/check-live-attribution-flow.sh $site_url
   scripts/check-live-llms-discovery.sh $site_url
   node scripts/check-site-metadata.js
+  node scripts/prepare-growth-rollout-receipt.js --markdown $tag
 
   gh run list --workflow live-site-attribution.yml --repo $repo --limit 3
 
@@ -212,4 +213,5 @@ Next read-only verification after the site deploy is visible:
   scripts/check-live-attribution-flow.sh $site_url
   scripts/check-live-llms-discovery.sh $site_url
   node scripts/check-site-metadata.js
+  node scripts/prepare-growth-rollout-receipt.js --markdown $tag
 EOF

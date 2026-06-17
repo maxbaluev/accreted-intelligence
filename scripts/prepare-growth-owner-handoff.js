@@ -14,6 +14,7 @@ const REQUIRED_FILES = [
   "server.json",
   "scripts/prepare-growth-approval-brief.js",
   "scripts/prepare-growth-decision-queue.js",
+  "scripts/prepare-growth-rollout-receipt.js",
   "scripts/run-approved-growth-rollout.sh",
   "scripts/check-growth-live-state.sh",
   "scripts/check-live-attribution-flow.sh",

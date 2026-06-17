@@ -287,6 +287,7 @@ Run these only after explicit owner approval for the named external action.
    scripts/check-live-llms-discovery.sh https://accint.xyz
    scripts/check-install-surface.sh
    node scripts/check-site-metadata.js
+   node scripts/prepare-growth-rollout-receipt.js --markdown $tag
    gh repo view $repo --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
    gh workflow list --repo $repo
    curl -fsSI https://accint.xyz/
