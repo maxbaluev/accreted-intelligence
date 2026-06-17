@@ -11,13 +11,14 @@ const fs = require("fs");
 
 const REPO = process.env.ACC_GROWTH_REPO || "maxbaluev/accreted-intelligence";
 const BASE_REF = process.env.ACC_GROWTH_BASE_REF || "origin/main";
-const GROWTH_REPORT = process.env.ACC_GROWTH_REPORT || "";
+const GROWTH_REPORT = process.env.ACC_GROWTH_REPORT || "docs/ops/growth-report.md";
 
 function usage() {
   console.error(`usage: node scripts/prepare-growth-approval-brief.js [--check|--markdown|--json] [tag]
 
 Examples:
   node scripts/prepare-growth-approval-brief.js --check v0.1.6
+  node scripts/prepare-growth-approval-brief.js --markdown v0.1.6
   ACC_GROWTH_REPORT=/path/to/NIGHT-REPORT.md node scripts/prepare-growth-approval-brief.js --markdown v0.1.6
 
 Output is review material only. It does not push, upload, dispatch workflows,

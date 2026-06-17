@@ -54,6 +54,7 @@ for f in \
   docs/ops/attribution-dashboard.md \
   docs/ops/directory-listing.md \
   docs/ops/growth-rollout-checklist.md \
+  docs/ops/growth-report.md \
   docs/ops/growth-surfaces.json \
   docs/ops/posthog-dashboard.json \
   docs/ops/social-launch-kit.md \

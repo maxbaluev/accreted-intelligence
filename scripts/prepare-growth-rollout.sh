@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.." || exit 1
 
 repo="${ACC_GROWTH_REPO:-maxbaluev/accreted-intelligence}"
 base_ref="${ACC_GROWTH_BASE_REF:-origin/main}"
-growth_report="${ACC_GROWTH_REPORT:-}"
+growth_report="${ACC_GROWTH_REPORT:-docs/ops/growth-report.md}"
 tag="${1:-}"
 
 usage() {
@@ -32,9 +32,10 @@ Default mode is local and read-only:
   - verifies the compact owner approval brief
   - verifies growth surface refs and attributed landing URLs
   - builds and verifies the local MCPB promotion packet without uploading
-  - optionally audits directory PR state when ACC_GROWTH_REPORT is set
-  - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
-  - optionally prepares owner-reviewable directory/list follow-up notes when ACC_GROWTH_REPORT is set
+  - audits the tracked directory PR state from docs/ops/growth-report.md, or
+    ACC_GROWTH_REPORT when set
+  - prepares directory/list attribution refs from the tracked report
+  - prepares owner-reviewable directory/list follow-up notes from the tracked report
   - prints the approval-gated push + hosted live-site verifier command
   - prints the approval-gated controlled live install receipt verifier command
   - prints the approval-gated PostHog dashboard shell creation command
@@ -184,7 +185,7 @@ if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
 elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else
-  echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to audit tracked PRs"
+  echo "  skipped: no growth report configured"
 fi
 
 echo
@@ -194,7 +195,7 @@ if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
 elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else
-  echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to prepare directory attribution refs"
+  echo "  skipped: no growth report configured"
 fi
 
 echo
@@ -204,7 +205,7 @@ if [ -n "$growth_report" ] && [ -f "$growth_report" ]; then
 elif [ -n "$growth_report" ]; then
   printf '  skipped: ACC_GROWTH_REPORT does not exist: %s\n' "$growth_report"
 else
-  echo "  skipped: set ACC_GROWTH_REPORT=/path/to/report.md to prepare directory follow-up notes"
+  echo "  skipped: no growth report configured"
 fi
 
 echo

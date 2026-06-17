@@ -30,6 +30,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - owner-reviewed social launch packet
 - compact owner approval brief
 - growth surface ref manifest
+- tracked growth report
 - directory surface ref generator
 - organic referrer classification
 - dry-run rollout approval packet
@@ -62,8 +63,9 @@ node scripts/check-social-launch-kit.js --check
 node scripts/prepare-growth-approval-brief.js --check v<tag>
 node scripts/prepare-social-launch-packet.js --check
 node scripts/check-growth-surfaces.js --check
-node scripts/prepare-directory-surface-refs.js --check path/to/report.md
-node scripts/prepare-directory-followup-kit.js --check path/to/report.md
+scripts/check-directory-pr-state.sh docs/ops/growth-report.md
+node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md
+node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md
 git status --short --branch
 git log --oneline origin/main..HEAD
 bash scripts/check-integrity.sh
@@ -121,16 +123,19 @@ Expected state:
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
   refs, attributed landing URLs, install snippets, and page prompt-copy source
   keys stay aligned
-- `node scripts/prepare-directory-surface-refs.js --check path/to/report.md`
-  passes for the tracked directory/list PR table when a growth report is
-  available
-- `node scripts/prepare-directory-followup-kit.js --check path/to/report.md`
+- `scripts/check-directory-pr-state.sh docs/ops/growth-report.md` reads the
+  tracked directory/list PR table and reports current open/merged/closed
+  status without posting
+- `node scripts/prepare-directory-surface-refs.js --check docs/ops/growth-report.md`
+  passes for the tracked directory/list PR table
+- `node scripts/prepare-directory-followup-kit.js --check docs/ops/growth-report.md`
   passes for the tracked directory/list PR table and prepares owner-reviewable
   maintainer-note drafts without posting
 - `scripts/check-integrity.sh` passes
 - root `LICENSE` exactly matches `LICENSE-APACHE-2.0.txt`
 - `docs/ops/attribution-dashboard.md` exists
 - `docs/ops/directory-listing.md` exists
+- `docs/ops/growth-report.md` exists
 - `docs/ops/growth-surfaces.json` exists
 - no private `src/**`, `Cargo.toml`, `Cargo.lock`, private tests, or substrate
   data appear in `git diff origin/main..HEAD --name-only`
@@ -144,7 +149,7 @@ canonical command list; copy from it rather than reconstructing the sequence.
 For a concise owner decision view, run:
 
 ```bash
-ACC_GROWTH_REPORT=path/to/report.md node scripts/prepare-growth-approval-brief.js --markdown v<tag>
+node scripts/prepare-growth-approval-brief.js --markdown v<tag>
 ```
 
 ## Public push sequence
@@ -339,12 +344,12 @@ After public push and site verification:
 4. Use `docs/ops/directory-listing.md` for future directory/list submissions
    and reviewer replies.
 5. Audit tracked PR state without posting:
-   `scripts/check-directory-pr-state.sh path/to/report.md`.
+   `scripts/check-directory-pr-state.sh docs/ops/growth-report.md`.
 6. Generate directory attribution refs without posting:
-   `node scripts/prepare-directory-surface-refs.js --markdown path/to/report.md`.
+   `node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md`.
 7. Prepare owner-reviewable registry/source-boundary follow-up notes without
    posting:
-   `node scripts/prepare-directory-followup-kit.js --markdown path/to/report.md`.
+   `node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md`.
 8. Do not retry lists that rejected the private-engine boundary unless the
    local fix is pushed and the target list's policy can accept the boundary.
 
