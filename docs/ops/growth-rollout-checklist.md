@@ -16,6 +16,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - attribution regression tests
 - controlled install attribution receipt verifier
 - read-only live growth state auditor
+- live prompt-copy attribution verifier
 - materialized PostHog dashboard spec
 - attribution dashboard/runbook docs
 - organic referrer classification
@@ -29,7 +30,8 @@ from the separate `maxbaluev/accreted-intelligence` clone.
 ## Before approval
 
 These checks are safe before approval. All are local except
-`scripts/check-growth-live-state.sh`, which performs read-only public lookups:
+`scripts/check-growth-live-state.sh`, which performs read-only public lookups
+and may report HOLD while the live site still lags local commits:
 
 ```bash
 scripts/prepare-growth-rollout.sh
@@ -110,7 +112,13 @@ curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_SOURCE"
+scripts/check-live-attribution-flow.sh https://accint.xyz
 ```
+
+`scripts/check-live-attribution-flow.sh` downloads served home/Reddit HTML into
+a temp directory and reuses the static attribution verifier, proving live prompt
+copies carry `ACC_INSTALL_REF`, `ACC_INSTALL_SOURCE`, and the source-only
+fallback.
 
 Also run a browser copy check if possible: copy the hero agent prompt and confirm
 the copied text contains `ACC_INSTALL_REF=<install_ref>` plus

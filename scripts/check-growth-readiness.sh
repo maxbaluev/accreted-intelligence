@@ -59,6 +59,7 @@ for f in \
   scripts/check-attribution-flow.js \
   scripts/check-controlled-install-attribution.sh \
   scripts/check-growth-live-state.sh \
+  scripts/check-live-attribution-flow.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/prepare-growth-rollout.sh \

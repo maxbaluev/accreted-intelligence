@@ -206,6 +206,20 @@ else
   skip "curl not found; cannot read live site"
 fi
 
+section "live prompt-copy attribution flow"
+if command -v curl >/dev/null 2>&1 && command -v node >/dev/null 2>&1; then
+  live_flow_output="$(bash scripts/check-live-attribution-flow.sh "$site_url" 2>&1)"
+  live_flow_status=$?
+  printf '%s\n' "$live_flow_output" | sed 's/^/    /'
+  if [ "$live_flow_status" -eq 0 ]; then
+    ok "live served HTML passes the prompt-copy attribution verifier"
+  else
+    hold "live served HTML does not yet pass the prompt-copy attribution verifier"
+  fi
+else
+  skip "curl and node are required for live prompt-copy attribution verification"
+fi
+
 section "GitHub Release MCPB assets"
 if ! command -v gh >/dev/null 2>&1; then
   skip "gh CLI not found; cannot read GitHub Release assets"

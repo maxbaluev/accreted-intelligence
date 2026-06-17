@@ -17,6 +17,7 @@ for f in \
   scripts/check-controlled-install-attribution.sh \
   scripts/check-growth-live-state.sh \
   scripts/check-growth-readiness.sh \
+  scripts/check-live-attribution-flow.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \
   scripts/docker-entrypoint.sh \

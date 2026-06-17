@@ -23,6 +23,7 @@ Default mode is local and read-only:
   - runs the growth-readiness gate
   - reports branch/release/registry state
   - reports read-only live public state and current holds
+  - verifies live prompt-copy attribution in the read-only live-state audit
   - prints the owner-approval commands for push, MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, and dashboard creation
 
@@ -140,6 +141,7 @@ Run these only after explicit owner approval for the named external action.
 2. Read-only verification after the push/site deploy:
 
    scripts/check-growth-live-state.sh $tag
+   scripts/check-live-attribution-flow.sh https://accint.xyz
    gh repo view $repo --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
    gh workflow list --repo $repo
    curl -fsSI https://accint.xyz/
