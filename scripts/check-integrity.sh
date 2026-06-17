@@ -118,6 +118,7 @@ if command -v node >/dev/null 2>&1; then
   if node scripts/check-social-launch-kit.js --check; then note "social launch kit: ok"; else fail=1; fi
   if node scripts/prepare-social-launch-packet.js --check; then note "social launch packet: ok"; else fail=1; fi
   if node scripts/prepare-social-launch-packet.js --decision-packet >/dev/null; then note "social launch decision packet: ok"; else fail=1; fi
+  if node scripts/prepare-social-launch-packet.js --decision-packet | grep -q 'Current Channel Holds'; then note "social launch channel holds: ok"; else fail=1; fi
   if node scripts/prepare-social-launch-packet.js --reply-packet hn-show >/dev/null; then note "social launch reply packet: ok"; else fail=1; fi
   if node scripts/prepare-social-launch-packet.js --receipt-packet hn-show https://example.com/accint-launch >/dev/null; then note "social launch receipt packet: ok"; else fail=1; fi
 else

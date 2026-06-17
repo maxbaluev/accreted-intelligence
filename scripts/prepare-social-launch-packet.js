@@ -300,8 +300,7 @@ function validatePacket(rows, kitText) {
   }
 }
 
-function validateGrowthReportReceiptTable() {
-  const report = read(GROWTH_REPORT_PATH);
+function validateGrowthReportReceiptTable(report) {
   if (!report.includes("## Social launch receipts")) {
     die(`${GROWTH_REPORT_PATH}: missing Social launch receipts section`);
   }
@@ -310,7 +309,37 @@ function validateGrowthReportReceiptTable() {
   }
 }
 
-function printCheck(rows) {
+function currentLaunchHolds(report) {
+  const holds = [];
+  if (/Hacker News still requires password-based login\/registration before posting/.test(report)) {
+    holds.push({
+      surface: "hn-show",
+      target: "Show HN",
+      hold: "Hacker News currently requires owner login or registration before posting.",
+      guidance: "Use Show HN first only if the owner can complete that account step; otherwise use the X launch thread as the first owner-controlled fallback after live verification.",
+    });
+  }
+  if (/Reddit r\/LocalLLaMA submission was attempted[\s\S]*Rule 4 self-promotion warning[\s\S]*no published URL/.test(report)) {
+    holds.push({
+      surface: "reddit-localllama",
+      target: "Reddit LocalLLaMA",
+      hold: "The previous Reddit LocalLLaMA attempt hit a Rule 4 self-promotion warning and produced no public URL.",
+      guidance: "Treat LocalLLaMA as critique-only unless the owner explicitly approves a fresh target and a public URL exists before recording a receipt.",
+    });
+  }
+  return holds;
+}
+
+function validateLaunchHolds(report, holds) {
+  if (report.includes("Hacker News still requires password-based login/registration") && !holds.some((hold) => hold.surface === "hn-show")) {
+    die("decision packet must surface the current Hacker News login hold from the growth report");
+  }
+  if (report.includes("Rule 4 self-promotion warning") && !holds.some((hold) => hold.surface === "reddit-localllama")) {
+    die("decision packet must surface the current Reddit LocalLLaMA hold from the growth report");
+  }
+}
+
+function printCheck(rows, launchHolds) {
   console.log("SOCIAL LAUNCH PACKET: PASS");
   for (const row of rows) {
     if (row.posts) {
@@ -322,6 +351,7 @@ function printCheck(rows) {
       console.log(`  ${row.id}: ${row.label}, body=${row.body.length} chars`);
     }
   }
+  console.log(`  current channel holds: ${launchHolds.length}`);
 }
 
 function printMarkdown(rows) {
@@ -390,7 +420,7 @@ function printMarkdown(rows) {
   }
 }
 
-function printDecisionPacket(rows) {
+function printDecisionPacket(rows, launchHolds) {
   const showHn = rows.find((row) => row.id === "hn-show");
   const localLlama = rows.find((row) => row.id === "reddit-localllama");
   const xThread = rows.find((row) => row.id === "x-launch-thread");
@@ -418,7 +448,7 @@ function printDecisionPacket(rows) {
   console.log();
   console.log("## Recommended First Launch");
   console.log();
-  console.log("Start with `Show HN` after the live attribution, PostHog proxy, and LLM discovery verifiers pass. It is the broadest standalone technical launch in the checked packet, has a short title, and sends traffic through a single attributed landing URL.");
+  console.log("Start with `Show HN` after the live attribution, PostHog proxy, and LLM discovery verifiers pass if the owner can complete the current HN login/registration hold. It is the broadest standalone technical launch in the checked packet, has a short title, and sends traffic through a single attributed landing URL. If that account step is not available, use the X launch thread as the first owner-controlled fallback after the same verifiers pass.");
   console.log();
   console.log(`- Surface ref: \`${showHn.id}\``);
   console.log(`- Attributed landing URL: ${showHn.landing_url}`);
@@ -431,6 +461,16 @@ function printDecisionPacket(rows) {
   console.log("node scripts/prepare-social-launch-packet.js --markdown");
   console.log("```");
   console.log();
+  if (launchHolds.length) {
+    console.log("## Current Channel Holds");
+    console.log();
+    console.log("These are read from `docs/ops/growth-report.md`; they are not posting authorization.");
+    console.log();
+    for (const hold of launchHolds) {
+      console.log(`- \`${hold.surface}\` (${hold.target}): ${hold.hold} ${hold.guidance}`);
+    }
+    console.log();
+  }
   console.log("## Target Choice");
   console.log();
   console.log("| Priority | Target | Use when | Surface ref |");
@@ -667,14 +707,17 @@ if (!["--check", "--decision-packet", "--reply-packet", "--receipt-packet", "--m
 const manifest = loadManifest();
 validateManifest(manifest);
 const kitText = read(KIT_PATH);
+const reportText = read(GROWTH_REPORT_PATH);
 const rows = buildPacket(manifest, kitText);
+const launchHolds = currentLaunchHolds(reportText);
 validatePacket(rows, kitText);
-validateGrowthReportReceiptTable();
+validateGrowthReportReceiptTable(reportText);
+validateLaunchHolds(reportText, launchHolds);
 
 if (mode === "--json") {
-  console.log(JSON.stringify({ schema_version: 1, rows }, null, 2));
+  console.log(JSON.stringify({ schema_version: 1, launch_holds: launchHolds, rows }, null, 2));
 } else if (mode === "--decision-packet") {
-  printDecisionPacket(rows);
+  printDecisionPacket(rows, launchHolds);
 } else if (mode === "--reply-packet") {
   printReplyPacket(rows, args[1]);
 } else if (mode === "--receipt-packet") {
@@ -682,5 +725,5 @@ if (mode === "--json") {
 } else if (mode === "--markdown") {
   printMarkdown(rows);
 } else {
-  printCheck(rows);
+  printCheck(rows, launchHolds);
 }
