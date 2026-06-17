@@ -132,3 +132,16 @@ authorization. They are review packets for exact owner-approved maintainer
 replies or listing updates. Use the Glama form packet before the
 punkpeye badge follow-up because that PR is blocked on Glama's listing and
 score badge.
+
+## Social launch receipts
+
+Append rows here only after an owner-approved public post exists. Generate the
+row locally from the checked launch packet so the surface ref, published URL,
+attributed landing URL, and follow-up boundary stay together:
+
+```bash
+node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>
+```
+
+| Date | Surface ref | Published URL | Attributed landing URL | Follow-up boundary |
+|---|---|---|---|---|

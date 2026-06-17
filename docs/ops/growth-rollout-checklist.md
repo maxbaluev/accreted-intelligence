@@ -434,6 +434,10 @@ the same `ref`/source envelope to copied prompt and installer text. Keep the
 `llms.txt` discovery verifier in this preflight so social launch copy never
 points agents at a stale or unserved discovery file.
 
+After an owner-approved post exists, append only the data row from
+`node scripts/prepare-social-launch-packet.js --receipt-packet <surface-ref> <published-url>`
+to the `## Social launch receipts` table in `docs/ops/growth-report.md`.
+
 ## Docker registry lane
 
 Do not submit to `docker/mcp-registry` until Docker-host smoke passes after the

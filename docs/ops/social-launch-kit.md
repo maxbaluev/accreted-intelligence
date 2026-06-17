@@ -235,7 +235,8 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 ## After posting
 
 After an owner-approved post goes live, record the URL and surface ref in the
-growth report, then monitor without spamming:
+`## Social launch receipts` table in the growth report, then monitor without
+spamming:
 
 ```bash
 node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>

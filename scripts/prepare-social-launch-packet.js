@@ -11,9 +11,11 @@ const path = require("path");
 
 const MANIFEST_PATH = path.join("docs", "ops", "growth-surfaces.json");
 const KIT_PATH = path.join("docs", "ops", "social-launch-kit.md");
+const GROWTH_REPORT_PATH = path.join("docs", "ops", "growth-report.md");
 const REPO_URL = "https://github.com/maxbaluev/accreted-intelligence";
 const VALUE_RE = /^[A-Za-z0-9._:/?+,-]{1,96}$/;
 const FORBIDDEN_CLAIMS = ["fully open source", "open-source engine", "public memory implementation"];
+const RECEIPT_TABLE_HEADER = "| Date | Surface ref | Published URL | Attributed landing URL | Follow-up boundary |";
 
 function usage() {
   console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--decision-packet|--reply-packet|--receipt-packet|--markdown|--json] [surface-ref] [published-url]
@@ -295,6 +297,16 @@ function validatePacket(rows, kitText) {
 
   for (const row of rows) {
     validateReplyDrafts(row);
+  }
+}
+
+function validateGrowthReportReceiptTable() {
+  const report = read(GROWTH_REPORT_PATH);
+  if (!report.includes("## Social launch receipts")) {
+    die(`${GROWTH_REPORT_PATH}: missing Social launch receipts section`);
+  }
+  if (!report.includes(RECEIPT_TABLE_HEADER) || !report.includes("|---|---|---|---|---|")) {
+    die(`${GROWTH_REPORT_PATH}: missing social launch receipt table`);
   }
 }
 
@@ -626,11 +638,9 @@ function printReceiptPacket(rows, surfaceId, publishedUrl) {
   console.log(`- Attributed landing URL: ${row.landing_url}`);
   console.log(`- Source envelope: \`${row.source}\``);
   console.log();
-  console.log("Append this row to `docs/ops/growth-report.md` after the owner-approved post is live:");
+  console.log("Append this data row to the `## Social launch receipts` table in `docs/ops/growth-report.md` after the owner-approved post is live:");
   console.log();
   console.log("```markdown");
-  console.log("| Date | Surface ref | Published URL | Attributed landing URL | Follow-up boundary |");
-  console.log("|---|---|---|---|---|");
   console.log(`| ${date} | \`${row.id}\` | ${url} | ${row.landing_url} | Monitor replies and attribution; do not bump or cross-post without fresh owner approval. |`);
   console.log("```");
   console.log();
@@ -659,6 +669,7 @@ validateManifest(manifest);
 const kitText = read(KIT_PATH);
 const rows = buildPacket(manifest, kitText);
 validatePacket(rows, kitText);
+validateGrowthReportReceiptTable();
 
 if (mode === "--json") {
   console.log(JSON.stringify({ schema_version: 1, rows }, null, 2));
