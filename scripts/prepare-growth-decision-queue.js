@@ -167,6 +167,10 @@ function queueValidationFailures(queue) {
 
 function buildQueue(brief, tag) {
   const receipts = brief.growth_receipts || {};
+  const currentHeadPublished = receipts.public_rollout_pushed
+    && brief.git.ahead === "0"
+    && brief.git.behind === "0";
+  const currentHeadLiveVerified = currentHeadPublished && receipts.hosted_live_verifier_passed;
   const localFailures = brief.local_checks.filter((item) => !item.ok);
   const rolloutBlockers = [];
   if (localFailures.length) {
@@ -202,13 +206,13 @@ function buildQueue(brief, tag) {
   return [
     queueItem(1, {
       action: "Approve public growth rollout",
-      status: receipts.public_rollout_pushed ? "completed" : (rolloutReady ? "ready_for_owner_approval" : "blocked"),
+      status: currentHeadPublished ? "completed" : (rolloutReady ? "ready_for_owner_approval" : "blocked"),
       owner_decision: "Approve or hold the guarded push plus hosted verifier dispatch.",
       command: action1.command,
       guard: action1.guard || "Requires ACC_APPROVE_GROWTH_ROLLOUT=1",
-      depends_on: receipts.public_rollout_pushed
-        ? ["receipt row confirms public rollout was pushed"]
-        : (rolloutReady ? ["Owner approval for this exact external action"] : rolloutBlockers),
+      depends_on: currentHeadPublished
+        ? ["current HEAD is published at origin/main and receipt row confirms public rollout was pushed"]
+        : (rolloutReady ? ["Owner approval for this exact external action and current local HEAD"] : rolloutBlockers),
       unlocks: [
         "publishes the local growth bundle",
         "makes README, live-site attribution, and llms.txt discovery changes observable",
@@ -219,12 +223,12 @@ function buildQueue(brief, tag) {
     }),
     queueItem(2, {
       action: "Verify live deploy, attribution, and LLM discovery",
-      status: receipts.hosted_live_verifier_passed ? "completed" : "waiting_on_rollout",
+      status: currentHeadLiveVerified ? "completed" : "waiting_on_rollout",
       owner_decision: "No mutation; run immediately after the approved rollout completes.",
       command: action2.command,
       guard: action2.guard || "Read-only",
-      depends_on: receipts.hosted_live_verifier_passed
-        ? ["hosted verifier receipt row confirms live attribution and llms discovery passed"]
+      depends_on: currentHeadLiveVerified
+        ? ["current HEAD is published and hosted verifier receipt row confirms live attribution and llms discovery passed"]
         : [
           "step 1 completed",
           "GitHub Pages/site deployment visible for the target commit",

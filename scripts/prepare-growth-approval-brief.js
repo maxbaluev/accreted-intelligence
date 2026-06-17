@@ -198,12 +198,15 @@ function runLocalChecks() {
   return results;
 }
 
-function exactActions(tag, branch, receipts) {
+function exactActions(tag, branch, receipts, state) {
+  const currentHeadPublished = receipts.public_rollout_pushed
+    && state.ahead === "0"
+    && state.behind === "0";
   return [
     {
       stage: "1",
       name: "Push local growth bundle and dispatch hosted live-site verifier",
-      status: receipts.public_rollout_pushed ? "completed" : "owner_approval_required",
+      status: currentHeadPublished ? "completed" : "owner_approval_required",
       command: `ACC_APPROVE_GROWTH_ROLLOUT=1 scripts/run-approved-growth-rollout.sh ${tag}`,
       external_effects: ["git push origin main", "gh workflow run live-site-attribution.yml"],
       guard: "Requires ACC_APPROVE_GROWTH_ROLLOUT=1",
@@ -265,8 +268,9 @@ function buildBrief(tag) {
   const bundle = unpublishedBundle(state);
   const checks = runLocalChecks();
   const receipts = growthReceipts();
-  const actions = exactActions(tag, state.branch, receipts);
+  const actions = exactActions(tag, state.branch, receipts, state);
   const failures = checks.filter((check) => !check.ok);
+  const hasUnpublishedBundle = state.ahead !== "0" && state.ahead !== "?";
   return {
     schema_version: 1,
     repo: REPO,
@@ -291,7 +295,9 @@ function buildBrief(tag) {
       "payment/CAPTCHA/private account action",
     ],
     known_holds: [
-      receipts.public_rollout_pushed
+      hasUnpublishedBundle
+        ? `A new local bundle is ${state.ahead} commit(s) ahead of origin/main; push and hosted verifier dispatch still require fresh owner approval.`
+        : receipts.public_rollout_pushed
         ? "Public rollout has already been pushed; do not repeat the guarded rollout unless a new local bundle is ahead of origin/main."
         : "Public rollout still requires owner approval before git push or hosted verifier dispatch.",
       receipts.glama_listing_verified
