@@ -195,6 +195,10 @@ function validateOwnedSurfaces(manifest) {
     assertIncludes(text, `$env:ACC_INSTALL_SOURCE='${source}'`, `${README_PATH}: PowerShell source for ${surface.id}`);
     assertIncludes(text, landingUrl(manifest, surface), `${README_PATH}: attributed landing URL for ${surface.id}`);
   }
+  const bareSiteLinks = text.match(/\]\(https:\/\/accint\.xyz\/?\)/g) || [];
+  if (bareSiteLinks.length > 0) {
+    die(`${README_PATH}: bare accint.xyz links must use the github-readme attributed URL`);
+  }
 }
 
 function validateOwnedShareSurfaces(manifest) {

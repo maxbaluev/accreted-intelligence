@@ -6,7 +6,7 @@
 [![Official MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.maxbaluev%2Faccint-1f6feb)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.maxbaluev%2Faccint/versions/latest)
 [![Works with](https://img.shields.io/badge/works%20with-Claude%20Code%20·%20OpenCode%20·%20Codex%20·%20Cursor-7c3aed)](#install)
 [![Platform](https://img.shields.io/badge/platform-Linux%20·%20macOS%20·%20Windows-555)](#install)
-[![Live](https://img.shields.io/badge/live-accint.xyz-3fb950)](https://accint.xyz)
+[![Live](https://img.shields.io/badge/live-accint.xyz-3fb950)](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme)
 
 > Make your AI work compound. Offload the task. Never the learning.
 
@@ -43,7 +43,7 @@ There is no separate mode for technical and non-technical work. The loop is iden
 | Chase invoices | reads the ledger, drafts the nudge | which reminder cadence actually moves receivables |
 | Monday client briefs | gathers, drafts, files | the brief shape each client reads |
 
-*(Illustrative. The measured counts live at [accint.xyz](https://accint.xyz). These rows show the shape, not a benchmark.)*
+*(Illustrative. The measured counts live at [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme). These rows show the shape, not a benchmark.)*
 
 Four different jobs, one set of primitives: **commitment → action → `HELD → your OK` → outcome → credited lesson.** The authority gate (`HELD → your OK`) is structural in every flow that touches the outside world. That gate is what makes the same loop safe for consequential work and not only for code.
 
@@ -75,7 +75,7 @@ machine.
 
 The installer probes your hardware, picks the embedder tier it can honestly run, downloads and verifies the matching release binary when available, starts a warm local daemon, and wires your agent's `.mcp.json`. The first run may download the embedder model (several GB) and take minutes. The installer reports the wait honestly and never pretends your hardware is bigger than it is.
 
-> **Prefer to be walked through it?** Paste **one prompt** into whatever agent you already use — Claude Code, Codex, Cursor, or OpenCode — and it installs acc *with* you, explaining each step, pausing for consent at the boundary, and verifying against a machine-readable contract instead of guessing. The prompt is the same one on [accint.xyz](https://accint.xyz). See **[docs/install/with-agent.md](docs/install/with-agent.md)**.
+> **Prefer to be walked through it?** Paste **one prompt** into whatever agent you already use — Claude Code, Codex, Cursor, or OpenCode — and it installs acc *with* you, explaining each step, pausing for consent at the boundary, and verifying against a machine-readable contract instead of guessing. The prompt is the same one on [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme). See **[docs/install/with-agent.md](docs/install/with-agent.md)**.
 
 ---
 
@@ -94,7 +94,7 @@ $ acc --db acc.db act solve "draft the follow-up to last week's brief"
 
 A `solve` records a commitment, retrieves and predicts the path most likely to work, and returns either the artifact or a deliberation frame for the attached session to resolve. Every step is written down as it happens. It's a receipt, not a transcript reconstructed after the fact. Read what it wrote with `acc commitments` and `acc status`.
 
-*(The same loop, animated, with the stat strip that updates as the system runs: [accint.xyz](https://accint.xyz).)*
+*(The same loop, animated, with the stat strip that updates as the system runs: [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme).)*
 
 ---
 
@@ -202,11 +202,11 @@ Keep your agent. Keep your computer. `acc` works underneath the AI tools you alr
 
 ## Where it goes — one Work Model today, a collective one tomorrow
 
-`acc` is a working single-host research kernel, a running system rather than a roadmap. We're honest about the line. These numbers are measured rather than promised. The live readout is at **[accint.xyz](https://accint.xyz)** and updates as the system runs.
+`acc` is a working single-host research kernel, a running system rather than a roadmap. We're honest about the line. These numbers are measured rather than promised. The live readout is at **[accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme)** and updates as the system runs.
 
 | Stage | What it is |
 |---|---|
-| **Now · live** | **Your Work Model** — a working Work Model of your operation, on your machine, scored by real outcomes today, with your OK required before anything leaves. The readout at [accint.xyz](https://accint.xyz) is it, running. |
+| **Now · live** | **Your Work Model** — a working Work Model of your operation, on your machine, scored by real outcomes today, with your OK required before anything leaves. The readout at [accint.xyz](https://accint.xyz/?ref=github-readme&utm_source=github&utm_campaign=readme) is it, running. |
 | **Next** | **Your team's Work Model** — many operators, one shared Work Model, per-person authority, one audit plane, so your team's experience compounds together instead of in scattered chats. |
 | **Horizon** | **Collective accreted intelligence** — Work Models that compound peer-to-peer in vector space, each node re-verifying against its own reality, so the network gets smarter with no central brain to trust. |
 
