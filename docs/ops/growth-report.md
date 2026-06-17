@@ -68,11 +68,18 @@ Last receipt refresh: 2026-06-17.
 - LLMs.txt Directory submission was unblocked after live `/llms.txt` verification
   and submitted on June 17; treat it as pending review until a public directory
   URL or confirmation email exists.
+- AgentWork.Tools was rechecked on June 17: its first-step form accepted the
+  AccInt draft and logo, but the second step requires either a paid plan or a
+  dofollow backlink/badge on the AccInt site for the free listing. Hold unless
+  the owner explicitly approves that backlink tradeoff or a paid placement.
+- Alieradox was retried on June 17 after an earlier failed form attempt; the
+  form still returned `Submission failed` with no public email/contact route
+  found for the advertised direct-email fallback.
 - De-dupe any further directory submission against the local queue before
   submitting or sending email; All AI Tool Hub, Launchpadly, MCP.Directory,
-  WithAI Tools, LLMs.txt Directory, mcpservers.org, MCP.so, Insidr.ai,
-  AISuperHub, ListedAI, Apps and Websites, and AI Tool Claw already have
-  recorded submission/email outcomes or held blockers.
+  WithAI Tools, LLMs.txt Directory, AgentWork.Tools, Alieradox, mcpservers.org,
+  MCP.so, Insidr.ai, AISuperHub, ListedAI, Apps and Websites, and AI Tool Claw
+  already have recorded submission/email outcomes or held blockers.
 - Do not reply to directory/listing PRs merely to bump visibility. Use generated
   notes only when a maintainer asks for clarification, a listing needs registry
   proof, or the owner approves a specific reply.
