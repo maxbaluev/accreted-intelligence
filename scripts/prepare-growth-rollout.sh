@@ -24,6 +24,7 @@ Default mode is local and read-only:
   - runs the growth-readiness gate
   - reports branch/release/registry state
   - reports read-only live public state and current holds
+  - verifies local install short-route alignment
   - verifies live prompt-copy attribution in the read-only live-state audit
   - verifies the social launch kit
   - verifies growth surface refs and attributed landing URLs
@@ -123,6 +124,10 @@ echo "== controlled install attribution pre-live proof =="
 bash scripts/check-controlled-install-attribution.sh
 
 echo
+echo "== install surface pre-live proof =="
+scripts/check-install-surface.sh
+
+echo
 echo "== PostHog dashboard pre-live proof =="
 node scripts/prepare-posthog-dashboard.js --check
 
@@ -191,6 +196,7 @@ Run these only after explicit owner approval for the named external action.
 
    scripts/check-growth-live-state.sh $tag
    scripts/check-live-attribution-flow.sh https://accint.xyz
+   scripts/check-install-surface.sh
    gh repo view $repo --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
    gh workflow list --repo $repo
    curl -fsSI https://accint.xyz/

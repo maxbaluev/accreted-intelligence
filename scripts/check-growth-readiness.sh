@@ -64,6 +64,7 @@ for f in \
   scripts/check-growth-live-state.sh \
   scripts/check-live-attribution-flow.sh \
   scripts/check-growth-surfaces.js \
+  scripts/check-install-surface.sh \
   scripts/check-mcpb-promotion-packet.sh \
   scripts/check-mcpb-release-assets.sh \
   scripts/check-release-alignment.sh \

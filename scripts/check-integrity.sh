@@ -18,6 +18,7 @@ for f in \
   scripts/check-directory-pr-state.sh \
   scripts/check-growth-live-state.sh \
   scripts/check-growth-readiness.sh \
+  scripts/check-install-surface.sh \
   scripts/check-mcpb-promotion-packet.sh \
   scripts/check-live-attribution-flow.sh \
   scripts/check-mcpb-release-assets.sh \
@@ -56,6 +57,11 @@ else
 fi
 
 echo "== attribution flow (web copy -> installer ref) =="
+if bash scripts/check-install-surface.sh; then
+  note "install surface: ok"
+else
+  fail=1
+fi
 if command -v node >/dev/null 2>&1; then
   if node scripts/check-attribution-flow.js; then note "web attribution flow: ok"; else fail=1; fi
 else

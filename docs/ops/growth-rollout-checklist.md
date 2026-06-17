@@ -10,6 +10,7 @@ posting by itself.
 Use this when the public clone is ahead with growth-readiness commits such as:
 
 - binary/container install-path fixes
+- short install-route alignment guard
 - installer attribution receipt support
 - web prompt-copy `ACC_INSTALL_REF` stitching
 - web prompt-copy `ACC_INSTALL_SOURCE` source/ref stitching
@@ -41,6 +42,7 @@ and may report HOLD while the live site still lags local commits:
 scripts/prepare-growth-rollout.sh
 scripts/check-growth-live-state.sh v<tag>
 bash scripts/check-growth-readiness.sh
+scripts/check-install-surface.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
 scripts/check-mcpb-promotion-packet.sh v<tag>
@@ -64,6 +66,9 @@ Expected state:
   state without pushing, uploading, dispatching, publishing, posting, submitting,
   or creating dashboards/listings
 - `scripts/check-growth-readiness.sh` passes
+- `scripts/check-install-surface.sh` passes and proves `https://accint.xyz/install`
+  stays aligned with the raw POSIX bootstrap and preserves attribution env
+  handoff
 - `scripts/check-controlled-install-attribution.sh` passes against temp
   POSIX/PowerShell installer homes without touching the operator's real acc home
 - `node scripts/prepare-posthog-dashboard.js --check` passes and validates the
@@ -128,6 +133,8 @@ After GitHub Pages / site deploy completes, verify the deployed pages:
 scripts/check-growth-live-state.sh v<tag>
 curl -fsSI https://accint.xyz/
 curl -fsSI https://accint.xyz/reddit/
+curl -fsSL https://accint.xyz/install | grep -F "ACC_INSTALL_REF"
+curl -fsSL https://accint.xyz/install | grep -F "exec bash ./install.sh"
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/reddit/ | grep -F "ACC_INSTALL_REF"
 curl -fsSL https://accint.xyz/ | grep -F "ACC_INSTALL_SOURCE"
