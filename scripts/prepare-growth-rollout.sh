@@ -31,9 +31,10 @@ Default mode is local and read-only:
   - builds and verifies the local MCPB promotion packet without uploading
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
-  - prints the owner-approval commands for push, MCPB upload, server.json advance,
-    hosted live-site verification, MCP Registry workflow dispatch, controlled
-    install, dashboard creation, social launch, and directory follow-up
+  - prints the approval-gated push + hosted live-site verifier command
+  - prints the owner-approval commands for MCPB upload, server.json advance,
+    MCP Registry workflow dispatch, controlled install, dashboard creation,
+    social launch, and directory follow-up
 
 It does not push, upload, dispatch, publish, post, or submit anything.
 EOF
@@ -191,6 +192,10 @@ Run these only after explicit owner approval for the named external action.
 1. Push the public growth bundle:
 
    git push origin ${branch:-main}
+
+   Or run the approval-gated helper after owner approval:
+
+   ACC_APPROVE_GROWTH_ROLLOUT=1 scripts/run-approved-growth-rollout.sh $tag
 
 2. Read-only verification after the push/site deploy:
 

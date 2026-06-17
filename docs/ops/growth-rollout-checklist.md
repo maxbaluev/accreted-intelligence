@@ -42,6 +42,7 @@ and may report HOLD while the live site still lags local commits:
 scripts/prepare-growth-rollout.sh
 scripts/check-growth-live-state.sh v<tag>
 bash scripts/check-growth-readiness.sh
+scripts/run-approved-growth-rollout.sh v<tag>
 scripts/check-install-surface.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
@@ -66,6 +67,10 @@ Expected state:
   state without pushing, uploading, dispatching, publishing, posting, submitting,
   or creating dashboards/listings
 - `scripts/check-growth-readiness.sh` passes
+- `scripts/run-approved-growth-rollout.sh v<tag>` prints `DRY RUN COMPLETE`
+  unless `ACC_APPROVE_GROWTH_ROLLOUT=1` is set, and its printed external actions
+  are limited to `git push` plus the hosted live-site attribution workflow
+  dispatch
 - `scripts/check-install-surface.sh` passes and proves `https://accint.xyz/install`
   stays aligned with the raw POSIX bootstrap and preserves attribution env
   handoff
@@ -105,6 +110,13 @@ From the public clone only:
 
 ```bash
 git push origin main
+```
+
+Or, after explicit owner approval, use the guarded helper that also dispatches
+the hosted live-site verifier:
+
+```bash
+ACC_APPROVE_GROWTH_ROLLOUT=1 scripts/run-approved-growth-rollout.sh v<tag>
 ```
 
 Immediately verify:

@@ -74,6 +74,7 @@ for f in \
   scripts/prepare-growth-rollout.sh \
   scripts/prepare-posthog-dashboard.js \
   scripts/prepare-mcpb-release-assets.sh \
+  scripts/run-approved-growth-rollout.sh \
   scripts/check-integrity.sh; do
   if [ -f "$f" ]; then
     note "$f: present"
