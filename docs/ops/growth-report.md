@@ -4,7 +4,7 @@ READ ONLY: this report tracks promotion surfaces and owner-review material. It
 does not authorize pushing, posting, commenting, submitting, paying, dispatching
 workflows, using account identity, or bypassing CAPTCHA/security controls.
 
-Last receipt refresh: 2026-06-17.
+Last receipt refresh: 2026-06-17T21:47Z.
 
 ## Current launch state
 
@@ -30,8 +30,9 @@ Last receipt refresh: 2026-06-17.
 - Directory PR state audit at refresh: 55 PRs checked, 40 open, 9 merged,
   6 closed/unmerged, 1 open PR with failing checks, 8 attention items.
 - Glama submission was made through Google OAuth with
-  `maxbaluev@outlook.com`; the direct listing and score badge now verify, but
-  Glama search for `accint` still did not show AccInt at refresh.
+  `maxbaluev@outlook.com`; the direct listing still verifies in read-only
+  browser refresh, but Glama search for `accint` still did not show AccInt at
+  `2026-06-17T21:47Z`.
 - `punkpeye/awesome-mcp-servers#8091` now has the Glama badge row on the owned
   branch at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91`, but the upstream PR
   remains open with GitHub merge status `CLEAN`. Wait for maintainer/check
@@ -55,9 +56,10 @@ Last receipt refresh: 2026-06-17.
   social receipt unless a public post URL exists.
 - PostHog dashboard/funnel checks still require valid PostHog credentials before
   live funnel evidence can be read.
-- MCP.Directory already has a recorded June 15 submission receipt, but a
-  read-only June 17 browser check did not find AccInt on the public query pages;
-  treat it as pending/unverified instead of resubmitting.
+- MCP.Directory already has a recorded June 15 submission receipt, but
+  read-only browser checks still did not find AccInt on `/?q=accint`; the
+  `/search?q=accint` route returns 404. Treat it as pending/unverified instead
+  of resubmitting.
 - Launchpadly invite inspected on June 17: the free startup listing requires a
   Launchpadly badge/backlink on the AccInt site, while the featured path is
   paid. Hold unless the owner explicitly approves that badge/backlink tradeoff
@@ -73,17 +75,20 @@ Last receipt refresh: 2026-06-17.
 - WithAI Tools has a live AccInt listing at
   `https://www.withaitools.com/tools/accreted-intelligence`, but the generated
   copy still misclassifies AccInt as a sales/prospecting tool with freemium
-  pricing and sales-outreach use cases. A correction request was sent to the
-  public contact email on June 17; do not promote or resubmit this listing
-  until the public copy is corrected.
+  pricing and sales-outreach use cases as of the read-only browser refresh at
+  `2026-06-17T21:47Z`. A correction request was sent to the public contact
+  email on June 17; do not promote or resubmit this listing until the public
+  copy is corrected.
 - LLMs.txt Directory submission was unblocked after live `/llms.txt` verification
-  and submitted on June 17; treat it as pending review until a public directory
-  URL or confirmation email exists.
+  and submitted on June 17; read-only checks of `https://llmtxt.app/`,
+  `/?q=accint`, and `/search?q=accint` did not find AccInt, so treat it as
+  pending review until a public directory URL or confirmation email exists.
 - PulseMCP search returned zero AccInt results on June 17 for `accint`,
   `accreted-intelligence`, and `maxbaluev`. Its submit page points to the
   Official MCP Registry path plus `hello@pulsemcp.com`; a registry-backed
   listing request was sent to that email from Outlook instead of using the
-  CAPTCHA-gated submit form.
+  CAPTCHA-gated form. Read-only browser refresh at `2026-06-17T21:47Z` still
+  showed `0` servers for `accint`.
 - Catalogue MCP (`Manu5921/catalogue-mcp`) had no existing AccInt issue and
   exposes a Submit MCP Server issue flow. Issue #5 was opened on June 17 with
   the AccInt repo, site, Official MCP Registry identity, `acc mcp` command,
