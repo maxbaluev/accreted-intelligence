@@ -74,6 +74,7 @@ for f in \
   scripts/check-release-alignment.sh \
   scripts/check-site-metadata.js \
   scripts/check-social-launch-kit.js \
+  scripts/prepare-growth-approval-brief.js \
   scripts/prepare-social-launch-packet.js \
   scripts/prepare-directory-followup-kit.js \
   scripts/prepare-directory-surface-refs.js \

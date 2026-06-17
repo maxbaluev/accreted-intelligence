@@ -28,6 +28,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - attribution dashboard/runbook docs
 - social launch kit
 - owner-reviewed social launch packet
+- compact owner approval brief
 - growth surface ref manifest
 - directory surface ref generator
 - organic referrer classification
@@ -58,6 +59,7 @@ scripts/run-approved-posthog-dashboard.sh
 scripts/run-approved-posthog-funnel-check.sh
 scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
+node scripts/prepare-growth-approval-brief.js --check v<tag>
 node scripts/prepare-social-launch-packet.js --check
 node scripts/check-growth-surfaces.js --check
 node scripts/prepare-directory-surface-refs.js --check path/to/report.md
@@ -114,6 +116,8 @@ Expected state:
   owner-approved posting copy, attribution refs, and source-boundary wording
 - `node scripts/prepare-social-launch-packet.js --check` passes and turns the
   HN/X/Reddit launch copy into exact owner-review packets without posting
+- `node scripts/prepare-growth-approval-brief.js --check v<tag>` passes and
+  prints the compact decision packet without running any external action
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
   refs, attributed landing URLs, install snippets, and page prompt-copy source
   keys stay aligned
@@ -137,6 +141,11 @@ Stop here unless the owner explicitly authorizes the public push/deploy/release
 step. After approval, keep each action separate and verify before continuing.
 The dry-run packet printed by `scripts/prepare-growth-rollout.sh` is the
 canonical command list; copy from it rather than reconstructing the sequence.
+For a concise owner decision view, run:
+
+```bash
+ACC_GROWTH_REPORT=path/to/report.md node scripts/prepare-growth-approval-brief.js --markdown v<tag>
+```
 
 ## Public push sequence
 

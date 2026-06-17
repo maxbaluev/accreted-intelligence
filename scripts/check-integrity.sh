@@ -107,6 +107,12 @@ fi
 echo "== growth surface refs =="
 if command -v node >/dev/null 2>&1; then
   if node scripts/check-growth-surfaces.js --check; then note "growth surface refs: ok"; else fail=1; fi
+  if node scripts/prepare-growth-approval-brief.js --check >/dev/null; then
+    note "growth approval brief: ok"
+  else
+    note "growth approval brief: FAIL"
+    fail=1
+  fi
   if printf '%s\n' '| 1 | example/list | 1 | Memory | https://github.com/example/list/pull/1 | ok |' | node scripts/prepare-directory-surface-refs.js --check - >/dev/null; then
     note "directory surface refs: ok"
   else

@@ -29,6 +29,7 @@ Default mode is local and read-only:
   - verifies static share/SEO metadata for launch previews
   - verifies the social launch kit
   - verifies the owner-reviewable social launch packet
+  - verifies the compact owner approval brief
   - verifies growth surface refs and attributed landing URLs
   - builds and verifies the local MCPB promotion packet without uploading
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
@@ -169,6 +170,10 @@ echo "== social launch packet pre-live proof =="
 node scripts/prepare-social-launch-packet.js --check
 
 echo
+echo "== growth approval brief pre-live proof =="
+ACC_GROWTH_REPORT="${growth_report:-}" node scripts/prepare-growth-approval-brief.js --check "$tag"
+
+echo
 echo "== growth surface refs pre-live proof =="
 node scripts/check-growth-surfaces.js --check
 
@@ -232,6 +237,8 @@ cat <<EOF
 Run these only after explicit owner approval for the named external action.
 
 1. Push the public growth bundle:
+
+   node scripts/prepare-growth-approval-brief.js --markdown $tag
 
    git push origin ${branch:-main}
 
