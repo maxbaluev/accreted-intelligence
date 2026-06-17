@@ -84,6 +84,49 @@ function gitState() {
   };
 }
 
+function splitLines(text) {
+  return String(text || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function unpublishedBundle(state) {
+  const baseRef = state.base_ref || BASE_REF;
+  const hasBase = run("git", ["rev-parse", "--verify", baseRef], { optional: true });
+  if (!hasBase) {
+    return {
+      base_ref: baseRef,
+      available: false,
+      commits: [],
+      files_changed: [],
+      shortstat: "",
+      reason: `base ref ${baseRef} is unavailable`,
+    };
+  }
+
+  const range = `${baseRef}..HEAD`;
+  const commits = splitLines(run("git", ["log", "--reverse", "--format=%h%x09%s", range], { optional: true }))
+    .map((line) => {
+      const [hash, ...subjectParts] = line.split("\t");
+      return {
+        hash,
+        subject: subjectParts.join("\t"),
+      };
+    })
+    .filter((commit) => commit.hash && commit.subject);
+  const filesChanged = splitLines(run("git", ["diff", "--name-only", range], { optional: true }));
+  const shortstat = run("git", ["diff", "--shortstat", range], { optional: true });
+
+  return {
+    base_ref: baseRef,
+    available: true,
+    commits,
+    files_changed: filesChanged,
+    shortstat,
+  };
+}
+
 function runLocalChecks() {
   const checks = [
     ["node", ["scripts/check-site-metadata.js"]],
@@ -184,6 +227,7 @@ function exactActions(tag, branch) {
 function buildBrief(tag) {
   const server = readJson("server.json");
   const state = gitState();
+  const bundle = unpublishedBundle(state);
   const checks = runLocalChecks();
   const actions = exactActions(tag, state.branch);
   const failures = checks.filter((check) => !check.ok);
@@ -194,6 +238,7 @@ function buildBrief(tag) {
     server_name: server.name || "",
     server_version: server.version || "",
     git: state,
+    unpublished_bundle: bundle,
     growth_report: GROWTH_REPORT || null,
     local_checks: checks,
     ready_for_owner_review: failures.length === 0 && state.clean && state.behind === "0" && state.ahead !== "0",
@@ -229,6 +274,10 @@ function printCheck(brief) {
   console.log(`  branch: ${brief.git.branch} @ ${brief.git.head}`);
   console.log(`  ahead/behind: ${brief.git.ahead}/${brief.git.behind}`);
   console.log(`  working tree: ${brief.git.clean ? "clean" : "dirty"}`);
+  if (brief.unpublished_bundle && brief.unpublished_bundle.available) {
+    console.log(`  unpublished commits: ${brief.unpublished_bundle.commits.length}`);
+    console.log(`  unpublished files changed: ${brief.unpublished_bundle.files_changed.length}`);
+  }
   console.log(`  exact approval actions: ${brief.exact_actions.length}`);
   console.log(`  ready for owner review: ${brief.ready_for_owner_review ? "yes" : "not yet"}`);
 }
@@ -248,6 +297,25 @@ function printMarkdown(brief) {
   console.log(`- Working tree: ${brief.git.clean ? "clean" : "dirty"}`);
   if (brief.growth_report) {
     console.log(`- Growth report: \`${brief.growth_report}\``);
+  }
+  if (brief.unpublished_bundle) {
+    console.log();
+    console.log("## Unpublished Bundle");
+    console.log();
+    console.log(`- Base ref: \`${brief.unpublished_bundle.base_ref}\``);
+    if (brief.unpublished_bundle.available) {
+      console.log(`- Commits to push: ${brief.unpublished_bundle.commits.length}`);
+      console.log(`- Files changed: ${brief.unpublished_bundle.files_changed.length}`);
+      if (brief.unpublished_bundle.shortstat) {
+        console.log(`- Diffstat: ${brief.unpublished_bundle.shortstat}`);
+      }
+      console.log();
+      for (const commit of brief.unpublished_bundle.commits) {
+        console.log(`- \`${commit.hash}\` ${commit.subject}`);
+      }
+    } else {
+      console.log(`- Status: unavailable (${brief.unpublished_bundle.reason})`);
+    }
   }
   console.log();
   console.log("## Local Checks");

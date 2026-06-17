@@ -168,6 +168,7 @@ function buildHandoff(tag) {
     server_name: brief.server_name,
     server_version: brief.server_version,
     git: brief.git,
+    unpublished_bundle: brief.unpublished_bundle || null,
     growth_report: brief.growth_report || queue.growth_report || null,
     ready_for_owner_review: brief.ready_for_owner_review && queue.ready_for_owner_review && validationFailures.length === 0,
     current_ask: {
@@ -187,6 +188,12 @@ function buildHandoff(tag) {
       branch_clean: Boolean(brief.git && brief.git.clean),
       branch_ahead: brief.git ? brief.git.ahead : "?",
       branch_behind: brief.git ? brief.git.behind : "?",
+      unpublished_commits: brief.unpublished_bundle && brief.unpublished_bundle.available
+        ? brief.unpublished_bundle.commits.length
+        : null,
+      unpublished_files_changed: brief.unpublished_bundle && brief.unpublished_bundle.available
+        ? brief.unpublished_bundle.files_changed.length
+        : null,
     },
     immediate_verification: {
       action: verification.action || verification.name || "Verify after deploy, no mutation",
@@ -221,6 +228,10 @@ function printCheck(handoff) {
   console.log(`  branch: ${handoff.git.branch} @ ${handoff.git.head}`);
   console.log(`  ahead/behind: ${handoff.git.ahead}/${handoff.git.behind}`);
   console.log(`  working tree: ${handoff.git.clean ? "clean" : "dirty"}`);
+  if (handoff.unpublished_bundle && handoff.unpublished_bundle.available) {
+    console.log(`  unpublished commits: ${handoff.unpublished_bundle.commits.length}`);
+    console.log(`  unpublished files changed: ${handoff.unpublished_bundle.files_changed.length}`);
+  }
   console.log(`  ready for owner review: ${handoff.ready_for_owner_review ? "yes" : "not yet"}`);
   console.log(`  ask: ${handoff.current_ask.action}`);
   console.log(`  command: ${shortCommand(handoff.current_ask.command)}`);
@@ -277,6 +288,25 @@ function printMarkdown(handoff) {
     console.log(`- Growth report: \`${handoff.growth_report}\``);
   }
   console.log();
+  if (handoff.unpublished_bundle) {
+    console.log("## Unpublished Bundle To Push");
+    console.log();
+    console.log(`- Base ref: \`${handoff.unpublished_bundle.base_ref}\``);
+    if (handoff.unpublished_bundle.available) {
+      console.log(`- Commits: ${handoff.unpublished_bundle.commits.length}`);
+      console.log(`- Files changed: ${handoff.unpublished_bundle.files_changed.length}`);
+      if (handoff.unpublished_bundle.shortstat) {
+        console.log(`- Diffstat: ${handoff.unpublished_bundle.shortstat}`);
+      }
+      console.log();
+      for (const commit of handoff.unpublished_bundle.commits) {
+        console.log(`- \`${commit.hash}\` ${commit.subject}`);
+      }
+    } else {
+      console.log(`- Status: unavailable (${handoff.unpublished_bundle.reason})`);
+    }
+    console.log();
+  }
   console.log("## Immediate Verification After Approval");
   console.log();
   console.log(`- Action: ${handoff.immediate_verification.action}`);

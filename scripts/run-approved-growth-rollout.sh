@@ -11,6 +11,7 @@ cd "$(dirname "$0")/.." || exit 1
 
 repo="${ACC_GROWTH_REPO:-maxbaluev/accreted-intelligence}"
 remote="${ACC_GROWTH_REMOTE:-origin}"
+base_ref="${ACC_GROWTH_BASE_REF:-$remote/main}"
 site_url="${ACC_LIVE_SITE_URL:-https://accint.xyz}"
 strict_live_state="${ACC_HOSTED_LIVE_STATE_STRICT:-false}"
 workflow_dispatch_attempts="${ACC_WORKFLOW_DISPATCH_ATTEMPTS:-6}"
@@ -34,6 +35,7 @@ Optional:
   ACC_WORKFLOW_DISPATCH_SLEEP=10
   ACC_GROWTH_REPO=maxbaluev/accreted-intelligence
   ACC_GROWTH_REMOTE=origin
+  ACC_GROWTH_BASE_REF=origin/main
 
 This script only covers the public push and hosted live-site attribution audit.
 It does not upload assets, publish registry metadata, post, comment, submit
@@ -89,6 +91,7 @@ echo "== approval-gated growth rollout =="
 printf '  repo: %s\n' "$repo"
 printf '  branch: %s\n' "$branch"
 printf '  remote: %s\n' "$remote"
+printf '  base ref: %s\n' "$base_ref"
 printf '  release tag: %s\n' "$tag"
 printf '  site: %s\n' "$site_url"
 printf '  strict hosted live-state: %s\n' "$strict_live_state"
@@ -98,6 +101,23 @@ printf '  workflow dispatch sleep: %ss\n' "$workflow_dispatch_sleep"
 echo
 echo "== local readiness =="
 bash scripts/check-growth-readiness.sh
+
+echo
+echo "== unpublished bundle =="
+if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
+  commit_count="$(git rev-list --count "$base_ref..HEAD" 2>/dev/null || printf '?')"
+  file_count="$(git diff --name-only "$base_ref..HEAD" 2>/dev/null | sed '/^$/d' | wc -l | tr -d ' ')"
+  shortstat="$(git diff --shortstat "$base_ref..HEAD" 2>/dev/null || true)"
+  printf '  base ref: %s\n' "$base_ref"
+  printf '  commits to push: %s\n' "$commit_count"
+  printf '  files changed: %s\n' "$file_count"
+  if [ -n "$shortstat" ]; then
+    printf '  diffstat: %s\n' "$shortstat"
+  fi
+  git log --reverse --oneline "$base_ref..HEAD" | sed 's/^/  /'
+else
+  printf '  base ref unavailable: %s\n' "$base_ref"
+fi
 
 if command -v actionlint >/dev/null 2>&1; then
   echo
