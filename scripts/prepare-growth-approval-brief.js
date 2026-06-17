@@ -217,7 +217,7 @@ function exactActions(tag, branch) {
     {
       stage: "7",
       name: "Owner-held Glama submission packet for punkpeye blocker",
-      command: `node scripts/prepare-glama-submission-packet.js --markdown ${tag}`,
+      command: `node scripts/prepare-glama-submission-packet.js --form-packet ${tag}`,
       external_effects: ["owner may manually submit the Glama listing in a logged-in browser"],
       guard: "Packet is read-only; no automated Glama submission or PR badge update",
     },

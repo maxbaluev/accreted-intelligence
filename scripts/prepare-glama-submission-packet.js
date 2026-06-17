@@ -22,11 +22,12 @@ const EXPECTED_TARGETS = [
 ];
 
 function usage() {
-  console.error(`usage: node scripts/prepare-glama-submission-packet.js [--check|--markdown|--json] [tag]
+  console.error(`usage: node scripts/prepare-glama-submission-packet.js [--check|--markdown|--form-packet|--json] [tag]
 
 Examples:
   node scripts/prepare-glama-submission-packet.js --check v0.1.6
   node scripts/prepare-glama-submission-packet.js --markdown v0.1.6
+  node scripts/prepare-glama-submission-packet.js --form-packet v0.1.6
 
 Output is review material only. It does not submit to Glama, push, comment,
 dispatch workflows, pay, bypass anti-bot controls, or use account identity.
@@ -358,16 +359,90 @@ function printMarkdown(packet) {
   }
 }
 
+function printFormPacket(packet) {
+  console.log("# Glama Form Packet");
+  console.log();
+  console.log("READ ONLY: this packet is for owner copy/paste into Glama. It does not open a browser, submit a form, push, comment, pay, bypass anti-bot controls, or use account identity.");
+  console.log();
+  console.log("## Submit");
+  console.log();
+  console.log(`- URL: ${packet.glama.submit_url}`);
+  console.log("- Owner action: submit manually only if the target and logged-in account context are acceptable.");
+  console.log(`- Ready for owner review: ${packet.ready_for_owner_review ? "yes" : "not yet"}`);
+  console.log();
+  console.log("## Fields");
+  console.log();
+  console.log("| Field | Value |");
+  console.log("|---|---|");
+  console.log(`| Repository URL | \`${packet.owner_submission_fields.repository_url}\` |`);
+  console.log(`| Dockerfile path | \`${packet.owner_submission_fields.dockerfile_path}\` |`);
+  console.log(`| Release tag | \`${packet.owner_submission_fields.release_tag}\` |`);
+  console.log(`| Docker build arg | \`${packet.owner_submission_fields.docker_build_arg}\` |`);
+  console.log(`| Default command | \`${packet.owner_submission_fields.default_command}\` |`);
+  console.log(`| Expected MCP tools | \`${packet.owner_submission_fields.expected_tools}\` |`);
+  console.log(`| Notes | ${packet.owner_submission_fields.notes} |`);
+  console.log();
+  console.log("Copy block:");
+  console.log();
+  console.log("```text");
+  console.log(`Repository URL: ${packet.owner_submission_fields.repository_url}`);
+  console.log(`Dockerfile path: ${packet.owner_submission_fields.dockerfile_path}`);
+  console.log(`Release tag: ${packet.owner_submission_fields.release_tag}`);
+  console.log(`Docker build arg: ${packet.owner_submission_fields.docker_build_arg}`);
+  console.log(`Default command: ${packet.owner_submission_fields.default_command}`);
+  console.log(`Expected MCP tools: ${packet.owner_submission_fields.expected_tools}`);
+  console.log(`Notes: ${packet.owner_submission_fields.notes}`);
+  console.log("```");
+  console.log();
+  console.log("## Local Proof Before Submission");
+  console.log();
+  console.log("```bash");
+  console.log(`node scripts/prepare-glama-submission-packet.js --check ${packet.tag}`);
+  console.log(packet.docker.build_command);
+  for (const command of packet.docker.smoke_commands) {
+    console.log(command);
+  }
+  console.log("```");
+  console.log();
+  console.log("## Verify After Glama Accepts");
+  console.log();
+  console.log(`- Listing URL: ${packet.glama.listing_url}`);
+  console.log(`- Search URL: ${packet.glama.search_url}`);
+  console.log(`- Score badge URL: ${packet.glama.score_badge_url}`);
+  console.log();
+  console.log("```bash");
+  console.log("scripts/prepare-punkpeye-glama-followup.sh");
+  console.log("```");
+  console.log();
+  console.log("Only after that helper reports `READY` and the owner approves the exact branch update:");
+  console.log();
+  console.log("```bash");
+  console.log("ACC_APPROVE_PUNKPEYE_GLAMA=1 scripts/prepare-punkpeye-glama-followup.sh");
+  console.log("```");
+  console.log();
+  console.log("## Holds");
+  console.log();
+  for (const hold of packet.known_holds) {
+    console.log(`- ${hold}`);
+  }
+  console.log();
+  console.log("## Forbidden Without Fresh Owner Approval");
+  console.log();
+  for (const item of packet.forbidden_without_approval) {
+    console.log(`- ${item}`);
+  }
+}
+
 const args = process.argv.slice(2);
 let mode = "--check";
 if (args[0] === "-h" || args[0] === "--help") {
   usage();
   process.exit(0);
 }
-if (["--check", "--markdown", "--json"].includes(args[0])) {
+if (["--check", "--markdown", "--form-packet", "--json"].includes(args[0])) {
   mode = args.shift();
 }
-if (!["--check", "--markdown", "--json"].includes(mode)) {
+if (!["--check", "--markdown", "--form-packet", "--json"].includes(mode)) {
   usage();
   process.exit(2);
 }
@@ -378,6 +453,8 @@ const packet = buildPacket(tag);
 
 if (mode === "--json") {
   console.log(JSON.stringify(packet, null, 2));
+} else if (mode === "--form-packet") {
+  printFormPacket(packet);
 } else if (mode === "--markdown") {
   printMarkdown(packet);
 } else {

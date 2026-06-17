@@ -411,9 +411,9 @@ $directory_followup_command
 
 16. punkpeye Glama badge follow-up after a real Glama listing exists:
 
-   node scripts/prepare-glama-submission-packet.js --markdown $tag
+   node scripts/prepare-glama-submission-packet.js --form-packet $tag
 
-   Owner submits manually at https://glama.ai/mcp/servers using the packet's
+   Owner submits manually at https://glama.ai/mcp/servers using the form packet's
    repository URL, root Dockerfile path, release tag, default MCP command, and
    expected tools. Do not automate the Glama form, browser session, payment,
    CAPTCHA, or account identity.

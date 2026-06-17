@@ -353,7 +353,7 @@ After public push and site verification:
 1. Run the advisory live-state audit:
    `scripts/check-growth-live-state.sh v<tag>`.
 2. Generate the owner-held Glama submission packet:
-   `node scripts/prepare-glama-submission-packet.js --markdown v<tag>`.
+   `node scripts/prepare-glama-submission-packet.js --form-packet v<tag>`.
    The owner can use it manually at `https://glama.ai/mcp/servers`; do not
    automate the form, logged-in browser, payment, CAPTCHA, or account identity.
 3. Re-check Glama:

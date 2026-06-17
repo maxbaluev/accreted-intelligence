@@ -118,7 +118,7 @@ scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --markdown docs/ops/growth-report.md
 node scripts/prepare-directory-surface-refs.js --markdown docs/ops/growth-report.md
 node scripts/prepare-directory-followup-kit.js --markdown docs/ops/growth-report.md
-node scripts/prepare-glama-submission-packet.js --markdown v0.1.6
+node scripts/prepare-glama-submission-packet.js --form-packet v0.1.6
 ```
 
 Start with the owner handoff for the current approval ask, then use the
@@ -127,6 +127,6 @@ report ranks open directory/listing PRs by live PR state, repository reach,
 checks, and known blockers so owner-approved follow-up goes to the
 highest-upside surfaces first. The generated notes are not posting
 authorization. They are review packets for exact owner-approved maintainer
-replies or listing updates. Use the Glama submission packet before the
+replies or listing updates. Use the Glama form packet before the
 punkpeye badge follow-up because that PR is blocked on Glama's listing and
 score badge.

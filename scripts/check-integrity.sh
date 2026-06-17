@@ -140,6 +140,12 @@ if command -v node >/dev/null 2>&1; then
     note "Glama submission packet: FAIL"
     fail=1
   fi
+  if node scripts/prepare-glama-submission-packet.js --form-packet >/dev/null; then
+    note "Glama form packet: ok"
+  else
+    note "Glama form packet: FAIL"
+    fail=1
+  fi
   if printf '%s\n' '| 1 | example/list | 1 | Memory | https://github.com/example/list/pull/1 | ok |' | node scripts/prepare-directory-surface-refs.js --check - >/dev/null; then
     note "directory surface refs: ok"
   else
