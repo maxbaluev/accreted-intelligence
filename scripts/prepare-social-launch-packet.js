@@ -16,12 +16,13 @@ const VALUE_RE = /^[A-Za-z0-9._:/?+,-]{1,96}$/;
 const FORBIDDEN_CLAIMS = ["fully open source", "open-source engine", "public memory implementation"];
 
 function usage() {
-  console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--markdown|--json]
+  console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--decision-packet|--markdown|--json]
 
 Modes:
-  --check     validate the social launch packet and print a compact summary
-  --markdown  print owner-reviewable post packets
-  --json      print structured packet data
+  --check            validate the social launch packet and print a compact summary
+  --decision-packet  print the one-page owner target choice packet
+  --markdown         print owner-reviewable post packets
+  --json             print structured packet data
 
 Output is review material only. Do not post, submit, comment, DM, pay, or use
 an account identity from this output without explicit owner approval for that
@@ -370,12 +371,94 @@ function printMarkdown(rows) {
   }
 }
 
+function printDecisionPacket(rows) {
+  const showHn = rows.find((row) => row.id === "hn-show");
+  const localLlama = rows.find((row) => row.id === "reddit-localllama");
+  const xThread = rows.find((row) => row.id === "x-launch-thread");
+  const claudeAi = rows.find((row) => row.id === "reddit-claudeai");
+  const chatGptCoding = rows.find((row) => row.id === "reddit-chatgptcoding");
+
+  console.log("# Social Launch Decision Packet");
+  console.log();
+  console.log("READ ONLY: owner-review material only. Do not post, submit, comment, DM, pay, open compose forms, or use account identity without explicit owner approval for the exact target.");
+  console.log();
+  console.log("## Preflight");
+  console.log();
+  console.log("Run these immediately before any owner-approved post:");
+  console.log();
+  console.log("```bash");
+  console.log("bash scripts/check-growth-readiness.sh");
+  console.log("scripts/check-growth-live-state.sh v<tag>");
+  console.log("scripts/check-live-attribution-flow.sh https://accint.xyz");
+  console.log("node scripts/check-site-metadata.js");
+  console.log("node scripts/check-growth-surfaces.js --check");
+  console.log("node scripts/check-social-launch-kit.js --check");
+  console.log("node scripts/prepare-social-launch-packet.js --check");
+  console.log("```");
+  console.log();
+  console.log("## Recommended First Launch");
+  console.log();
+  console.log("Start with `Show HN` after the live attribution verifier passes. It is the broadest standalone technical launch in the checked packet, has a short title, and sends traffic through a single attributed landing URL.");
+  console.log();
+  console.log(`- Surface ref: \`${showHn.id}\``);
+  console.log(`- Attributed landing URL: ${showHn.landing_url}`);
+  console.log(`- Title length: ${showHn.title.length} chars`);
+  console.log(`- Body length: ${showHn.body.length} chars`);
+  console.log();
+  console.log("Review full copy:");
+  console.log();
+  console.log("```bash");
+  console.log("node scripts/prepare-social-launch-packet.js --markdown");
+  console.log("```");
+  console.log();
+  console.log("## Target Choice");
+  console.log();
+  console.log("| Priority | Target | Use when | Surface ref |");
+  console.log("|---:|---|---|---|");
+  console.log(`| 1 | Show HN | Broad technical launch after live attribution passes | \`${showHn.id}\` |`);
+  console.log(`| 2 | Reddit LocalLLaMA | You want technical critique of local memory/scoring from local-LLM users | \`${localLlama.id}\` |`);
+  console.log(`| 3 | X launch thread | The owner account has relevant AI/coding-agent audience | \`${xThread.id}\` |`);
+  console.log(`| 4 | Reddit ClaudeAI | Relevant existing Claude thread or explicit owner-approved standalone post | \`${claudeAi.id}\` |`);
+  console.log(`| 5 | Reddit ChatGPTCoding | Relevant existing Codex/ChatGPT coding thread or explicit owner-approved standalone post | \`${chatGptCoding.id}\` |`);
+  console.log();
+  console.log("## Copy Blocks");
+  console.log();
+  console.log("Show HN title:");
+  console.log();
+  console.log("```text");
+  console.log(showHn.title);
+  console.log("```");
+  console.log();
+  console.log("Show HN body:");
+  console.log();
+  console.log("```text");
+  console.log(showHn.body);
+  console.log("```");
+  console.log();
+  console.log("Optional attributed install reply if requested:");
+  console.log();
+  console.log("```bash");
+  console.log(showHn.install_reply);
+  console.log("```");
+  console.log();
+  console.log("## After Posting");
+  console.log();
+  console.log("Record the published URL and surface ref in `docs/ops/growth-report.md`, then monitor without bumping:");
+  console.log();
+  console.log("```bash");
+  console.log("scripts/check-growth-live-state.sh v<tag>");
+  console.log("scripts/run-approved-posthog-funnel-check.sh");
+  console.log("```");
+  console.log();
+  console.log("Reply only to concrete questions, corrections, or useful technical discussion.");
+}
+
 const mode = process.argv[2] || "--check";
 if (mode === "-h" || mode === "--help") {
   usage();
   process.exit(0);
 }
-if (!["--check", "--markdown", "--json"].includes(mode)) {
+if (!["--check", "--decision-packet", "--markdown", "--json"].includes(mode)) {
   usage();
   process.exit(2);
 }
@@ -388,6 +471,8 @@ validatePacket(rows, kitText);
 
 if (mode === "--json") {
   console.log(JSON.stringify({ schema_version: 1, rows }, null, 2));
+} else if (mode === "--decision-packet") {
+  printDecisionPacket(rows);
 } else if (mode === "--markdown") {
   printMarkdown(rows);
 } else {

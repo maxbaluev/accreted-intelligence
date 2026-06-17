@@ -63,6 +63,7 @@ scripts/check-mcpb-promotion-packet.sh v<tag>
 node scripts/check-social-launch-kit.js --check
 node scripts/prepare-growth-approval-brief.js --check v<tag>
 node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --decision-packet
 node scripts/check-growth-surfaces.js --check
 scripts/check-directory-pr-state.sh docs/ops/growth-report.md
 node scripts/prepare-directory-priority-report.js --check docs/ops/growth-report.md
@@ -122,6 +123,8 @@ Expected state:
   owner-approved posting copy, attribution refs, and source-boundary wording
 - `node scripts/prepare-social-launch-packet.js --check` passes and turns the
   HN/X/Reddit launch copy into exact owner-review packets without posting
+- `node scripts/prepare-social-launch-packet.js --decision-packet` prints the
+  one-page owner target choice packet without opening compose/submit URLs
 - `node scripts/prepare-growth-approval-brief.js --check v<tag>` passes and
   prints the compact approval packet without running any external action
 - `node scripts/prepare-growth-decision-queue.js --check v<tag>` passes and
@@ -390,6 +393,7 @@ posting:
 ```bash
 node scripts/check-social-launch-kit.js --check
 node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --decision-packet
 node scripts/prepare-social-launch-packet.js --markdown
 node scripts/check-growth-surfaces.js --check
 node scripts/check-growth-surfaces.js --print

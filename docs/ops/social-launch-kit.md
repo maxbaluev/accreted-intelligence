@@ -101,15 +101,17 @@ Before any owner-approved post, generate the local review packet:
 
 ```bash
 node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --decision-packet
 node scripts/prepare-social-launch-packet.js --markdown
 ```
 
 The packet reads only this Markdown file and
 [`docs/ops/growth-surfaces.json`](growth-surfaces.json). It does not open
-posting URLs, post, submit, comment, DM, pay, or use account identity. It
-prints per-surface copy, attributed landing URLs, install snippets, and channel
-fit checks so the owner can approve an exact target without reassembling the
-launch by hand.
+posting URLs, post, submit, comment, DM, pay, or use account identity. The
+decision packet gives a one-page target choice and first-launch recommendation;
+the full markdown packet prints per-surface copy, attributed landing URLs,
+install snippets, and channel fit checks so the owner can approve an exact
+target without reassembling the launch by hand.
 
 ## Show HN
 

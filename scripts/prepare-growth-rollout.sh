@@ -175,6 +175,7 @@ node scripts/check-social-launch-kit.js --check
 echo
 echo "== social launch packet pre-live proof =="
 node scripts/prepare-social-launch-packet.js --check
+node scripts/prepare-social-launch-packet.js --decision-packet >/dev/null
 
 echo
 echo "== growth approval brief pre-live proof =="
@@ -388,6 +389,7 @@ Run these only after explicit owner approval for the named external action.
 
    node scripts/check-social-launch-kit.js --check
    node scripts/prepare-social-launch-packet.js --check
+   node scripts/prepare-social-launch-packet.js --decision-packet
    node scripts/prepare-social-launch-packet.js --markdown
    node scripts/check-site-metadata.js
    node scripts/check-growth-surfaces.js --check

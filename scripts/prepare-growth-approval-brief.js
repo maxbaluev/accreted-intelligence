@@ -210,7 +210,7 @@ function exactActions(tag, branch) {
     {
       stage: "6",
       name: "Manual social launch posting",
-      command: "node scripts/prepare-social-launch-packet.js --markdown",
+      command: "node scripts/prepare-social-launch-packet.js --decision-packet",
       external_effects: ["owner manually posts selected HN/X/Reddit copy outside automation"],
       guard: "No automated posting; owner chooses exact target",
     },
