@@ -78,7 +78,8 @@ case "$tag" in
 esac
 
 branch="$(git branch --show-current 2>/dev/null || true)"
-head_sha="$(git rev-parse --short HEAD)"
+head_short="$(git rev-parse --short HEAD)"
+head_sha="$(git rev-parse HEAD)"
 ahead="?"
 behind="?"
 if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
@@ -106,7 +107,8 @@ bash scripts/check-growth-readiness.sh
 echo
 echo "== rollout state =="
 printf '  repo: %s\n' "$repo"
-printf '  branch: %s @ %s\n' "${branch:-<detached>}" "$head_sha"
+printf '  branch: %s @ %s\n' "${branch:-<detached>}" "$head_short"
+printf '  approved head: %s\n' "$head_sha"
 printf '  base ref: %s\n' "$base_ref"
 printf '  ahead/behind: %s/%s\n' "$ahead" "$behind"
 printf '  server.json version: %s\n' "${server_version:-<missing>}"
@@ -282,6 +284,7 @@ Run these only after explicit owner approval for the named external action.
 
    scripts/check-growth-live-state.sh $tag
    scripts/check-live-attribution-flow.sh https://accint.xyz
+   scripts/check-live-llms-discovery.sh https://accint.xyz
    scripts/check-install-surface.sh
    node scripts/check-site-metadata.js
    gh repo view $repo --json nameWithOwner,licenseInfo,homepageUrl,repositoryTopics
@@ -304,6 +307,7 @@ Run these only after explicit owner approval for the named external action.
    gh workflow run live-site-attribution.yml --repo $repo \\
      -f acc_version=$tag \\
      -f site_url=https://accint.xyz \\
+     -f expected_head=$head_sha \\
      -f strict_live_state=false
    gh run list --workflow live-site-attribution.yml --repo $repo --limit 3
 

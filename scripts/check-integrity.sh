@@ -151,6 +151,7 @@ if command -v node >/dev/null 2>&1; then
   if grep -q 'scripts/check-live-llms-discovery.sh https://accint.xyz' scripts/prepare-growth-approval-brief.js &&
     grep -q 'scripts/check-live-llms-discovery.sh' scripts/prepare-growth-decision-queue.js &&
     grep -q 'scripts/check-live-llms-discovery.sh' scripts/prepare-growth-owner-handoff.js &&
+    grep -q 'scripts/check-live-llms-discovery.sh https://accint.xyz' scripts/prepare-growth-rollout.sh &&
     grep -q 'scripts/check-live-llms-discovery.sh https://accint.xyz' scripts/prepare-social-launch-packet.js; then
     note "owner packets include live llms.txt discovery verification: ok"
   else
@@ -170,7 +171,9 @@ if command -v node >/dev/null 2>&1; then
   if grep -q 'head_full' scripts/prepare-growth-approval-brief.js &&
     grep -q 'expected_head' scripts/prepare-growth-approval-brief.js &&
     grep -q 'expected_head' scripts/prepare-growth-decision-queue.js &&
-    grep -q 'approved_head' scripts/prepare-growth-owner-handoff.js; then
+    grep -q 'approved_head' scripts/prepare-growth-owner-handoff.js &&
+    grep -q 'approved head: %s' scripts/prepare-growth-rollout.sh &&
+    grep -q 'expected_head=$head_sha' scripts/prepare-growth-rollout.sh; then
     note "owner packets bind approval to exact HEAD: ok"
   else
     note "owner packets bind approval to exact HEAD: FAIL"
