@@ -54,6 +54,14 @@ else
   fail=1
 fi
 
+echo "== MCP registry publish guard =="
+if grep -q 'scripts/check-mcpb-release-assets.sh "v${version}" server.json' .github/workflows/publish-mcp.yml; then
+  note "publish workflow release-asset guard: ok"
+else
+  note "publish workflow release-asset guard: MISSING"
+  fail=1
+fi
+
 echo "== no stale brand / no personal contact =="
 if grep -rIn 'acc4' --include='*.md' --include='*.sh' --include='*.ps1' --include='*.json' --exclude=check-integrity.sh --exclude-dir=.git --exclude-dir=.worktrees . | grep -v 'CHANGELOG.md'; then
   note "FOUND stale 'acc4' references above"; fail=1

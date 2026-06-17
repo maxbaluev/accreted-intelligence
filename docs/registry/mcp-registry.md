@@ -116,6 +116,12 @@ permissions:
 
 steps:
   - uses: actions/checkout@v5
+  - name: Verify MCPB release assets
+    env:
+      GH_TOKEN: ${{ github.token }}
+    run: |
+      version="$(python3 -c 'import json; print(json.load(open("server.json"))["version"])')"
+      bash scripts/check-mcpb-release-assets.sh "v${version}" server.json
   - name: Install mcp-publisher
     run: |
       curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
@@ -127,3 +133,4 @@ steps:
 
 Keep this workflow on manual dispatch until the release pipeline attaches MCPB
 assets and updates `server.json` with real `fileSha256` values for each release.
+The workflow verifies those assets before it authenticates or publishes.

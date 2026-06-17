@@ -37,11 +37,13 @@ source).
    prebuilt binaries + `sha256sums.txt` as assets (no source in the release).
 5. **Package MCPB assets** — after the release binaries are attached, run
    `scripts/package-mcpb.sh vX.Y.Z all` from this public clone and attach the
-   generated `dist/acc-mcp-*.mcpb` + `.sha256` files to the same release. Copy
-   `dist/server.mcpb-all.json` to `server.json`, commit it, and use
-   `docs/registry/mcp-registry.md` for the official MCP Registry
-   `mcp-publisher` steps. The tracked `publish-mcp-registry` workflow is manual
-   and uses GitHub OIDC, so no maintainer token needs to be stored.
+   generated `dist/acc-mcp-*.mcpb` + `.sha256` files to the same release. Run
+   `scripts/check-mcpb-release-assets.sh vX.Y.Z dist/server.mcpb-all.json`;
+   only after it passes, copy `dist/server.mcpb-all.json` to `server.json`,
+   commit it, and use `docs/registry/mcp-registry.md` for the official MCP
+   Registry `mcp-publisher` steps. The tracked `publish-mcp-registry` workflow
+   is manual, re-runs the asset check before publishing, and uses GitHub OIDC,
+   so no maintainer token needs to be stored.
 6. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
    from `index.html` + `CNAME` at repo root; confirm the deep-doc links resolve on
    the published default branch.
