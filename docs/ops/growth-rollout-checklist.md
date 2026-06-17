@@ -16,6 +16,7 @@ Use this when the public clone is ahead with growth-readiness commits such as:
 - web prompt-copy `ACC_INSTALL_SOURCE` source/ref stitching
 - attribution regression tests
 - controlled install attribution receipt verifier
+- approval-gated controlled live install receipt helper
 - read-only live growth state auditor
 - live prompt-copy attribution verifier
 - MCPB promotion packet verifier
@@ -43,6 +44,7 @@ scripts/prepare-growth-rollout.sh
 scripts/check-growth-live-state.sh v<tag>
 bash scripts/check-growth-readiness.sh
 scripts/run-approved-growth-rollout.sh v<tag>
+scripts/run-approved-controlled-live-install.sh v<tag>
 scripts/check-install-surface.sh
 bash scripts/check-controlled-install-attribution.sh
 node scripts/prepare-posthog-dashboard.js --check
@@ -71,6 +73,11 @@ Expected state:
   unless `ACC_APPROVE_GROWTH_ROLLOUT=1` is set, and its printed external actions
   are limited to `git push` plus the hosted live-site attribution workflow
   dispatch
+- `scripts/run-approved-controlled-live-install.sh v<tag>` prints
+  `DRY RUN COMPLETE` unless `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1` is set. In
+  approved mode it fetches the live POSIX installer, runs only the
+  `ACC_INSTALL_ATTRIBUTION_ONLY=1` stop path in temp homes, and checks the
+  receipt without doing a full install
 - `scripts/check-install-surface.sh` passes and proves `https://accint.xyz/install`
   stays aligned with the raw POSIX bootstrap and preserves attribution env
   handoff
@@ -207,7 +214,11 @@ as live:
    Publish registry metadata after the alignment check passes.
 8. Run `scripts/check-controlled-install-attribution.sh` locally. It must pass
    before any live controlled install.
-9. Run the public install path in a controlled environment.
+9. Run the live receipt proof helper in dry-run, then after explicit owner
+   approval:
+   `ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1 scripts/run-approved-controlled-live-install.sh v<tag>`.
+10. Run a full public install path only in a controlled environment where
+    dependency installation, daemon startup, and telemetry are acceptable.
 
 The controlled install should produce:
 
@@ -313,6 +324,8 @@ Hold instead of continuing when:
 - the private release binary does not contain the attribution bridge
 - controlled install cannot produce a matching web copy and `first_run`
   `distinct_id`
+- controlled live receipt proof cannot fetch the live installer or produce the
+  expected temp receipt
 - Glama still has no real listing for the punkpeye badge requirement
 - a target directory requires payment, CAPTCHA, anti-bot bypass, private account
   action, or owner identity input

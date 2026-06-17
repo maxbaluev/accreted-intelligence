@@ -32,6 +32,7 @@ Default mode is local and read-only:
   - optionally audits directory PR state when ACC_GROWTH_REPORT is set
   - optionally prepares directory/list attribution refs when ACC_GROWTH_REPORT is set
   - prints the approval-gated push + hosted live-site verifier command
+  - prints the approval-gated controlled live install receipt verifier command
   - prints the owner-approval commands for MCPB upload, server.json advance,
     MCP Registry workflow dispatch, controlled install, dashboard creation,
     social launch, and directory follow-up
@@ -123,6 +124,10 @@ fi
 echo
 echo "== controlled install attribution pre-live proof =="
 bash scripts/check-controlled-install-attribution.sh
+
+echo
+echo "== controlled live install receipt helper =="
+scripts/run-approved-controlled-live-install.sh "$tag"
 
 echo
 echo "== install surface pre-live proof =="
@@ -249,14 +254,20 @@ Run these only after explicit owner approval for the named external action.
 
    scripts/check-controlled-install-attribution.sh
 
-9. Live controlled install attribution proof after owner approval:
+9. Live controlled install attribution receipt proof after owner approval:
 
-   ACC_INSTALL_REF=controlled-${tag#v} ACC_INSTALL_SOURCE='ref=controlled-rollout' \\
-     bash -c 'curl -fsSL https://accint.xyz/install | sh'
+   scripts/run-approved-controlled-live-install.sh $tag
+   ACC_APPROVE_CONTROLLED_LIVE_INSTALL=1 \\
+     scripts/run-approved-controlled-live-install.sh $tag
 
    Expected local receipt:
      ref=controlled-${tag#v}
      source_ref=ref=controlled-rollout
+
+   This helper runs the live POSIX installer with
+   ACC_INSTALL_ATTRIBUTION_ONLY=1 inside a temp home. It proves the live route
+   can write the attribution receipt without doing a full install or touching
+   the operator's real acc home.
 
 10. Local PostHog dashboard spec proof:
 
