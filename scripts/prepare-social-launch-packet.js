@@ -16,11 +16,12 @@ const VALUE_RE = /^[A-Za-z0-9._:/?+,-]{1,96}$/;
 const FORBIDDEN_CLAIMS = ["fully open source", "open-source engine", "public memory implementation"];
 
 function usage() {
-  console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--decision-packet|--markdown|--json]
+  console.error(`usage: node scripts/prepare-social-launch-packet.js [--check|--decision-packet|--receipt-packet|--markdown|--json] [surface-ref] [published-url]
 
 Modes:
   --check            validate the social launch packet and print a compact summary
   --decision-packet  print the one-page owner target choice packet
+  --receipt-packet   print the after-posting receipt row for the growth report
   --markdown         print owner-reviewable post packets
   --json             print structured packet data
 
@@ -446,6 +447,7 @@ function printDecisionPacket(rows) {
   console.log("Record the published URL and surface ref in `docs/ops/growth-report.md`, then monitor without bumping:");
   console.log();
   console.log("```bash");
+  console.log("node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>");
   console.log("scripts/check-growth-live-state.sh v<tag>");
   console.log("scripts/run-approved-posthog-funnel-check.sh");
   console.log("```");
@@ -453,12 +455,53 @@ function printDecisionPacket(rows) {
   console.log("Reply only to concrete questions, corrections, or useful technical discussion.");
 }
 
-const mode = process.argv[2] || "--check";
+function printReceiptPacket(rows, surfaceId, publishedUrl) {
+  const id = surfaceId || "hn-show";
+  const row = rows.find((item) => item.id === id);
+  if (!row) {
+    die(`unknown social launch surface ${id}`);
+  }
+  const url = publishedUrl || "<published-url>";
+  if (publishedUrl && !/^https?:\/\/\S+$/i.test(publishedUrl)) {
+    die(`published URL must be http(s) and contain no whitespace: ${publishedUrl}`);
+  }
+  const date = new Date().toISOString().slice(0, 10);
+
+  console.log("# Social Launch Receipt Packet");
+  console.log();
+  console.log("READ ONLY: this packet records an owner-approved public post after it exists. It does not open the URL, post, comment, submit, DM, pay, or use account identity.");
+  console.log();
+  console.log("## Receipt");
+  console.log();
+  console.log(`- Surface ref: \`${row.id}\``);
+  console.log(`- Surface label: ${row.label}`);
+  console.log(`- Published URL: ${url}`);
+  console.log(`- Attributed landing URL: ${row.landing_url}`);
+  console.log(`- Source envelope: \`${row.source}\``);
+  console.log();
+  console.log("Append this row to `docs/ops/growth-report.md` after the owner-approved post is live:");
+  console.log();
+  console.log("```markdown");
+  console.log("| Date | Surface ref | Published URL | Attributed landing URL | Follow-up boundary |");
+  console.log("|---|---|---|---|---|");
+  console.log(`| ${date} | \`${row.id}\` | ${url} | ${row.landing_url} | Monitor replies and attribution; do not bump or cross-post without fresh owner approval. |`);
+  console.log("```");
+  console.log();
+  console.log("Monitor without bumping:");
+  console.log();
+  console.log("```bash");
+  console.log("scripts/check-growth-live-state.sh v<tag>");
+  console.log("scripts/run-approved-posthog-funnel-check.sh");
+  console.log("```");
+}
+
+const args = process.argv.slice(2);
+const mode = args[0] || "--check";
 if (mode === "-h" || mode === "--help") {
   usage();
   process.exit(0);
 }
-if (!["--check", "--decision-packet", "--markdown", "--json"].includes(mode)) {
+if (!["--check", "--decision-packet", "--receipt-packet", "--markdown", "--json"].includes(mode)) {
   usage();
   process.exit(2);
 }
@@ -473,6 +516,8 @@ if (mode === "--json") {
   console.log(JSON.stringify({ schema_version: 1, rows }, null, 2));
 } else if (mode === "--decision-packet") {
   printDecisionPacket(rows);
+} else if (mode === "--receipt-packet") {
+  printReceiptPacket(rows, args[1], args[2]);
 } else if (mode === "--markdown") {
   printMarkdown(rows);
 } else {

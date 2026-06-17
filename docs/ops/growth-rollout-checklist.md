@@ -394,6 +394,7 @@ posting:
 node scripts/check-social-launch-kit.js --check
 node scripts/prepare-social-launch-packet.js --check
 node scripts/prepare-social-launch-packet.js --decision-packet
+node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>
 node scripts/prepare-social-launch-packet.js --markdown
 node scripts/check-growth-surfaces.js --check
 node scripts/check-growth-surfaces.js --print

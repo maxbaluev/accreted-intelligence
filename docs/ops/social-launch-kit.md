@@ -232,6 +232,7 @@ After an owner-approved post goes live, record the URL and surface ref in the
 growth report, then monitor without spamming:
 
 ```bash
+node scripts/prepare-social-launch-packet.js --receipt-packet hn-show <published-url>
 scripts/check-directory-pr-state.sh path/to/report.md
 scripts/check-growth-live-state.sh v<tag>
 ```
