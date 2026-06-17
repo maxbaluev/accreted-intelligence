@@ -3,7 +3,8 @@
 #
 # Default mode is dry-run: validate the local dashboard spec and print the exact
 # approved command. Approved mode creates only the dashboard shell and a markdown
-# setup tile through documented PostHog dashboard endpoints. It does not create
+# setup tile through documented PostHog dashboard endpoints, then points the
+# owner at the local UI packet for creating the six insights. It does not create
 # undocumented insight payloads, read events, export analytics, post, comment,
 # submit, pay, or use account identity beyond the supplied PostHog API key.
 set -euo pipefail
@@ -35,7 +36,9 @@ Optional:
 Approved mode requires a personal API key with dashboard:read and
 dashboard:write scopes. It checks for an existing exact dashboard name before
 creating a new dashboard shell, then adds a markdown text tile with the six
-required insight specs from docs/ops/posthog-dashboard.json.
+required insight specs from docs/ops/posthog-dashboard.json. Use
+`node scripts/prepare-posthog-dashboard.js --ui-packet` for field-by-field
+PostHog UI input.
 
 It does not create insight tiles through undocumented APIs, read event data,
 export analytics, post, comment, submit, pay, or use account identity outside
@@ -78,6 +81,7 @@ spec = json.loads(Path("docs/ops/posthog-dashboard.json").read_text())
 tiles = spec["dashboard"]["tiles"]
 print(f"  name: {os.environ['POSTHOG_DASHBOARD_NAME']}")
 print(f"  tiles to create manually after shell: {len(tiles)}")
+print("  UI packet: node scripts/prepare-posthog-dashboard.js --ui-packet")
 for index, tile in enumerate(tiles, 1):
     if tile["type"] == "funnel":
         steps = " -> ".join(step["event"] for step in tile["steps"])
@@ -101,6 +105,10 @@ Approved mode:
   1. GET  $posthog_host/api/environments/<environment-id>/dashboards/?search=<dashboard>
   2. POST $posthog_host/api/environments/<environment-id>/dashboards/
   3. POST $posthog_host/api/environments/<environment-id>/dashboards/<id>/create_text_tile/
+
+Then create the six insight tiles from:
+
+  node scripts/prepare-posthog-dashboard.js --ui-packet
 EOF
 
 if [ "${ACC_APPROVE_POSTHOG_DASHBOARD:-0}" != "1" ]; then
@@ -165,7 +173,7 @@ def setup_markdown():
         "# AccInt install attribution setup",
         "",
         "This dashboard shell was created from `docs/ops/posthog-dashboard.json`.",
-        "Create the insight tiles below in PostHog's UI, then use this dashboard to rank growth surfaces from visitor-to-copy-to-first-run conversion and activation, not copy events alone.",
+        "Create the insight tiles below in PostHog's UI from `node scripts/prepare-posthog-dashboard.js --ui-packet`, then use this dashboard to rank growth surfaces from visitor-to-copy-to-first-run conversion and activation, not copy events alone.",
         "",
         "Privacy contract: no raw prompt text, file contents, memory contents, Work Model data, or full inbound referrer URLs.",
         "",

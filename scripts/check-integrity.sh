@@ -90,6 +90,7 @@ fi
 echo "== PostHog dashboard spec =="
 if command -v node >/dev/null 2>&1; then
   if node scripts/prepare-posthog-dashboard.js --check; then note "PostHog dashboard spec: ok"; else fail=1; fi
+  if node scripts/prepare-posthog-dashboard.js --ui-packet >/dev/null; then note "PostHog UI packet: ok"; else fail=1; fi
 else
   note "node: MISSING (required for PostHog dashboard verifier)"
   fail=1

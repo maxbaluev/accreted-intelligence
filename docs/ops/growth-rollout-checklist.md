@@ -293,6 +293,7 @@ binary release are live. The materialized local spec is
 ```bash
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/prepare-posthog-dashboard.js --print
+node scripts/prepare-posthog-dashboard.js --ui-packet
 scripts/run-approved-posthog-dashboard.sh
 scripts/run-approved-posthog-funnel-check.sh
 ```
@@ -323,7 +324,11 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 The helper requires a personal API key with `dashboard:read` and
 `dashboard:write`, checks for an existing exact dashboard name first, and does
 not create undocumented insight payloads. Create the six insight tiles from the
-validated spec in the PostHog UI before using the dashboard for decisions.
+generated UI packet before using the dashboard for decisions:
+
+```bash
+node scripts/prepare-posthog-dashboard.js --ui-packet
+```
 
 After the dashboard is created and a controlled live install is run, query the
 aggregate funnel readout:

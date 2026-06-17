@@ -53,6 +53,7 @@ the live PostHog dashboard, run:
 ```bash
 node scripts/prepare-posthog-dashboard.js --check
 node scripts/prepare-posthog-dashboard.js --print
+node scripts/prepare-posthog-dashboard.js --ui-packet
 scripts/run-approved-posthog-dashboard.sh
 scripts/run-approved-posthog-funnel-check.sh
 ```
@@ -73,8 +74,12 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires `dashboard:read` and `dashboard:write`, checks for an
 existing exact dashboard name before creating a new shell, and does not create
-undocumented insight payloads. Add the six insight tiles below from the
-validated spec in the PostHog UI.
+undocumented insight payloads. Add the six insight tiles from the generated UI
+packet in the PostHog UI:
+
+```bash
+node scripts/prepare-posthog-dashboard.js --ui-packet
+```
 
 After the live dashboard exists and a controlled install has been run, read the
 aggregate funnel:

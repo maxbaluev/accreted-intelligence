@@ -345,6 +345,7 @@ Run these only after explicit owner approval for the named external action.
 
    node scripts/prepare-posthog-dashboard.js --check
    node scripts/prepare-posthog-dashboard.js --print
+   node scripts/prepare-posthog-dashboard.js --ui-packet
 
 11. Re-run the full read-only live-state audit:
 
@@ -363,7 +364,7 @@ Run these only after explicit owner approval for the named external action.
 
    The helper creates only the dashboard shell and a markdown setup tile through
    documented PostHog dashboard endpoints. Add the six insight tiles from
-   docs/ops/posthog-dashboard.json in the PostHog UI, then confirm the
+   the generated UI packet in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 
 13. Read the PostHog growth funnel after the dashboard and controlled install:

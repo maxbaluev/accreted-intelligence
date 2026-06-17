@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Validate and print the local PostHog dashboard spec without calling PostHog.
-// This is an operator-prep step: it turns the runbook into a stable artifact and
+// This is an operator-prep step: it turns the runbook into stable artifacts and
 // keeps dashboard creation approval-gated/manual.
 
 const fs = require("fs");
@@ -143,6 +143,62 @@ function printSummary(spec) {
   });
 }
 
+function renderFilter(filter) {
+  const operator = filter.operator || "exact";
+  return `${filter.property} ${operator} ${JSON.stringify(filter.value)}`;
+}
+
+function printUiPacket(spec) {
+  console.log("# PostHog Insight Tile Packet");
+  console.log();
+  console.log("READ ONLY: this packet is generated from docs/ops/posthog-dashboard.json. It does not call PostHog or use credentials.");
+  console.log();
+  console.log(`Dashboard: ${spec.dashboard.name}`);
+  console.log(`Description: ${spec.dashboard.description}`);
+  console.log();
+  console.log("Privacy contract:");
+  console.log(`- Identity: ${spec.dashboard.privacy_contract.allowed_identity}`);
+  console.log(`- Allowed source properties: ${spec.dashboard.privacy_contract.allowed_source_properties.join(", ")}`);
+  console.log(`- Forbidden payloads: ${spec.dashboard.privacy_contract.forbidden_payloads.join(", ")}`);
+  console.log();
+  console.log(`Create these ${spec.dashboard.tiles.length} PostHog insights in order and add them to the dashboard.`);
+  console.log();
+
+  spec.dashboard.tiles.forEach((tile, index) => {
+    console.log(`## ${index + 1}. ${tile.title}`);
+    console.log();
+    console.log(`Slug: \`${tile.slug}\``);
+    console.log(`Insight type: \`${tile.type}\``);
+
+    if (tile.type === "funnel") {
+      console.log(`Conversion window: \`${tile.conversion_window_days} days\``);
+      console.log(`Breakdowns: \`${tile.breakdowns.join("`, `")}\``);
+      console.log();
+      console.log("Steps:");
+      tile.steps.forEach((step, stepIndex) => {
+        console.log(`${stepIndex + 1}. Event: \`${step.event}\``);
+        if (Array.isArray(step.filters) && step.filters.length) {
+          console.log(`   Filters: ${step.filters.map(renderFilter).join("; ")}`);
+        }
+      });
+    } else {
+      console.log(`Display: \`${tile.display}\``);
+      console.log();
+      console.log("HogQL:");
+      console.log();
+      console.log("```sql");
+      console.log(tile.hogql);
+      console.log("```");
+    }
+
+    if (tile.expected_use) {
+      console.log();
+      console.log(`Expected use: ${tile.expected_use}`);
+    }
+    console.log();
+  });
+}
+
 const mode = process.argv[2] || "--check";
 try {
   const spec = validate();
@@ -150,10 +206,12 @@ try {
     console.log(JSON.stringify(spec, null, 2));
   } else if (mode === "--print") {
     printSummary(spec);
+  } else if (mode === "--ui-packet") {
+    printUiPacket(spec);
   } else if (mode === "--check") {
     console.log("POSTHOG DASHBOARD SPEC: PASS");
   } else {
-    console.error("usage: scripts/prepare-posthog-dashboard.js [--check|--print|--json]");
+    console.error("usage: scripts/prepare-posthog-dashboard.js [--check|--print|--ui-packet|--json]");
     process.exit(2);
   }
 } catch (err) {
