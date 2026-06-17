@@ -59,9 +59,6 @@
 #        ACC_NONINTERACTIVE=1 never prompt; skip sudo steps, just warn
 #        ACC_TIER=<lane>    force the embedder lane (skip the host probe's pick)
 #        ACC_INSTALL=source skip the phase-3 prebuilt-release fetch; always build from source
-#        ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
-#        ACC_INSTALL_SOURCE=<source> optional coarse source/ref context for that receipt
-#        ACC_INSTALL_ATTRIBUTION_ONLY=1 write the attribution receipt and stop (test/verification)
 #        ACC_BROWSER_HOME / ACC_BROWSER_SOCK   browser env overrides
 #
 # Windows: native installs use install.ps1 (the same phase-machine in PowerShell). This
@@ -91,7 +88,7 @@ for a in "$@"; do
 done
 # DB default is set AFTER OS is known (below) so a release install (non-git) writes the db
 # to the per-OS CANONICAL DATA DIR — the SAME path `db::canonical_db_path` resolves a bare
-# `acc.db` to outside a git repo. Otherwise bare `acc report`/`acc doctor` (read-only, cannot
+# `acc.db` to outside a git repo. Otherwise bare `acc doctor`/`acc doctor --report` (read-only, cannot
 # create) look in the canonical dir while the installer wrote it under $PWD — the exact split
 # that hard-FAILED for a real user. An explicit path arg ($ARGS[0]) still wins.
 DB_ARG="${ARGS[0]:-}"
@@ -512,57 +509,6 @@ step "phase 0 — probe host + select embedder tier"
 say "Accreted Intelligence (AccInt) — acc is an H-JEPA Work Model + tool loop for Claude Code: predict the better path, retrieve from your scored Work Model, run sandboxed actions, learn from real outcomes."
 say "host: $OS/$ARCH · substrate: $DB"
 [ "$OS" = "Linux" ] || [ "$OS" = "Darwin" ] || warn "untested OS '$OS' — proceeding best-effort (Windows: use install.ps1; container as fallback)"
-
-# ── phase 0a — local install attribution receipt ─────────────────────────────────────
-# ACC_INSTALL_REF is an explicit, caller-supplied attribution nonce/label for install URLs.
-# ACC_INSTALL_SOURCE is optional coarse source context copied from the web page (`ref`,
-# UTM, or referrer category). The public installer records both LOCALLY only; it does not
-# send a network event here. Telemetry, when enabled below, remains event-name only and is
-# governed by ACC_NO_TELEMETRY / `acc telemetry off`.
-sanitize_install_ref() {
-  printf '%s' "$1" | LC_ALL=C tr -cd 'A-Za-z0-9._:/?&=+,-' | cut -c1-160
-}
-INSTALL_REF_RAW="${ACC_INSTALL_REF:-}"
-INSTALL_SOURCE_RAW="${ACC_INSTALL_SOURCE:-}"
-INSTALL_REF=""
-INSTALL_SOURCE=""
-[ -n "$INSTALL_REF_RAW" ] && INSTALL_REF="$(sanitize_install_ref "$INSTALL_REF_RAW")"
-[ -n "$INSTALL_SOURCE_RAW" ] && INSTALL_SOURCE="$(sanitize_install_ref "$INSTALL_SOURCE_RAW")"
-INSTALL_ATTR_PATH="$CANON_DATA_DIR/install-attribution.env"
-INSTALL_ATTR_DESC=""
-[ -n "$INSTALL_REF" ] && INSTALL_ATTR_DESC="ref '$INSTALL_REF'"
-[ -n "$INSTALL_SOURCE" ] && INSTALL_ATTR_DESC="${INSTALL_ATTR_DESC:+$INSTALL_ATTR_DESC, }source '$INSTALL_SOURCE'"
-write_install_attribution() {
-  mkdir -p "$CANON_DATA_DIR" || return 1
-  {
-    [ -n "$INSTALL_REF" ] && printf 'ref=%s\n' "$INSTALL_REF"
-    [ -n "$INSTALL_SOURCE" ] && printf 'source_ref=%s\n' "$INSTALL_SOURCE"
-    date -u '+captured_at_utc=%Y-%m-%dT%H:%M:%SZ'
-    printf 'source='
-    [ -n "$INSTALL_REF" ] && printf 'ACC_INSTALL_REF'
-    [ -n "$INSTALL_REF" ] && [ -n "$INSTALL_SOURCE" ] && printf '+'
-    [ -n "$INSTALL_SOURCE" ] && printf 'ACC_INSTALL_SOURCE'
-    printf '\n'
-    printf 'note=local install attribution receipt; not sent by installer\n'
-  } > "$INSTALL_ATTR_PATH"
-}
-
-step "phase 0a — install attribution (local receipt)"
-if [ -z "$INSTALL_REF_RAW" ] && [ -z "$INSTALL_SOURCE_RAW" ]; then
-  phase_result "install_attribution" "skipped" "ACC_INSTALL_REF/ACC_INSTALL_SOURCE not set — no install attribution receipt written" "optional: ACC_INSTALL_REF=web-copy ACC_INSTALL_SOURCE='ref=gh-surface' ./install.sh"
-elif [ -z "$INSTALL_REF" ] && [ -z "$INSTALL_SOURCE" ]; then
-  phase_result "install_attribution" "skipped" "install attribution env vars had no supported label characters after sanitization — no receipt written" "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
-elif [ "$DRY_RUN" = "1" ]; then
-  phase_result "install_attribution" "would" "write local install attribution $INSTALL_ATTR_DESC to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
-elif write_install_attribution; then
-  phase_result "install_attribution" "ok" "wrote local install attribution $INSTALL_ATTR_DESC to $INSTALL_ATTR_PATH (not sent by installer)" "phase 0: probe tier"
-else
-  phase_result "install_attribution" "skipped" "could not write local install attribution receipt at $INSTALL_ATTR_PATH" "install continues; attribution is optional"
-fi
-if [ "${ACC_INSTALL_ATTRIBUTION_ONLY:-0}" = "1" ]; then
-  phase_result "verdict" "ok" "install attribution receipt check complete; stopped before install phases"
-  exit 0
-fi
 
 # ── update-mode detection ───────────────────────────────────────────────────────────
 # An EXISTING install (an acc binary on PATH and/or an existing substrate at $DB) flips
@@ -1536,7 +1482,7 @@ Fix this FIRST (then acc is fully live):
   1. See why it failed:   tail -n 30 /tmp/acc-embedder.log
   2. Start the embedder:  acc embedder            (first run downloads the model — several GB, minutes)
   3. Re-check health:     acc --db $DB doctor     (expect: embedder OK, verdict OK)
-  4. Still stuck?         acc report              (builds a SANITIZED report — no Work Model data, no secrets, just
+  4. Still stuck?         acc doctor --report     (builds a SANITIZED report — no Work Model data, no secrets, just
                           structural health — and prints a pre-filled GitHub issue link to file at
                           github.com/maxbaluev/accreted-intelligence/issues)
 
