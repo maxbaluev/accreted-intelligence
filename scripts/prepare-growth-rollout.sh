@@ -364,7 +364,7 @@ Run these only after explicit owner approval for the named external action.
      scripts/run-approved-posthog-dashboard.sh
 
    The helper creates only the dashboard shell and a markdown setup tile through
-   documented PostHog dashboard endpoints. Add the six insight tiles from
+   documented PostHog dashboard endpoints. Add the insight tiles from
    the generated UI packet in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 

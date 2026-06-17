@@ -13,6 +13,7 @@ The attribution chain is intentionally narrow:
 |---|---|---|---|
 | Web page view | `landing_viewed` on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref`, `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
 | Copy install text | `install_command_copied` | same generated `install_ref` | `method` (`agent_prompt` or `manual_command`), `os`, `placement`, `install_ref`, source props |
+| Share AccInt link | `share_link_clicked`, `share_link_copied` | same generated `install_ref` | `surface=visitor-share`, `mode` for copied/shared completion, source props; no raw inbound referrer URL |
 | Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local `ref` plus optional `source_ref` from copied `ACC_INSTALL_SOURCE`; not sent by the installer |
 | App telemetry | `first_run`, `daily_rollup`, lifecycle events | `distinct_id = telemetry_install_ref` when present, otherwise random device UUID | `first_run.has_install_ref`, `os`, `agent`, `project_lang`; no raw prompt/file/memory data |
 
@@ -74,7 +75,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires `dashboard:read` and `dashboard:write`, checks for an
 existing exact dashboard name before creating a new shell, and does not create
-undocumented insight payloads. Add the six insight tiles from the generated UI
+undocumented insight payloads. Add the seven insight tiles from the generated UI
 packet in the PostHog UI:
 
 ```bash
@@ -334,7 +335,82 @@ Expected use:
 - If `copied_people` is high and `first_runs` is low, fix installer trust,
   prompt wording, or first-run reliability before adding more traffic.
 
-### 6. Activation after install
+### 6. Visitor share loop
+
+Type: SQL insight, table.
+
+```sql
+WITH
+shares AS (
+    SELECT
+        'visitor-share' AS surface,
+        uniqExact(distinct_id) AS sharers,
+        count() AS share_events
+    FROM events
+    WHERE event = 'share_link_copied'
+      AND properties.surface = 'visitor-share'
+      AND {filters}
+),
+landings AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS landed_at
+    FROM events
+    WHERE event = 'landing_viewed'
+      AND properties.ref = 'visitor-share'
+      AND properties.utm_source = 'share'
+      AND {filters}
+    GROUP BY distinct_id
+),
+copies AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS copied_at
+    FROM events
+    WHERE event = 'install_command_copied'
+      AND {filters}
+    GROUP BY distinct_id
+),
+first_runs AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS first_run_at
+    FROM events
+    WHERE event = 'first_run'
+      AND properties.has_install_ref = 'true'
+      AND {filters}
+    GROUP BY distinct_id
+)
+SELECT
+    s.surface AS surface,
+    s.sharers AS sharers,
+    s.share_events AS share_events,
+    uniqExact(l.distinct_id) AS referred_visitors,
+    uniqExact(c.distinct_id) AS referred_copied_people,
+    uniqExact(f.distinct_id) AS referred_first_runs,
+    if(s.share_events = 0, 0, round(1.0 * referred_visitors / s.share_events, 2)) AS visitors_per_share,
+    if(referred_visitors = 0, 0, round(100.0 * referred_first_runs / referred_visitors, 1)) AS referred_visit_to_run_pct
+FROM shares s
+LEFT JOIN landings l ON 1 = 1
+LEFT JOIN copies c ON c.distinct_id = l.distinct_id
+    AND c.copied_at >= l.landed_at
+    AND c.copied_at < l.landed_at + interval 7 day
+LEFT JOIN first_runs f ON f.distinct_id = l.distinct_id
+    AND f.first_run_at >= l.landed_at
+    AND f.first_run_at < l.landed_at + interval 7 day
+GROUP BY s.surface, s.sharers, s.share_events
+```
+
+Expected use:
+
+- This is the organic loop tile: it shows whether visitors are copying/sharing
+  the owned share URL and whether the resulting `visitor-share` traffic reaches
+  install copy and first run.
+- `visitors_per_share` below 1 means the share CTA is not propagating yet; high
+  referred visitors with low `referred_visit_to_run_pct` means the shared
+  landing traffic needs stronger trust or channel fit before scaling it.
+
+### 7. Activation after install
 
 Type: Funnel.
 

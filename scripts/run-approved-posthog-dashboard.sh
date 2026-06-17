@@ -4,9 +4,10 @@
 # Default mode is dry-run: validate the local dashboard spec and print the exact
 # approved command. Approved mode creates only the dashboard shell and a markdown
 # setup tile through documented PostHog dashboard endpoints, then points the
-# owner at the local UI packet for creating the six insights. It does not create
-# undocumented insight payloads, read events, export analytics, post, comment,
-# submit, pay, or use account identity beyond the supplied PostHog API key.
+# owner at the local UI packet for creating the dashboard insights. It does not
+# create undocumented insight payloads, read events, export analytics, post,
+# comment, submit, pay, or use account identity beyond the supplied PostHog API
+# key.
 set -euo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
@@ -35,8 +36,8 @@ Optional:
 
 Approved mode requires a personal API key with dashboard:read and
 dashboard:write scopes. It checks for an existing exact dashboard name before
-creating a new dashboard shell, then adds a markdown text tile with the six
-required insight specs from docs/ops/posthog-dashboard.json. Use
+creating a new dashboard shell, then adds a markdown text tile with the required
+insight specs from docs/ops/posthog-dashboard.json. Use
 `node scripts/prepare-posthog-dashboard.js --ui-packet` for field-by-field
 PostHog UI input.
 
@@ -106,7 +107,7 @@ Approved mode:
   2. POST $posthog_host/api/environments/<environment-id>/dashboards/
   3. POST $posthog_host/api/environments/<environment-id>/dashboards/<id>/create_text_tile/
 
-Then create the six insight tiles from:
+Then create the insight tiles from:
 
   node scripts/prepare-posthog-dashboard.js --ui-packet
 EOF

@@ -1442,7 +1442,7 @@ if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph(
     btn.addEventListener('click',function(){
       var url=btn.getAttribute('data-share-url')||window.location.href,
           surface=btn.getAttribute('data-share-surface')||'visitor-share',
-          props=Object.assign({surface:surface,share_url:url},source_props);
+          props=Object.assign({surface:surface},source_props);
       function copied(mode){
         ph('share_link_copied',Object.assign({mode:mode},props));
         done(mode==='native_share'?'shared ✓':'copied ✓');

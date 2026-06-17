@@ -15,6 +15,7 @@ const REQUIRED_TILES = [
   "landing_to_copy_to_first_run_by_surface",
   "attributed_first_runs",
   "copy_to_attributed_first_run_by_surface",
+  "visitor_share_loop",
   "activation_after_install",
 ];
 
@@ -51,7 +52,7 @@ function validateTileSet(spec, runbook) {
   REQUIRED_TILES.forEach((slug) => {
     assert(bySlug.has(slug), `missing required tile ${slug}`);
   });
-  assert(tiles.length >= REQUIRED_TILES.length, "dashboard spec has fewer than six tiles");
+  assert(tiles.length >= REQUIRED_TILES.length, "dashboard spec has fewer than required tiles");
 
   tiles.forEach((tile) => {
     assert(tile.slug && /^[a-z0-9_]+$/.test(tile.slug), `bad tile slug: ${tile.slug}`);
@@ -85,7 +86,7 @@ function validatePrivacy(spec) {
   ["raw prompt text", "file contents", "memory contents", "work model data"].forEach((forbidden) => {
     includes(raw, forbidden, "privacy contract");
   });
-  ["install_ref", "ref_source", "ref_host", "has_install_ref"].forEach((prop) => {
+  ["install_ref", "ref_source", "ref_host", "has_install_ref", "surface", "mode"].forEach((prop) => {
     includes(raw, prop, "allowed attribution properties");
   });
 }
@@ -122,6 +123,14 @@ function validate() {
     "first_run",
     "conversion_pct",
     "interval 7 day",
+  ]);
+  validateSql(bySlug.get("visitor_share_loop"), [
+    "event = 'share_link_copied'",
+    "properties.surface = 'visitor-share'",
+    "properties.ref = 'visitor-share'",
+    "referred_visitors",
+    "visitors_per_share",
+    "referred_visit_to_run_pct",
   ]);
   validatePrivacy(spec);
 
