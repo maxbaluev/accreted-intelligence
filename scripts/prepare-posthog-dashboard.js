@@ -17,6 +17,7 @@ const REQUIRED_TILES = [
   "direct_install_refs_by_source",
   "copy_to_attributed_first_run_by_surface",
   "visitor_share_loop",
+  "reddit_community_loop",
   "activation_after_install",
 ];
 
@@ -141,6 +142,14 @@ function validate() {
     "referred_visitors",
     "visitors_per_share",
     "referred_visit_to_run_pct",
+  ]);
+  validateSql(bySlug.get("reddit_community_loop"), [
+    "event = 'reddit_landing_viewed'",
+    "event = 'reddit_community_clicked'",
+    "event = 'reddit_post_template_clicked'",
+    "community_click_rate_pct",
+    "template_click_rate_pct",
+    "interval 7 day",
   ]);
   validatePrivacy(spec);
 

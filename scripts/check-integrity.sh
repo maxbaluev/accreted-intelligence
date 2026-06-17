@@ -95,10 +95,11 @@ if command -v node >/dev/null 2>&1; then
   if grep -q "event = 'share_link_copied'" scripts/run-approved-posthog-funnel-check.sh &&
     grep -q "direct install refs by source" scripts/run-approved-posthog-funnel-check.sh &&
     printf '%s\n' "$funnel_dry_run" | grep -q "direct install refs by source" &&
-    printf '%s\n' "$funnel_dry_run" | grep -q "owned share loop"; then
-    note "PostHog funnel/direct-ref/share-loop readout: ok"
+    printf '%s\n' "$funnel_dry_run" | grep -q "owned share loop" &&
+    printf '%s\n' "$funnel_dry_run" | grep -q "Reddit community loop"; then
+    note "PostHog funnel/direct-ref/share/community-loop readout: ok"
   else
-    note "PostHog funnel/direct-ref/share-loop readout: FAIL"
+    note "PostHog funnel/direct-ref/share/community-loop readout: FAIL"
     fail=1
   fi
 else

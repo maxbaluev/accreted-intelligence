@@ -317,11 +317,14 @@ Minimum tiles:
 4. attributed first runs
 5. copy to attributed first run by surface
 6. owned share loop
-7. activation after install
+7. reddit community loop
+8. activation after install
 
 Do not rank acquisition surfaces from copy events alone. Rank from visitor to
 copy to attributed first run, then activation; use the owned share loop to
 detect whether owned referrals are compounding instead of only being clicked.
+Use the Reddit community loop to decide whether Reddit traffic is producing
+community participation before treating a subreddit as a pure install channel.
 
 After explicit owner approval, the shell and setup tile can be created through
 the PostHog Dashboard API:
@@ -336,7 +339,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires a personal API key with `dashboard:read` and
 `dashboard:write`, checks for an existing exact dashboard name first, and does
-not create undocumented insight payloads. Create the eight insight tiles from
+not create undocumented insight payloads. Create the nine insight tiles from
 the generated UI packet before using the dashboard for decisions:
 
 ```bash
@@ -344,7 +347,8 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the dashboard is created and a controlled live install is run, query the
-aggregate funnel, direct install refs, and owned-share-loop readout:
+aggregate funnel, direct install refs, owned-share-loop, and Reddit community
+readout:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -449,7 +453,7 @@ Hold instead of continuing when:
   `distinct_id`
 - controlled live receipt proof cannot fetch the live installer or produce the
   expected temp receipt
-- PostHog dashboard shell/setup tile cannot be created or the eight insight tiles
+- PostHog dashboard shell/setup tile cannot be created or the nine insight tiles
   are not present before ranking growth surfaces
 - PostHog aggregate funnel readout cannot confirm attributed first runs and
   direct `gh-*` directory install refs before deciding which launch/listing

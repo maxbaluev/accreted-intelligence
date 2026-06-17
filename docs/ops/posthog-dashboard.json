@@ -2,7 +2,7 @@
   "schema_version": 1,
   "dashboard": {
     "name": "AccInt install attribution",
-    "description": "Operator spec for the PostHog dashboard that measures landing views, share events, web copy events, direct install refs, attributed first runs, and activation without collecting prompts, files, memory, or Work Model data.",
+    "description": "Operator spec for the PostHog dashboard that measures landing views, share events, Reddit community actions, web copy events, direct install refs, attributed first runs, and activation without collecting prompts, files, memory, or Work Model data.",
     "privacy_contract": {
       "allowed_identity": "install_ref / telemetry_install_ref only",
       "allowed_source_properties": [
@@ -21,6 +21,8 @@
         "placement",
         "surface",
         "mode",
+        "destination",
+        "template",
         "os",
         "agent",
         "project_lang",
@@ -103,6 +105,14 @@
         "type": "sql",
         "display": "table",
         "hogql": "WITH\nshares AS (\n    SELECT\n        properties.surface AS surface,\n        uniqExact(distinct_id) AS sharers,\n        count() AS share_events\n    FROM events\n    WHERE event = 'share_link_copied'\n      AND properties.surface IS NOT NULL\n      AND properties.surface != ''\n      AND {filters}\n    GROUP BY surface\n),\nlandings AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS landed_at,\n        properties.ref AS surface\n    FROM events\n    WHERE event = 'landing_viewed'\n      AND properties.utm_source = 'share'\n      AND properties.ref IS NOT NULL\n      AND properties.ref != ''\n      AND {filters}\n    GROUP BY distinct_id, surface\n),\ncopies AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS copied_at\n    FROM events\n    WHERE event = 'install_command_copied'\n      AND {filters}\n    GROUP BY distinct_id\n),\nfirst_runs AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS first_run_at\n    FROM events\n    WHERE event = 'first_run'\n      AND properties.has_install_ref = 'true'\n      AND {filters}\n    GROUP BY distinct_id\n)\nSELECT\n    s.surface AS surface,\n    s.sharers AS sharers,\n    s.share_events AS share_events,\n    uniqExact(l.distinct_id) AS referred_visitors,\n    uniqExact(c.distinct_id) AS referred_copied_people,\n    uniqExact(f.distinct_id) AS referred_first_runs,\n    if(s.share_events = 0, 0, round(1.0 * referred_visitors / s.share_events, 2)) AS visitors_per_share,\n    if(referred_visitors = 0, 0, round(100.0 * referred_first_runs / referred_visitors, 1)) AS referred_visit_to_run_pct\nFROM shares s\nLEFT JOIN landings l ON l.surface = s.surface\nLEFT JOIN copies c ON c.distinct_id = l.distinct_id\n    AND c.copied_at >= l.landed_at\n    AND c.copied_at < l.landed_at + interval 7 day\nLEFT JOIN first_runs f ON f.distinct_id = l.distinct_id\n    AND f.first_run_at >= l.landed_at\n    AND f.first_run_at < l.landed_at + interval 7 day\nGROUP BY s.surface, s.sharers, s.share_events"
+      },
+      {
+        "slug": "reddit_community_loop",
+        "title": "Reddit community loop",
+        "type": "sql",
+        "display": "table",
+        "hogql": "WITH\nviews AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS landed_at,\n        any(properties.ref) AS ref,\n        any(properties.rsub) AS rsub,\n        any(properties.utm_campaign) AS utm_campaign,\n        any(properties.ref_source) AS ref_source\n    FROM events\n    WHERE event = 'reddit_landing_viewed'\n      AND {filters}\n    GROUP BY distinct_id\n),\ncommunity AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS community_at\n    FROM events\n    WHERE event = 'reddit_community_clicked'\n      AND {filters}\n    GROUP BY distinct_id\n),\ntemplates AS (\n    SELECT\n        distinct_id,\n        min(timestamp) AS template_at\n    FROM events\n    WHERE event = 'reddit_post_template_clicked'\n      AND {filters}\n    GROUP BY distinct_id\n)\nSELECT\n    multiIf(\n        v.rsub IS NOT NULL AND v.rsub != '', v.rsub,\n        v.ref IS NOT NULL AND v.ref != '', v.ref,\n        v.utm_campaign IS NOT NULL AND v.utm_campaign != '', v.utm_campaign,\n        v.ref_source IS NOT NULL AND v.ref_source != '', v.ref_source,\n        'reddit'\n    ) AS surface,\n    uniqExact(v.distinct_id) AS reddit_visitors,\n    uniqExactIf(c.distinct_id, c.community_at >= v.landed_at AND c.community_at < v.landed_at + interval 7 day) AS community_clickers,\n    uniqExactIf(t.distinct_id, t.template_at >= v.landed_at AND t.template_at < v.landed_at + interval 7 day) AS template_clickers,\n    if(reddit_visitors = 0, 0, round(100.0 * community_clickers / reddit_visitors, 1)) AS community_click_rate_pct,\n    if(reddit_visitors = 0, 0, round(100.0 * template_clickers / reddit_visitors, 1)) AS template_click_rate_pct\nFROM views v\nLEFT JOIN community c ON c.distinct_id = v.distinct_id\nLEFT JOIN templates t ON t.distinct_id = v.distinct_id\nGROUP BY surface\nORDER BY community_clickers DESC, template_clickers DESC, reddit_visitors DESC\nLIMIT 25",
+        "expected_use": "Measures whether Reddit landing traffic turns into community joins or concrete post-template starts before ranking Reddit as an acquisition loop."
       },
       {
         "slug": "activation_after_install",

@@ -203,7 +203,7 @@ function exactActions(tag, branch) {
     },
     {
       stage: "5",
-      name: "PostHog aggregate funnel, direct refs, and share-loop readout after dashboard/control install",
+      name: "PostHog aggregate funnel, direct refs, share loop, and Reddit community readout after dashboard/control install",
       command: "POSTHOG_HOST=https://us.posthog.com POSTHOG_PROJECT_ID=<project-id> POSTHOG_PERSONAL_API_KEY=<personal-api-key> ACC_APPROVE_POSTHOG_QUERY=1 scripts/run-approved-posthog-funnel-check.sh",
       external_effects: ["read-only aggregate PostHog Query API calls"],
       guard: "Requires ACC_APPROVE_POSTHOG_QUERY=1 and PostHog credentials",

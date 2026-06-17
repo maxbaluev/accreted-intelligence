@@ -93,13 +93,14 @@ Approved mode runs aggregate HogQL via:
   POST $posthog_host/api/projects/<project-id>/query/
 
 Readouts:
-  1. landing views, share events, copy events, attributed first-run events, first retrieves, daily rollups
+  1. landing views, share events, Reddit community actions, copy events, attributed first-run events, first retrieves, daily rollups
   2. landing-to-copy-to-first-run conversion by surface
   3. copy-to-attributed-first-run conversion by surface and method
   4. direct install refs by source, including gh-* directory/listing refs
   5. owned share loop
-  6. activation after attributed first run
-  7. optional controlled distinct_id event presence
+  6. Reddit community loop
+  7. activation after attributed first run
+  8. optional controlled distinct_id event presence
 EOF
 
 if [ "${ACC_APPROVE_POSTHOG_QUERY:-0}" != "1" ]; then
@@ -173,8 +174,14 @@ summary_sql = f"""
 SELECT
     countIf(event = 'landing_viewed') AS landing_events,
     uniqExactIf(distinct_id, event = 'landing_viewed') AS landing_people,
+    countIf(event = 'reddit_landing_viewed') AS reddit_landing_events,
+    uniqExactIf(distinct_id, event = 'reddit_landing_viewed') AS reddit_landing_people,
     countIf(event = 'share_link_copied') AS share_events,
     uniqExactIf(distinct_id, event = 'share_link_copied') AS sharers,
+    countIf(event = 'reddit_community_clicked') AS reddit_community_click_events,
+    uniqExactIf(distinct_id, event = 'reddit_community_clicked') AS reddit_community_clickers,
+    countIf(event = 'reddit_post_template_clicked') AS reddit_template_click_events,
+    uniqExactIf(distinct_id, event = 'reddit_post_template_clicked') AS reddit_template_clickers,
     countIf(event = 'install_command_copied') AS copy_events,
     uniqExactIf(distinct_id, event = 'install_command_copied') AS copied_people,
     countIf(event = 'first_run' AND properties.has_install_ref = 'true') AS attributed_first_run_events,
@@ -183,7 +190,7 @@ SELECT
     uniqExactIf(distinct_id, event = 'daily_rollup') AS daily_rollups
 FROM events
 WHERE {window}
-  AND event IN ('landing_viewed', 'share_link_copied', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+  AND event IN ('landing_viewed', 'reddit_landing_viewed', 'share_link_copied', 'reddit_community_clicked', 'reddit_post_template_clicked', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
 """.strip()
 
 traffic_sql = f"""
@@ -394,6 +401,60 @@ LEFT JOIN first_runs f ON f.distinct_id = l.distinct_id
 GROUP BY s.surface, s.sharers, s.share_events
 """.strip()
 
+reddit_community_sql = f"""
+WITH
+views AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS landed_at,
+        any(properties.ref) AS ref,
+        any(properties.rsub) AS rsub,
+        any(properties.utm_campaign) AS utm_campaign,
+        any(properties.ref_source) AS ref_source
+    FROM events
+    WHERE event = 'reddit_landing_viewed'
+      AND {window}
+    GROUP BY distinct_id
+),
+community AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS community_at
+    FROM events
+    WHERE event = 'reddit_community_clicked'
+      AND {window}
+    GROUP BY distinct_id
+),
+templates AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS template_at
+    FROM events
+    WHERE event = 'reddit_post_template_clicked'
+      AND {window}
+    GROUP BY distinct_id
+)
+SELECT
+    multiIf(
+        v.rsub IS NOT NULL AND v.rsub != '', v.rsub,
+        v.ref IS NOT NULL AND v.ref != '', v.ref,
+        v.utm_campaign IS NOT NULL AND v.utm_campaign != '', v.utm_campaign,
+        v.ref_source IS NOT NULL AND v.ref_source != '', v.ref_source,
+        'reddit'
+    ) AS surface,
+    uniqExact(v.distinct_id) AS reddit_visitors,
+    uniqExactIf(c.distinct_id, c.community_at >= v.landed_at AND c.community_at < v.landed_at + interval 7 day) AS community_clickers,
+    uniqExactIf(t.distinct_id, t.template_at >= v.landed_at AND t.template_at < v.landed_at + interval 7 day) AS template_clickers,
+    if(reddit_visitors = 0, 0, round(100.0 * community_clickers / reddit_visitors, 1)) AS community_click_rate_pct,
+    if(reddit_visitors = 0, 0, round(100.0 * template_clickers / reddit_visitors, 1)) AS template_click_rate_pct
+FROM views v
+LEFT JOIN community c ON c.distinct_id = v.distinct_id
+LEFT JOIN templates t ON t.distinct_id = v.distinct_id
+GROUP BY surface
+ORDER BY community_clickers DESC, template_clickers DESC, reddit_visitors DESC
+LIMIT 25
+""".strip()
+
 activation_sql = f"""
 WITH
 first_runs AS (
@@ -433,6 +494,7 @@ queries = [
     ("surface conversion", surface_sql),
     ("direct install refs by source", direct_refs_sql),
     ("owned share loop", share_loop_sql),
+    ("reddit community loop", reddit_community_sql),
     ("activation", activation_sql),
 ]
 if controlled_id:
@@ -446,7 +508,7 @@ SELECT
 FROM events
 WHERE {window}
   AND distinct_id = '{safe_controlled}'
-  AND event IN ('landing_viewed', 'share_link_clicked', 'share_link_copied', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
+  AND event IN ('landing_viewed', 'reddit_landing_viewed', 'share_link_clicked', 'share_link_copied', 'reddit_community_clicked', 'reddit_post_template_clicked', 'install_command_copied', 'first_run', 'first_retrieve', 'daily_rollup')
 GROUP BY event
 ORDER BY first_seen ASC
 LIMIT 10

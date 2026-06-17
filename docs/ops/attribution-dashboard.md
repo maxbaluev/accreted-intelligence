@@ -14,6 +14,7 @@ The attribution chain is intentionally narrow:
 | Web page view | `landing_viewed` on `index.html` / `reddit/index.html` | generated `install_ref` via `posthog.identify(install_ref)` | `install_ref`, `landing`, `utm_*`, `ref`, `rsub`, `thread`, `entry`, `ref_source`, and `ref_host` when present |
 | Copy install text | `install_command_copied` | same generated `install_ref` | `method` (`agent_prompt` or `manual_command`), `os`, `placement`, `install_ref`, source props |
 | Share AccInt link | `share_link_clicked`, `share_link_copied` | same generated `install_ref` | `surface` such as `visitor-share` or `reddit-share`, `mode` for copied/shared completion, source props; no raw inbound referrer URL |
+| Reddit community action | `reddit_community_clicked`, `reddit_post_template_clicked` | same generated `install_ref` | `destination`, `template`, `placement`, source props; no raw inbound referrer URL or account identity |
 | Installer | `install-attribution.env` local receipt | copied `ACC_INSTALL_REF` | local `ref` plus optional `source_ref` from copied `ACC_INSTALL_SOURCE`; not sent by the installer |
 | App telemetry | `first_run`, `daily_rollup`, lifecycle events | `distinct_id = telemetry_install_ref` when present, otherwise random device UUID | `first_run.has_install_ref`, `os`, `agent`, `project_lang`; no raw prompt/file/memory data |
 
@@ -75,7 +76,7 @@ ACC_APPROVE_POSTHOG_DASHBOARD=1 \
 
 The helper requires `dashboard:read` and `dashboard:write`, checks for an
 existing exact dashboard name before creating a new shell, and does not create
-undocumented insight payloads. Add the eight insight tiles from the generated UI
+undocumented insight payloads. Add the nine insight tiles from the generated UI
 packet in the PostHog UI:
 
 ```bash
@@ -83,7 +84,8 @@ node scripts/prepare-posthog-dashboard.js --ui-packet
 ```
 
 After the live dashboard exists and a controlled install has been run, read the
-aggregate funnel, direct install refs, and owned share loop:
+aggregate funnel, direct install refs, owned share loop, and Reddit community
+loop:
 
 ```bash
 POSTHOG_HOST=https://us.posthog.com \
@@ -96,8 +98,9 @@ ACC_APPROVE_POSTHOG_QUERY=1 \
 Set `ACC_CONTROLLED_DISTINCT_ID=<install_ref copied from the live page>` to
 verify one controlled browser-copy install. This uses the documented PostHog
 Query API for small aggregate HogQL readouts, including `share_link_copied`
-counts, direct `gh-*` directory install refs, and owned-share referred
-visitor/install conversion; it is not an event export path.
+counts, direct `gh-*` directory install refs, owned-share referred
+visitor/install conversion, and Reddit community action rates; it is not an
+event export path.
 
 ### 1. Copy to first run funnel
 
@@ -438,7 +441,73 @@ Expected use:
   referred visitors with low `referred_visit_to_run_pct` means the shared
   landing traffic needs stronger trust or channel fit before scaling it.
 
-### 8. Activation after install
+### 8. Reddit community loop
+
+Type: SQL insight, table.
+
+```sql
+WITH
+views AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS landed_at,
+        any(properties.ref) AS ref,
+        any(properties.rsub) AS rsub,
+        any(properties.utm_campaign) AS utm_campaign,
+        any(properties.ref_source) AS ref_source
+    FROM events
+    WHERE event = 'reddit_landing_viewed'
+      AND {filters}
+    GROUP BY distinct_id
+),
+community AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS community_at
+    FROM events
+    WHERE event = 'reddit_community_clicked'
+      AND {filters}
+    GROUP BY distinct_id
+),
+templates AS (
+    SELECT
+        distinct_id,
+        min(timestamp) AS template_at
+    FROM events
+    WHERE event = 'reddit_post_template_clicked'
+      AND {filters}
+    GROUP BY distinct_id
+)
+SELECT
+    multiIf(
+        v.rsub IS NOT NULL AND v.rsub != '', v.rsub,
+        v.ref IS NOT NULL AND v.ref != '', v.ref,
+        v.utm_campaign IS NOT NULL AND v.utm_campaign != '', v.utm_campaign,
+        v.ref_source IS NOT NULL AND v.ref_source != '', v.ref_source,
+        'reddit'
+    ) AS surface,
+    uniqExact(v.distinct_id) AS reddit_visitors,
+    uniqExactIf(c.distinct_id, c.community_at >= v.landed_at AND c.community_at < v.landed_at + interval 7 day) AS community_clickers,
+    uniqExactIf(t.distinct_id, t.template_at >= v.landed_at AND t.template_at < v.landed_at + interval 7 day) AS template_clickers,
+    if(reddit_visitors = 0, 0, round(100.0 * community_clickers / reddit_visitors, 1)) AS community_click_rate_pct,
+    if(reddit_visitors = 0, 0, round(100.0 * template_clickers / reddit_visitors, 1)) AS template_click_rate_pct
+FROM views v
+LEFT JOIN community c ON c.distinct_id = v.distinct_id
+LEFT JOIN templates t ON t.distinct_id = v.distinct_id
+GROUP BY surface
+ORDER BY community_clickers DESC, template_clickers DESC, reddit_visitors DESC
+LIMIT 25
+```
+
+Expected use:
+
+- This is the community-growth tile: it shows whether Reddit landing traffic
+  turns into subreddit visits or concrete post-template starts.
+- Use it beside install conversion. A source can be worth nurturing even before
+  install conversion if it creates high-signal community posts; a source with
+  visits but no community action needs a sharper community ask.
+
+### 9. Activation after install
 
 Type: Funnel.
 

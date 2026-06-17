@@ -372,7 +372,7 @@ Run these only after explicit owner approval for the named external action.
    the generated UI packet in the PostHog UI, then confirm the
    controlled install appears in both web copy and first-run events.
 
-13. Read the PostHog growth funnel, direct install refs, and owned share loop after the dashboard and controlled install:
+13. Read the PostHog growth funnel, direct install refs, owned share loop, and Reddit community loop after the dashboard and controlled install:
 
    scripts/run-approved-posthog-funnel-check.sh
    POSTHOG_HOST=https://us.posthog.com \\
@@ -387,7 +387,8 @@ Run these only after explicit owner approval for the named external action.
      ACC_APPROVE_POSTHOG_QUERY=1 scripts/run-approved-posthog-funnel-check.sh
 
    Use this aggregate readout to rank surfaces by visitor-to-copy-to-first-run
-   conversion, share-loop propagation, and activation, not by copy events alone.
+   conversion, share-loop propagation, Reddit community participation, and
+   activation, not by copy events alone.
 
 14. Prepare owner-approved social launch copy:
 

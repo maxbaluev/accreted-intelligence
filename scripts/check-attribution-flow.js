@@ -194,6 +194,9 @@ function checkReddit() {
     ref_host: "news.ycombinator.com",
     ref_source: "hacker_news",
   });
+  assertIncludes(html, "reddit_landing_viewed", `${file}: reddit landing event`);
+  assertIncludes(html, "reddit_community_clicked", `${file}: reddit community event`);
+  assertIncludes(html, "reddit_post_template_clicked", `${file}: reddit template event`);
   assertIncludes(html, "reddit_agent_prompt_copied", `${file}: prompt-copy event`);
   assertIncludes(html, "share_link_clicked", `${file}: reddit share click event`);
   assertIncludes(html, "share_link_copied", `${file}: reddit share copied event`);
