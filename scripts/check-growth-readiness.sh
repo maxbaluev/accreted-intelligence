@@ -68,6 +68,7 @@ for f in \
   scripts/check-install-surface.sh \
   scripts/check-mcpb-promotion-packet.sh \
   scripts/check-mcpb-release-assets.sh \
+  scripts/check-registry-discovery-docs.js \
   scripts/check-release-alignment.sh \
   scripts/check-social-launch-kit.js \
   scripts/prepare-directory-surface-refs.js \

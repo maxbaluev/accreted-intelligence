@@ -11,6 +11,7 @@
 | You'd rather be walked through it (any agent — Claude Code, Codex, Cursor, OpenCode) | paste one prompt into your agent | [with-agent.md](with-agent.md) |
 | macOS / Linux you control | the one manual line | [self-serve.md](self-serve.md) |
 | Windows you control | PowerShell installer | [self-serve.md](self-serve.md) |
+| MCPB-aware client, marketplace, or downstream MCP directory | official MCP Registry entry `io.github.maxbaluev/accint` | [../registry/mcp-registry.md](../registry/mcp-registry.md) |
 | Locked-down, no-root, or container-only hosts | container portability path | [container.md](container.md) |
 
 The universal path is the simplest: paste **one prompt** into whatever agent you already
@@ -18,6 +19,18 @@ use and it installs acc *with* you, pausing for your consent at the boundary and
 the result against a machine-readable contract — see [with-agent.md](with-agent.md). The
 prompt is the same one on [accint.xyz](https://accint.xyz); the other two paths are the
 same install underneath, by hand.
+
+## Official MCP Registry / MCPB
+
+AccInt is also discoverable as
+[`io.github.maxbaluev/accint`](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.maxbaluev%2Faccint/versions/latest)
+in the Official MCP Registry, with MCPB packages for macOS, Linux, and Windows.
+Use that path when your client or marketplace consumes MCPB metadata from the
+registry. The MCPB bundle ships the local `acc` binary only; your `acc.db`
+substrate is created on your machine and stays there.
+
+If you want the installer to detect and wire every local agent host for you,
+use the one-liner or the conversational install path instead.
 
 ## The one-liner (self-serve)
 

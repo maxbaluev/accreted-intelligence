@@ -3,6 +3,7 @@
 [![Stars](https://img.shields.io/github/stars/maxbaluev/accreted-intelligence?style=flat&logo=github&color=f5c518)](https://github.com/maxbaluev/accreted-intelligence/stargazers)
 [![License](https://img.shields.io/badge/license-Apache--2.0%20(repo%20glue)-blue)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-server-1f6feb)](https://modelcontextprotocol.io)
+[![Official MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.maxbaluev%2Faccint-1f6feb)](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.maxbaluev%2Faccint/versions/latest)
 [![Works with](https://img.shields.io/badge/works%20with-Claude%20Code%20·%20OpenCode%20·%20Codex%20·%20Cursor-7c3aed)](#install)
 [![Platform](https://img.shields.io/badge/platform-Linux%20·%20macOS%20·%20Windows-555)](#install)
 [![Live](https://img.shields.io/badge/live-accint.xyz-3fb950)](https://accint.xyz)
@@ -63,6 +64,14 @@ Windows (PowerShell 5.1+):
 ```powershell
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
+
+**Official MCP Registry / MCPB:** AccInt is published as
+[`io.github.maxbaluev/accint`](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.maxbaluev%2Faccint/versions/latest)
+with MCPB packages for macOS, Linux, and Windows. Use that registry entry when
+you are installing through an MCPB-aware client, marketplace, or downstream MCP
+directory. The one-line installer above remains the broadest path when you want
+`acc hosts-sync` to wire Claude Code, Codex, Cursor, and OpenCode on the same
+machine.
 
 The installer probes your hardware, picks the embedder tier it can honestly run, downloads and verifies the matching release binary when available, starts a warm local daemon, and wires your agent's `.mcp.json`. The first run may download the embedder model (several GB) and take minutes. The installer reports the wait honestly and never pretends your hardware is bigger than it is.
 

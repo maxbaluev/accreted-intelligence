@@ -5,8 +5,31 @@ already ships prebuilt binaries, so the lowest-friction official MCP Registry
 path is **MCPB**: a GitHub Release asset that contains `manifest.json` plus the
 platform binary.
 
-This page is maintainer-facing. It prepares the registry submission, but does
-not submit anything by itself.
+This page covers both the published user-facing registry state and the
+maintainer packaging flow. It does not submit anything by itself.
+
+## Published user-facing state
+
+As of the current checked metadata:
+
+- Registry name: `io.github.maxbaluev/accint`
+- Latest endpoint:
+  `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.maxbaluev%2Faccint/versions/latest`
+- Current metadata version: `version: 0.1.6`
+- Package type: `registryType: mcpb`
+- Platform bundles: macOS aarch64, Linux aarch64, Linux x86_64, Windows x86_64
+- Transport: stdio
+- Tools: `acc_retrieve`, `acc_act`
+
+Use the official registry entry when an MCPB-aware client, marketplace, or
+downstream MCP directory consumes MCP Registry metadata. The MCPB bundle ships
+the local `acc` binary only. It does not include `acc.db`; the user chooses or
+accepts the local substrate path during MCPB install, and that file stays on
+the user's machine.
+
+For broad self-serve setup and host wiring, the one-line installer remains the
+recommended path because it runs `acc hosts-sync` for Claude Code, Codex,
+Cursor, and OpenCode.
 
 ## Current path
 
@@ -49,20 +72,20 @@ extension/name or in the repository path.
 After the normal release assets exist on GitHub:
 
 ```bash
-scripts/prepare-mcpb-release-assets.sh v0.1.5
+scripts/prepare-mcpb-release-assets.sh v0.1.6
 ```
 
 This creates:
 
 ```text
-dist/acc-mcp-v0.1.5-aarch64-apple-darwin.mcpb
-dist/acc-mcp-v0.1.5-aarch64-apple-darwin.sha256
-dist/acc-mcp-v0.1.5-aarch64-unknown-linux-musl.mcpb
-dist/acc-mcp-v0.1.5-aarch64-unknown-linux-musl.sha256
-dist/acc-mcp-v0.1.5-x86_64-unknown-linux-musl.mcpb
-dist/acc-mcp-v0.1.5-x86_64-unknown-linux-musl.sha256
-dist/acc-mcp-v0.1.5-x86_64-pc-windows-msvc.mcpb
-dist/acc-mcp-v0.1.5-x86_64-pc-windows-msvc.sha256
+dist/acc-mcp-v0.1.6-aarch64-apple-darwin.mcpb
+dist/acc-mcp-v0.1.6-aarch64-apple-darwin.sha256
+dist/acc-mcp-v0.1.6-aarch64-unknown-linux-musl.mcpb
+dist/acc-mcp-v0.1.6-aarch64-unknown-linux-musl.sha256
+dist/acc-mcp-v0.1.6-x86_64-unknown-linux-musl.mcpb
+dist/acc-mcp-v0.1.6-x86_64-unknown-linux-musl.sha256
+dist/acc-mcp-v0.1.6-x86_64-pc-windows-msvc.mcpb
+dist/acc-mcp-v0.1.6-x86_64-pc-windows-msvc.sha256
 dist/server.<target>.json
 dist/server.mcpb-all.json
 ```
@@ -72,14 +95,14 @@ Release. Do not commit `dist/`; release artifacts belong on GitHub Releases.
 The preparation script is a dry run unless `ACC_UPLOAD_MCPB_ASSETS=1` is set:
 
 ```bash
-ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh v0.1.5
+ACC_UPLOAD_MCPB_ASSETS=1 scripts/prepare-mcpb-release-assets.sh v0.1.6
 ```
 
 After the upload, verify the release and generated metadata before copying the
 metadata into the root:
 
 ```bash
-scripts/check-mcpb-release-assets.sh v0.1.5 dist/server.mcpb-all.json
+scripts/check-mcpb-release-assets.sh v0.1.6 dist/server.mcpb-all.json
 ```
 
 The check must pass before `server.json` is advanced to the new version. A
@@ -94,9 +117,9 @@ already the publishable metadata file.
 For a new release, regenerate it from the generated multi-package file:
 
 ```bash
-scripts/advance-mcpb-server-json.sh v0.1.5 dist/server.mcpb-all.json
-ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh v0.1.5 dist/server.mcpb-all.json
-scripts/check-release-alignment.sh v0.1.5 server.json
+scripts/advance-mcpb-server-json.sh v0.1.6 dist/server.mcpb-all.json
+ACC_ADVANCE_SERVER_JSON=1 scripts/advance-mcpb-server-json.sh v0.1.6 dist/server.mcpb-all.json
+scripts/check-release-alignment.sh v0.1.6 server.json
 ```
 
 The official registry validates every package entry in `packages[]`. Keeping all

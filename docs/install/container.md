@@ -44,7 +44,7 @@ scripts/acc-docker.sh acc frames   # pass through to acc --db /data/acc.db ...
 Pin a specific release instead of `latest`:
 
 ```bash
-ACC_VERSION=v0.1.5 scripts/acc-docker.sh status
+ACC_VERSION=v0.1.6 scripts/acc-docker.sh status
 ```
 
 ## Required smoke before registry submission
@@ -52,9 +52,9 @@ ACC_VERSION=v0.1.5 scripts/acc-docker.sh status
 Run this on a real Docker host before treating the image as fully verified:
 
 ```bash
-ACC_VERSION=v0.1.5 scripts/acc-docker.sh status
-ACC_VERSION=v0.1.5 ACC_NO_EMBEDDER=1 scripts/acc-docker.sh doctor
-ACC_VERSION=v0.1.5 scripts/acc-docker.sh start
+ACC_VERSION=v0.1.6 scripts/acc-docker.sh status
+ACC_VERSION=v0.1.6 ACC_NO_EMBEDDER=1 scripts/acc-docker.sh doctor
+ACC_VERSION=v0.1.6 scripts/acc-docker.sh start
 docker exec -i acc acc --db /data/acc.db status
 scripts/acc-docker.sh stop
 ```
@@ -67,7 +67,7 @@ After this repo change is pushed, the manual GitHub Actions workflow
 GitHub's Docker host:
 
 ```bash
-gh workflow run docker-container-smoke.yml -f acc_version=v0.1.5
+gh workflow run docker-container-smoke.yml -f acc_version=v0.1.6
 ```
 
 That workflow intentionally sets `ACC_NO_EMBEDDER=1`, so it verifies the image,
@@ -80,7 +80,7 @@ promoting a registry image that should prove model warm-up too.
 | Env | Default | Meaning |
 |---|---|---|
 | `ACC_IMAGE` | `acc:local` | local image tag |
-| `ACC_VERSION` | `latest` | release to install into the image (`latest`, `v0.1.5`, or `0.1.5`) |
+| `ACC_VERSION` | `latest` | release to install into the image (`latest`, `v0.1.6`, or `0.1.6`) |
 | `ACC_DATA_DIR` | `$PWD/.acc-data` | host substrate dir mounted at `/data` |
 | `ACC_MODELS_DIR` | `$PWD/.acc-models` | host model/uv cache dir mounted at `/models` |
 | `ACC_CONTAINER` | `acc` | detached container name for `start` / `stop` |
@@ -176,7 +176,7 @@ separate server name, such as `acc-container`.
 The helper is just a wrapper around these primitives:
 
 ```bash
-docker build --build-arg ACC_VERSION=v0.1.5 -t acc:local .
+docker build --build-arg ACC_VERSION=v0.1.6 -t acc:local .
 mkdir -p .acc-data .acc-models
 docker run --rm -it \
   -v "$PWD/.acc-data:/data" \

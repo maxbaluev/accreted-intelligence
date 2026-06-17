@@ -122,6 +122,12 @@ else
   note "publish workflow latest-release guard: MISSING"
   fail=1
 fi
+if command -v node >/dev/null 2>&1; then
+  if node scripts/check-registry-discovery-docs.js; then note "registry discovery docs: ok"; else fail=1; fi
+else
+  note "node: MISSING (required for registry discovery docs verifier)"
+  fail=1
+fi
 
 echo "== live growth workflow guard =="
 live_workflow=".github/workflows/live-site-attribution.yml"

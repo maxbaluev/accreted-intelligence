@@ -18,6 +18,10 @@ curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/mai
 irm https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install.ps1 | iex
 ```
 
+If your host or marketplace installs from the Official MCP Registry, use the
+`io.github.maxbaluev/accint` MCPB entry instead. The one-liner remains the
+most complete path for local host wiring because it runs `acc hosts-sync`.
+
 For attribution from a directory listing or PR, put `ACC_INSTALL_REF=<surface>`
 on the installer process. `ACC_INSTALL_SOURCE='ref=<surface>'` can carry coarse
 source context in the same local receipt:
