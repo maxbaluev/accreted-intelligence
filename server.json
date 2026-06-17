@@ -3,7 +3,7 @@
   "name": "io.github.maxbaluev/accint",
   "title": "AccInt",
   "description": "Local Work Model MCP server for agent work that learns from real outcomes.",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "websiteUrl": "https://accint.xyz",
   "repository": {
     "url": "https://github.com/maxbaluev/accreted-intelligence",
@@ -12,32 +12,32 @@
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.4/acc-mcp-v0.1.4-aarch64-apple-darwin.mcpb",
-      "fileSha256": "676815f89002475eab3fc13ca815007601e831bcbed17ba66f0cec793bc786b9",
+      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.6/acc-mcp-v0.1.6-aarch64-apple-darwin.mcpb",
+      "fileSha256": "c27ac2cf37af7931e855748fe6f9a3d6d0d9d75adfd95a8e2cdb4114fa74df92",
       "transport": {
         "type": "stdio"
       }
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.4/acc-mcp-v0.1.4-aarch64-unknown-linux-musl.mcpb",
-      "fileSha256": "59c2625084a674fde139aae25fd82a4fb3fb73165e8220ad6f3f27209e13f6db",
+      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.6/acc-mcp-v0.1.6-aarch64-unknown-linux-musl.mcpb",
+      "fileSha256": "4e5dc64717fc701e6ab948c4b498e3aaec0f3c9826fde21715d9414358f15351",
       "transport": {
         "type": "stdio"
       }
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.4/acc-mcp-v0.1.4-x86_64-unknown-linux-musl.mcpb",
-      "fileSha256": "e5b7c9945d6273504eeba6195d9243600337d394bf9686e286dfcf5e6e65a119",
+      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.6/acc-mcp-v0.1.6-x86_64-unknown-linux-musl.mcpb",
+      "fileSha256": "5cf45c34dac0bdb4bfd0ab5155683166cfa9ae63ed77a7f3656bb1dfb38bfd97",
       "transport": {
         "type": "stdio"
       }
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.4/acc-mcp-v0.1.4-x86_64-pc-windows-msvc.mcpb",
-      "fileSha256": "69b2ff5810a33fc21b5b466504a380ef120f952a866c358db034e1542cc68962",
+      "identifier": "https://github.com/maxbaluev/accreted-intelligence/releases/download/v0.1.6/acc-mcp-v0.1.6-x86_64-pc-windows-msvc.mcpb",
+      "fileSha256": "3441b0a32da96f23b511be33f49120af761c8715b3efdf11766a89a2ef35052e",
       "transport": {
         "type": "stdio"
       }
