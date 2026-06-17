@@ -33,4 +33,4 @@ A great way to contribute: add or fix a host adapter. See [`../../CONTRIBUTING.m
 
 ---
 
-See it live: [accint.xyz](https://accint.xyz).
+See it live: [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

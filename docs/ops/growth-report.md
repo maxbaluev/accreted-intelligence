@@ -14,8 +14,9 @@ Last read-only refresh: 2026-06-17.
 - Official MCP Registry: `io.github.maxbaluev/accint` / `0.1.6`
 - Local public clone state at refresh: `main` ahead of `origin/main` with the
   approval-gated growth bundle.
-- Owned growth surfaces include the GitHub README (`github-readme`) so README
-  live-site clicks and copied installer commands can be attributed after push.
+- Owned growth surfaces include the GitHub README (`github-readme`) and public
+  GitHub docs (`github-docs`) so README/docs live-site clicks and copied README
+  installer commands can be attributed after push.
 
 ## Holds
 

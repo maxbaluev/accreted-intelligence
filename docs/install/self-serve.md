@@ -66,4 +66,4 @@ Windows? Use the PowerShell one-liner above. Locked-down, no-root, or container-
 
 ---
 
-Then run your [first session](../first-session.md). See it live: [accint.xyz](https://accint.xyz).
+Then run your [first session](../first-session.md). See it live: [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

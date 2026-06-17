@@ -48,4 +48,4 @@ Closing a commitment defaults to `self_graded` — a deliberately weak prior —
 
 ---
 
-The live readout — checked-against-reality vs. self-graded, updating as the system runs — is at [accint.xyz](https://accint.xyz): measured, not promised.
+The live readout — checked-against-reality vs. self-graded, updating as the system runs — is at [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs): measured, not promised.

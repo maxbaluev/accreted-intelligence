@@ -17,7 +17,7 @@
 The universal path is the simplest: paste **one prompt** into whatever agent you already
 use and it installs acc *with* you, pausing for your consent at the boundary and verifying
 the result against a machine-readable contract — see [with-agent.md](with-agent.md). The
-prompt is the same one on [accint.xyz](https://accint.xyz); the other two paths are the
+prompt is the same one on [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs); the other two paths are the
 same install underneath, by hand.
 
 ## Official MCP Registry / MCPB
@@ -76,4 +76,4 @@ $ acc doctor     # diagnose; output is safe to paste
 
 Then run your [first session](../first-session.md). To wire another agent (OpenCode, Codex, Cursor), run `acc hosts-sync` — see [../hosts/README.md](../hosts/README.md).
 
-See it live: [accint.xyz](https://accint.xyz).
+See it live: [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

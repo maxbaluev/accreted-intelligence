@@ -14,7 +14,7 @@ when you want your agent to drive.
 ## The one paste
 
 Open your agent in an empty directory and paste this single prompt — the same one on
-[accint.xyz](https://accint.xyz):
+[accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs):
 
 ```
 Install AccInt for yourself — a local Work Model that learns what actually worked across

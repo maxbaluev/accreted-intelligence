@@ -19,6 +19,17 @@
       }
     },
     {
+      "id": "github-docs",
+      "kind": "owned_docs",
+      "label": "GitHub docs",
+      "landing": "home",
+      "source": {
+        "ref": "github-docs",
+        "utm_source": "github",
+        "utm_campaign": "docs"
+      }
+    },
+    {
       "id": "visitor-share",
       "kind": "owned_share",
       "label": "Visitor share link",

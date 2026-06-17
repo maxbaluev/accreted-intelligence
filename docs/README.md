@@ -10,7 +10,7 @@ Five self-select paths. Each layer is complete on its own — start where you ar
 | publishing / registry work | [registry/mcp-registry.md](registry/mcp-registry.md) | [PUBLIC_REPO_MANIFEST.md](PUBLIC_REPO_MANIFEST.md) |
 | here for the science | [reference/whitepaper.md](reference/whitepaper.md) | [reference/trust-model.md](reference/trust-model.md) |
 
-Read as far down as you care. Each layer is complete on its own. The full live story — the commitments ledger settling in real time, with the measured readout that updates as the system runs — is at [accint.xyz](https://accint.xyz).
+Read as far down as you care. Each layer is complete on its own. The full live story — the commitments ledger settling in real time, with the measured readout that updates as the system runs — is at [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).
 
 ---
 

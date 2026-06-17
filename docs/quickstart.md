@@ -65,4 +65,4 @@ Run the same kind of job again next week. Steps reality already verified **repla
 
 ---
 
-Next: [concept.md](concept.md) for the full picture · [hosts/README.md](hosts/README.md) to wire another agent · [reference/whitepaper.md](reference/whitepaper.md) for the science. See it live: [accint.xyz](https://accint.xyz).
+Next: [concept.md](concept.md) for the full picture · [hosts/README.md](hosts/README.md) to wire another agent · [reference/whitepaper.md](reference/whitepaper.md) for the science. See it live: [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

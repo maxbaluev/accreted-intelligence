@@ -1,6 +1,6 @@
 # Glossary
 
-One screen, one source of truth for the terms and stamps used across this repo and [accint.xyz](https://accint.xyz). Other docs link here rather than redefine.
+One screen, one source of truth for the terms and stamps used across this repo and [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs). Other docs link here rather than redefine.
 
 ## The loop
 
@@ -44,4 +44,4 @@ Provenance tiers, verbatim, are `self_graded` · `owner` · `external` · `runti
 
 > Note: `acc task` is **not** part of this product — it belongs to a different system. The real CLI surface is `acc status`, `acc commitments`, `acc frames`, `acc doctor`, and `acc --db acc.db act solve "…"`, plus the two MCP verbs `acc_retrieve` / `acc_act`. See [first-session.md](first-session.md).
 
-See it live: [accint.xyz](https://accint.xyz).
+See it live: [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

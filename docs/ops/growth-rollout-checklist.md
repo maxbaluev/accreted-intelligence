@@ -132,8 +132,8 @@ Expected state:
 - `node scripts/prepare-growth-owner-handoff.js --check v<tag>` passes and
   reduces the current owner ask to a one-page handoff
 - `node scripts/check-growth-surfaces.js --check` passes and proves launch
-  refs, attributed landing URLs, README install attribution, install snippets,
-  and page prompt-copy source keys stay aligned
+  refs, README/docs attributed landing URLs, README install attribution, install
+  snippets, and page prompt-copy source keys stay aligned
 - `scripts/check-directory-pr-state.sh docs/ops/growth-report.md` reads the
   tracked directory/list PR table and reports current open/merged/closed
   status without posting

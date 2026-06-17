@@ -49,7 +49,7 @@ source).
    `publish-mcp-registry` workflow is manual, re-runs the asset and
    latest-release alignment checks before publishing, and uses GitHub OIDC, so no
    maintainer token needs to be stored.
-6. **Confirm the live site** — the [accint.xyz](https://accint.xyz) deploy serves
+6. **Confirm the live site** — the [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs) deploy serves
    from `index.html` + `CNAME` at repo root; confirm the deep-doc links resolve on
    the published default branch.
 

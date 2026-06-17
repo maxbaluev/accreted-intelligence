@@ -40,7 +40,7 @@ The whole point is that this loop does not change shape between jobs. Only the c
 
 Same four links. Same stamps. The notable thing about both rows: **the entry shape is identical** — *you say X to your agent.* The non-technical surface is conversational, through the host agent you already run (Claude Code, Cursor, and friends). There is no separate "business mode" and no "technical mode," and for the non-coder there is no CLI to learn — it is one loop, learning from all of them into one memory.
 
-*(Illustrative — the stamps show the shape, not a benchmark. The only measured numbers live at [accint.xyz](https://accint.xyz).)*
+*(Illustrative — the stamps show the shape, not a benchmark. The only measured numbers live at [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).)*
 
 ## Two things compound, not one
 
@@ -67,4 +67,4 @@ On a machine you control. One small program and one data file, sitting underneat
 
 `acc` is an early release and a working single-host kernel — a running system, not a finished platform. The universal claim above is proven by *shape* — the architecture genuinely is identical across jobs — but not yet by scale. We say what's young, with evidence. The depth, with the math and the proven-vs-open line, is in [reference/whitepaper.md](reference/whitepaper.md).
 
-Ready to run it? → [first-session.md](first-session.md). See it live → [accint.xyz](https://accint.xyz).
+Ready to run it? → [first-session.md](first-session.md). See it live → [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

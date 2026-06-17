@@ -2,7 +2,7 @@
 
 *A Recursive Language Model over late-interaction scored-token memory, where judgment lives in external scored state and the model is a replaceable processor.*
 
-> **Status (honest).** This describes **acc**, a working single-host research kernel. It is a running system, not a roadmap: a proof-of-concept built to test one thesis under real use. It is deliberately precise about what reality has validated, what is self-graded, and what remains open. Where a claim is not yet validated by controlled experiment, it says so. The running readout (checked-against-reality vs. self-graded counts, updating as the system runs) is live at [accint.xyz](https://accint.xyz): measured, not promised.
+> **Status (honest).** This describes **acc**, a working single-host research kernel. It is a running system, not a roadmap: a proof-of-concept built to test one thesis under real use. It is deliberately precise about what reality has validated, what is self-graded, and what remains open. Where a claim is not yet validated by controlled experiment, it says so. The running readout (checked-against-reality vs. self-graded counts, updating as the system runs) is live at [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs): measured, not promised.
 
 ## Abstract
 

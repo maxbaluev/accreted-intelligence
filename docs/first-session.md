@@ -26,7 +26,7 @@ A `solve` records a [commitment](glossary.md), retrieves from memory, and return
   you approved · sent · the angle that worked is kept      [CREDITED]
 ```
 
-*(Illustrative receipt — the stamps are narrative labels; see [glossary.md](glossary.md) for how each maps to the actual emitted state. The live, animated version with the measured stat strip is at [accint.xyz](https://accint.xyz).)*
+*(Illustrative receipt — the stamps are narrative labels; see [glossary.md](glossary.md) for how each maps to the actual emitted state. The live, animated version with the measured stat strip is at [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).)*
 
 ## 3. Read what it wrote
 
@@ -53,4 +53,4 @@ Inside your host agent (Claude Code, Cursor, …) the same two verbs are the MCP
 
 > Not `acc task` — that command belongs to a different system and does not exist here.
 
-Next: the expanded walkthrough in [quickstart.md](quickstart.md). See it live: [accint.xyz](https://accint.xyz).
+Next: the expanded walkthrough in [quickstart.md](quickstart.md). See it live: [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

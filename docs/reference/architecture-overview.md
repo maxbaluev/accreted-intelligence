@@ -84,4 +84,4 @@ Many terminals share what compounds: the substrate, the warm encoder daemon, and
 | Transitions-ledger predictor (k-NN energy descent), wired and running | Predictor lift over retrieval-only (measured delta, not isolated) |
 | Owner-authority floor; weak self-graded prior | Hardening the reachable-network / send boundary |
 
-The mechanisms in the left column are running today. The right column is honest open work. The largest claims (substrate lift, scale, replay) are not yet validated by controlled experiment. This is the live system rather than a demo, and the measured readout runs at [accint.xyz](https://accint.xyz).
+The mechanisms in the left column are running today. The right column is honest open work. The largest claims (substrate lift, scale, replay) are not yet validated by controlled experiment. This is the live system rather than a demo, and the measured readout runs at [accint.xyz](https://accint.xyz/?ref=github-docs&utm_source=github&utm_campaign=docs).

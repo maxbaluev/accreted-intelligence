@@ -8,6 +8,21 @@ const MANIFEST_PATH = path.join("docs", "ops", "growth-surfaces.json");
 const SOCIAL_KIT_PATH = path.join("docs", "ops", "social-launch-kit.md");
 const README_PATH = "README.md";
 const PAGE_PATHS = ["index.html", path.join("reddit", "index.html")];
+const DOCS_ATTRIBUTION_PATHS = [
+  path.join("docs", "README.md"),
+  path.join("docs", "RELEASE_RUNBOOK.md"),
+  path.join("docs", "concept.md"),
+  path.join("docs", "first-session.md"),
+  path.join("docs", "glossary.md"),
+  path.join("docs", "quickstart.md"),
+  path.join("docs", "install", "README.md"),
+  path.join("docs", "install", "self-serve.md"),
+  path.join("docs", "install", "with-agent.md"),
+  path.join("docs", "hosts", "README.md"),
+  path.join("docs", "reference", "architecture-overview.md"),
+  path.join("docs", "reference", "trust-model.md"),
+  path.join("docs", "reference", "whitepaper.md"),
+];
 const SOURCE_KEYS = [
   "ref",
   "utm_source",
@@ -39,6 +54,22 @@ function assertIncludes(text, needle, context) {
   if (!text.includes(needle)) {
     die(`${context}: missing ${JSON.stringify(needle)}`);
   }
+}
+
+function markdownFiles(dir) {
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === ".git" || entry.name === ".worktrees" || entry.name === "node_modules") {
+      continue;
+    }
+    const file = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...markdownFiles(file));
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      files.push(file);
+    }
+  }
+  return files;
 }
 
 function sourceQuery(surface) {
@@ -110,7 +141,7 @@ function validateManifest(manifest) {
       die(`${MANIFEST_PATH}: duplicate surface id ${surface.id}`);
     }
     seen.add(surface.id);
-    if (!["social_launch", "directory", "owned_site", "owned_share"].includes(surface.kind)) {
+    if (!["social_launch", "directory", "owned_site", "owned_docs", "owned_share"].includes(surface.kind)) {
       die(`${MANIFEST_PATH}: ${surface.id}: invalid kind ${JSON.stringify(surface.kind)}`);
     }
     if (!manifest.base_urls[surface.landing]) {
@@ -201,6 +232,22 @@ function validateOwnedSurfaces(manifest) {
   }
 }
 
+function validateOwnedDocsSurfaces(manifest) {
+  const docsSurfaces = manifest.surfaces.filter((item) => item.kind === "owned_docs");
+  for (const surface of docsSurfaces) {
+    const url = landingUrl(manifest, surface);
+    for (const file of DOCS_ATTRIBUTION_PATHS) {
+      assertIncludes(read(file), url, `${file}: attributed docs landing URL for ${surface.id}`);
+    }
+  }
+  for (const file of markdownFiles("docs")) {
+    const bareSiteLinks = read(file).match(/\]\(https:\/\/accint\.xyz\/?\)/g) || [];
+    if (bareSiteLinks.length > 0) {
+      die(`${file}: bare accint.xyz links must use an attributed growth surface URL`);
+    }
+  }
+}
+
 function validateOwnedShareSurfaces(manifest) {
   for (const surface of manifest.surfaces.filter((item) => item.kind === "owned_share")) {
     const file = pagePathForLanding(surface);
@@ -240,5 +287,6 @@ if (mode === "--print") {
 validatePages(usedSourceKeys);
 validateSocialKit(manifest);
 validateOwnedSurfaces(manifest);
+validateOwnedDocsSurfaces(manifest);
 validateOwnedShareSurfaces(manifest);
 console.log("GROWTH SURFACES: PASS");
