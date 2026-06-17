@@ -158,6 +158,8 @@ function checkHome() {
     ref_source: undefined,
   });
   assertIncludes(html, "install_agent_prompt_copied", `${file}: prompt-copy event`);
+  assertIncludes(html, "share_link_copied", `${file}: visitor share event`);
+  assertIncludes(html, "data-share-url=\"https://accint.xyz/?ref=visitor-share&amp;utm_source=share&amp;utm_campaign=organic\"", `${file}: visitor share URL`);
   assertAgentPrompt(file, html, "agent-prompt");
   assertSourceOnlyAgentPrompt(file, html, "agent-prompt");
   assertAgentPrompt(file, html, "agent-prompt2");

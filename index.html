@@ -165,7 +165,8 @@ letter-spacing:.09em;text-transform:uppercase;padding:0 20px;white-space:nowrap;
 .install-2nd{margin-top:16px;display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);
 font-size:12px;letter-spacing:.03em;}
 .install-2nd a{color:var(--dim);text-decoration:none;}
-.install-2nd a:hover{color:var(--orange);}
+.install-2nd button{font:inherit;letter-spacing:inherit;color:var(--dim);background:transparent;border:0;cursor:pointer;padding:0;text-align:left;}
+.install-2nd a:hover,.install-2nd button:hover{color:var(--orange);}
 .install-2nd .gh{color:var(--ink);}
 .install .note{margin-top:13px;font-size:12px;color:var(--faint);font-family:var(--mono);letter-spacing:.04em;}
 @media(max-width:520px){.cmd code{font-size:11.5px;padding:12px 12px;}.copy{padding:0 14px;}}
@@ -722,6 +723,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
         <div class="install-2nd">
           <a class="gh" href="https://github.com/maxbaluev/accreted-intelligence">★ Star &amp; watch on GitHub</a>
           <a href="https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/whitepaper.md">Read the whitepaper →</a>
+          <button class="share-link" type="button" data-share-surface="visitor-share" data-share-url="https://accint.xyz/?ref=visitor-share&amp;utm_source=share&amp;utm_campaign=organic" aria-label="Copy AccInt share link">Share AccInt →</button>
         </div>
         <div class="note">the installer probes your hardware and prints the reason · no account, no API key</div>
       </div>
@@ -1241,6 +1243,7 @@ try{if(localStorage.getItem('acc_eb_dismissed')==='1'){document.documentElement.
       <div class="install-2nd">
         <a class="gh" href="https://github.com/maxbaluev/accreted-intelligence">★ Star &amp; watch on GitHub</a>
         <a href="https://github.com/maxbaluev/accreted-intelligence/blob/main/docs/reference/whitepaper.md">Read the whitepaper →</a>
+        <button class="share-link" type="button" data-share-surface="visitor-share" data-share-url="https://accint.xyz/?ref=visitor-share&amp;utm_source=share&amp;utm_campaign=organic" aria-label="Copy AccInt share link">Share AccInt →</button>
       </div>
       <div class="note">no account · no API key · swap the model anytime · what it learns never leaves</div>
     </div>
@@ -1430,6 +1433,34 @@ if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph(
     if(isWin){showOS('win');}
   });
 
+  [].slice.call(document.querySelectorAll('.share-link')).forEach(function(btn){
+    var original=btn.textContent;
+    function done(label){
+      btn.textContent=label;
+      setTimeout(function(){btn.textContent=original;},1600);
+    }
+    btn.addEventListener('click',function(){
+      var url=btn.getAttribute('data-share-url')||window.location.href,
+          surface=btn.getAttribute('data-share-surface')||'visitor-share',
+          props=Object.assign({surface:surface,share_url:url},source_props);
+      function copied(mode){
+        ph('share_link_copied',Object.assign({mode:mode},props));
+        done(mode==='native_share'?'shared ✓':'copied ✓');
+      }
+      if(navigator.share){
+        navigator.share({title:'AccInt',text:'AccInt turns agent work into an accountable Work Model.',url:url})
+          .then(function(){copied('native_share');})
+          .catch(function(err){if(!err||err.name!=='AbortError'){ph('share_link_failed',Object.assign({mode:'native_share'},props));}});
+      }else if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(function(){copied('clipboard');}).catch(function(){
+          fallbackCopy(url);copied('fallback_copy');
+        });
+      }else{
+        fallbackCopy(url);copied('fallback_copy');
+      }
+    });
+  });
+
   /* hero device is static (single commitment settling) — no tab JS */
 
   /* story switcher (#jobs) */
@@ -1473,6 +1504,8 @@ if(source_props.utm_source==='reddit'||source_props.ref==='reddit_referrer'){ph(
     if(!e.target||!e.target.closest)return;
     if(e.target.closest('.nav-cta')){ph('cta_clicked',{placement:'nav'});return;}
     if(e.target.closest('.install-2nd .gh')){ph('github_clicked');return;}
+    var sh=e.target.closest('.share-link');
+    if(sh){ph('share_link_clicked',Object.assign({surface:sh.getAttribute('data-share-surface')||'visitor-share'},source_props));return;}
     var d=e.target.closest('.doclinks .doc');
     if(d){ph('doc_link_clicked',{doc:(d.firstChild&&d.firstChild.nodeValue||'').trim()});}
   });

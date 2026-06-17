@@ -19,6 +19,17 @@
       }
     },
     {
+      "id": "visitor-share",
+      "kind": "owned_share",
+      "label": "Visitor share link",
+      "landing": "home",
+      "source": {
+        "ref": "visitor-share",
+        "utm_source": "share",
+        "utm_campaign": "organic"
+      }
+    },
+    {
       "id": "hn-show",
       "kind": "social_launch",
       "label": "Show HN",

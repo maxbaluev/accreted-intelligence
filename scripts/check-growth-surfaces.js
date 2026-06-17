@@ -53,6 +53,14 @@ function landingUrl(manifest, surface) {
   return `${base}${sep}${sourceQuery(surface)}`;
 }
 
+function htmlAttr(value) {
+  return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+function pagePathForLanding(surface) {
+  return surface.landing === "reddit" ? path.join("reddit", "index.html") : "index.html";
+}
+
 function posixSnippet(manifest, surface) {
   return `curl -fsSL ${manifest.base_urls.posix_installer} | ACC_INSTALL_REF=${surface.id} ACC_INSTALL_SOURCE='${sourceQuery(surface)}' sh`;
 }
@@ -102,7 +110,7 @@ function validateManifest(manifest) {
       die(`${MANIFEST_PATH}: duplicate surface id ${surface.id}`);
     }
     seen.add(surface.id);
-    if (!["social_launch", "directory", "owned_site"].includes(surface.kind)) {
+    if (!["social_launch", "directory", "owned_site", "owned_share"].includes(surface.kind)) {
       die(`${MANIFEST_PATH}: ${surface.id}: invalid kind ${JSON.stringify(surface.kind)}`);
     }
     if (!manifest.base_urls[surface.landing]) {
@@ -189,6 +197,17 @@ function validateOwnedSurfaces(manifest) {
   }
 }
 
+function validateOwnedShareSurfaces(manifest) {
+  for (const surface of manifest.surfaces.filter((item) => item.kind === "owned_share")) {
+    const file = pagePathForLanding(surface);
+    const html = read(file);
+    assertIncludes(html, `data-share-surface="${surface.id}"`, `${file}: share surface ${surface.id}`);
+    assertIncludes(html, `data-share-url="${htmlAttr(landingUrl(manifest, surface))}"`, `${file}: share URL ${surface.id}`);
+    assertIncludes(html, "share_link_clicked", `${file}: share click event ${surface.id}`);
+    assertIncludes(html, "share_link_copied", `${file}: share copied event ${surface.id}`);
+  }
+}
+
 function printSurfaces(manifest) {
   for (const surface of manifest.surfaces) {
     console.log(`${surface.id} (${surface.label || surface.kind})`);
@@ -217,4 +236,5 @@ if (mode === "--print") {
 validatePages(usedSourceKeys);
 validateSocialKit(manifest);
 validateOwnedSurfaces(manifest);
+validateOwnedShareSurfaces(manifest);
 console.log("GROWTH SURFACES: PASS");
