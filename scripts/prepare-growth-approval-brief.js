@@ -153,7 +153,7 @@ function runLocalChecks() {
   if (GROWTH_REPORT && fs.existsSync(GROWTH_REPORT)) {
     const directoryChecks = [
       ["node", ["scripts/prepare-directory-surface-refs.js", "--check", GROWTH_REPORT]],
-      ["node", ["scripts/prepare-directory-followup-kit.js", "--check", GROWTH_REPORT]],
+      ["node", ["scripts/prepare-directory-followup-kit.js", "--check", "--actionable", GROWTH_REPORT]],
     ];
     for (const [command, args] of directoryChecks) {
       const label = `${command} ${args.join(" ")}`;
