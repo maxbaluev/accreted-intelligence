@@ -13,7 +13,8 @@ Last receipt refresh: 2026-06-17.
 - Release: `v0.1.6`
 - Official MCP Registry: `io.github.maxbaluev/accint` / `0.1.6`
 - Public clone state at refresh: `main` synced with `origin/main` at
-  `21a635e` after the approved public growth rollout.
+  `581c5c6`; the approved public growth rollout itself landed at `21a635e`
+  and the later commits record rollout receipts.
 - Live verification: hosted GitHub Actions verifier run
   `27691022310` passed after GitHub Pages finished building.
 - Controlled live install receipt: `ref=controlled-0.1.6`,
@@ -26,7 +27,7 @@ Last receipt refresh: 2026-06-17.
 
 ## Holds
 
-- Directory PR state audit at refresh: 55 PRs checked, 42 open, 8 merged,
+- Directory PR state audit at refresh: 55 PRs checked, 41 open, 9 merged,
   5 closed/unmerged, 1 open PR with failing checks, 7 attention items.
 - Glama submission was made through Google OAuth with
   `maxbaluev@outlook.com`; the direct listing and score badge now verify, but
@@ -35,6 +36,11 @@ Last receipt refresh: 2026-06-17.
   branch at `fe1bec64dc0dba5c2f9e20d79e7940c0034e5a91`, but the upstream PR
   remains open with GitHub merge status `CLEAN`. Wait for maintainer/check
   movement and do not comment merely to bump visibility.
+- `nibzard/awesome-agentic-patterns#102` still reports failing checks, but the
+  failing GitHub Actions reviewer log is permission-gated upstream
+  (`Actor does not have write permissions to the repository`), not a local
+  pattern validation failure. Treat Vercel and Continue statuses there as
+  external/report-only unless a maintainer asks for changes.
 - Hacker News still requires password-based login/registration before posting.
 - Reddit r/LocalLLaMA submission was attempted under the logged-in account
   `Effective_Iron2146`, but Reddit showed a Rule 4 self-promotion warning and
@@ -75,7 +81,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 
 | # | List | Area | State at refresh | PR | Last update | Note |
 |---|---|---|---|---|---|---|
-| 1 | punkpeye/awesome-mcp-servers | MCP directory | open | https://github.com/punkpeye/awesome-mcp-servers/pull/8091 | 2026-06-17T13:36:11Z | Glama badge row pushed to owned branch; wait for checks/maintainer. |
+| 1 | punkpeye/awesome-mcp-servers | MCP directory | open | https://github.com/punkpeye/awesome-mcp-servers/pull/8091 | 2026-06-17T13:36:25Z | Glama badge row pushed to owned branch; wait for checks/maintainer. |
 | 2 | appcypher/wong2/TensorBlock alternatives via TensorBlock/awesome-mcp-servers | MCP directory | merged | https://github.com/TensorBlock/awesome-mcp-servers/pull/721 | 2026-06-15T21:49:38Z | Listing win; monitor only. |
 | 3 | mcpHQ/awesome-mcp-servers | MCP directory | merged | https://github.com/mcpHQ/awesome-mcp-servers/pull/2 | 2026-06-15T19:43:45Z | Listing win; monitor only. |
 | 4 | DhanushNehru/awesome-mcp-servers | MCP directory | merged | https://github.com/DhanushNehru/awesome-mcp-servers/pull/33 | 2026-06-15T11:18:19Z | Listing win; monitor only. |
@@ -97,7 +103,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 | 20 | BehiSecc/awesome-claude-skills | Claude skills | open | https://github.com/BehiSecc/awesome-claude-skills/pull/369 | 2026-06-15T12:33:30Z | Follow only if asked. |
 | 21 | ComposioHQ/awesome-claude-skills | Claude skills | open | https://github.com/ComposioHQ/awesome-claude-skills/pull/1082 | 2026-06-15T14:02:42Z | Review required / merge blocked; follow only with owner-approved clarification. |
 | 22 | ComposioHQ/awesome-claude-plugins | Claude plugins | open | https://github.com/ComposioHQ/awesome-claude-plugins/pull/301 | 2026-06-15T13:48:51Z | Follow only if asked. |
-| 23 | GetBindu/awesome-claude-code-and-skills | Claude Code | open | https://github.com/GetBindu/awesome-claude-code-and-skills/pull/68 | 2026-06-15T12:19:46Z | Follow only if asked. |
+| 23 | GetBindu/awesome-claude-code-and-skills | Claude Code | merged | https://github.com/GetBindu/awesome-claude-code-and-skills/pull/68 | 2026-06-17T12:44:59Z | Listing win; monitor only. |
 | 24 | rohitg00/awesome-claude-code-toolkit | Claude Code | open | https://github.com/rohitg00/awesome-claude-code-toolkit/pull/544 | 2026-06-15T07:15:16Z | Follow only if asked. |
 | 25 | ccplugins/awesome-claude-code-plugins | Claude Code plugins | open | https://github.com/ccplugins/awesome-claude-code-plugins/pull/270 | 2026-06-15T07:17:41Z | Follow only if asked. |
 | 26 | jqueryscript/awesome-claude-code | Claude Code | open | https://github.com/jqueryscript/awesome-claude-code/pull/399 | 2026-06-15T07:20:58Z | Follow only if asked. |
@@ -112,7 +118,7 @@ node scripts/prepare-glama-submission-packet.js --check v0.1.6
 | 35 | Meirtz/Awesome-Context-Engineering | Context engineering | open | https://github.com/Meirtz/Awesome-Context-Engineering/pull/75 | 2026-06-15T07:01:05Z | Follow only if asked. |
 | 36 | yzfly/awesome-context-engineering | Context engineering | open | https://github.com/yzfly/awesome-context-engineering/pull/10 | 2026-06-17T04:10:28Z | Recently updated; check before any reply. |
 | 37 | ai-boost/awesome-harness-engineering | Harness engineering | open | https://github.com/ai-boost/awesome-harness-engineering/pull/67 | 2026-06-15T08:40:51Z | Follow only if asked. |
-| 38 | nibzard/awesome-agentic-patterns | Agentic patterns | open | https://github.com/nibzard/awesome-agentic-patterns/pull/102 | 2026-06-15T10:44:08Z | Failing checks; inspect before any owner-approved fix or reply. |
+| 38 | nibzard/awesome-agentic-patterns | Agentic patterns | open | https://github.com/nibzard/awesome-agentic-patterns/pull/102 | 2026-06-15T10:44:08Z | GitHub Actions reviewer fails on upstream write-permission gate; external Vercel/Continue checks are report-only. |
 | 39 | rafska/awesome-local-llm | Local LLM | open | https://github.com/rafska/awesome-local-llm/pull/106 | 2026-06-15T10:34:25Z | Follow only if asked. |
 | 40 | tensorchord/Awesome-LLMOps | LLMOps | open | https://github.com/tensorchord/Awesome-LLMOps/pull/577 | 2026-06-15T06:13:09Z | Follow only if asked. |
 | 41 | Danielskry/Awesome-RAG | RAG | open | https://github.com/Danielskry/Awesome-RAG/pull/104 | 2026-06-15T08:23:47Z | RAG framing is weaker; avoid over-follow-up. |
