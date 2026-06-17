@@ -11,6 +11,10 @@ on:
         description: "Live site base URL"
         required: true
         default: "https://accint.xyz"
+      expected_head:
+        description: "Optional full commit SHA that this hosted verifier must run against"
+        required: false
+        default: ""
       strict_live_state:
         description: "Fail if any live growth hold remains"
         required: true
@@ -27,6 +31,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify expected checkout commit
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.expected_head != '' }}
+        env:
+          EXPECTED_HEAD: ${{ inputs.expected_head }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          printf 'expected head: %s\n' "$EXPECTED_HEAD"
+          printf 'actual head:   %s\n' "$actual"
+          test "$actual" = "$EXPECTED_HEAD"
 
       - name: Static integrity
         run: bash scripts/check-integrity.sh

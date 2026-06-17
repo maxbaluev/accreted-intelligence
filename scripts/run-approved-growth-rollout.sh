@@ -86,10 +86,12 @@ if [ -z "$branch" ]; then
   printf 'refusing: detached HEAD; checkout a branch before rollout\n' >&2
   exit 1
 fi
+head_sha="$(git rev-parse HEAD)"
 
 echo "== approval-gated growth rollout =="
 printf '  repo: %s\n' "$repo"
 printf '  branch: %s\n' "$branch"
+printf '  approved head: %s\n' "$head_sha"
 printf '  remote: %s\n' "$remote"
 printf '  base ref: %s\n' "$base_ref"
 printf '  release tag: %s\n' "$tag"
@@ -143,6 +145,7 @@ These are the only external mutations this script can perform when approved:
   gh workflow run live-site-attribution.yml --repo $repo \\
     -f acc_version=$tag \\
     -f site_url=$site_url \\
+    -f expected_head=$head_sha \\
     -f strict_live_state=$strict_live_state
 
 Read-only follow-up after deployment is visible:
@@ -179,6 +182,7 @@ while :; do
   if gh workflow run live-site-attribution.yml --repo "$repo" \
     -f "acc_version=$tag" \
     -f "site_url=$site_url" \
+    -f "expected_head=$head_sha" \
     -f "strict_live_state=$strict_live_state"; then
     break
   fi

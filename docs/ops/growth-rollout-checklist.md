@@ -257,16 +257,18 @@ gh workflow run live-site-attribution.yml \
   --repo maxbaluev/accreted-intelligence \
   -f acc_version=v<tag> \
   -f site_url=https://accint.xyz \
+  -f expected_head=<approved-full-commit-sha> \
   -f strict_live_state=false
 gh run list --workflow live-site-attribution.yml \
   --repo maxbaluev/accreted-intelligence \
   --limit 3
 ```
 
-That workflow runs the live prompt-copy attribution verifier from a GitHub-hosted
-runner, verifies the deployed `llms.txt` discovery surface, then prints the
-advisory full live growth audit. Keep
-`strict_live_state=false` while Glama/punkpeye are still expected holds.
+That workflow first verifies the checked-out commit matches `expected_head`,
+then runs the live attribution/PostHog proxy verifier from a GitHub-hosted
+runner, verifies the deployed `llms.txt` discovery surface, and prints the
+advisory full live growth audit. Keep `strict_live_state=false` while
+Glama/punkpeye are still expected holds.
 
 Also run a browser copy check if possible: copy the hero agent prompt and confirm
 the copied text contains `ACC_INSTALL_REF=<install_ref>` plus
