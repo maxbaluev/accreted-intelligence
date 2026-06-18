@@ -37,11 +37,54 @@
   "tools": [
     {
       "name": "acc_retrieve",
-      "description": "Retrieve scored Work Model context by late interaction."
+      "description": "Retrieve scored Work Model context by late interaction.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Text query to retrieve relevant scored Work Model context."
+          },
+          "image": {
+            "type": "string",
+            "description": "Local image path or data URI for cross-modal retrieval."
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "query"
+            ]
+          },
+          {
+            "required": [
+              "image"
+            ]
+          }
+        ],
+        "additionalProperties": false
+      }
     },
     {
       "name": "acc_act",
-      "description": "Run a Work Model action such as solve, continue, exec, register, or outcome."
+      "description": "Run a Work Model action such as solve, continue, exec, register, or outcome.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "runtime": {
+            "type": "string",
+            "description": "Runtime to execute, such as solve, continue, outcome, exec, register, browser, or a registered runtime name."
+          },
+          "input": {
+            "type": "string",
+            "description": "Action input. For JSON-shaped actions, pass a JSON string."
+          }
+        },
+        "required": [
+          "input"
+        ],
+        "additionalProperties": false
+      }
     }
   ],
   "tools_generated": false,
