@@ -1112,7 +1112,7 @@ elif [ "$NONINTERACTIVE" = "1" ]; then
   # remaining phases (wiring, verify) run so the script EXITS PROMPTLY. (warm stays 0 → the
   # final verdict prints the honest "warming in background" path, not happy-path try-these.)
   warm=0; emb_died=0
-  phase_result "seed" "skipped" "non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background — downloading the model, several GB on first run). Check progress in a few minutes with: acc --db $DB doctor" "acc --db $DB browser start (after the model finishes loading)"
+  phase_result "seed" "skipped" "non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background — downloading the model, several GB on first run). Check progress in a few minutes with: $ACC_BIN --db $DB doctor" "$ACC_BIN --db $DB browser start (after the model finishes loading)"
 else
   say "waiting for the embedder (first run may download the model — several GB, takes minutes)…"
   warm=0; emb_died=0
@@ -1166,7 +1166,11 @@ except Exception:
       say "──────────────────────────────────────────"
     fi
     if [ "$emb_died" = "1" ]; then
-      phase_result "seed" "skipped" "embedder daemon exited before warming (see the log tail above + /tmp/acc-embedder.log — likely CUDA/driver/import error)" "fix the error above, then: acc embedder &  ·  acc --db $DB browser start"
+      if grep -q 'requires accelerate' /tmp/acc-embedder.log 2>/dev/null; then
+        phase_result "seed" "skipped" "embedder daemon exited before warming: encoder env is missing accelerate (old installer/runtime); current releases include it" "update acc, then: $ACC_BIN embedder restart  ·  $ACC_BIN --db $DB browser start"
+      else
+        phase_result "seed" "skipped" "embedder daemon exited before warming (see the log tail above + /tmp/acc-embedder.log — likely CUDA/driver/import error)" "fix the error above, then: $ACC_BIN embedder restart  ·  $ACC_BIN --db $DB browser start"
+      fi
     else
       phase_result "seed" "skipped" "embedder did not warm within 10min (see the log tail above + /tmp/acc-embedder.log)" "seed later: acc --db $DB browser start (after the model finishes loading)"
     fi
@@ -1432,6 +1436,8 @@ fi
 # OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding Work Model — they work in EVERY directory
 # now, with no per-project step. So the next step is simply: open Claude Code anywhere and talk.
 # The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project onto its own db.
+ACC_CMD="\"${ACC_BIN:-acc}\""
+DB_ARG="\"$DB\""
 cc_next_lines() {
   cat <<CCNEXT
 Your Work Model is ready for its first example.
@@ -1446,8 +1452,8 @@ posted, paid, deleted, or done outside your machine. After the result it shows w
 Work Model can reuse next time.
 (The two verbs acc_retrieve + acc_act appear after a restart / reload MCP if Claude Code is open.)
 Optional — isolate a project on its OWN separate Work Model (confidential / separated work):
-  cd <your-project> && acc hosts-sync --project .
-CLI health check, if you want it: acc --db $DB status  ·  acc --db $DB doctor
+  cd <your-project> && $ACC_CMD hosts-sync --project .
+CLI health check, if you want it: $ACC_CMD --db $DB_ARG status  ·  $ACC_CMD --db $DB_ARG doctor
 CCNEXT
 }
 
@@ -1462,11 +1468,11 @@ elif [ "$NONINTERACTIVE" = "1" ] && [ "${warm:-0}" != "1" ]; then
   cat <<BGWARM
 
 Check progress in a few minutes:
-  acc --db $DB doctor        (expect: embedder OK once the model finishes loading)
+  $ACC_CMD --db $DB_ARG doctor        (expect: embedder OK once the model finishes loading)
 
 Once the embedder is warm, retrieval is live. The CLI works immediately:
-  acc --db $DB status
-  acc --db $DB doctor
+  $ACC_CMD --db $DB_ARG status
+  $ACC_CMD --db $DB_ARG doctor
 
 BGWARM
   cc_next_lines
@@ -1480,9 +1486,9 @@ elif [ "${warm:-0}" != "1" ]; then
 
 Fix this FIRST (then acc is fully live):
   1. See why it failed:   tail -n 30 /tmp/acc-embedder.log
-  2. Start the embedder:  acc embedder            (first run downloads the model — several GB, minutes)
-  3. Re-check health:     acc --db $DB doctor     (expect: embedder OK, verdict OK)
-  4. Still stuck?         acc doctor --report     (builds a SANITIZED report — no Work Model data, no secrets, just
+  2. Start the embedder:  $ACC_CMD embedder restart     (first run downloads the model — several GB, minutes)
+  3. Re-check health:     $ACC_CMD --db $DB_ARG doctor  (expect: embedder OK, verdict OK)
+  4. Still stuck?         $ACC_CMD doctor --report      (builds a SANITIZED report — no Work Model data, no secrets, just
                           structural health — and prints a pre-filled GitHub issue link to file at
                           github.com/maxbaluev/accreted-intelligence/issues)
 
@@ -1498,7 +1504,7 @@ Try this now:
   3. acc will draft/research locally, show what happened, and ask before anything is sent.
 
 Optional health check:
-  acc --db $DB doctor
+  $ACC_CMD --db $DB_ARG doctor
 
 TRY
   cc_next_lines
@@ -1538,8 +1544,9 @@ if [ -x "$BIN_DIR/acc" ]; then
   elif [ "$PERSIST_PATH" != "1" ]; then
     # --no-persist-path: do not edit the rc; print the exact line instead.
     printf '\n%sPATH note%s\n' "$G_STEP" "$C_RESET"
-    printf '  acc is at %s, not on PATH for NEW terminals. Add to %s, then open a new terminal:\n' "$BIN_DIR" "$RC_TARGET"
+    printf '  acc is at %s, but bare `acc` is not on PATH for new terminals. Add to %s, then open a new terminal:\n' "$BIN_DIR" "$RC_TARGET"
     printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
+    printf '  Until then, run it directly as: %s/acc\n' "$BIN_DIR"
   elif [ "$DRY_RUN" = "1" ]; then
     say "WOULD append to $RC_TARGET: $EXPORT_LINE"
   else
@@ -1552,6 +1559,6 @@ if [ -x "$BIN_DIR/acc" ]; then
     printf '\n%sPATH persisted%s\n' "$G_STEP" "$C_RESET"
     printf '  Appended to %s:\n' "$RC_TARGET"
     printf '      %s%s%s\n' "$C_BOLD" "$EXPORT_LINE" "$C_RESET"
-    printf '  Open a new terminal (or `source %s`) to pick it up. Opt out next time with --no-persist-path.\n' "$RC_TARGET"
+    printf '  This installer cannot change the parent shell that launched it. Open a new terminal or run `source %s`; until then, use %s/acc. Opt out next time with --no-persist-path.\n' "$RC_TARGET" "$BIN_DIR"
   fi
 fi
