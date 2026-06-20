@@ -37,9 +37,6 @@ ENV KNOBS (mirrors install.sh's Env section):
   ACC_NO_BROWSER=1      skip the browser capability
   ACC_TIER=<lane>       force the embedder lane (skip the host probe's pick)
   ACC_INSTALL=source    skip the phase-3 prebuilt-release fetch; always build from source
-  ACC_INSTALL_REF=<label> write a local install attribution receipt (not sent by installer)
-  ACC_INSTALL_SOURCE=<source> optional coarse source/ref context for that receipt
-  ACC_INSTALL_ATTRIBUTION_ONLY=1 write the attribution receipt and stop (test/verification)
 
 ENGINE LANE HONESTY: the acc windows engine port is IN FLIGHT. Phase 3 first tries the
 PREBUILT release lane (sha256-verified download of acc.exe -- no VS Build Tools needed
@@ -496,63 +493,6 @@ $OsBuild = Get-OsBuild
 $Arch = Get-Arch
 Say ("host: $OsBuild / $Arch - substrate: $DbPath")
 if (-not $script:OnWindows) { Warn 'non-windows host -- install.ps1 is the native WINDOWS lane; this run is a cross-platform dry-run self-test only (POSIX hosts: ./install.sh)' }
-
-# -- phase 0a -- local install attribution receipt ----------------------------------------
-# ACC_INSTALL_REF is an explicit, caller-supplied attribution nonce/label for install URLs.
-# ACC_INSTALL_SOURCE is optional coarse source context copied from the web page (`ref`,
-# UTM, or referrer category). The public installer records both LOCALLY only; it does not
-# send a network event here.
-function Sanitize-InstallRef([string]$Value) {
-  if (-not $Value) { return '' }
-  $chars = New-Object System.Text.StringBuilder
-  foreach ($ch in $Value.ToCharArray()) {
-    $s = [string]$ch
-    if ($s -match '[A-Za-z0-9._:/?&=+,\-]') { [void]$chars.Append($s) }
-    if ($chars.Length -ge 160) { break }
-  }
-  return $chars.ToString()
-}
-
-Step 'phase 0a -- install attribution (local receipt)'
-$InstallRefRaw = if ($env:ACC_INSTALL_REF) { $env:ACC_INSTALL_REF } else { '' }
-$InstallSourceRaw = if ($env:ACC_INSTALL_SOURCE) { $env:ACC_INSTALL_SOURCE } else { '' }
-$InstallRef = Sanitize-InstallRef $InstallRefRaw
-$InstallSourceRef = Sanitize-InstallRef $InstallSourceRaw
-$InstallAttrPath = Join-Path $ConfigHome 'install-attribution.env'
-$InstallAttrDescParts = @()
-if ($InstallRef) { $InstallAttrDescParts += "ref '$InstallRef'" }
-if ($InstallSourceRef) { $InstallAttrDescParts += "source '$InstallSourceRef'" }
-$InstallAttrDesc = $InstallAttrDescParts -join ', '
-if ((-not $InstallRefRaw) -and (-not $InstallSourceRaw)) {
-  Emit-Phase 'install_attribution' 'skipped' 'ACC_INSTALL_REF/ACC_INSTALL_SOURCE not set -- no install attribution receipt written' 'optional: $env:ACC_INSTALL_REF="web-copy"; $env:ACC_INSTALL_SOURCE="ref=gh-surface"; .\install.ps1'
-} elseif ((-not $InstallRef) -and (-not $InstallSourceRef)) {
-  Emit-Phase 'install_attribution' 'skipped' 'install attribution env vars had no supported label characters after sanitization -- no receipt written' "use letters, numbers, '.', '_', ':', '/', '?', '&', '=', '+', ',', '-'"
-} elseif ($DryRun) {
-  Emit-Phase 'install_attribution' 'would' "write local install attribution $InstallAttrDesc to $InstallAttrPath (not sent by installer)" 'phase 0: probe tier'
-} else {
-  try {
-    if (-not (Test-Path $ConfigHome)) { New-Item -ItemType Directory -Force -Path $ConfigHome | Out-Null }
-    $now = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
-    $lines = @()
-    if ($InstallRef) { $lines += "ref=$InstallRef" }
-    if ($InstallSourceRef) { $lines += "source_ref=$InstallSourceRef" }
-    $lines += "captured_at_utc=$now"
-    $sourceFields = @()
-    if ($InstallRef) { $sourceFields += 'ACC_INSTALL_REF' }
-    if ($InstallSourceRef) { $sourceFields += 'ACC_INSTALL_SOURCE' }
-    $lines += ('source=' + ($sourceFields -join '+'))
-    $lines += 'note=local install attribution receipt; not sent by installer'
-    $lines | Set-Content -LiteralPath $InstallAttrPath -Encoding ASCII
-    Emit-Phase 'install_attribution' 'ok' "wrote local install attribution $InstallAttrDesc to $InstallAttrPath (not sent by installer)" 'phase 0: probe tier'
-  } catch {
-    Emit-Phase 'install_attribution' 'skipped' "could not write local install attribution receipt at $InstallAttrPath" 'install continues; attribution is optional'
-  }
-}
-if ($env:ACC_INSTALL_ATTRIBUTION_ONLY -eq '1') {
-  Emit-Phase 'verdict' 'ok' 'install attribution receipt check complete; stopped before install phases'
-  exit 0
-}
-
 Select-Tier
 $script:HfCache = Get-HfCacheDir
 $script:DiskFreeMb = Probe-FreeDiskMb

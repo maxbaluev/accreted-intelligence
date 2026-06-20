@@ -109,17 +109,18 @@ the hook-driven automation is shallow, and the rule + this recipe carry the loop
 
 ## Timeouts — landed-slow is not dead (-32001)
 
-The acc MCP server bounds every `acc_act` call with a server-side deadline
-(`ACC_MCP_CALL_DEADLINE_SECS`, default 900s). Past it the call RETURNS a
-resumable checkpoint — never a hang. But if your HOST's MCP client timeout is
-SHORTER than the server deadline, the client reports `-32001 Request timed out`
-while the work keeps running and usually LANDS server-side. The client cannot
-tell landed-slow from dead.
+The acc MCP server bounds every `acc_act` call with a server-side stall deadline
+(`ACC_MCP_CALL_DEADLINE_SECS`, default 45s) plus an absolute ceiling
+(`ACC_MCP_CALL_CEILING_SECS`, default 240s). Progress resets the stall clock; a
+silent call RETURNS a resumable checkpoint — never a hang. But if your HOST's
+MCP client timeout is SHORTER than the server return point, the client reports
+`-32001 Request timed out` while the work keeps running and usually LANDS
+server-side. The client cannot tell landed-slow from dead.
 
-**Fix: set the server deadline BELOW your host's client timeout** (the host-sync
-entries use a 45s stall window under 300s client walls), so slow calls return an
-honest checkpoint payload the model can act on instead of an opaque client
-error.
+**Fix: keep the server return points BELOW your host's client timeout** (the
+host-sync entries use a 45s stall window under 300s client walls, and acc's
+built-in ceiling is 240s), so slow calls return an honest checkpoint payload the
+model can act on instead of an opaque client error.
 
 Recovery recipes when a timeout still happens:
 - `continue` (frame submission) is IDEMPOTENT — resubmit the exact same

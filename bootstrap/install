@@ -11,20 +11,14 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/maxbaluev/accreted-intelligence/main/bootstrap/install | sh -s -- --dry-run --json
 #
-# Env: ACC_REPO         git URL to fetch   (default: https://github.com/maxbaluev/accreted-intelligence.git)
-#      ACC_SRC          checkout directory (default: ${XDG_DATA_HOME:-$HOME/.local/share}/acc/src)
-#      ACC_INSTALL_REF  optional local attribution label passed to install.sh; written locally, not sent by bootstrap
-#      ACC_INSTALL_SOURCE optional coarse source/ref context passed through with the label
+# Env: ACC_REPO  git URL to fetch   (default: https://github.com/maxbaluev/accreted-intelligence.git)
+#      ACC_SRC   checkout directory (default: ${XDG_DATA_HOME:-$HOME/.local/share}/acc/src)
 #
 # No sudo, no second installer, nothing clever -- git is the only requirement here.
 set -eu
 
 REPO_URL="${ACC_REPO:-https://github.com/maxbaluev/accreted-intelligence.git}"
 DEST="${ACC_SRC:-${XDG_DATA_HOME:-$HOME/.local/share}/acc/src}"
-
-if [ -n "${ACC_INSTALL_REF:-}" ] || [ -n "${ACC_INSTALL_SOURCE:-}" ]; then
-  echo "acc bootstrap: install attribution env set (local receipt only; installer does not send it)"
-fi
 
 if ! command -v git >/dev/null 2>&1; then
   echo "acc bootstrap: git not found -- install git first (debian/ubuntu: apt install git; fedora: dnf install git; macos: xcode-select --install or brew install git)" >&2
