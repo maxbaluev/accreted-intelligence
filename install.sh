@@ -58,6 +58,14 @@
 #   Env: ACC_NO_BROWSER=1   skip the browser capability
 #        ACC_NONINTERACTIVE=1 never prompt; skip sudo steps, just warn
 #        ACC_TIER=<lane>    force the embedder lane (skip the host probe's pick)
+#        ACC_EMBEDDER_BACKEND=modal|local|auto
+#                            modal = use the remote Modal embedder via normal `acc embedder`;
+#                            local = force local subprocess model; auto = modal when configured
+#        ACC_MODAL_ENV_FILE=/path/to/.env
+#                            optional env file with ACC_MODAL_EMBEDDER_URL/KEY/TOKEN
+#        ACC_REMOTE_MODEL_ID=<hf-model-id>
+#                            remote Modal model override; when unset on updates, the installer
+#                            preserves the existing substrate's primary model identity
 #        ACC_INSTALL=source skip the phase-3 prebuilt-release fetch; always build from source
 #        ACC_BROWSER_HOME / ACC_BROWSER_SOCK   browser env overrides
 #
@@ -90,7 +98,8 @@ done
 # to the per-OS CANONICAL DATA DIR — the SAME path `db::canonical_db_path` resolves a bare
 # `acc.db` to outside a git repo. Otherwise bare `acc doctor`/`acc doctor --report` (read-only, cannot
 # create) look in the canonical dir while the installer wrote it under $PWD — the exact split
-# that hard-FAILED for a real user. An explicit path arg ($ARGS[0]) still wins.
+# that hard-FAILED for a real user. An explicit path arg ($ARGS[0]) selects the one global
+# substrate for this install and is registered as the canonical pointer once the db exists.
 DB_ARG="${ARGS[0]:-}"
 
 EMB_SOCK="/tmp/acc-embedder.sock"
@@ -98,6 +107,9 @@ ENCODER_SCRIPT_FULL="$REPO/encoders/li_encode.py"           # LateOn / full-bf16
 ENCODER_SCRIPT_AWQ="$REPO/encoders/li_encode_colqwen.py"    # AWQ lanes (linux x86_64)
 BROWSER_HOME="${ACC_BROWSER_HOME:-$HOME/.local/share/acc/browser}"
 BROWSER_VENV="$BROWSER_HOME/venv"
+ACC_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+ACC_MODAL_ENV_DEFAULT="$ACC_CONFIG_HOME/acc/modal.env"
+REMOTE_MODEL_ID="${ACC_REMOTE_MODEL_ID:-}"
 
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -156,6 +168,33 @@ fi
 # verdict object. Everything that would clutter the JSON stream goes to stderr in JSON mode.
 # Color/glyphs are gated on USE_COLOR above so a captured (non-TTY) stream is plain ASCII.
 have() { command -v "$1" >/dev/null 2>&1; }
+substrate_primary_model() {
+  [ -r "$DB" ] || return 1
+  have python3 || return 1
+  python3 - "$DB" <<'PY'
+import sqlite3
+import sys
+
+try:
+    con = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
+    row = con.execute(
+        """
+        select model, count(*) as n
+        from representation
+        where coalesce(model, '') <> ''
+        group by model
+        order by n desc
+        limit 1
+        """
+    ).fetchone()
+except Exception:
+    sys.exit(1)
+
+if not row or not row[0]:
+    sys.exit(1)
+print(row[0])
+PY
+}
 story_mode() { [ "$JSON" != "1" ] && [ "${VERBOSE:-0}" != "1" ]; }
 log()  { [ "$JSON" = "1" ] && printf '%s\n' "$*" >&2 || printf '  %s\n' "$*"; }
 say()  { log "$@"; }
@@ -249,6 +288,50 @@ act() {
   fi
   "$@"
 }
+
+# modal_env_value KEY — read a single Modal setting from process env, ACC_MODAL_ENV_FILE,
+# local .env, or ~/.config/acc/modal.env. Never shell-source the file: customer projects
+# often contain values that are valid app config but invalid shell syntax.
+modal_env_value() {
+  local key="$1" val="" file=""
+  val="${!key:-}"
+  if [ -n "$val" ]; then printf '%s\n' "$val"; return 0; fi
+  if [ -n "${ACC_MODAL_ENV_FILE:-}" ]; then
+    file="$ACC_MODAL_ENV_FILE"
+  elif [ -f "$REPO/.env" ]; then
+    file="$REPO/.env"
+  elif [ -f "$ACC_MODAL_ENV_DEFAULT" ]; then
+    file="$ACC_MODAL_ENV_DEFAULT"
+  fi
+  [ -n "$file" ] && [ -r "$file" ] || return 1
+  local out
+  out="$(awk -v key="$key" '
+    /^[[:space:]]*(#|$)/ { next }
+    index($0, "=") {
+      name = substr($0, 1, index($0, "=") - 1)
+      value = substr($0, index($0, "=") + 1)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", name)
+      sub(/^export[[:space:]]+/, "", name)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      if ((substr(value, 1, 1) == "\"" && substr(value, length(value), 1) == "\"") ||
+          (substr(value, 1, 1) == "'"'"'" && substr(value, length(value), 1) == "'"'"'")) {
+        value = substr(value, 2, length(value) - 2)
+      }
+      if (name == key && value != "") { print value; exit 0 }
+    }
+  ' "$file")"
+  [ -n "$out" ] || return 1
+  printf '%s\n' "$out"
+}
+
+ACC_EMBEDDER_BACKEND_EFFECTIVE="$(printf '%s' "${ACC_EMBEDDER_BACKEND:-${ACC_EMBEDDER_MODE:-auto}}" | tr '[:upper:]' '[:lower:]')"
+ACC_MODAL_URL="$(modal_env_value ACC_MODAL_EMBEDDER_URL 2>/dev/null || modal_env_value ACC_REMOTE_EMBEDDER_URL 2>/dev/null || true)"
+REMOTE_EMBEDDER=0
+case "$ACC_EMBEDDER_BACKEND_EFFECTIVE" in
+  modal|remote) REMOTE_EMBEDDER=1 ;;
+  local|subprocess|python) REMOTE_EMBEDDER=0 ;;
+  *) [ -n "$ACC_MODAL_URL" ] && REMOTE_EMBEDDER=1 ;;
+esac
 
 # ── sudo wrapper ──────────────────────────────────────────────────────────────────────
 SUDO=""
@@ -532,7 +615,26 @@ select_tier
 HF_CACHE="$(hf_cache_dir)"
 DISK_FREE_MB="$(probe_disk_free_mb)"
 case "$DISK_FREE_MB" in ''|*[!0-9]*) DISK_FREE_MB=0 ;; esac
-apply_disk_floor
+if [ "$REMOTE_EMBEDDER" = "1" ]; then
+  TIER="modal-remote"
+  EXISTING_REMOTE_MODEL=""
+  if [ -z "$REMOTE_MODEL_ID" ] && [ "$UPDATE_MODE" = "1" ]; then
+    EXISTING_REMOTE_MODEL="$(substrate_primary_model 2>/dev/null || true)"
+  fi
+  if [ -n "$REMOTE_MODEL_ID" ]; then
+    REMOTE_MODEL_SOURCE="ACC_REMOTE_MODEL_ID"
+  elif [ -n "$EXISTING_REMOTE_MODEL" ]; then
+    REMOTE_MODEL_SOURCE="existing substrate primary model"
+  else
+    REMOTE_MODEL_SOURCE="host-selected model"
+  fi
+  MODEL_ID="${REMOTE_MODEL_ID:-${EXISTING_REMOTE_MODEL:-$MODEL_ID}}"
+  DEVICE="remote"
+  ENCODER_SCRIPT=""
+  TIER_REASON="remote embedder configured → $MODEL_ID ($REMOTE_MODEL_SOURCE) via normal acc embedder socket (no local model load)"
+else
+  apply_disk_floor
+fi
 say "probe: gpu=$PROBE_GPU vram_free=${PROBE_VRAM}MB ram=${PROBE_RAM}MB awq_lane=$PROBE_AWQ mps=$PROBE_MPS disk_free=${DISK_FREE_MB}MB (hf cache: $HF_CACHE)"
 if [ "$TIER" = "container" ]; then
   # Container is a TERMINAL verdict — no native lane fits this host, so the native phases
@@ -891,7 +993,9 @@ step "phase 4 — encoder env (uv sync of the tier's script deps)"
 # exists: it chooses the embedded script by model id, points CUDA lanes at the PyTorch cu128
 # wheel index, and verifies `torch.cuda.is_available()` before the install can pin cuda. The
 # direct `uv sync --script <file>` path remains only as a fallback for older binaries.
-if [ -n "$MODEL_ID" ] && "$ACC_BIN" warm-encoder --help >/dev/null 2>&1; then
+if [ "$REMOTE_EMBEDDER" = "1" ]; then
+  phase_result "encoder_env" "skipped" "remote embedder configured — skipping local torch/transformers encoder env" "phase 5: model pin"
+elif [ -n "$MODEL_ID" ] && "$ACC_BIN" warm-encoder --help >/dev/null 2>&1; then
   # Binary path (source checkout or release install): the wheel download is VISIBLE here instead
   # of hidden inside the first embedder start (mirror of the phase-6 prefetch binary fallback).
   if [ "$DRY_RUN" = "1" ]; then
@@ -942,7 +1046,9 @@ elif {
        # owner forced ACC_TIER, write the pin EXPLICITLY (`acc pin <model> <device>` always
        # writes) so phase 0's forced lane is the lane actually pinned — even in update mode,
        # even if a stale auto-probed pin disagrees. Non-forced installs keep the host-probe pin.
-       if [ "$TIER_FORCED" = "1" ]; then
+       if [ "$REMOTE_EMBEDDER" = "1" ]; then
+         act "acc pin $MODEL_ID remote (remote embedder identity; no local device probe)" "$ACC_BIN" pin "$MODEL_ID" remote >/dev/null 2>&1
+       elif [ "$TIER_FORCED" = "1" ]; then
          act "acc pin $MODEL_ID $DEVICE (explicit — owner forced ACC_TIER=$TIER, always writes)" "$ACC_BIN" pin "$MODEL_ID" "$DEVICE" >/dev/null 2>&1
        else
          act "acc pin (records the host-selected model/device)" "$ACC_BIN" pin >/dev/null 2>&1
@@ -977,7 +1083,9 @@ elif "$ACC_BIN" prefetch --help >/dev/null 2>&1; then
   PREFETCH_CMD=("$ACC_BIN" prefetch)
   PREFETCH_DISPLAY="acc prefetch"
 fi
-if [ -z "$MODEL_ID" ] || [ "${#PREFETCH_CMD[@]}" -eq 0 ]; then
+if [ "$REMOTE_EMBEDDER" = "1" ]; then
+  phase_result "model_prefetch" "skipped" "remote embedder configured — skipping local model weight prefetch" "phase 7: substrate"
+elif [ -z "$MODEL_ID" ] || [ "${#PREFETCH_CMD[@]}" -eq 0 ]; then
   phase_result "model_prefetch" "skipped" "no model to prefetch for tier=$TIER (or no prefetch path: on-disk $PREFETCH_SCRIPT absent and the binary has no prefetch subcommand)" "phase 7: substrate"
 elif [ "$UPDATE_MODE" = "1" ] && [ "$PIN_UNCHANGED" = "1" ]; then
   # Update mode + unchanged pin: the weights were already fetched by the original install;
@@ -1038,7 +1146,20 @@ elif [ "$DRY_RUN" = "1" ]; then
 elif act "initialize substrate at $DB" "$ACC_BIN" --db "$DB" status >/dev/null 2>&1; then
   phase_result "substrate" "ok" "substrate initialized at $DB"
 else
-  phase_result "substrate" "skipped" "could not init substrate (created on first ingest)" "acc --db $DB ingest hello \"hi\""
+  phase_result "substrate" "skipped" "could not init substrate (created on first ingest)" "acc ingest hello \"hi\""
+fi
+
+# If the installer was given an explicit db path, make that path the global canonical
+# substrate. Without this, install-time `--db /custom/acc.db` would create one file while
+# bare MCP/hooks later use the platform default. The default data-dir path needs no pointer.
+if [ -n "$DB_ARG" ]; then
+  if [ "$DRY_RUN" = "1" ]; then
+    phase_result "canonical" "would" "register explicit install db as the global canonical substrate: $DB" "acc canonical $DB"
+  elif [ -f "$DB" ] && "$ACC_BIN" canonical "$DB" >/dev/null 2>&1; then
+    phase_result "canonical" "ok" "registered explicit install db as the global canonical substrate: $DB"
+  else
+    phase_result "canonical" "skipped" "explicit install db was not registered as canonical (db missing or binary rejected it)" "run: acc canonical $DB"
+  fi
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
@@ -1062,10 +1183,19 @@ step "phase 8 — warm embedder daemon"
 if emb_warm; then
   phase_result "embedder_daemon" "ok" "embedder already warm on $EMB_SOCK"
 elif [ "$DRY_RUN" = "1" ]; then
-  phase_result "embedder_daemon" "would" "start the embedder daemon (model $MODEL_ID on $DEVICE; weights prefetched in phase 6 — a skipped prefetch downloads lazily here)" "phase 9: browser"
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    phase_result "embedder_daemon" "would" "start the remote-backed embedder daemon (model $MODEL_ID; no local model load)" "phase 9: browser"
+  else
+    phase_result "embedder_daemon" "would" "start the embedder daemon (model $MODEL_ID on $DEVICE; weights prefetched in phase 6 — a skipped prefetch downloads lazily here)" "phase 9: browser"
+  fi
 else
-  act "start the embedder daemon (model loads in background)" bash -c 'nohup "'"$ACC_BIN"'" embedder >/tmp/acc-embedder.log 2>&1 &'
-  phase_result "embedder_daemon" "ok" "embedder starting — model loads in background (first run downloads it). Log: /tmp/acc-embedder.log" "phase 9: browser"
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    act "start the remote-backed embedder daemon" bash -c 'nohup "'"$ACC_BIN"'" embedder >/tmp/acc-embedder.log 2>&1 &'
+    phase_result "embedder_daemon" "ok" "remote-backed embedder starting — the configured backend does the GPU/model work; no local model load. Log: /tmp/acc-embedder.log" "phase 9: browser"
+  else
+    act "start the embedder daemon (model loads in background)" bash -c 'nohup "'"$ACC_BIN"'" embedder >/tmp/acc-embedder.log 2>&1 &'
+    phase_result "embedder_daemon" "ok" "embedder starting — model loads in background (first run downloads it). Log: /tmp/acc-embedder.log" "phase 9: browser"
+  fi
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
@@ -1101,7 +1231,11 @@ fi
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 10 — seed core runtimes (waits for the embedder)"
 if [ "$DRY_RUN" = "1" ]; then
-  phase_result "seed" "would" "wait for the embedder to warm, then converge the browser daemon + seed runtime:browser" "phase 11: wiring"
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    phase_result "seed" "would" "wait for the remote-backed embedder to answer one encode, then converge the browser daemon + seed runtime:browser" "phase 11: wiring"
+  else
+    phase_result "seed" "would" "wait for the embedder to warm, then converge the browser daemon + seed runtime:browser" "phase 11: wiring"
+  fi
 elif [ "$NONINTERACTIVE" = "1" ]; then
   # NON-INTERACTIVE (piped / captured / agent shell / ACC_NONINTERACTIVE=1): the blocking
   # 600s warm-wait below would hide the multi-GB first-run model download inside a synchronous
@@ -1112,9 +1246,17 @@ elif [ "$NONINTERACTIVE" = "1" ]; then
   # remaining phases (wiring, verify) run so the script EXITS PROMPTLY. (warm stays 0 → the
   # final verdict prints the honest "warming in background" path, not happy-path try-these.)
   warm=0; emb_died=0
-  phase_result "seed" "skipped" "non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background — downloading the model, several GB on first run). Check progress in a few minutes with: $ACC_BIN --db $DB doctor" "$ACC_BIN --db $DB browser start (after the model finishes loading)"
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    phase_result "seed" "skipped" "non-interactive install: not blocking on the remote embedder warm-up (Modal endpoint check is warming in the background). Check progress with: $ACC_BIN doctor" "$ACC_BIN browser start (after the embedder is ready)"
+  else
+    phase_result "seed" "skipped" "non-interactive install: not blocking on the embedder warm-up (your Work Model is warming in the background — downloading the model, several GB on first run). Check progress in a few minutes with: $ACC_BIN doctor" "$ACC_BIN browser start (after the model finishes loading)"
+  fi
 else
-  say "waiting for the embedder (first run may download the model — several GB, takes minutes)…"
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    say "waiting for the remote-backed embedder (Modal endpoint + first encode)…"
+  else
+    say "waiting for the embedder (first run may download the model — several GB, takes minutes)…"
+  fi
   warm=0; emb_died=0
   for i in $(seq 0 599); do
     if emb_warm; then warm=1; break; fi
@@ -1132,7 +1274,13 @@ except Exception:
       say "[embedder] daemon process exited — see /tmp/acc-embedder.log"
       break
     fi
-    [ $((i % 10)) -eq 0 ] && [ "$i" -gt 0 ] && say "[embedder wait ${i}s/600s] model loading into memory/VRAM (weights were pre-fetched in phase 6; first load takes a moment) (log: /tmp/acc-embedder.log)"
+    if [ $((i % 10)) -eq 0 ] && [ "$i" -gt 0 ]; then
+      if [ "$REMOTE_EMBEDDER" = "1" ]; then
+        say "[embedder wait ${i}s/600s] waiting on remote encode (log: /tmp/acc-embedder.log)"
+      else
+        say "[embedder wait ${i}s/600s] model loading into memory/VRAM (weights were pre-fetched in phase 6; first load takes a moment) (log: /tmp/acc-embedder.log)"
+      fi
+    fi
     # PERMANENT-FAILURE SCAN (install-side never-silent invariant, cf. solved:e60ca6342725ecf0):
     # the daemon is a SUPERVISOR that respawns a crash-looping worker, so the pid check above
     # never fires on a hard ImportError / bad-model load — the worker dies, the daemon lives, and
@@ -1152,7 +1300,7 @@ except Exception:
     if [ "${ACC_NO_BROWSER:-0}" != "1" ]; then
       "$ACC_BIN" --db "$DB" browser start >/dev/null 2>&1 \
         && phase_result "seed" "ok" "converged browser daemon + seeded runtime:browser" "phase 11: wiring" \
-        || phase_result "seed" "skipped" "browser convergence reported an issue (see /tmp/acc-browser.log)" "acc --db $DB browser start"
+        || phase_result "seed" "skipped" "browser convergence reported an issue (see /tmp/acc-browser.log)" "acc browser start"
     else
       phase_result "seed" "ok" "embedder warm (browser skipped)" "phase 11: wiring"
     fi
@@ -1166,21 +1314,26 @@ except Exception:
       say "──────────────────────────────────────────"
     fi
     if [ "$emb_died" = "1" ]; then
-      if grep -q 'requires accelerate' /tmp/acc-embedder.log 2>/dev/null; then
-        phase_result "seed" "skipped" "embedder daemon exited before warming: encoder env is missing accelerate (old installer/runtime); current releases include it" "update acc, then: $ACC_BIN embedder restart  ·  $ACC_BIN --db $DB browser start"
+      if [ "$REMOTE_EMBEDDER" = "1" ]; then
+        phase_result "seed" "skipped" "remote-backed embedder exited before warming (see the log tail above + /tmp/acc-embedder.log — likely Modal URL/auth/model mismatch)" "check ACC_MODAL_EMBEDDER_URL, ACC_MODAL_KEY, ACC_MODAL_TOKEN, then: $ACC_BIN embedder restart  ·  $ACC_BIN browser start"
+      elif grep -q 'requires accelerate' /tmp/acc-embedder.log 2>/dev/null; then
+        phase_result "seed" "skipped" "embedder daemon exited before warming: encoder env is missing accelerate (old installer/runtime); current releases include it" "update acc, then: $ACC_BIN embedder restart  ·  $ACC_BIN browser start"
       else
-        phase_result "seed" "skipped" "embedder daemon exited before warming (see the log tail above + /tmp/acc-embedder.log — likely CUDA/driver/import error)" "fix the error above, then: $ACC_BIN embedder restart  ·  $ACC_BIN --db $DB browser start"
+        phase_result "seed" "skipped" "embedder daemon exited before warming (see the log tail above + /tmp/acc-embedder.log — likely CUDA/driver/import error)" "fix the error above, then: $ACC_BIN embedder restart  ·  $ACC_BIN browser start"
       fi
     else
-      phase_result "seed" "skipped" "embedder did not warm within 10min (see the log tail above + /tmp/acc-embedder.log)" "seed later: acc --db $DB browser start (after the model finishes loading)"
+      if [ "$REMOTE_EMBEDDER" = "1" ]; then
+        phase_result "seed" "skipped" "remote-backed embedder did not warm within 10min (see the log tail above + /tmp/acc-embedder.log)" "seed later: acc browser start (after the Modal endpoint answers)"
+      else
+        phase_result "seed" "skipped" "embedder did not warm within 10min (see the log tail above + /tmp/acc-embedder.log)" "seed later: acc browser start (after the model finishes loading)"
+      fi
     fi
   fi
 fi
 
 # ════════════════════════════════════════════════════════════════════════════════════════
-# PHASE 11 — wiring: register acc as an MCP server (project-local .mcp.json). Relative
-# "acc.db" on purpose — Claude Code launches MCP servers from the project dir, so the file
-# stays clone-portable. "alwaysLoad": true skips MCP tool-search deferral (the two verbs are
+# PHASE 11 — wiring: register acc as an MCP server (project .mcp.json). Project entries are
+# bare `acc mcp` and resolve the same global Work Model as user-scope wiring. "alwaysLoad": true skips MCP tool-search deferral (the two verbs are
 # the kernel interface — they must never be lazy-loaded). Idempotent: a complete acc entry
 # is left unchanged; a pre-alwaysLoad entry is upgraded IN PLACE (key added, rest preserved).
 # ════════════════════════════════════════════════════════════════════════════════════════
@@ -1197,13 +1350,13 @@ elif [ "$DRY_RUN" = "1" ]; then
   if [ -f "$REPO/.mcp.json" ] && python3 -c 'import json,sys;e=json.load(open(sys.argv[1])).get("mcpServers",{}).get("acc");sys.exit(0 if isinstance(e,dict) and e.get("alwaysLoad") is True else 1)' "$REPO/.mcp.json" 2>/dev/null; then
     phase_result "mcp_wiring" "ok" ".mcp.json already registers the acc server with alwaysLoad (would leave unchanged)"
   else
-    phase_result "mcp_wiring" "would" "write project-local .mcp.json (server: acc · db: acc.db, relative · alwaysLoad: true)" "phase 11b: hooks wiring"
+    phase_result "mcp_wiring" "would" "write project .mcp.json (server: acc mcp · global db · alwaysLoad: true)" "phase 11b: hooks wiring"
   fi
 else
   MCP_RESULT="$(python3 - <<'PY'
 import json, pathlib
 path = pathlib.Path(".mcp.json")
-acc = {"command": "acc", "args": ["--db", "acc.db", "mcp"], "alwaysLoad": True}
+acc = {"command": "acc", "args": ["mcp"], "alwaysLoad": True}
 if path.exists():
     try:
         data = json.loads(path.read_text())
@@ -1223,7 +1376,7 @@ if isinstance(entry, dict):
 else:
     servers["acc"] = acc
     path.write_text(json.dumps(data, indent=2) + "\n")
-    print("WROTE project-local .mcp.json (server: acc · db: acc.db, relative on purpose · alwaysLoad: true)")
+    print("WROTE project .mcp.json (server: acc mcp · global db · alwaysLoad: true)")
 PY
 )"
   case "$MCP_RESULT" in
@@ -1313,8 +1466,8 @@ fi
 # convenience — it never fails the install. Honors --dry-run (unified-diff preview, nothing
 # written) and ACC_HOSTS_SYNC=off (no-op inside the binary). Idempotent + re-runnable: install
 # a new agent later and just re-run `acc hosts-sync` (or start a session — the fingerprint
-# trigger re-converges). The OPTIONAL isolation override is `acc hosts-sync --project .`
-# (a separate per-project .mcp.json + db for confidential/separated work).
+# trigger re-converges). `acc hosts-sync --project .` only writes project carriers; it does
+# not create a project-local db.
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 13 — wire installed coding agents globally (acc hosts-sync)"
 HOSTS_BIN="$ACC_BIN"
@@ -1370,14 +1523,14 @@ fi
 # ════════════════════════════════════════════════════════════════════════════════════════
 step "phase 14 — verify (acc doctor)"
 if [ "$DRY_RUN" = "1" ]; then
-  phase_result "verify" "would" "run: acc --db $DB doctor (proves binary/substrate/embedder/model_pin/sandbox/mcp/hooks/brain)" "acc --db $DB doctor --json"
+  phase_result "verify" "would" "run: acc doctor (proves binary/substrate/embedder/model_pin/sandbox/mcp/hooks/brain)" "acc doctor --json"
 else
   if [ "$JSON" = "1" ]; then
     DOC_JSON="$("$ACC_BIN" --db "$DB" doctor --json 2>/dev/null || echo '{"schema":"acc.doctor.v1","status":"unknown"}')"
     DOC_STATUS="$(printf '%s' "$DOC_JSON" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("status","unknown"))' 2>/dev/null || echo unknown)"
     case "$DOC_STATUS" in
-      ok)   json_phase "verify" "ok" "acc doctor: $DOC_STATUS" "acc --db $DB doctor --json" ;;
-      *)    json_phase "verify" "ok" "acc doctor: $DOC_STATUS (degraded layers are normal on a fresh install — see the doctor report)" "acc --db $DB doctor --json" ;;
+      ok)   json_phase "verify" "ok" "acc doctor: $DOC_STATUS" "acc doctor --json" ;;
+      *)    json_phase "verify" "ok" "acc doctor: $DOC_STATUS (degraded layers are normal on a fresh install — see the doctor report)" "acc doctor --json" ;;
     esac
   else
     "$ACC_BIN" --db "$DB" doctor || true
@@ -1418,9 +1571,9 @@ if [ "$JSON" = "1" ]; then
   if [ "$DRY_RUN" = "1" ]; then
     json_phase "verdict" "would" "dry-run complete: all phases walked, nothing mutated; tier=$TIER ($MODEL_ID on $DEVICE)" "run ./install.sh (no --dry-run) to install"
   elif [ "$UPDATE_MODE" = "1" ]; then
-    json_phase "verdict" "ok" "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?}; tier=$TIER ($MODEL_ID on $DEVICE); Work Model at $DB untouched (schema migrates automatically on first open). Verify with the doctor handoff." "acc --db $DB doctor --json"
+    json_phase "verdict" "ok" "updated ${OLD_ACC_ID:-<none>} → ${NEW_ACC_ID:-?}; tier=$TIER ($MODEL_ID on $DEVICE); Work Model at $DB untouched (schema migrates automatically on first open). Verify with the doctor handoff." "acc doctor --json"
   else
-    json_phase "verdict" "ok" "install complete; tier=$TIER ($MODEL_ID on $DEVICE). Verify with the doctor handoff." "acc --db $DB doctor --json"
+    json_phase "verdict" "ok" "install complete; tier=$TIER ($MODEL_ID on $DEVICE). Verify with the doctor handoff." "acc doctor --json"
   fi
   exit 0
 fi
@@ -1435,9 +1588,7 @@ fi
 # NEXT-STEP guidance. The one-Work-Model pivot: phase 13 wired ALL your agents (Claude Code,
 # OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding Work Model — they work in EVERY directory
 # now, with no per-project step. So the next step is simply: open Claude Code anywhere and talk.
-# The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project onto its own db.
 ACC_CMD="\"${ACC_BIN:-acc}\""
-DB_ARG="\"$DB\""
 cc_next_lines() {
   cat <<CCNEXT
 Your Work Model is ready for its first example.
@@ -1451,9 +1602,9 @@ AccInt drafts, researches, and reasons locally first. It asks before anything is
 posted, paid, deleted, or done outside your machine. After the result it shows what the
 Work Model can reuse next time.
 (The two verbs acc_retrieve + acc_act appear after a restart / reload MCP if Claude Code is open.)
-Optional — isolate a project on its OWN separate Work Model (confidential / separated work):
+Optional — add project instruction/hook carriers without changing the global Work Model:
   cd <your-project> && $ACC_CMD hosts-sync --project .
-CLI health check, if you want it: $ACC_CMD --db $DB_ARG status  ·  $ACC_CMD --db $DB_ARG doctor
+CLI health check, if you want it: $ACC_CMD status  ·  $ACC_CMD doctor
 CCNEXT
 }
 
@@ -1464,15 +1615,19 @@ elif [ "$NONINTERACTIVE" = "1" ] && [ "${warm:-0}" != "1" ]; then
   # NON-INTERACTIVE path: we deliberately SKIPPED the blocking warm-wait (phase 10), so the
   # embedder is warming in the BACKGROUND — this is NOT a failure. Print a clear line and exit
   # 0 promptly (an agent's captured stdout shows the next step without ever hitting its timeout).
-  ok "acc installed. Your Work Model is warming up — downloading the model in the background (several GB on first run)."
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    ok "acc installed. Your Work Model is warming in the background through the remote embedder."
+  else
+    ok "acc installed. Your Work Model is warming in the background — downloading the model (several GB on first run)."
+  fi
   cat <<BGWARM
 
 Check progress in a few minutes:
-  $ACC_CMD --db $DB_ARG doctor        (expect: embedder OK once the model finishes loading)
+  $ACC_CMD doctor        (expect: embedder OK once the embedder is ready)
 
 Once the embedder is warm, retrieval is live. The CLI works immediately:
-  $ACC_CMD --db $DB_ARG status
-  $ACC_CMD --db $DB_ARG doctor
+  $ACC_CMD status
+  $ACC_CMD doctor
 
 BGWARM
   cc_next_lines
@@ -1482,17 +1637,32 @@ elif [ "${warm:-0}" != "1" ]; then
   # with the ONE manual step the user must take next. (install is stage 0 of onboarding — name
   # the next action explicitly whenever manual recovery is required.)
   warn "acc installed, but the embedder (the encoder daemon) did NOT come up — retrieval + ingest won't work yet."
-  cat <<DEGRADED
+  if [ "$REMOTE_EMBEDDER" = "1" ]; then
+    cat <<DEGRADED
+
+Fix this FIRST (then acc is fully live):
+  1. See why it failed:   tail -n 30 /tmp/acc-embedder.log
+  2. Check remote config: ACC_REMOTE_EMBEDDER_URL / ACC_MODAL_EMBEDDER_URL and remote auth config
+  3. Start the embedder:  $ACC_CMD embedder restart
+  4. Re-check health:     $ACC_CMD doctor               (expect: embedder OK, verdict OK)
+  5. Still stuck?         $ACC_CMD doctor --report      (builds a SANITIZED report — no Work Model data, no secrets, just
+                          structural health — and prints a pre-filled GitHub issue link to file at
+                          github.com/maxbaluev/accreted-intelligence/issues)
+
+DEGRADED
+  else
+    cat <<DEGRADED
 
 Fix this FIRST (then acc is fully live):
   1. See why it failed:   tail -n 30 /tmp/acc-embedder.log
   2. Start the embedder:  $ACC_CMD embedder restart     (first run downloads the model — several GB, minutes)
-  3. Re-check health:     $ACC_CMD --db $DB_ARG doctor  (expect: embedder OK, verdict OK)
+  3. Re-check health:     $ACC_CMD doctor               (expect: embedder OK, verdict OK)
   4. Still stuck?         $ACC_CMD doctor --report      (builds a SANITIZED report — no Work Model data, no secrets, just
                           structural health — and prints a pre-filled GitHub issue link to file at
                           github.com/maxbaluev/accreted-intelligence/issues)
 
 DEGRADED
+  fi
   cc_next_lines
 else
   ok "acc install complete — embedder warm, all systems live."
@@ -1504,7 +1674,7 @@ Try this now:
   3. acc will draft/research locally, show what happened, and ask before anything is sent.
 
 Optional health check:
-  $ACC_CMD --db $DB_ARG doctor
+  $ACC_CMD doctor
 
 TRY
   cc_next_lines

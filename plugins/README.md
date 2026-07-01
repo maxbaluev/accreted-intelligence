@@ -70,12 +70,13 @@ Cursor rules body, and the MCP server instructions. The per-host
 `AGENTS-snippet.md` hand copies are gone — tests pin every carrier, so the
 copies can never diverge again.
 
-## Cross-project memory
+## Global Memory
 
-One substrate can serve every project and every host: export
-`ACC_DB=/abs/path/acc.db` in the environment the host starts from. The
-spawned hooks and the MCP server both honor it; without it, resolution is the
-per-project `<cwd>/acc.db`.
+One substrate serves every project and every host. `acc canonical
+/abs/path/acc.db` can pin that global substrate to an existing database;
+without a pointer, hooks, MCP, and CLI bind to the platform global data-dir db
+from any project. Do not set `ACC_DB` in host configs and do not create
+project-local `acc.db` files.
 
 ## Coexistence with your existing setup
 

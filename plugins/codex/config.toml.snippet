@@ -12,4 +12,5 @@ command = "acc"
 args = ["mcp"]
 env = { "ACC_MCP_CALL_DEADLINE_SECS" = "45" }
 tool_timeout_sec = 300
-# Cross-project memory: add "ACC_DB" = "/home/you/acc.db" to env above.
+# Work Model: bare `acc mcp` uses the global canonical substrate; do not
+# set ACC_DB in host configs.

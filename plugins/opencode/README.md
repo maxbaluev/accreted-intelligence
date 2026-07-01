@@ -40,9 +40,10 @@ snippet file to hand-copy, and tests pin every carrier verbatim.
    writes IS the contract digest (retrieve first, cite `[ids]`, credit
    honestly), rendered from `HOST_TEACHING_CANONICAL` in `src/hosts.rs`.
 
-Cross-project memory: export `ACC_DB=/abs/path/acc.db` in the environment
-OpenCode starts from (the plugin's spawned hooks and the MCP server both
-inherit it). Default is `<project>/acc.db`.
+Global memory: the plugin's spawned hooks and MCP server bind to one global Work
+Model from every project. `acc canonical /abs/path/acc.db` can pin that global
+substrate to an existing database; without a pointer, acc uses the platform
+global data-dir db. Do not export `ACC_DB` for normal host usage.
 
 ## What the plugin records
 

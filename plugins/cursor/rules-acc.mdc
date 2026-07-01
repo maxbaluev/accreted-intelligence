@@ -12,7 +12,9 @@ alwaysApply: true
   input="<goal>")` is memory-first: it records a commitment, answers from the scored
   memory when it can, and checkpoints a deliberation frame when it cannot — answer a
   returned `brain_frame` via `acc_act(runtime="continue", input={"frame_id": "…",
-  "proposal_text": "…"})`; the frame_id alone is the credential.
+  "proposal_text": "…"})`; the frame_id alone is the credential. End every
+  `proposal_text` with `PREDICT: <0.00-1.00> <why>`; acc strips it before the owner
+  sees it and uses it to calibrate the Work Model against later outcomes.
 - **Close what you open.** When reality answers — a passing test, a real reply, a
   shipped artifact — `acc_act(runtime="outcome", input={"ref": "<id>", "good": true})`.
 - **Credit honesty.** An outcome defaults to `self_graded` → a weak 0.25× prior. Tag
@@ -30,5 +32,7 @@ alwaysApply: true
   owner-held (preference, consent, identity, history) — never fabricate it. Inside
   `acc_act(runtime="exec")` sandboxed code, `acc retrieve "<q>"` recurses over the
   same memory mid-run. Never leave a received frame unresolved.
-- **Cross-project memory.** Export `ACC_DB=/abs/path/acc.db` to share one substrate
-  across projects; otherwise hooks and MCP resolve the project-local `acc.db`.
+- **Global memory.** Hooks, MCP, and CLI bind to one global Work Model from every
+  project. `acc canonical <path>` may pin that global substrate to an existing db;
+  without a pointer, the platform global data-dir db is used. Do not create
+  per-project `acc.db` files or set `ACC_DB` in host configs.

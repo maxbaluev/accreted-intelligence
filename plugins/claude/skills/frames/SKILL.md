@@ -11,6 +11,8 @@ Routing sugar over the two MCP verbs — no logic lives here.
 2. For each open/waiting frame: read its typed hole + retrieved context, deliberate,
    then submit via
    `acc_act(runtime="continue", input={"frame_id": ..., "submit_token": ..., "proposal_text": ...})`.
-3. An identical duplicate submit replays the cached result — resubmitting is safe.
-4. Surface each resolution's `commitment` id and cited `[ids]`; drain the queue fully
+3. End `proposal_text` with `PREDICT: <0.00-1.00> <why>`; acc strips that line before
+   the owner sees it and uses it to calibrate the Work Model against later outcomes.
+4. An identical duplicate submit replays the cached result — resubmitting is safe.
+5. Surface each resolution's `commitment` id and cited `[ids]`; drain the queue fully
    before taking new work — checkpointed frames are work headless runs saved for you.

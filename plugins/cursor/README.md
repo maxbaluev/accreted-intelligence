@@ -42,8 +42,8 @@ drop-in copies of exactly what `--project` writes.
    `python3` / shell requirement.
 2. **MCP.** Merge [`mcp.json`](mcp.json) into `~/.cursor/mcp.json` (global) or
    `<project>/.cursor/mcp.json`. The server block carries the deadline contract
-   (`env.ACC_MCP_CALL_DEADLINE_SECS`); add `"ACC_DB": "/abs/path/acc.db"` to the
-   same `env` for cross-project memory.
+   (`env.ACC_MCP_CALL_DEADLINE_SECS`) and uses the global canonical Work Model.
+   Do not set `ACC_DB` in Cursor config.
 3. **Rule.** `acc hosts-sync --project` writes
    `<project>/.cursor/rules/acc.mdc` for you; the checked-in
    [`rules-acc.mdc`](rules-acc.mdc) is the manual drop-in copy of the same
@@ -101,8 +101,9 @@ verbs every turn:
   `.cursor/rules/acc.mdc` carries this contract) and **cite the `[ids]`** you
   build on — this hand-runs the inject the platform cannot.
 - Route non-trivial work through `acc_act` `solve`, answer any returned
-  `brain_frame` via `continue`, and **close commitments with `outcome`** — the
-  Stop guard you do not get for free, run by hand.
+  `brain_frame` via `continue`, end `proposal_text` with `PREDICT: <0.00-1.00> <why>`,
+  and **close commitments with `outcome`** — the Stop guard you do not get for free,
+  run by hand.
 
 This is honest reach, not a defect: the MCP verbs are full-depth on Cursor; only
 the hook-driven automation is shallow, and the rule + this recipe carry the loop.

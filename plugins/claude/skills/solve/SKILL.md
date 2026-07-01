@@ -12,5 +12,7 @@ Routing sugar over the two MCP verbs — no logic lives here.
 3. If the result is a **brain_frame**: it is YOUR deliberation turn — the frame is typed
    (which hole, what was retrieved, what is predicted). Reason over it, then submit via
    `acc_act(runtime="continue", input={"frame_id": ..., "submit_token": ..., "proposal_text": ...})`.
-4. Never leave a received frame unresolved; never solo-derive outside the loop.
-5. Close the commitment honestly later with `acc_act(runtime="outcome", ...)`.
+4. End `proposal_text` with `PREDICT: <0.00-1.00> <why>`; acc strips that line before
+   the owner sees it and uses it to calibrate the Work Model against later outcomes.
+5. Never leave a received frame unresolved; never solo-derive outside the loop.
+6. Close the commitment honestly later with `acc_act(runtime="outcome", ...)`.

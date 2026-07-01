@@ -82,10 +82,10 @@ file to hand-copy, and tests pin every carrier verbatim.
    writes IS the contract digest (retrieve first, cite `[ids]`, credit
    honestly), rendered from `HOST_TEACHING_CANONICAL` in `src/hosts.rs`.
 
-Cross-project memory: add `"ACC_DB" = "/abs/path/acc.db"` to the
-`[mcp_servers.acc]` `env` map and export the same variable in the shell Codex
-runs from (the notify hook inherits it). Default resolution is the per-project
-`acc.db`.
+Global memory: bare `acc mcp` plus the notify hook bind to one global Work
+Model from every project. `acc canonical /abs/path/acc.db` can pin that global
+substrate to an existing database; without a pointer, acc uses the platform
+global data-dir db. Do not set `ACC_DB` in Codex host config.
 
 ## What gets recorded
 
@@ -130,8 +130,9 @@ self-enforces the loop:
   `~/.codex/AGENTS.md` fence carries this contract) and **cite the `[ids]`** you
   build on — this hand-runs the inject the pre-trust state cannot.
 - Route non-trivial work through `acc_act` `solve`, answer any returned
-  `brain_frame` via `continue`, and **close commitments with `outcome`** — the
-  Stop guard you do not get for free before trust, run by hand.
+  `brain_frame` via `continue`, end `proposal_text` with `PREDICT: <0.00-1.00> <why>`,
+  and **close commitments with `outcome`** — the Stop guard you do not get for free
+  before trust, run by hand.
 
 Run `/hooks` once to trust acc's SHA-keyed hooks and lift Codex to full binding
 parity; the recipe above remains correct as a permanent belt-and-suspenders.

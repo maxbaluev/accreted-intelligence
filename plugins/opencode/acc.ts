@@ -23,8 +23,9 @@
  *      or block the host.
  *
  * The two-verb MCP access (acc_retrieve / acc_act) is registered separately in
- * opencode.json — see opencode.json.snippet next to this file. Cross-project memory:
- * export ACC_DB=/abs/path/acc.db (the spawned hooks inherit the session environment).
+ * opencode.json — see opencode.json.snippet next to this file. Memory is global:
+ * spawned hooks and MCP use the canonical Work Model; do not set ACC_DB in host
+ * configs.
  */
 import type { Plugin } from "@opencode-ai/plugin"
 import { spawn } from "node:child_process"

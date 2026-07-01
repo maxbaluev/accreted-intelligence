@@ -136,7 +136,9 @@ $ConfigHome     = Join-Path (Get-WinAppData) 'acc'        # auth.json + model.js
 # `crate::platform::data_dir().join("acc.db")` -- the exact path `db::canonical_db_path`
 # resolves a bare `acc.db` to for a non-git release install. So the installer, the wired MCP
 # (relative `acc.db` -> same canonical dir off-git), and bare read-only `acc` commands all
-# agree on ONE db. An explicit -DbPath argument still wins (absolute paths pass through).
+# agree on ONE db. An explicit -DbPath argument selects the one global substrate for this
+# install and is registered as the canonical pointer once the db exists.
+$ExplicitDbPath = -not [string]::IsNullOrWhiteSpace($DbPath)
 if (-not $DbPath) { $DbPath = Join-Path $ConfigHome 'acc.db' }
 $CacheHome      = Join-Path (Get-WinLocalAppData) 'acc'   # caches
 $RunDir         = Join-Path $CacheHome 'run'               # daemon endpoint home
@@ -1062,13 +1064,31 @@ if (Test-Path $DbPath) {
 } elseif ($DryRun) {
   Emit-Phase 'substrate' 'would' ("create a fresh substrate at $DbPath") 'phase 8: config home'
 } elseif (-not $BinaryAvailable) {
-  Emit-Phase 'substrate' 'skipped' ("substrate init requires the acc binary -- $EnginePendingNote") ("later: acc --db $DbPath status (created on first use)")
+  Emit-Phase 'substrate' 'skipped' ("substrate init requires the acc binary -- $EnginePendingNote") ("later: acc status (created on first use)")
 } else {
   $r = Invoke-Native $Acc @('--db', $DbPath, 'status')
   if ($r.ok) {
     Emit-Phase 'substrate' 'ok' ("substrate initialized at $DbPath")
   } else {
-    Emit-Phase 'substrate' 'skipped' 'could not init substrate (created on first ingest)' ("acc --db $DbPath ingest hello `"hi`"")
+    Emit-Phase 'substrate' 'skipped' 'could not init substrate (created on first ingest)' ("acc ingest hello `"hi`"")
+  }
+}
+
+# If the installer was given an explicit db path, make that path the global canonical
+# substrate. Without this, install-time `--db C:\...\acc.db` would create one file while
+# bare MCP/hooks later use the platform default. The default data-dir path needs no pointer.
+if ($ExplicitDbPath) {
+  if ($DryRun) {
+    Emit-Phase 'canonical' 'would' ("register explicit install db as the global canonical substrate: $DbPath") ("acc canonical $DbPath")
+  } elseif ($BinaryAvailable -and (Test-Path $DbPath)) {
+    $r = Invoke-Native $Acc @('canonical', $DbPath)
+    if ($r.ok) {
+      Emit-Phase 'canonical' 'ok' ("registered explicit install db as the global canonical substrate: $DbPath")
+    } else {
+      Emit-Phase 'canonical' 'skipped' 'explicit install db was not registered as canonical (binary rejected it)' ("run: acc canonical $DbPath")
+    }
+  } else {
+    Emit-Phase 'canonical' 'skipped' 'explicit install db was not registered as canonical (db missing or binary unavailable)' ("run: acc canonical $DbPath")
   }
 }
 
@@ -1255,7 +1275,7 @@ if ($DryRun) {
   # promptly. ($warm stays $false -> the final block prints the honest "warming in background".)
   $warm = $false
   $embDied = $false
-  Emit-Phase 'seed' 'skipped' ("non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background -- downloading the model, several GB on first run). Check progress in a few minutes with: acc --db $DbPath doctor") ("acc --db $DbPath browser start (after the model finishes loading)")
+  Emit-Phase 'seed' 'skipped' ("non-interactive install: not blocking on the embedder warm-up (your Work Model warms up in the background -- downloading the model, several GB on first run). Check progress in a few minutes with: acc doctor") ("acc browser start (after the model finishes loading)")
 } else {
   Say 'waiting for the embedder (first run may download the model -- several GB, takes minutes)...'
   $warm = $false
@@ -1304,7 +1324,7 @@ if ($DryRun) {
       if ($r.ok) {
         Emit-Phase 'seed' 'ok' 'converged Camoufox browser daemon + seeded runtime:browser' 'phase 12: wiring'
       } else {
-        Emit-Phase 'seed' 'failed' 'browser convergence reported an issue after embedder warm' ("check the broker log, then run: acc --db $DbPath browser start")
+        Emit-Phase 'seed' 'failed' 'browser convergence reported an issue after embedder warm' ("check the broker log, then run: acc browser start")
       }
     } else {
       Emit-Phase 'seed' 'ok' 'embedder warm (browser skipped)' 'phase 12: wiring'
@@ -1322,21 +1342,21 @@ if ($DryRun) {
       }
     }
     if ($embDied) {
-      Emit-Phase 'seed' 'failed' ("embedder daemon/worker crashed before warming (see the log tail above + $EmbLogErr -- likely model-load / CUDA-driver / import error)") ("fix the error above, then: acc embedder  ;  acc --db $DbPath browser start  (or use the container: docs/install/container.md)")
+      Emit-Phase 'seed' 'failed' ("embedder daemon/worker crashed before warming (see the log tail above + $EmbLogErr -- likely model-load / CUDA-driver / import error)") ("fix the error above, then: acc embedder  ;  acc browser start  (or use the container: docs/install/container.md)")
     } else {
-      Emit-Phase 'seed' 'failed' ("embedder did not warm within 10min (see the log tail above + $EmbLogOut) -- a real stall, not a pending lane") ("inspect the log; once it loads run: acc --db $DbPath browser start  (or use the container: docs/install/container.md)")
+      Emit-Phase 'seed' 'failed' ("embedder did not warm within 10min (see the log tail above + $EmbLogOut) -- a real stall, not a pending lane") ("inspect the log; once it loads run: acc browser start  (or use the container: docs/install/container.md)")
     }
   }
 }
 
 # =========================================================================================
-# PHASE 12 -- wiring: register acc as an MCP server (project-local .mcp.json) EXACTLY the
-# way install.sh phase 11 does: relative "acc.db" on purpose (Claude Code launches MCP
-# servers from the project dir -- clone-portable). "alwaysLoad": true skips MCP tool-search
+# PHASE 12 -- wiring: register acc as an MCP server (project .mcp.json) EXACTLY the
+# way install.sh phase 11 does: bare "acc mcp" resolves the same global Work Model as
+# user-scope wiring. "alwaysLoad": true skips MCP tool-search
 # deferral (the two verbs are the kernel interface -- never lazy-loaded). Idempotent: a
 # complete acc entry (with alwaysLoad) is left unchanged; a pre-alwaysLoad entry is upgraded
 # IN PLACE (the key is added, every other mcpServers key preserved). User-level settings
-# under %USERPROFILE%\.claude are NOT touched -- the wiring is project-local, same as install.sh.
+# under %USERPROFILE%\.claude are NOT touched in this phase.
 # =========================================================================================
 Step 'phase 12 -- register acc as an MCP server (.mcp.json)'
 $McpPath = Join-Path $Repo '.mcp.json'
@@ -1360,7 +1380,7 @@ if ($RepoIsClone) {
   if (Test-McpHasAccAlwaysLoad) {
     Emit-Phase 'mcp_wiring' 'ok' '.mcp.json already registers the acc server with alwaysLoad (would leave unchanged)'
   } else {
-    Emit-Phase 'mcp_wiring' 'would' 'write project-local .mcp.json (server: acc - db: acc.db, relative - alwaysLoad: true)' 'phase 13: hooks'
+    Emit-Phase 'mcp_wiring' 'would' 'write project .mcp.json (server: acc mcp - global db - alwaysLoad: true)' 'phase 13: hooks'
   }
 } else {
   $mcpDetail = ''; $mcpStatus = 'ok'
@@ -1393,10 +1413,10 @@ if ($RepoIsClone) {
         $mcpDetail = 'upgraded .mcp.json acc entry in place -- added alwaysLoad: true (rest preserved)'
       }
     } else {
-      $entry = [pscustomobject][ordered]@{ command = 'acc'; args = @('--db', 'acc.db', 'mcp'); alwaysLoad = $true }
+      $entry = [pscustomobject][ordered]@{ command = 'acc'; args = @('mcp'); alwaysLoad = $true }
       $mcpData.mcpServers | Add-Member -NotePropertyName 'acc' -NotePropertyValue $entry
       [IO.File]::WriteAllText($McpPath, (ConvertTo-Json -InputObject $mcpData -Depth 16) + "`n")
-      $mcpDetail = 'wrote project-local .mcp.json (server: acc - db: acc.db, relative on purpose - alwaysLoad: true)'
+      $mcpDetail = 'wrote project .mcp.json (server: acc mcp - global db - alwaysLoad: true)'
     }
     Emit-Phase 'mcp_wiring' $mcpStatus $mcpDetail 'phase 13: hooks'
   }
@@ -1460,8 +1480,8 @@ if ($RepoIsClone) {
 # lifecycle recording, ADD-ONLY (an existing acc entry is never rewritten), one backup per
 # changed file. A fresh install leaves all agents on one compounding Work Model with NO per-project
 # step. Fail-soft: wiring an agent is convenience -- it NEVER fails the install. Honors -DryRun
-# (preview, nothing written) and ACC_HOSTS_SYNC=off (escape -> skip). The optional isolation
-# override is `acc hosts-sync --project .`. Mirror of install.sh phase 13. Needs the built
+# (preview, nothing written) and ACC_HOSTS_SYNC=off (escape -> skip). `acc hosts-sync --project .`
+# only writes project carriers; it does not create a project-local db. Mirror of install.sh phase 13. Needs the built
 # binary -- skips with the pending note until then.
 # =========================================================================================
 Step 'phase 14 -- wire installed coding agents globally (acc hosts-sync)'
@@ -1537,7 +1557,7 @@ if ($DryRun) {
 # =========================================================================================
 Step 'phase 16 -- verify (acc doctor)'
 if ($DryRun) {
-  Emit-Phase 'verify' 'would' ("run: acc --db $DbPath doctor (proves binary/substrate/embedder/model_pin/sandbox/mcp/hooks/brain)") ("acc --db $DbPath doctor --json")
+  Emit-Phase 'verify' 'would' ("run: acc doctor (proves binary/substrate/embedder/model_pin/sandbox/mcp/hooks/brain)") ("acc doctor --json")
 } elseif (-not $BinaryAvailable) {
   Emit-Phase 'verify' 'skipped' ("acc doctor unavailable -- $EnginePendingNote") 're-run .\install.ps1 after the engine port lands for the doctor handoff'
 } else {
@@ -1548,9 +1568,9 @@ if ($DryRun) {
       try { $docStatus = '' + ((($r.out | Out-String).Trim()) | ConvertFrom-Json).status } catch { $docStatus = 'unknown' }
     }
     if ($docStatus -eq 'ok') {
-      Emit-Phase 'verify' 'ok' ("acc doctor: $docStatus") ("acc --db $DbPath doctor --json")
+      Emit-Phase 'verify' 'ok' ("acc doctor: $docStatus") ("acc doctor --json")
     } else {
-      Emit-Phase 'verify' 'ok' ("acc doctor: $docStatus (degraded layers are normal on a fresh install -- see the doctor report)") ("acc --db $DbPath doctor --json")
+      Emit-Phase 'verify' 'ok' ("acc doctor: $docStatus (degraded layers are normal on a fresh install -- see the doctor report)") ("acc doctor --json")
     }
   } else {
     $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
@@ -1564,9 +1584,9 @@ if ($Json) {
   if ($DryRun) {
     Emit-Phase 'verdict' 'would' ("dry-run complete: all phases walked, nothing mutated; tier=$script:Tier ($script:ModelId on $script:Device)") 'run .\install.ps1 (no -DryRun) to install'
   } elseif ($script:AnyFailed) {
-    Emit-Phase 'verdict' 'failed' ("install degraded: a phase failed -- on windows this usually means the engine port is still in flight (config + wiring landed; binary-dependent phases reported honestly)") ("acc --db $DbPath doctor --json (after the engine windows lane lands)")
+    Emit-Phase 'verdict' 'failed' ("install degraded: a phase failed -- on windows this usually means the engine port is still in flight (config + wiring landed; binary-dependent phases reported honestly)") ("acc doctor --json (after the engine windows lane lands)")
   } else {
-    Emit-Phase 'verdict' 'ok' ("install complete; tier=$script:Tier ($script:ModelId on $script:Device). Verify with the doctor handoff.") ("acc --db $DbPath doctor --json")
+    Emit-Phase 'verdict' 'ok' ("install complete; tier=$script:Tier ($script:ModelId on $script:Device). Verify with the doctor handoff.") ("acc doctor --json")
   }
   if ($script:AnyFailed -and (-not $DryRun)) { exit 1 }
   exit 0
@@ -1588,8 +1608,7 @@ if ($script:AnyFailed) {
 # NEXT-STEP guidance. The one-Work-Model pivot: phase 14 wired ALL agents (Claude Code,
 # OpenCode, Codex, Cursor) GLOBALLY onto ONE compounding Work Model -- they work in EVERY
 # directory now, no per-project step. So the next step is simply: open Claude Code anywhere
-# and talk. The OPTIONAL isolation override (`acc hosts-sync --project .`) carves a project
-# onto its own db. Mirrors install.sh's cc_next_lines.
+# and talk. Mirrors install.sh's cc_next_lines.
 $CcNext = @"
 Your Work Model is ready for its first example.
 
@@ -1602,9 +1621,9 @@ AccInt drafts, researches, and reasons locally first. It asks before anything is
 posted, paid, deleted, or done outside your machine. After the result it shows what the
 Work Model can reuse next time. The two verbs (acc_retrieve + acc_act) appear after a
 restart / reload MCP if Claude Code is open.
-Optional -- isolate a project on its OWN separate Work Model (confidential / separated work):
+Optional -- add project instruction/hook carriers without changing the global Work Model:
   cd <your-project>; acc hosts-sync --project .
-CLI health check, if you want it: acc --db $DbPath status  ;  acc --db $DbPath doctor
+CLI health check, if you want it: acc status  ;  acc doctor
 "@
 
 if ($NonInteractive -and (-not $warm)) {
@@ -1615,11 +1634,11 @@ if ($NonInteractive -and (-not $warm)) {
   Write-Chatter @"
 
 Check progress in a few minutes:
-  acc --db $DbPath doctor        (expect: embedder OK once the model finishes loading)
+  acc doctor        (expect: embedder OK once the model finishes loading)
 
 Once the Work Model is warm, the assistant can use it. You can check health any time:
-  acc --db $DbPath status
-  acc --db $DbPath doctor
+  acc status
+  acc doctor
 
 $CcNext
 
@@ -1637,7 +1656,7 @@ Try this now:
   3. acc will draft/research locally, show what happened, and ask before anything is sent.
 
 Optional health check:
-  acc --db $DbPath doctor
+  acc doctor
 
 $CcNext
 
